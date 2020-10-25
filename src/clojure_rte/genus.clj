@@ -89,8 +89,11 @@
    (if (= t1 t2)
      true
      (binding [*type-equivalent?-default* default]
+       ;; two types are equivalent if each is a subtype of the other.
+       ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
+       ;;    as that may be compute intensive.
        (let [s1 (subtype? t1 t2 (constantly :dont-know))
-             s2 (delay (subtype? t1 t2 (constantly :dont-know)))]
+             s2 (delay (subtype? t2 t1 (constantly :dont-know)))]
          (case s1
            (false) false
            (case @s2
