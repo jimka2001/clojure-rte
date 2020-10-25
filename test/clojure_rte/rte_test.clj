@@ -700,3 +700,13 @@
                 )
         "synchronized union b")
     ))
+
+(deftest t-rte-nullable-704
+  (testing "nullable of canonicalize"
+    (let [rte '(:contains-any (member a b c a b c)
+                              :epsilon
+                              (:+ (:or (:and (:contains-every)) :empty-set))
+                              (:not (:* (member [1 2 3] [2 1 3]))))
+          rte-canonicalized (canonicalize-pattern rte)]
+      (is (nullable rte) "test 1")
+      (is (nullable rte-canonicalized) "test 2"))))
