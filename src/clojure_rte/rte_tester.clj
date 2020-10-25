@@ -154,27 +154,32 @@
 ;;    rte-components
 ;;    verbose))
 
+
+(defn test-rte-canonicalize-nullable-1 [rte]
+  (with-compile-env []
+    ;;(cl-format true "canonicalizing:~%")
+    ;; TODO doall this lazy seq
+    (binding [canonicalize-pattern-once (memoize -canonicalize-pattern-once)]
+      (let [can (canonicalize-pattern rte)]
+        ;;(cl-format true "canonicalized: ~A~%" can)
+        (if (nullable rte)
+          (assert (nullable can)
+                  (cl-format false
+                             "rte ~A is nullable but its canonicalization ~A is not"
+                             rte can))
+          (assert (not (nullable can))
+                  (cl-format false
+                             "rte ~A is not nullable but its canonicalization ~A is nullable"
+                             rte can)))))))
+
 (defn test-rte-canonicalize-nullable
   "Run some tests to assure that if an rte r is nullable if and only
   if (canonicalize-pattern r) is also nullable."
   [num-tries size verbose]
   (tester/random-test num-tries
-                      (fn [rte]
-                        (with-compile-env []
-                          ;;(cl-format true "canonicalizing:~%")
-                          ;; TODO doall this lazy seq
-                          (let [can (canonicalize-pattern rte)]
-                            ;;(cl-format true "canonicalized: ~A~%" can)
-                            (if (nullable rte)
-                              (assert (nullable can)
-                                      (cl-format false
-                                                 "rte ~A is nullable but its canonicalization ~A is not"
-                                                 rte can))
-                              (assert (not (nullable can))
-                                      (cl-format false
-                                                 "rte ~A is not nullable but its canonicalization ~A is nullable"
-                                                 rte can))))))
-                      (fn [] (gen-rte size *test-types*))
+                      test-rte-canonicalize-nullable-1
+                      (fn [] (println [:generating :size size])
+                        (gen-rte size *test-types*))
                       rte-components
                       verbose))
 
