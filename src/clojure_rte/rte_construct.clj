@@ -31,6 +31,10 @@
 (declare traverse-pattern)
 (declare canonicalize-pattern)
 
+(def sigma-* '(:* :sigma))
+(def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
+(def not-epsilon `(:cat :sigma ~sigma-*))
+
 (def ^:dynamic *rte-known*
   "Dynamic variable whose value is a map.
   The map associates symbols with rte expansions.
@@ -153,9 +157,9 @@
            ([_ & _]
             (let [operands (for [operand (rest pattern)]
                              (traverse-pattern operand functions))]
-              `(:cat (:* :sigma)
+              `(:cat ~sigma-*
                      (:or ~@operands)
-                     (:* :sigma)))))
+                     ~sigma-*))))
          (rest pattern)))
 
 (defmethod rte-expand :contains-every [pattern functions]
@@ -165,8 +169,8 @@
            ([_ & _]
             (let [wrapped (for [operand (rest pattern)
                                  :let [traversed (traverse-pattern operand functions)]]
-                             `(:cat (:* :sigma) ~traversed (:* :sigma)))]
               `(:and ~@wrapped))))
+                                   `(:cat ~sigma-* ~operand ~sigma-*))]
          (rest pattern)))
 
 (defmethod rte-expand :contains-none [pattern _functions]
@@ -240,7 +244,7 @@
             (let [[keyword] pattern]
               (case keyword
                 (:or)  (traverse-pattern :empty-set functions)
-                (:and) (traverse-pattern '(:* :sigma) functions)
+                (:and) (traverse-pattern sigma-* functions)
                 (:cat) (traverse-pattern :epsilon functions)
                 (:not
                  :*) (throw (ex-info (format "[264] invalid pattern %s, expecting exactly one operand" pattern)
@@ -456,10 +460,10 @@
                            :not (fn [operand _functions]
                                   (let [operand (canonicalize-pattern operand)]
                                     (case operand
-                                      (:sigma) '(:or (:cat :sigma :sigma (:* :sigma)) :epsilon)
+                                      (:sigma) not-sigma
                                       ((:* :sigma)) :empty-set
-                                      (:epsilon) '(:cat :sigma (:* :sigma))
-                                      (:empty-set) '(:* :sigma)
+                                      (:epsilon) not-epsilon
+                                      (:empty-set) sigma-*
                                       (cond
                                         (not? operand) ;; (:not (:not A)) --> A
                                         (second operand)
@@ -488,7 +492,7 @@
                                      ;;    then the result is :empty-set
                                      ;;    otherwise the result is :epsilon
 
-                                     ;; TODO (:and (:cat A B (:* :sigma))
+                                     ;; TODO (:and (:cat A B sigma-*)
                                      ;;            (:cat A B ))
                                      ;;  --> (:and (:cat A B))
 
@@ -502,9 +506,9 @@
                                      ((member :empty-set operands)
                                       :empty-set)
 
-                                     ((member '(:* :sigma) operands)
+                                     ((member sigma-* operands)
                                       (cons :and (remove-eagerly (fn [obj]
-                                                           (= '(:* :sigma) obj)) operands)))
+                                                           (= sigma-* obj)) operands)))
 
                                      ((some or? operands)
                                       ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
@@ -545,9 +549,9 @@
                                          (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
                                  (let [operands (dedupe (sort-operands (map-eagerly canonicalize-pattern operands)))]
                                    (cl/cl-cond
-                                    ;; TODO (:or (:cat A B (:* :sigma))
+                                    ;; TODO (:or (:cat A B sigma-*)
                                     ;;           (:cat A B ))
-                                    ;;  --> (:or (:cat A B (:* :sigma)))
+                                    ;;  --> (:or (:cat A B sigma-*))
                                     
                                     ;; (:or A :epsilon B (:cat X (:* X)) C)
                                     ;;   --> (:or A :epsilon B (:* X) C ) --> (:or A B (:* X) C)
@@ -578,8 +582,8 @@
                                                            (rest obj)
                                                            (list obj))) operands)))
 
-                                    ((member '(:* :sigma) operands)
-                                     '(:* :sigma))
+                                    ((member sigma-* operands)
+                                     sigma-*)
 
                                     ((member :empty-set operands)
                                      (cons :or (remove-eagerly #{:empty-set} operands)))
@@ -589,7 +593,7 @@
                                            others (remove-eagerly not? operands)]
                                        (when (some (fn [item]
                                                      (some #{(list :not item)} nots)) others)
-                                         '(:* :sigma))))
+                                         sigma-*)))
 
                                     ;; (:or subtype supertype x y z) --> (:and supertype x y z)
                                     ((let [atoms (filter-eagerly (complement seq?) operands)

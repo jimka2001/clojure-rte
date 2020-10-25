@@ -221,7 +221,7 @@
         (let [pairs (partition 2 pairs)
               cases (mapcat conv-1-case-clause pairs)]
           `(let [~var ~expr]
-             (rte-case ~var ~@cases (:* :sigma) nil)))))))
+             (rte-case ~var ~@cases ~sigma-* nil)))))))
 
 (defmacro destructuring-fn-many
   "Internal macro used in the exapansion of destructuring-fn"
