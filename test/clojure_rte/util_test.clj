@@ -299,3 +299,31 @@
     (is (= (fixed-point 1 identity =) 1))
     (is (= (fixed-point 10 (fn [n] (if (> n 0) (- n 1) n)) =) 0))))
 
+(deftest t-util-member
+  (testing "util member"
+    (is (member 1 '(1 2 3)))
+    (is (member 2 '(1 2 3)))
+    (is (member 3 '(1 2 3)))
+    (is (not (member 4 '(1 2 3))))
+    
+    (is (member 1 [1 2 3]))
+    (is (member 2 [1 2 3]))
+    (is (member 3 [1 2 3]))
+    (is (not (member 4 [1 2 3])))
+
+    (is (member false '(1 false 2)))
+    (is (not (member false '(1 2 3))))
+    (is (not (member false '(1 nil 2 3))))
+
+    (is (member nil '(1 nil 2)))
+    (is (not (member nil '(1 false 2 3))))
+    (is (not (member nil '(1 2 3))))
+
+    (is (member true '(1 true 2)))
+    (is (not (member true '(1 false 2 3))))
+    (is (not (member true '(1 nil 2 3))))
+    (is (not (member true '(1 2 3))))
+
+    (is (not (member 1 [])))
+    (is (not (member 1 ())))))
+

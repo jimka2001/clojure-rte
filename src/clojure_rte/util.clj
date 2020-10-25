@@ -177,9 +177,13 @@
   "Like cl:member.  Determines whether the given target is an element of the given sequence."
   [target items]
   (boolean (cond
+             (empty? items) false
              (nil? target) (some nil? items)
              (false? target) (some false? items)
-             :else (some #{target} items))))
+             :else (reduce (fn [acc item]
+                                   (if (= item target)
+                                     (reduced true)
+                                     false)) false items))))
 
 (defn partition-by-pred 
   "Apply the predicate to every element of the sequence and return a vector of two

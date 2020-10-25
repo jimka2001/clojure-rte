@@ -143,6 +143,7 @@
     (is (not (gns/typep false '(member 1 nil 3))) "test 9")
     (is (not (gns/typep nil '(member 1 false 3))) "test 10")))
 
+
 (deftest t-type-max
   (testing "type-max"
     (is (= 'Number (gns/type-max '(Number Integer))))
