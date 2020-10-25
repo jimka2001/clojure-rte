@@ -142,8 +142,7 @@
            ([] :epsilon)
            ([operand] operand)
            ([_ & _]
-            (let [operands (for [operand (rest pattern)]
-                             (traverse-pattern operand functions))]
+            (let [operands (rest pattern)]
               (cons :or (call-with-collector (fn [collect]
                                                (visit-permutations
                                                 (fn [perm]
@@ -155,8 +154,7 @@
            ([] :epsilon)
            ([operand] operand)
            ([_ & _]
-            (let [operands (for [operand (rest pattern)]
-                             (traverse-pattern operand functions))]
+            (let [operands (rest pattern)]
               `(:cat ~sigma-*
                      (:or ~@operands)
                      ~sigma-*))))
@@ -167,10 +165,9 @@
            ([] :epsilon)
            ([operand] operand)
            ([_ & _]
-            (let [wrapped (for [operand (rest pattern)
-                                 :let [traversed (traverse-pattern operand functions)]]
-              `(:and ~@wrapped))))
+            (let [wrapped (for [operand (rest pattern)]
                                    `(:cat ~sigma-* ~operand ~sigma-*))]
+              `(:and ~@(doall wrapped)))))
          (rest pattern)))
 
 (defmethod rte-expand :contains-none [pattern _functions]
@@ -182,7 +179,7 @@
   (letfn [(expand [n m pattern]
             (assert (>= n 0) (format "pattern %s is limited to n >= 0, not %s" pattern n))
             (assert (<= n m) (format "pattern %s is limited to n <= m, got %s > %s" pattern n m))
-            (let [operand (traverse-pattern pattern functions)
+            (let [operand pattern
                   repeated-operand (repeat n operand)
                   optional-operand (repeat (- m n) `(:? ~operand))
                   ]
@@ -300,7 +297,8 @@
                 ;;case-else
                 (if (registered-type? token)
                   ((:type functions) pattern functions)
-                  (traverse-pattern (rte-expand pattern functions) functions)))))]
+                  (let [expanded (doall (rte-expand pattern functions))]
+                    (traverse-pattern expanded functions))))))]
     (let [pattern (convert-type-designator-to-rte given-pattern)]
       (cond (not (seq? pattern))
             (if-atom pattern)
