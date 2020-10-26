@@ -411,6 +411,28 @@
   [type-designator]
   (cons 'rte (map-eagerly canonicalize-pattern (rest type-designator))))
 
+(defn remove-first-duplicate [test seq]
+  "Look through the given sequence to find two consecutive elements a,b
+  for whcih (test a b) is a Boolean true.   If not found, return false.
+  If found return a pair [prefix suffix] where prefix is a copy of the squence
+  up to but not including a, and suffix is the tail after but not including a.
+  The suffix sequence starts with b.   I.e., the length of the input sequence
+  is 1 less than the some of the two output sequences, if a duplicate was found."
+  (loop [seq seq
+         head ()]
+    (cond (empty? seq)
+          false
+
+          (empty? (rest seq))
+          false
+
+          (test (first seq) (second seq))
+          [(reverse head) (rest seq)]
+
+          :else
+          (recur (rest seq)
+                 (cons (first seq) head)))))
+
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -443,13 +465,13 @@
                                     (cl/cl-cond
                                      ;; (:cat A (:* X) (:* X) B)
                                      ;;  --> (:cat A (:* X) B)
-                                     ((let [ptr (first-repeat operands (fn [a b]
-                                                                         (and (= a b)
-                                                                              (*? a))))]
-                                        (if (empty? ptr)
-                                          false
-                                          (let [prefix (cl/ldiff operands ptr)]
-                                            (cons :cat (concat-eagerly prefix (rest ptr)))))))
+                                     ((let [x (remove-first-duplicate (fn [a b]
+                                                                        (and (*? a)
+                                                                             (= a b)))
+                                                                      operands)]
+                                        ;; remove-first-duplicate returns false if it didn't find a duplicate
+                                        (and x
+                                             (cons :cat (concat (first x) (second x))))))
 
                                      ;; (:cat x (:cat a b) y) --> (:cat x a b y)
                                      ((some cat? operands)
