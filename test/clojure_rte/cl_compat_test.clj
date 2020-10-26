@@ -135,4 +135,4 @@
              (clojure-rte.cl-compat/ldiff L (rest (rest L))))
            '(1 2)))
     (is (= (clojure-rte.cl-compat/ldiff '(1 2 3 4) '(3 4))
-           '(1 2 3 4)))))
+           '(1 2)))))
