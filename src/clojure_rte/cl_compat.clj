@@ -82,10 +82,12 @@
 
 (defn ldiff [l-left l-mid]
   "Returns a copy of the first prefix of l-left whose
-   tail is pointer-identical to l-mid."
+   tail is = (but perhaps not pointer-identical) to l-mid."
+  ;; we can't check pointer identity here because
+  ;;  the sequence might be lazy.
   (loop [acc ()
          l-iter l-left]
-    (cond (identical? l-mid l-iter)
+    (cond (= l-mid l-iter)
           (reverse acc)
 
           (empty? l-iter)
