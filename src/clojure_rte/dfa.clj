@@ -659,7 +659,7 @@
   exit values of the dfa with non-canonicalized rte patterns of the accepting
   langauge. If there are no accepting states in the Dfa, an empty map {}
   is returned."
-  [dfa]
+  [dfa']
   ;; TODO - this can be done easiser
   ;;    1. trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
@@ -671,7 +671,9 @@
   ;;    8.    n^2 iteration to-this-state x from-this-state
   ;;    9.    append new transitions in next iteration of loop 5.
   ;;    10. this reduces to one transtion per exit value, returns the map of exit-value to label
-  (let [;; #2
+  (let [;; #1
+        dfa (trim dfa')
+        ;; #2
         old-transition-triples (for [q (states-as-seq dfa)
                                      [label dst-id] (:transitions q)]
                                  [(:index q) label dst-id])
