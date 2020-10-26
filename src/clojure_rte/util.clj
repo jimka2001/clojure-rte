@@ -322,3 +322,8 @@
   "Like concat, but forces non-lazy behavior"
   [& concat-args]
   (doall (apply concat concat-args)))
+
+(defn dedupe-eagerly 
+  "Like dedupe, but forces non-lazy behavior"
+  [& dedupe-args]
+  (doall (apply dedupe dedupe-args)))

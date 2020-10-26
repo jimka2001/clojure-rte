@@ -20,7 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.tester
-  (:require [clojure.pprint :refer [cl-format]])
+  (:require [clojure.pprint :refer [cl-format]]
+            [clojure-rte.util :refer [map-eagerly]])
 )
 
 
@@ -33,6 +34,16 @@
            (or (some (fn [component]
                        (simplify unary component gen-components)) (gen-components error-case))
                error-case)))))
+
+(defn de-lazify [obj]
+  (cond (not (sequential? obj))
+        obj
+
+        (empty? obj)
+        obj
+
+        :else
+        (map-eagerly de-lazify obj)))
 
 (defn random-test
   "Call a testing function, unary-test-fun, on *randomly* generated values.
@@ -47,7 +58,8 @@
   verbose indicates whether to print verbose information about progression of tests."
   [num-tries unary-test-fun arg-generator gen-components verbose]
   (doseq [n (doall (range num-tries))
-          :let [data (arg-generator)]]
+                data (de-lazify (arg-generator))
     (when verbose
       (cl-format true "~d/~d: trying ~A~%" n num-tries data))
+        
     (unary-test-fun data)))

@@ -545,7 +545,7 @@
                            :or (fn [operands _functions]
                                  (assert (< 1 (count operands))
                                          (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
-                                 (let [operands (dedupe (sort-operands (map-eagerly canonicalize-pattern operands)))]
+                                 (let [operands (dedupe-eagerly (sort-operands (map-eagerly canonicalize-pattern operands)))]
                                    (cl/cl-cond
                                     ;; TODO (:or (:cat A B sigma-*)
                                     ;;           (:cat A B ))
