@@ -74,7 +74,7 @@
     (clojure-rte.rte-tester/test-rte-not-1 :sigma)
     (clojure-rte.rte-tester/test-rte-not-1 :empty-set)
     (clojure-rte.rte-tester/test-rte-not-1 '(:* :sigma))
-    (test-rte-not 500 4 true)))
+    (test-rte-not 500 4 false)))
 
 ;; this test is not yet correctly implemented,
 ;;    need a good way to compare two rtes for equivalence
