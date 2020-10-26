@@ -436,7 +436,7 @@
                                         (if (empty? ptr)
                                           false
                                           (let [prefix (cl/ldiff operands ptr)]
-                                            (cons :cat (concat prefix (rest ptr)))))))
+                                            (cons :cat (concat-eagerly prefix (rest ptr)))))))
 
                                      ;; (:cat x (:cat a b) y) --> (:cat x a b y)
                                      ((some cat? operands)
