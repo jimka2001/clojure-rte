@@ -49,7 +49,10 @@
   [:type
    :? :+ :* :not
    :and :or 
-   :cat :permute
+   :cat ;; :permute
+   ;; TODO add back :contains-any :contains-every to improve test cases
+   ;;    add these back after OOM error has been solved
+   ;; :contains-any :contains-every
    :sigma :empty-set :epsilon])
 
 (defn gen-rte
@@ -60,11 +63,10 @@
     (case key
       (:type) (rand-nth types)
       (:sigma :empty-set :epsilon) key
-      (:permute) (gen-rte :cat size types)
-      (:and :or :cat) (cons key (map (fn [k] (gen-rte (dec size) types))
-                                              (range size)))
+      ;;(:permute) (gen-rte :cat size types)
+      (:and :or :cat :contains-any :contains-every) (cons key (map (fn [k] (gen-rte (dec size) types))
+                                                                   (range size)))
       (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
-
 
 (def ^:dynamic *test-types*
   '((satisfies integer?)
