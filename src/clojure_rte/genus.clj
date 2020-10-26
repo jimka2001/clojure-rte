@@ -1041,7 +1041,7 @@
   )
 
 (defn expand-satisfies [type-designator]
-  "Expand (satisfies rational? to
+  "Expand (satisfies rational?) to
   (or
     (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
     clojure.lang.Ratio BigDecimal)
