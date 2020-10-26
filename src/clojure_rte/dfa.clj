@@ -660,7 +660,6 @@
   langauge. If there are no accepting states in the Dfa, an empty map {}
   is returned."
   [dfa']
-  (println [:extract-rte 1])
   ;; TODO - this can be done easiser
   ;;    1. trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
@@ -685,7 +684,6 @@
                                     :when (:accepting q)]
                                 ;; we designate new final states each as [:F some-exit-value]
                                 [(:index q) :epsilon [:F ((:exit-map dfa) (:index q))]])]
-    (println [:extract-rte 2])
     (letfn [          ;; local function
             (pretty-or [operands]
               (cond (empty? operands)

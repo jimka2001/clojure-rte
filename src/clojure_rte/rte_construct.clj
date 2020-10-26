@@ -442,7 +442,6 @@
   keeps calling canonicalize-pattern-once until it finally
   stops changing."
   [re]
-  ;; (println [:once re])
   (traverse-pattern re
                     (assoc *traversal-functions*
                            :type (fn [tag _functions]
