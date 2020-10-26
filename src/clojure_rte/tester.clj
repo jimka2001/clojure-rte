@@ -58,7 +58,7 @@
   verbose indicates whether to print verbose information about progression of tests."
   [num-tries unary-test-fun arg-generator gen-components verbose]
   (doseq [n (doall (range num-tries))
-                data (de-lazify (arg-generator))
+          :let [data (de-lazify (arg-generator))]]
     (when verbose
       (cl-format true "~d/~d: trying ~A~%" n num-tries data))
         
