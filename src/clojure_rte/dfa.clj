@@ -660,6 +660,7 @@
   langauge. If there are no accepting states in the Dfa, an empty map {}
   is returned."
   [dfa']
+  (println [:extract-rte 1])
   ;; TODO - this can be done easiser
   ;;    1. trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
@@ -684,6 +685,7 @@
                                     :when (:accepting q)]
                                 ;; we designate new final states each as [:F some-exit-value]
                                 [(:index q) :epsilon [:F ((:exit-map dfa) (:index q))]])]
+    (println [:extract-rte 2])
     (letfn [          ;; local function
             (pretty-or [operands]
               (cond (empty? operands)
@@ -763,12 +765,18 @@
                                            (concat new-initial-transitions
                                                    old-transition-triples
                                                    new-final-transitions)
+                                           ;; TODO need to order states for faster
+                                           ;;    elimination.  I.e., order by increasing
+                                           ;;    product of num-inputs x num-outputs
                                            (ids-as-seq dfa))
+            _ (println [:extract-rte 3])
             grouped (group-by (fn [[_ _ [_ exit-value]]] exit-value) new-transition-triples)]
+        (println [:extract-rte 4])
         (for [[exit-value triples] grouped]
           ;; one label per return value
           ;; #10
-          [exit-value (pretty-or (extract-labels triples))])))))
+         (do (println [:extract-rte 5 :exit-value exit-value (count triples)])
+          [exit-value (pretty-or (extract-labels triples))]))))))
 
 (defn intersect-labels
   ""

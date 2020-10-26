@@ -195,6 +195,8 @@
               (invalid-pattern pattern functions '[:exp [_ _ _ & _]])))
            (rest pattern))))
 
+
+(def traversal-depth-max 10)
 (defn traverse-pattern
   "Workhorse function for walking an rte pattern.
    This function is the master of understanding the syntax of an rte
@@ -204,14 +206,23 @@
    *traversal-functions*, indicating the callbacks for each rte
    keyword such as :* :cat etc.  The philosophy is that no other
    function needs to understand how to walk an rte pattern."
-  [given-pattern functions]
+  ([given-pattern functions]
+   (traverse-pattern 0 given-pattern functions))
+  (
+  [depth given-pattern functions]
+   (if (= depth traversal-depth-max)
+     (cl-format false "warning traverse pattern depth reached: ~A ~A"
+                      depth given-pattern))
+   (assert (<= depth traversal-depth-max)
+           (cl-format false "traverse pattern depth exceeded: ~A ~A"
+                      depth given-pattern))
   (letfn [(if-atom [pattern]
             (cond
               (member pattern '(:epsilon :empty-set :sigma))
               ((functions pattern) pattern functions)
 
               (*rte-known* pattern)
-              (traverse-pattern (*rte-known* pattern) functions)
+              (traverse-pattern (inc depth) (*rte-known* pattern) functions)
 
               :else
               ((:type functions) pattern functions)))
@@ -240,9 +251,9 @@
           (if-singleton-list [pattern] ;; (:or)  (:and)
             (let [[keyword] pattern]
               (case keyword
-                (:or)  (traverse-pattern :empty-set functions)
-                (:and) (traverse-pattern sigma-* functions)
-                (:cat) (traverse-pattern :epsilon functions)
+                (:or)  (traverse-pattern (inc depth) :empty-set functions)
+                (:and) (traverse-pattern (inc depth) sigma-* functions)
+                (:cat) (traverse-pattern (inc depth) :epsilon functions)
                 (:not
                  :*) (throw (ex-info (format "[264] invalid pattern %s, expecting exactly one operand" pattern)
                                      {:error-type :rte-syntax-error
@@ -258,25 +269,25 @@
                   ((:type functions) pattern functions)
 
                   :else
-                  (traverse-pattern (rte-expand pattern functions) functions)))))
+                  (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
           (if-exactly-one-operand [pattern] ;; (:or Long) (:* Long)
             (let [[token operand] pattern]
               (case token
                 (:or :and :cat)
-                (traverse-pattern operand functions)
+                (traverse-pattern (inc depth) operand functions)
                 
                 (:not :*)
                 ((functions token) operand functions)
 
                 (satisfies)
                 (if (not= pattern (gns/expand-satisfies pattern))
-                  (traverse-pattern (gns/expand-satisfies pattern) functions)
+                  (traverse-pattern (inc depth) (gns/expand-satisfies pattern) functions)
                   ((:type functions) pattern functions))
                 
                 ;;case-else
                 (if (registered-type? (first pattern))
                   ((:type functions) pattern functions)
-                  (traverse-pattern (rte-expand pattern functions) functions)))))
+                  (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
           (if-multiple-operands [pattern]
             (let [[token & operands] pattern]
               (case token
@@ -298,7 +309,7 @@
                 (if (registered-type? token)
                   ((:type functions) pattern functions)
                   (let [expanded (doall (rte-expand pattern functions))]
-                    (traverse-pattern expanded functions))))))]
+                    (traverse-pattern (inc depth) expanded functions))))))]
     (let [pattern (convert-type-designator-to-rte given-pattern)]
       (cond (not (seq? pattern))
             (if-atom pattern)
@@ -313,7 +324,7 @@
             (if-exactly-one-operand pattern)
 
             ;; cond-else (:keyword args) or list-expr ;; (:and x y)
-            :else (if-multiple-operands pattern)))))
+            :else (if-multiple-operands pattern))))))
 
 (defn nullable 
   "Determine whether the given rational type expression is nullable.
@@ -322,6 +333,7 @@
   (boolean
    (traverse-pattern expr
                      (assoc *traversal-functions*
+                            :client nullable
                             :empty-set (rte-constantly false)
                             :epsilon (rte-constantly true)
                             :sigma   (rte-constantly false)
@@ -408,6 +420,7 @@
   keeps calling canonicalize-pattern-once until it finally
   stops changing."
   [re]
+  ;; (println [:once re])
   (traverse-pattern re
                     (assoc *traversal-functions*
                            :type (fn [tag _functions]

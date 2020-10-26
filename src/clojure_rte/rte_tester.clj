@@ -192,8 +192,12 @@
   (with-compile-env []
     ;; is (not rte) equivalent to (complement dfa) ?
     (let [dfa (rte-to-dfa rte)
+          _ (println "called rte-to-dfa on rte")
           dfa-complement (dfa/complement dfa)
-          dfa-not-rte (rte-to-dfa (list :not rte))]
+          _ (println "called dfa/complement")
+          dfa-not-rte (rte-to-dfa (list :not rte))
+          _ (println "called rte-to-dfa on :not rte")
+          ]
       ;;(dot/dfa-to-dot dfa :view true :title "dfa")
       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
       ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
@@ -213,16 +217,31 @@
               (cl-format false
                          "!dfa != (dfa (not rte)), when rte=~A" rte))
       
+
+      (println [:assertions 3])
+
       (let [extracted-rte-map (dfa-to-rte dfa-complement)
+            _ (println "finished (dfa-to-rte dfa-complement)")
             extracted-rte (get extracted-rte-map true :empty-set)
+            _ (println "finished (get extracted-rte-map true :empty-set)")
+            dfa-not (rte-to-dfa (list :not extracted-rte))
+            _ (println "finished (rte-to-dfa (list :not extracted-rte))")
             ]
         
-        (assert (dfa/dfa-equivalent dfa
-                                    ;; dfa-to-rte returns a map
-                                    ;;   we have to find the value corresponding to the key=true
-                                    (rte-to-dfa (list :not extracted-rte)))
+        (println "starting dfa/dfa-equivalent")
+        
+        (assert (dfa/dfa-equivalent dfa dfa-not)
                 (cl-format false
-                           "(rte (dfa (not rte))) != dfa, when rte=~A" rte))))))
+                           "(rte (dfa (not rte))) != dfa, when rte=~A" rte))
+        (println "finished dfa/dfa-equivalent")
+
+        )
+
+  
+
+      ))
+  (println [:finished :test-rte-not-1 rte])
+  )
 
 (defn test-rte-not
   "Testing several functions, dfa/complement, dfa-to-rte, dfa-equivalent"
