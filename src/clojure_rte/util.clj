@@ -174,7 +174,7 @@
            (throw e)))))
 
 (defn member
-  "Like cl:member.  Determines whether the given target is an element of the given sequence."
+  "Determines whether the given target is an element of the given sequence."
   [target items]
   (boolean (cond
              (empty? items) false
