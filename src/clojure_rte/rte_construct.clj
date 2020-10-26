@@ -899,5 +899,8 @@
   is returned."
   [dfa]
   (assert (instance? (dfa/record-name) dfa) (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
-  (into {} (for [[exit-value label] (dfa/extract-rte dfa)]
-             [exit-value (canonicalize-pattern label)])))
+  (into {} (doall (for [[exit-value label] (dfa/extract-rte dfa)]
+                    (let [can (canonicalize-pattern label)
+                          _ (println [:can can])]
+
+                      [exit-value can])))))

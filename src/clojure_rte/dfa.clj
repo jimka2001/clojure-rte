@@ -24,7 +24,7 @@
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [fixed-point member group-by-mapped print-vals defn-memoized
-                                      filter-eagerly remove-eagerly map-eagerly mapcat-eagerly]]
+                                      concat-eagerly filter-eagerly remove-eagerly map-eagerly mapcat-eagerly]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
@@ -760,21 +760,21 @@
 
       ;; #5 / #9
       (let [new-transition-triples (reduce eliminate-state
-                                           (concat new-initial-transitions
+                                           (concat-eagerly new-initial-transitions
                                                    old-transition-triples
                                                    new-final-transitions)
                                            ;; TODO need to order states for faster
                                            ;;    elimination.  I.e., order by increasing
                                            ;;    product of num-inputs x num-outputs
                                            (ids-as-seq dfa))
-            _ (println [:extract-rte 3])
             grouped (group-by (fn [[_ _ [_ exit-value]]] exit-value) new-transition-triples)]
-        (println [:extract-rte 4])
-        (for [[exit-value triples] grouped]
+        (for [[exit-value triples] grouped
+              :let [pretty (pretty-or (extract-labels triples))]
+              ]
           ;; one label per return value
           ;; #10
-         (do (println [:extract-rte 5 :exit-value exit-value (count triples)])
-          [exit-value (pretty-or (extract-labels triples))]))))))
+         (do (println [:extract-rte 5 :exit-value exit-value (count triples) ])
+          [exit-value pretty]))))))
 
 (defn intersect-labels
   ""
