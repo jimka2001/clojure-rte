@@ -482,7 +482,7 @@
    (subtype? sub-designator super-designator *subtype?-default*))
   ([sub-designator super-designator default]
    {:pre [(fn? default)]
-    :post [(fn [v] (#{true false :dont-know} v))]}
+    :post [(fn [v] (member v '(true false :dont-know)))]}
    (binding [*subtype?-default* default]
      (loop [[k & ks] (sort-method-keys -subtype?)]
        (let [s ((k (methods -subtype?)) sub-designator super-designator)]
