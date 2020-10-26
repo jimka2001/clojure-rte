@@ -180,8 +180,7 @@
   [num-tries size verbose]
   (tester/random-test num-tries
                       test-rte-canonicalize-nullable-1
-                      (fn [] (println [:generating :size size])
-                        (gen-rte size *test-types*))
+                      (fn [] (gen-rte size *test-types*))
                       rte-components
                       verbose))
 
