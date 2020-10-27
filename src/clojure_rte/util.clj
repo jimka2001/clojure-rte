@@ -311,3 +311,11 @@
   "Like dedupe, but forces non-lazy behavior"
   [& dedupe-args]
   (doall (apply dedupe dedupe-args)))
+
+(defmacro exists [[var seq] & body]
+  `(some (fn [~var]
+           ~@body) ~seq))
+
+(defmacro setof [[var seq] & body]
+  `(filter (fn [~var]
+             ~@body) ~seq))
