@@ -773,8 +773,7 @@
               ]
           ;; one label per return value
           ;; #10
-         (do (println [:extract-rte 5 :exit-value exit-value (count triples) ])
-          [exit-value pretty]))))))
+         [exit-value pretty])))))
 
 (defn intersect-labels
   ""

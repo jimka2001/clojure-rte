@@ -66,7 +66,7 @@
   (testing "canonicalize of :not"
     (test-rte-canonicalize-nullable 500 ; num-tries
                                     4 ; size
-                                    true ;verbose
+                                    false ;verbose
                                     )))
 
 (deftest t-rte-not-random
