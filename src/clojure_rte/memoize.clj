@@ -25,10 +25,9 @@
 
 (in-ns 'clojure-rte.rte-core)
 
-
 (def ^:dynamic rte-compile 
   "Compile an rte pattern into a finite automaton."
-  rte-to-dfa ;;(memoize rte-to-dfa)
+  (memoize rte-to-dfa)
   )
 
 (defn call-with-compile-env [thunk]
