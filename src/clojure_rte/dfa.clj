@@ -661,7 +661,7 @@
   is returned."
   [dfa']
   ;; TODO - this can be done easiser
-  ;;    1. trim the given dfa
+  ;;    1. minimize and trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
   ;;    3. add transitions from extra-state-I to all initial states with :epsilon transition
   ;;    4. add transitions from all accepting states to extra-state-F (one per exit value) with :epsilon transition
@@ -672,7 +672,7 @@
   ;;    9.    append new transitions in next iteration of loop 5.
   ;;    10. this reduces to one transtion per exit value, returns the map of exit-value to label
   (let [;; #1
-        dfa (trim dfa')
+        dfa (trim (minimize dfa')) ; we must minimize otherwise the size of the returned expression can be HUGE
         ;; #2
         old-transition-triples (for [q (states-as-seq dfa)
                                      [label dst-id] (:transitions q)]
