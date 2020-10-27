@@ -218,6 +218,7 @@
 
     ;; :and
     (is (= (canonicalize-pattern '(:and)) '(:* :sigma)) "(:and)")
+    (is (= (canonicalize-pattern '(:and :epsilon :sigma)) :empty-set) "(:and :epsilon :sigma)")
     (is (= 'java.io.Serializable
            (canonicalize-pattern '(:and java.io.Serializable
                                         java.io.Serializable))) "and remove duplicate 1")
@@ -710,3 +711,77 @@
           rte-canonicalized (canonicalize-pattern rte)]
       (is (nullable rte) "test 1")
       (is (nullable rte-canonicalized) "test 2"))))
+
+(def pattern-714 '(:or (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma)
+                    (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable)
+                    (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq)
+                    (:and clojure.lang.ISeq java.lang.Comparable)
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (:not (= 2)) :sigma java.lang.Comparable))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (:not (= 2)) :sigma java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma) (:and (= 2) java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable) (:and (= 2) java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (:not (= 2)) :sigma java.lang.Comparable))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (:not (= 2)) :sigma java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (:not java.lang.Comparable) :sigma clojure.lang.ISeq) (:and (= 2) java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and (= 2) java.lang.Comparable) (:and (= 2) java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (:not (= 2)) (:not java.lang.Comparable) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (:not (= 2)) :sigma java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (= 2) java.lang.Comparable) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    (:cat (:and clojure.lang.ISeq java.lang.Comparable) (:and (= 2) java.lang.Comparable) (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2))) (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
+                    :epsilon))
+
+(deftest t-canonicalize-pattern-714
+    (testing "canonicalize-pattern large special case"
+      (canonicalize-pattern
+       pattern-714)))
+
+(deftest t-reduce-redundant-or
+  (testing "reduce-redundant-or"
+    (is (= (reduce-redundant-or '((:and :epsilon :epsilon) (:and :sigma :epsilon)))
+           '(:and :epsilon :epsilon)))
+    (is (= (reduce-redundant-or '(:sigma :epsilon (:and :sigma :epsilon)))
+           (:sigma :epsilon)))
+    (is (= (reduce-redundant-or '(X (:and A X B)))
+           'X))
+    (is (= (reduce-redundant-or '((:and X) (:and A X B)))
+           '(:and X)))
+    (is (= (reduce-redundant-or '((:and A B C) (:and X Y Z)))
+           '((:and A B C) (:and X Y Z))))
+    (is (= (reduce-redundant-or '((:and A X C) (:and A Y C)))
+           '((:and A X C) (:and A Y C))))))
+    
+    
+    
