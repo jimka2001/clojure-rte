@@ -32,8 +32,8 @@
   )
 
 (defn call-with-compile-env [thunk]
-  (binding [rte-compile rte-to-dfa ;; (memoize rte-to-dfa)
-            canonicalize-pattern-once -canonicalize-pattern-once ;; (memoize -canonicalize-pattern-once)
+  (binding [rte-compile (memoize rte-to-dfa)
+            canonicalize-pattern-once (memoize -canonicalize-pattern-once)
             ]
     (thunk)))
 
