@@ -737,15 +737,16 @@
          (disjoint? t1 (second t2) (constantly false)))
     false
 
-    ;; (disjoint?   'java.io.Serializable '(not java.lang.Comparable))
+    ;; (disjoint?   'java.io.Serializable '(not java.lang.Comparable))  ;; i.e., :interface vs :interface
+    ;; (disjoint? 'clojure.lang.ISeq '(not java.lang.Number)) ;; i.e. :interface vs (not :abstract)
     (and (not? t2)
          (class-designator? t1)
          (class-designator? (second t2))
-         (= :interface (class-type t1))
-         (= :interface (class-type (second t2)))
+         (member (class-type t1) '(:abstract :interface))
+         (member (class-type (second t2)) '(:abstract :interface))
          (not (= (find-class t1) (find-class (second t2)))))
     false
-        
+
     ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
     (and (not? t1)
          (not? t2)
