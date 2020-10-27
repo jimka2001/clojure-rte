@@ -433,6 +433,21 @@
           (recur (rest seq)
                  (cons (first seq) head)))))
 
+(defn reduce-redundant-or [operands]
+  (let [ands (doall (filter-eagerly and? operands))
+        xyz (doall (setof [x ands] (exists [y operands] (member y (rest x)))))
+        abc (doall (setof [and1 ands]
+                          (let [and1-operands (set (rest and1)) ]
+                            (exists [and2 ands]
+                                             (let [and2-operands (set (rest and2))]
+                                               (and (not (subset? and1-operands and2-operands))
+                                                    (subset? and2-operands and1-operands)))))))
+        superfluous-ands (concat-eagerly xyz abc)]
+    (if (empty? superfluous-ands)
+      operands
+      ;; remove all superfluous-ands from or-operands
+      (remove (fn [to-remove] (member to-remove superfluous-ands)) operands))))
+
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -528,15 +543,20 @@
                                      ;;            (:cat A B ))
                                      ;;  --> (:and (:cat A B))
 
+                                     ;; (:and :epsilon :sigma A B C)
+                                     ;; --> :empty-set, because :epsilon and :sigma are disjoint
+                                     ((and (member :epsilon operands)
+                                           (member :sigma operands))
+                                      :empty-set)
+                                     
+                                     ((member :empty-set operands)
+                                      :empty-set)
 
                                      ((some and? operands)
                                       (cons :and (mapcat-eagerly (fn [obj]
                                                            (if (and? obj)
                                                              (rest obj)
                                                              (list obj))) operands)))
-
-                                     ((member :empty-set operands)
-                                      :empty-set)
 
                                      ((member sigma-* operands)
                                       (cons :and (remove-eagerly (fn [obj]
@@ -579,7 +599,9 @@
                            :or (fn [operands _functions]
                                  (assert (< 1 (count operands))
                                          (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
-                                 (let [operands (dedupe-eagerly (sort-operands (map-eagerly canonicalize-pattern operands)))]
+                                 (let [operands (dedupe-eagerly
+                                                 (sort-operands (map-eagerly canonicalize-pattern
+                                                                             (reduce-redundant-or operands))))]
                                    (cl/cl-cond
                                     ;; TODO (:or (:cat A B sigma-*)
                                     ;;           (:cat A B ))
