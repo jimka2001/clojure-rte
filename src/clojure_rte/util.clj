@@ -313,9 +313,11 @@
   (doall (apply dedupe dedupe-args)))
 
 (defmacro exists [[var seq] & body]
+  "Test whether there exists an element of a sequence which matches a condition."
   `(some (fn [~var]
            ~@body) ~seq))
 
 (defmacro setof [[var seq] & body]
+  "Return a sequence of lazy elements of a given sequence which match a given condition"
   `(filter (fn [~var]
              ~@body) ~seq))
