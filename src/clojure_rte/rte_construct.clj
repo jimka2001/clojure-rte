@@ -439,9 +439,9 @@
         abc (doall (setof [and1 ands]
                           (let [and1-operands (set (rest and1)) ]
                             (exists [and2 ands]
-                                             (let [and2-operands (set (rest and2))]
-                                               (and (not (subset? and1-operands and2-operands))
-                                                    (subset? and2-operands and1-operands)))))))
+                                    (let [and2-operands (set (rest and2))]
+                                      (and (not (subset? and1-operands and2-operands))
+                                           (subset? and2-operands and1-operands)))))))
         superfluous-ands (concat-eagerly xyz abc)]
     (if (empty? superfluous-ands)
       operands
