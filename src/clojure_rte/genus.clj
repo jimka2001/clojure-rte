@@ -723,13 +723,15 @@
         (boolean (rest t1))
 
         ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
-        (exists [t (rest t1)]
-                (and (not? t)
-                     (member? (second t))))
+        (and (and? t1)
+             (exists [t (rest t1)]
+                     (and (not? t)
+                          (member? (second t)))))
         (inhabited? (canonicalize-type (cons 'and
                                              (remove (fn [t]
                                                        (and (not? t)
-                                                            (member? (second t)))) (rest t1)))))
+                                                            (member? (second t)))) (rest t1))))
+                    (constantly :dont-know))
 
         :else    
         :dont-know))
