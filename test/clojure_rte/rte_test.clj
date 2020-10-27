@@ -773,7 +773,7 @@
     (is (= (reduce-redundant-or '((:and :epsilon :epsilon) (:and :sigma :epsilon)))
            '((:and :epsilon :epsilon))))
     (is (= (reduce-redundant-or '(:sigma :epsilon (:and :sigma :epsilon)))
-           (:sigma :epsilon)))
+           '(:sigma :epsilon)))
     (is (= (reduce-redundant-or '(X (:and A X B)))
            '(X)))
     (is (= (reduce-redundant-or '((:and X) (:and A X B)))
