@@ -24,7 +24,7 @@
   (:require [clojure.set :refer [intersection subset?]]
             [clojure.repl :refer [source-fn]]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [call-with-collector member find-simplifier defn-memoized]]
+            [clojure-rte.util :refer [exists call-with-collector member find-simplifier defn-memoized]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
   ))
@@ -654,9 +654,18 @@
      true
 
      (and (and? t1)
-          (some (fn [t] (subtype? t t2)) (rest t1)))
+          (exists [t (rest t1)] (subtype? t t2)))
      ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
      true
+
+
+     ;; (subtype? '(and A B) '(not A))
+     (and (and? t1)
+          (not? t2)
+          (exists [t (rest t1)]
+                  (= t (second t2)))
+          (inhabited? t1))
+     false
 
      ;; (subtype? (and A B C X Y) (and A B C) )
      (and (and? t1)
@@ -710,9 +719,20 @@
     :dont-know))
 
 (defmethod -inhabited? :member [t1]
-  (if (member? t1)
-    (boolean (rest t1))
-    :dont-know))
+  (cond (member? t1)
+        (boolean (rest t1))
+
+        ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
+        (exists [t (rest t1)]
+                (and (not? t)
+                     (member? (second t))))
+        (inhabited? (canonicalize-type (cons 'and
+                                             (remove (fn [t]
+                                                       (and (not? t)
+                                                            (member? (second t)))) (rest t1)))))
+
+        :else    
+        :dont-know))
 
 (defmethod -inhabited? := [t1]
   (if (=? t1)
@@ -910,14 +930,16 @@
              ((and (not-empty left) (not-empty right)
                    ;; exists t2 in right such that t1 < t2
                    ;; then t1 & !t2 = nil
-                   (some (fn [t2] (subtype? (first left) t2 (constantly false)))  right))
+                   (exists [t2 right]
+                           (subtype? (first left) t2 (constantly false))))
               ;; prune
               )
 
              ((and (not-empty left) (not-empty right)
-                   ;; exists t2 in right such that t1 < t2
+                   ;; exists t1 in left such that t1 < t2
                    ;; then t1 & !t2 = nil
-                   (some (fn [t1] (subtype? t1 (first right) (constantly false)))  left))
+                   (exists [t1 left]
+                           (subtype? t1 (first right) (constantly false))))
               ;; prune
               )
 
@@ -1096,6 +1118,16 @@
                         type-designator))
                     
                     (fn [type-designator]
+                      (cond (empty? (rest type-designator))
+                            :sigma
+
+                            (empty? (rest (rest type-designator)))
+                            (second type-designator)
+
+                            :else
+                            type-designator))
+                    
+                    (fn [type-designator]
                       (if (some =? (rest type-designator))
                         ;; (and Double (= "a")) --> (member)
                         ;; (and String (= "a")) --> (member "a")
@@ -1111,7 +1143,6 @@
                               candidates (rest (first member-candidates))]
                           (cons 'member (filter (fn [x] (typep x type-designator)) candidates)))
                         type-designator))
-
                     
                     (fn [type-designator]
                       (if (member :sigma (rest type-designator))
@@ -1139,7 +1170,8 @@
                                          (cons 'member filtered-candidates))
                                        t
                                        ))
-                                   (rest type-designator)))))
+                                   (rest type-designator)))
+                        type-designator))
 
                     (fn [type-designator]
                       (cons 'and (map canonicalize-type (rest type-designator))))]))
@@ -1164,6 +1196,16 @@
                         (cons 'or (map canonicalize-type
                                        (remove #{:empty-set} (rest type-designator))))
                         type-designator))
+
+                    (fn [type-designator]
+                      (cond (empty? (rest type-designator))
+                            :empty-set
+
+                            (empty? (rest (rest type-designator)))
+                            (second type-designator)
+
+                            :else
+                            type-designator))
 
                     (fn [type-designator]
                       (if (member :sigma (rest type-designator))
