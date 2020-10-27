@@ -771,13 +771,13 @@
 (deftest t-reduce-redundant-or
   (testing "reduce-redundant-or"
     (is (= (reduce-redundant-or '((:and :epsilon :epsilon) (:and :sigma :epsilon)))
-           '(:and :epsilon :epsilon)))
+           '((:and :epsilon :epsilon))))
     (is (= (reduce-redundant-or '(:sigma :epsilon (:and :sigma :epsilon)))
            (:sigma :epsilon)))
     (is (= (reduce-redundant-or '(X (:and A X B)))
-           'X))
+           '(X)))
     (is (= (reduce-redundant-or '((:and X) (:and A X B)))
-           '(:and X)))
+           '((:and X))))
     (is (= (reduce-redundant-or '((:and A B C) (:and X Y Z)))
            '((:and A B C) (:and X Y Z))))
     (is (= (reduce-redundant-or '((:and A X C) (:and A Y C)))
