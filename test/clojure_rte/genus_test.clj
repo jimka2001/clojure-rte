@@ -271,7 +271,7 @@
 (deftest t-inhabited
   (testing "inhabited?"
     (with-compile-env ()
-
+      (is (gns/inhabited? '(and Number (not (member 1 2 3))) (constantly false)))
       (is (gns/inhabited? 'Long))
       (is (gns/inhabited? '(not Long)))
       (is (gns/inhabited? 'Object))
@@ -331,7 +331,9 @@
     (is (member (gns/canonicalize-type '(and Double (= 1.0)))
                 '((= 1.0) (member 1.0))) "test 1")
     (is (= '(member 1.0 2.0)
-           (gns/canonicalize-type '(and Double (member 1.0 2.0 "a" "b")))) "test 2")))
+           (gns/canonicalize-type '(and Double (member 1.0 2.0 "a" "b")))) "test 2")
+    (is (= (gns/canonicalize-type '(and Number))
+           'Number) "test 3")))
 
 (deftest t-canonicalize-or
   (testing "canonicalize-type or"
