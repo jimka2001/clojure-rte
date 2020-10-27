@@ -227,7 +227,7 @@
   "Testing several functions, dfa/complement, dfa-to-rte, dfa-equivalent"
   [num-tries size verbose]
   (tester/random-test num-tries
-                      test-rte-not-1                            
+                      test-rte-not-1
                       (fn [] (gen-rte size *test-types*))
                       rte-components
                       verbose))
