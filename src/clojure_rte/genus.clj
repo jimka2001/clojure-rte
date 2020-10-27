@@ -664,7 +664,7 @@
           (not? t2)
           (exists [t (rest t1)]
                   (= t (second t2)))
-          (inhabited? t1))
+          (inhabited? t1 (constantly false)))
      false
 
      ;; (subtype? (and A B C X Y) (and A B C) )
@@ -711,6 +711,24 @@
     
     :dont-know))
 
+(defmethod -inhabited? :and [t1]
+  (cond
+    (not (and? t1))
+    :dont-know
+
+    ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
+    (exists [t (rest t1)]
+            (and (not? t)
+                 (member? (second t))))
+    (inhabited? (canonicalize-type (cons 'and
+                                         (remove (fn [t]
+                                                   (and (not? t)
+                                                        (member? (second t)))) (rest t1))))
+                (constantly :dont-know))
+
+    :else
+    :dont-know))
+
 (defmethod -inhabited? :not [t1]
   (if (and (not? t1)
            (class-designator? (second t1)))
@@ -721,17 +739,6 @@
 (defmethod -inhabited? :member [t1]
   (cond (member? t1)
         (boolean (rest t1))
-
-        ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
-        (and (and? t1)
-             (exists [t (rest t1)]
-                     (and (not? t)
-                          (member? (second t)))))
-        (inhabited? (canonicalize-type (cons 'and
-                                             (remove (fn [t]
-                                                       (and (not? t)
-                                                            (member? (second t)))) (rest t1))))
-                    (constantly :dont-know))
 
         :else    
         :dont-know))
