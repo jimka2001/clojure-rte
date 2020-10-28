@@ -718,25 +718,25 @@
                                          :epsilon)
                                 :type (fn [type _functions]
                                         (cond 
-                                              (gns/disjoint? wrt type)
-                                              :empty-set
+                                          (gns/disjoint? wrt type)
+                                          :empty-set
 
-                                              (gns/subtype? wrt type (constantly false))
-                                              :epsilon
-                                              
-                                              (and (sequential? wrt)
-                                                   (= 'and (first wrt)))
-                                              (compute-compound-derivative type wrt)
+                                          (gns/subtype? wrt type (constantly false))
+                                          :epsilon
+                                          
+                                          (and (sequential? wrt)
+                                               (gns/and? wrt))
+                                          (compute-compound-derivative type wrt)
 
-                                              :else
-                                              (throw (ex-info (format "cannot compute derivative of overlapping types because %s is not a subtype of %s" wrt type)
-                                                              {:error-type :derivative-undefined
-                                                               :wrt wrt
-                                                               :expr expr
-                                                               :sub-types [{:type `(~'and ~wrt ~expr)}
-                                                                           {:type `(~'and ~wrt (~'not ~expr))}]
-                                                               }))
-                                              ))
+                                          :else
+                                          (throw (ex-info (format "cannot compute derivative of overlapping types because %s is not a subtype of %s" wrt type)
+                                                          {:error-type :derivative-undefined
+                                                           :wrt wrt
+                                                           :expr expr
+                                                           :sub-types [{:type `(~'and ~wrt ~expr)}
+                                                                       {:type `(~'and ~wrt (~'not ~expr))}]
+                                                           }))
+                                          ))
                                 :or (fn [operands _functions]
                                       (cons :or (walk operands)))
                                 :and (fn [operands _functions]
