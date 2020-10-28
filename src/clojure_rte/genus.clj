@@ -684,30 +684,49 @@
         :else
         :dont-know))
 
+(defn find-incompatible-members [c1 c2]
+  (let [members-1 (:members (refl/type-reflect c1))
+        members-2 (:members (refl/type-reflect c2))]
+    (for [m1 members-1
+          m2 members-2
+          :when (and (= (:name m1) (:name m2))
+                     (not= (:return-type m1) (:return-type m2))
+                     (= (:parameter-types m1) (:parameter-types m2)))
+          ]
+      [m1 m2])))
+
 (defmethod -disjoint? :classes [t1 t2]
   (if (and (class-designator? t1)
            (class-designator? t2))
-    (if (= (find-class t1)
-           (find-class t2))
-      false
-      (case [(class-type t1) (class-type t2)]
-        ((:interface :interface)
-         (:interface :abstract)
-         (:abstract :interface))
-        false ;; not disjoint
-        
-        ((:final :final)
-         (:final :interface)
-         (:final :abstract))
-        (not (subtype? t1 t2 subtype?-error))
-        
-        ((:interface :final)
-         (:abstract :final))
-        (not (subtype? t2 t1 subtype?-error))
-        
-        ((:abstract :abstract))
-        (not (or (subtype? t1 t2 (constantly false))
-                 (subtype? t2 t1 subtype?-error)))))
+    (let [c1 (find-class t1)
+          c2 (find-class t2)]
+      (cond (= c1 c2)
+            false
+
+            (isa? c1 c2)
+            false
+
+            (isa? c2 c1)
+            false
+
+            :else
+            (case [(class-type t1) (class-type t2)]
+              ((:interface :interface)
+               (:interface :abstract)
+               (:abstract :interface))
+              (not (empty? (find-incompatible-members c1 c2)))
+              
+              ((:final :final)
+               (:final :interface)
+               (:final :abstract))
+              true
+              
+              ((:interface :final)
+               (:abstract :final))
+              true
+              
+              ((:abstract :abstract))
+              true)))
     
     :dont-know))
 
