@@ -784,12 +784,14 @@
                                            ;;    product of num-inputs x num-outputs
                                            (ids-as-seq dfa))
             grouped (group-by (fn [[_ _ [_ exit-value]]] exit-value) new-transition-triples)]
-        (for [[exit-value triples] grouped
-              :let [pretty (combine-labels (extract-labels triples))]
-              ]
-          ;; one label per return value
-          ;; #10
-         [exit-value pretty])))))
+        (into {}
+              (doall 
+               (for [[exit-value triples] grouped
+                     :let [pretty (combine-labels (extract-labels triples))]
+                     ]
+                 ;; one label per return value
+                 ;; #10
+                 [exit-value pretty])))))))
 
 (defn intersect-labels
   ""
