@@ -656,10 +656,10 @@
 
 (defn extract-rte
   "Accepts an object of type Dfa, and returns a map which associates
-  exit values of the dfa with non-canonicalized rte patterns of the accepting
+  exit values of the dfa with canonicalized rte patterns of the accepting
   langauge. If there are no accepting states in the Dfa, an empty map {}
   is returned."
-  [dfa']
+  [dfa' canonicalize-pattern]
   ;; TODO - this can be done easiser
   ;;    1. minimize and trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
@@ -685,7 +685,7 @@
                                 ;; we designate new final states each as [:F some-exit-value]
                                 [(:index q) :epsilon [:F ((:exit-map dfa) (:index q))]])]
     (letfn [          ;; local function
-            (pretty-or [operands]
+            (combine-labels [operands]
               (cond (empty? operands)
                     :empty-set
                     
@@ -693,7 +693,12 @@
                     (first operands)
                     
                     :else
-                    (cons :or operands)))
+                    ;; I'm not 100% sure whether canonicalizing is a good idea or not.
+                    ;;   the idea is to keep the labels as concise as possible and prevent
+                    ;;   them from becoming larger and larger as the states are eliminated.
+                    ;;   The danger is that a huge amount of time might be spent
+                    ;;   over and over canonicalizing the same patterns.
+                    (canonicalize-pattern (cons :or operands))))
 
             ;; local function
             (pretty-cat [operands]
@@ -718,7 +723,18 @@
 
             ;; local function
             (combine-parallel [triples]
-              triples)
+              ;; accepts a sequence of triples, each of the form [from label to]
+              ;;   groups them by common from/to, these are parallel transitions
+              ;;   combines the labels of the parallel transitions, into one single lable
+              ;;   and collects a sequence of transitions, none of which are parallel.
+              ;;   This action is important because it greatly reduces the number of transitions
+              ;;   created.  The caller, the computation of new-triples, makes an NxM loop
+              ;;   creating NxM new triples.   This reduces N and M by eliminating parallel
+              ;;   transitions.
+              (for [[[from to] triples] (group-by (fn [[from _ to]] [from to]) triples)
+                    :let [label (combine-labels (extract-labels triples))]
+                    ]
+                [from label to]))
 
             ;; local function
             (eliminate-state [transition-triples q-id]
@@ -747,10 +763,10 @@
                             transition-triples)
 
                     ;; #7
-                    self-loop-label (pretty-or (extract-labels q-to-q))
+                    self-loop-label (combine-labels (extract-labels q-to-q))
                     ;; #8
-                    new-triples (for [[src pre-label _] x-to-q
-                                      [_ post-label dst] q-to-x]
+                    new-triples (for [[src pre-label _] (combine-parallel x-to-q)
+                                      [_ post-label dst] (combine-parallel q-to-x)]
                                   [src
                                    (pretty-cat (list pre-label
                                                      (list :* self-loop-label)
@@ -768,12 +784,14 @@
                                            ;;    product of num-inputs x num-outputs
                                            (ids-as-seq dfa))
             grouped (group-by (fn [[_ _ [_ exit-value]]] exit-value) new-transition-triples)]
-        (for [[exit-value triples] grouped
-              :let [pretty (pretty-or (extract-labels triples))]
-              ]
-          ;; one label per return value
-          ;; #10
-         [exit-value pretty])))))
+        (into {}
+              (doall 
+               (for [[exit-value triples] grouped
+                     :let [pretty (combine-labels (extract-labels triples))]
+                     ]
+                 ;; one label per return value
+                 ;; #10
+                 [exit-value pretty])))))))
 
 (defn intersect-labels
   ""

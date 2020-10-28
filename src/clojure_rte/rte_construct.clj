@@ -919,6 +919,6 @@
   langauge.  If there are no accepting states in the Dfa, an empty map {}
   is returned."
   [dfa]
-  (assert (instance? (dfa/record-name) dfa) (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
-  (into {} (doall (for [[exit-value label] (dfa/extract-rte dfa)]
-                    [exit-value (canonicalize-pattern label)]))))
+  (assert (instance? (dfa/record-name) dfa)
+          (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
+  (dfa/extract-rte dfa canonicalize-pattern))
