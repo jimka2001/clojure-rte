@@ -724,8 +724,7 @@
                                           (gns/subtype? wrt type (constantly false))
                                           :epsilon
                                           
-                                          (and (sequential? wrt)
-                                               (gns/and? wrt))
+                                          (gns/and? wrt)
                                           (compute-compound-derivative type wrt)
 
                                           :else
