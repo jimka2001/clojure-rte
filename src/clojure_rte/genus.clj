@@ -690,7 +690,6 @@
     (for [m1 members-1
           m2 members-2
           :when (and (= (:name m1) (:name m2))
-                     (not= (:return-type m1) (:return-type m2))
                      (= (:parameter-types m1) (:parameter-types m2)))
           ]
       [m1 m2])))
