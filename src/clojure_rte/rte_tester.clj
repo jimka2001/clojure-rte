@@ -50,9 +50,7 @@
    :? :+ :* :not
    :and :or 
    :cat ;; :permute
-   ;; TODO add back :contains-any :contains-every to improve test cases
-   ;;    add these back after OOM error has been solved
-   ;; :contains-any :contains-every
+   :contains-any :contains-every :contains-none
    :sigma :empty-set :epsilon])
 
 (defn gen-rte
