@@ -780,7 +780,15 @@
          (= t1 (second t2)))
     true
     
-    ;; (disjoint? A (not B)) 
+    ;; (disjoint? A (not B)) ;; when A
+    ;; (disjoint? 'Number '(not java.io.Serializable))   as Number is a subclass of java.io.Serializable
+    (and (not? t2)
+         (class-designator? t1)
+         (class-designator? (second t2))
+         (isa? (find-class t1) (find-class (second t2))))
+    true
+
+    ;; (disjoint? A (not B)) ;; when A and B are disjoint
     (and (not? t2)
          (disjoint? t1 (second t2) (constantly false)))
     false
