@@ -366,3 +366,16 @@
                        'java.net.http.WebSocket
                        (constantly false)))))
 
+(deftest t-disjoint-public
+  (testing "disjoint for classes which are not abstract, and not interface, and not final"
+    ;; TODO finish this test
+    ;; find a class which is :public and has subclasses other than Object, and test
+    ;;   disjoint? with it.
+    clojure.lang.PersistentVector
+    ;; clojure.lang.IHashEq is a superclass of clojure.lang.PersistentVector
+    BigInteger
+    BigDecimal
+    clojure.lang.Ratio
+    
+    ))
+
