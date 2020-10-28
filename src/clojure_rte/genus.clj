@@ -553,7 +553,7 @@
         :dont-know))
 
 (defn-memoized [class-type -class-type]
-  "Takes a class-name and returns either :abstract, :interface, or :final,
+  "Takes a class-name and returns either :abstract, :interface, :public, or :final,
   or throws an ex-info exception."
   [t]
   (let [c (find-class t)
@@ -569,7 +569,7 @@
       (contains? flags :abstract)
       :abstract
       (= flags #{:public})
-      :final
+      :public
       
       :else
       (throw (ex-info (format "disjoint? type %s flags %s not yet implemented" t flags)
@@ -684,7 +684,11 @@
         :else
         :dont-know))
 
-(defn find-incompatible-members [c1 c2]
+(defn find-incompatible-members
+  "Computes a lazy list of pairs [m1 m2] where m1 is an member of c1
+  and m2 is a member of c2, where m1 and m2 have the same name
+  and same parameter-types, thus c1 and c2 are incompatible."
+  [c1 c2]
   (let [members-1 (:members (refl/type-reflect c1))
         members-2 (:members (refl/type-reflect c2))]
     (for [m1 members-1
@@ -709,23 +713,19 @@
             false
 
             :else
-            (case [(class-type t1) (class-type t2)]
-              ((:interface :interface)
-               (:interface :abstract)
-               (:abstract :interface))
-              (not (empty? (find-incompatible-members c1 c2)))
-              
-              ((:final :final)
-               (:final :interface)
-               (:final :abstract))
-              true
-              
-              ((:interface :final)
-               (:abstract :final))
-              true
-              
-              ((:abstract :abstract))
-              true)))
+            (let [ct1 (class-type t1)
+                  ct2 (class-type t2)]
+              (cond
+                (or (= :final ct1)
+                    (= :final ct2))
+                true ;; we've already checked isa? above
+
+                (or (= :interface ct1)
+                    (= :interface ct2))
+                (not (empty? (find-incompatible-members c1 c2)))
+
+                :else
+                true))))
     
     :dont-know))
 
