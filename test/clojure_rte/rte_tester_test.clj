@@ -74,6 +74,15 @@
     (clojure-rte.rte-tester/test-rte-not-1 :sigma)
     (clojure-rte.rte-tester/test-rte-not-1 :empty-set)
     (clojure-rte.rte-tester/test-rte-not-1 '(:* :sigma))
+    (clojure-rte.rte-tester/test-rte-not-1 '(:or (:and (:cat (:cat (:not :epsilon)) (member 1 a))
+                                                       (:or (:? (:or)) (:and (satisfies keyword?)))
+                                                       (:not :sigma))
+                                                 :empty-set
+                                                 (:not :sigma)
+                                                 (:cat (:? (:* (:not (:cat))))
+                                                       (:and :empty-set :sigma)
+                                                       (:? (:* (:? :sigma))))))
+
     (test-rte-not 500 4 false)))
 
 ;; this test is not yet correctly implemented,
