@@ -190,8 +190,11 @@
   (with-compile-env []
     ;; is (not rte) equivalent to (complement dfa) ?
     (let [dfa (rte-to-dfa rte)
+          + (println [1])
           dfa-complement (dfa/complement dfa)
+          _        (println [2])
           dfa-not-rte (rte-to-dfa (list :not rte))
+          _ (println [3])
           ]
       ;;(dot/dfa-to-dot dfa :view true :title "dfa")
       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
@@ -201,20 +204,26 @@
                                   dfa)
               (cl-format false
                          "dfa not equivalent with self rte=~A" rte))
-
+      (println [4])
+      
       (assert (dfa/dfa-equivalent dfa-not-rte
                                   dfa-not-rte)
               (cl-format false
                          "dfa of :not, not equivalent with self rte=~A" (list :not rte)))
-
+       (println [5])
+      
       (assert (dfa/dfa-equivalent dfa-complement
                                   dfa-not-rte)
               (cl-format false
                          "!dfa != (dfa (not rte)), when rte=~A" rte))
-
+       (println [6])
+      
       (let [extracted-rte-map (dfa-to-rte dfa-complement)
+            _ (println [7])
             extracted-rte (get extracted-rte-map true :empty-set)
+            _ (println [8])
             dfa-not (rte-to-dfa (list :not extracted-rte))
+            _ (println [9])
             ]
         
         (assert (dfa/dfa-equivalent dfa dfa-not)
