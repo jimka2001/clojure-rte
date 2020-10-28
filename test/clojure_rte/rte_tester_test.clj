@@ -83,7 +83,7 @@
                                                        (:and :empty-set :sigma)
                                                        (:? (:* (:? :sigma))))))
 
-    (test-rte-not 500 4 false)))
+    (test-rte-not 500 4 true)))
 
 ;; this test is not yet correctly implemented,
 ;;    need a good way to compare two rtes for equivalence
