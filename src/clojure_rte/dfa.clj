@@ -718,7 +718,18 @@
 
             ;; local function
             (combine-parallel [triples]
-              triples)
+              ;; accepts a sequence of triples, each of the form [from label to]
+              ;;   groups them by common from/to, these are parallel transitions
+              ;;   combines the labels of the parallel transitions, into one single lable
+              ;;   and collects a sequence of transitions, none of which are parallel.
+              ;;   This action is important because it greatly reduces the number of transitions
+              ;;   created.  The caller, the computation of new-triples, makes an NxM loop
+              ;;   creating NxM new triples.   This reduces N and M by eliminating parallel
+              ;;   transitions.
+              (for [[[from to] triples] (group-by (fn [[from _ to]] [from to]) triples)
+                    :let [label (pretty-or (extract-labels triples))]
+                    ]
+                [from label to]))
 
             ;; local function
             (eliminate-state [transition-triples q-id]
@@ -749,8 +760,8 @@
                     ;; #7
                     self-loop-label (pretty-or (extract-labels q-to-q))
                     ;; #8
-                    new-triples (for [[src pre-label _] x-to-q
-                                      [_ post-label dst] q-to-x]
+                    new-triples (for [[src pre-label _] (combine-parallel x-to-q)
+                                      [_ post-label dst] (combine-parallel q-to-x)]
                                   [src
                                    (pretty-cat (list pre-label
                                                      (list :* self-loop-label)
