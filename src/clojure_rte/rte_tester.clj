@@ -64,8 +64,9 @@
       (:type) (rand-nth types)
       (:sigma :empty-set :epsilon) key
       ;;(:permute) (gen-rte :cat size types)
-      (:and :or :cat :contains-any :contains-every) (cons key (map (fn [k] (gen-rte (dec size) types))
-                                                                   (range size)))
+      (:and :or :cat :contains-any
+            :contains-every :contains-none) (cons key (map (fn [k] (gen-rte (dec size) types))
+                                                           (range size)))
       (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
 
 (def ^:dynamic *test-types*
