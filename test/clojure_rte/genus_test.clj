@@ -72,7 +72,11 @@
       (is (gns/disjoint? '(not Boolean) '(not Object) (constantly false))) ;; currently broken
       (is (gns/disjoint? 'Long 'Boolean (constantly false)))
       (is (not (gns/disjoint? '(not Long) '(not Boolean) (constantly true))))
-      (is (not (gns/disjoint? 'clojure.lang.ISeq '(not java.lang.Number)))))))
+      (is (not (gns/disjoint? 'clojure.lang.ISeq '(not java.lang.Number))))
+      ;; because Number is a subtype of java.io.Serializable
+      ;;   then Number should be disjoint from (not java.io.Serializable)
+      (is (gns/disjoint? 'Number '(not java.io.Serializable) (constantly false)))
+      )))
 
 (deftest t-disjoint-2-14
   (if (and (resolve 'java.lang.Comparable)
@@ -351,3 +355,14 @@
       (is (=
            (gns/disjoint? t1 t2)
            (gns/disjoint? t2 t1 ))))))
+
+(deftest t-disjoint-interfaces
+  (testing "disjoint interfaces"
+    (is (gns/find-class 'javax.security.auth.spi.LoginModule))
+    (is (gns/find-class 'java.net.http.WebSocket))
+    (is (not (empty? (gns/find-incompatible-members javax.security.auth.spi.LoginModule
+                                                    java.net.http.WebSocket))))
+    (is (gns/disjoint? 'javax.security.auth.spi.LoginModule
+                       'java.net.http.WebSocket
+                       (constantly false)))))
+
