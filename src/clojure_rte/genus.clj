@@ -78,7 +78,6 @@
   [c1 c2]
   {:pre [(and (or (symbol? c1) (class? c1))
               (or (symbol? c2) (class? c2)))]}
-  (println [:c1 c1 :c2 c2])
   (cond (symbol? c1)
         (find-incompatible-members (or (find-class c1)
                                        (throw (ex-info (format "find-incompatible-members: no such class %s" c1)
