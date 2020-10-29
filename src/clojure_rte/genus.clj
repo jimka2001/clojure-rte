@@ -71,6 +71,41 @@
     (resolve class-name)
     nil))
 
+(defn find-incompatible-members
+  "Computes a lazy list of pairs [m1 m2] where m1 is an member of c1
+  and m2 is a member of c2, where m1 and m2 have the same name
+  and same parameter-types, thus c1 and c2 are incompatible."
+  [c1 c2]
+  {:pre [(and (or (symbol? c1) (class? c1))
+              (or (symbol? c2) (class? c2)))]}
+  (println [:c1 c1 :c2 c2])
+  (cond (symbol? c1)
+        (find-incompatible-members (or (find-class c1)
+                                       (throw (ex-info (format "find-incompatible-members: no such class %s" c1)
+                                                       {:c1 c1
+                                                        :c2 c2})))
+                                   c2)
+
+        (symbol? c2)
+        (find-incompatible-members c1 
+                                   (or (find-class c2)
+                                       (throw (ex-info (format "find-incompatible-members: no such class %s" c2)
+                                                       {:c1 c1
+                                                        :c2 c2}))))
+
+        :else
+        (let [members-1 (:members (refl/type-reflect c1))
+              members-2 (:members (refl/type-reflect c2))]
+          (for [m1 members-1
+                m2 members-2
+                :when (and (= (:name m1) (:name m2))
+                           (= (:parameter-types m1) (:parameter-types m2)))
+                ]
+            [m1 m2]))))
+
+(defn compatible-members? [c1 c2]
+  (empty? (find-incompatible-members c1 c2)))
+
 (defn type-equivalent?-error [t1-designator t2-designator]
   (throw (ex-info (format "type-equivalent? cannot decide %s vs %s" t1-designator t2-designator)
                   {:error-type :not-yet-implemented
@@ -684,20 +719,6 @@
         :else
         :dont-know))
 
-(defn find-incompatible-members
-  "Computes a lazy list of pairs [m1 m2] where m1 is an member of c1
-  and m2 is a member of c2, where m1 and m2 have the same name
-  and same parameter-types, thus c1 and c2 are incompatible."
-  [c1 c2]
-  (let [members-1 (:members (refl/type-reflect c1))
-        members-2 (:members (refl/type-reflect c2))]
-    (for [m1 members-1
-          m2 members-2
-          :when (and (= (:name m1) (:name m2))
-                     (= (:parameter-types m1) (:parameter-types m2)))
-          ]
-      [m1 m2])))
-
 (defmethod -disjoint? :classes [t1 t2]
   (if (and (class-designator? t1)
            (class-designator? t2))
@@ -722,7 +743,7 @@
 
                 (or (= :interface ct1)
                     (= :interface ct2))
-                (not (empty? (find-incompatible-members c1 c2)))
+                (not (compatible-members? c1 c2))
 
                 :else
                 true))))
