@@ -258,35 +258,39 @@
   {:forms '[(destructuring-fn name? [[params* ] constr-map] exprs*)
             (destructuring-fn name? ([[params*] constr-map ] exprs*)+)]}
   [& args]
-  (destructuring-case
-   args
-   [[] {}]
-   (throw (IllegalArgumentException. 
-           "destructuring-fn, empty argument list not supported"))
+  (cond
+    (empty? args)
+    (throw (IllegalArgumentException. 
+            "destructuring-fn, empty argument list not supported")) 
 
-   [[name & others] {name (not (or (satisfies symbol?)
-                                   (= nil))) }]
-   `(destructuring-fn nil ~@args)
+    (not (or (symbol? (first args))
+             (= nil (first args))))
+    `(destructuring-fn nil ~@args)
+    
 
-   [[name] {}]
-   (throw (IllegalArgumentException. 
-           "destructuring-fn, invalid function body or clauses clauses"))
+    (= 1 (count args))
+    (throw (IllegalArgumentException. 
+            "destructuring-fn, invalid function body or clauses clauses")) 
 
-   [[name lambda-list & others] {lambda-list (satisfies vector?)}]
-   `(destructuring-fn-many
-     ~name
-     (~lambda-list
-      ~@others))
-   
-   [[name & clauses] {clauses (and (satisfies list?)
-                                   (not (= ()))
-                                   (rte (:* (:cat (satisfies vector?) (:* :sigma)))))}]
-   `(destructuring-fn-many
-     ~name
-     ~@clauses)
+    (vector? (second args)) ; if lambda-list is a vector
+    (let [[name lambda-list & others] args]
+      `(destructuring-fn-many
+        ~name
+        (~lambda-list
+         ~@others)))
 
-   [[& others] {}]
-   (throw (IllegalArgumentException. 
-           (cl-format false
-                      "destructuring-fn, invalid argument list: ~A"
-                      args)))))
+    (every? (fn [clause]
+            (and (list? clause)
+                 (not (empty? clause))
+                 (vector? (first clause))))
+            (rest args))
+    (let [[name & clauses] args]
+      `(destructuring-fn-many
+        ~name
+        ~@clauses))
+    
+    :else
+    (throw (IllegalArgumentException. 
+            (cl-format false
+                       "destructuring-fn, invalid argument list: ~A"
+                       args)))))
