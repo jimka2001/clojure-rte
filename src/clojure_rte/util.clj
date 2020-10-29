@@ -321,3 +321,24 @@
   "Return a sequence of lazy elements of a given sequence which match a given condition"
   `(filter (fn [~var]
              ~@body) ~seq))
+
+(defmacro forall [[var seq] & body]
+  "Return true if the given body evaluates to logical true for every element of the given sequence"
+  `(every? (fn [~var]
+            ~@body) ~seq))
+
+(defn lazy-pairs [seq]
+  (cond (empty? seq)
+        ()
+
+        :else
+        (concat (for [t (rest seq)]
+                  [(first seq) t])
+                (lazy-pairs (rest seq)))))
+
+(defmacro forall-pairs [[[v1 v2] seq] & body]
+  `(every? (fn [[~v1 ~v2]] ~@body) (lazy-pairs ~seq)))
+
+(defmacro exists-pair  [[[v1 v2] seq] & body]
+  `(some (fn [[~v1 ~v2]]
+           ~@body) (lazy-pairs ~seq)))

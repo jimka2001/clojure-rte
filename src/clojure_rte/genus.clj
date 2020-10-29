@@ -24,7 +24,7 @@
   (:require [clojure.set :refer [intersection subset?]]
             [clojure.repl :refer [source-fn]]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [exists call-with-collector member find-simplifier defn-memoized]]
+            [clojure-rte.util :refer [exists-pair forall-pairs forall exists call-with-collector member find-simplifier defn-memoized]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
   ))
