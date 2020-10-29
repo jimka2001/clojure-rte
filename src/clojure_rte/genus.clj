@@ -316,7 +316,7 @@
    (disjoint? t1 t2 *disjoint?-default*))
   ([t1 t2 default]
    {:pre [(fn? default)]
-    :post [(fn [v] (#{true false :dont-know} v))]}
+    :post [(fn [v] (member v '(true false :dont-know)))]}
    (letfn [(check-disjoint [t1' t2' default]
              (binding [*disjoint?-default* default]
                (loop [[k & ks] (sort-method-keys -disjoint?)]
