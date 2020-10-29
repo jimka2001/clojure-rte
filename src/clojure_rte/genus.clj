@@ -422,36 +422,51 @@
   :dont-know)
 
 (defmethod -disjoint? :and [t1 t2]
-  (cond (and (and? t2)
-             (some (fn [t]
-                     (disjoint? t1 t)) (rest t2)))
-        ;; (disjoint? X (and A B C))
-        true
+  (let [inhabited-t1 (delay (inhabited? t1 (constantly false)))
+        inhabited-t2 (delay (inhabited? t2 (constantly false)))]
+    (cond (and (and? t1)
+               (exists [t (rest t1)]
+                       (disjoint? t2 t)))
+          ;; (disjoint? (and A B C) X)
+          true
 
-        ;; (disjoint? (and A B C) X)
-        (and (and? t1)
-             (some #{t2} (rest t1))
-             (inhabited? t2 (constantly false)))
-        false
-        
-        ;; (disjoint? 'A '(and B C))
-        ;; (disjoint? 'java.lang.Comparable '(and String (not (member a b c 1 2 3))))
-        (and (and? t1)
-             (inhabited? t1 (constantly false))
-             (inhabited? t2 (constantly false))
-             (some (fn [t1'] (or (subtype? t1' t2 (constantly false))
-                                 (subtype? t2 t1' (constantly false))
-                                 )) (rest t1)))
-        false
+          ;; (disjoint? (and A B C) B)
+          (and (and? t1)
+               (member t2 (rest t1))
+               @inhabited-t2
+               @inhabited-t1)
+          false
+          
+          ;; (disjoint? '(and B C) 'A)
+          ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
+          (and (and? t1)
+               @inhabited-t2
+               @inhabited-t1
+               (exists [t1' (rest t1)]
+                       (or (subtype? t1' t2 (constantly false))
+                           (subtype? t2 t1' (constantly false))
+                           )))
+          false
 
-        (and (and? t1)
-             (class-designator? t2)
-             (= (find-class t2) java.lang.Object)
-             (some class-designator? (rest t1)))
-        false
-        
-        :else
-        :dont-know))
+          (and (and? t1)
+               (class-designator? t2)
+               (= (find-class t2) java.lang.Object)
+               (some class-designator? (rest t1)))
+          false
+
+          
+          ;; (disjoint? (and A B C) X)
+          (and (and? t1)
+               (class-designator? t2)
+               (every? class-designator? (rest t1)))
+          (not (forall-pairs [[a b] (conj (rest t1) t2)]
+                             (or (isa? (find-class a) (find-class b))
+                                 (isa? (find-class b) (find-class a))
+                                 ;; TODO isn't this wrong? because () is not false
+                                 (compatible-members? a b))))
+
+          :else
+          :dont-know)))
 
 (defmethod -disjoint? := [t1 t2]
   (cond (=? t1)
@@ -479,6 +494,12 @@
              (class-designator? t2))
         false
         
+        (and (not? t1)
+             (not? t2)
+             (member? (second t1))
+             (member? (second t2)))
+        false
+
         :else
         :dont-know))
 
@@ -556,13 +577,20 @@
    {:pre [(fn? default)]
     :post [(fn [v] (#{true false :dont-know} v))]}
    (binding [*inhabited?-default* default]
-     (loop [[k & ks] (sort-method-keys -inhabited?)]
-       (case ((k (methods -inhabited?)) type-designator)
-         (true) true
-         (false) false
-         (if ks
-           (recur ks)
-           (default type-designator)))))))
+     (letfn [(calc-inhabited [type-designator default]
+               (loop [[k & ks] (sort-method-keys -inhabited?)]
+                 (case ((k (methods -inhabited?)) type-designator)
+                   (true) true
+                   (false) false
+                   (if ks
+                     (recur ks)
+                     (default type-designator)))))]
+       (let [i (calc-inhabited type-designator (constantly :dont-know))]
+         (cond (= :dont-know)
+               (calc-inhabited (canonicalize-type type-designator) default)
+
+               :else
+               i))))))
 
 (defmethod -inhabited? :primary [type-designator]
   (if (class-designator? type-designator)
@@ -623,19 +651,12 @@
 
 (defmethod -subtype? :not [sub super]
   (cond (and (not? super)  ; (subtype? 'Long '(not Double))
-             (class-designator? sub)
-             (class-designator? (second super))
-             (= :final (class-type sub))
-             (= :final (class-type (second super)))
-             (= false (type-equivalent? sub (second super) (constantly :dont-know))))
+             (disjoint? sub (second super) (constantly false)))
         true
 
-        (and (not? sub)  ; (subtype? '(not Double) 'Long)
-             (class-designator? super)
-             (class-designator? (second sub))
-             (= :final (class-type super))
-             (= :final (class-type (second sub)))
-             (= false (type-equivalent? (second sub) super (constantly :dont-know))))
+        ;; (subtype? '(not Double) 'Long)
+        (and (not? sub)
+             (disjoint? super (second sub) (constantly false)))
         false
 
         (and (not? sub)
@@ -754,6 +775,27 @@
     (not (and? t1))
     :dont-know
 
+    (and (< 2 (count t1))
+         (forall-pairs [[a b] (rest t1)]
+                       (and (or (class-designator? a)
+                                (not? a)
+                                (class-designator? (second a)))
+                            (or (class-designator? b)
+                                (not? b)
+                                (class-designator? (second b)))
+                            (not (disjoint? a b)))))
+    true
+                        
+    (exists-pair [[a b] (rest t1)]
+                 (and (or (class-designator? a)
+                          (not? a)
+                          (class-designator? (second a)))
+                      (or (class-designator? b)
+                          (not? b)
+                          (class-designator? (second b)))
+                      (disjoint? a b)))
+    false
+    
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
     (exists [t (rest t1)]
             (and (not? t)
@@ -768,11 +810,17 @@
     :dont-know))
 
 (defmethod -inhabited? :not [t1]
-  (if (and (not? t1)
-           (class-designator? (second t1)))
-    (not (= (find-class (second t1))
-            Object))
-    :dont-know))
+  (cond (not (not? t1))
+        :dont-know
+
+        (class-designator? (second t1))
+        (not= Object (find-class (second t1))) ;; (not Object) is empty, (not any-other-class) is inhabited
+
+        (member? (second t1))
+        true
+
+        :else
+        :dont-know))
 
 (defmethod -inhabited? :member [t1]
   (cond (member? t1)
@@ -802,14 +850,24 @@
     ;; (disjoint? A (not B)) ;; when A
     ;; (disjoint? 'Number '(not java.io.Serializable))   as Number is a subclass of java.io.Serializable
     (and (not? t2)
-         (class-designator? t1)
          (class-designator? (second t2))
-         (isa? (find-class t1) (find-class (second t2))))
+         (class-designator? t1)
+         (subtype? t1 (second t2) (constantly false)))
     true
 
     ;; (disjoint? A (not B)) ;; when A and B are disjoint
     (and (not? t2)
          (disjoint? t1 (second t2) (constantly false)))
+    false
+
+    ;; (disjoint? 'BigDecimal '(not clojure.lang.IMeta))
+    ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
+    (and (not? t2)
+         (class-designator? t1)
+         (class-designator? (second t2))
+         (or (= :interface (class-primary-flag (second t2)))
+             (= :interface (class-primary-flag t1)))
+         (empty? (find-incompatible-members (second t2) t1)))
     false
 
     ;; (disjoint?   'java.io.Serializable '(not java.lang.Comparable))  ;; i.e., :interface vs :interface
@@ -826,10 +884,7 @@
     (and (not? t1)
          (not? t2)
          (class-designator? (second t1))
-         (class-designator? (second t2))
-         (= :interface (class-primary-flag (second t1)))
-         (= :interface (class-primary-flag (second t2)))
-         (not (= (find-class (second t1)) (find-class (second t2)))))
+         (class-designator? (second t2)))
     false
 
     ;; if t1 < t2, then t1 disjoint from (not t2)
@@ -1289,6 +1344,9 @@
     (class-designator? type-designator)
     type-designator
     
+    (member type-designator '(:sigma :empty-set))
+    type-designator
+
     (not (sequential? type-designator))
     (throw (ex-info (format "canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :not-a-sequence

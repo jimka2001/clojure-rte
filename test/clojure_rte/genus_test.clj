@@ -366,6 +366,32 @@
                        'java.net.http.WebSocket
                        (constantly false)))))
 
+(deftest t-disjoint-and
+  (testing "disjoint of intersection types"
+    (is (= false (gns/disjoint? '(and BigDecimal clojure.lang.IMeta) 'java.lang.Number (constantly :dont-know))) "test 1")
+    (is (= false (gns/disjoint? '(and clojure.lang.IMeta BigInteger) 'java.lang.Number (constantly :dont-know))) "test 2")
+    (is (= false (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'java.lang.Number (constantly :dont-know))) "test 3")
+    (is (= true  (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'String (constantly :dont-know))) "test 4")
+
+    (is (= true  (gns/inhabited? '(and BigDecimal (not clojure.lang.IMeta)) (constantly :dont-know))) "test 5")
+    (is (= false (gns/inhabited? '(not Object) (constantly :dont-know))) "test 6")
+    (is (= false (gns/inhabited? '(and (not Object)) (constantly :dont-know))) "test 7")
+    (is (= false (gns/disjoint? 'BigDecimal 'clojure.lang.IMeta (constantly :dont-know))) "test 8")
+    (is (= false (gns/disjoint? 'BigDecimal '(not clojure.lang.IMeta) (constantly :dont-know))) "test 9")
+
+    (is (= false (gns/disjoint? '(and BigDecimal (not clojure.lang.IMeta)) 'java.lang.Number (constantly :dont-know)))
+        "test 10")
+    (is (= false  (gns/disjoint? '(and BigInteger (not clojure.lang.IMeta)) 'java.lang.Number (constantly :dont-know)))
+        "test 11")
+    (is (= false (gns/disjoint? '(and clojure.lang.Ratio (not clojure.lang.IMeta)) 'java.lang.Number (constantly :dont-know)))
+        "test 12")
+
+    (is (= false (gns/disjoint? 'java.io.Serializable '(not Long) (constantly :dont-know)))
+        "test 13")
+    (is (= true (gns/disjoint? '(not java.io.Serializable) 'Long (constantly :dont-know)))
+        "test 14")
+    ))
+
 (deftest t-disjoint-public
   (testing "disjoint for classes which are not abstract, and not interface, and not final"
     ;; TODO finish this test
@@ -378,4 +404,3 @@
     clojure.lang.Ratio
     
     ))
-
