@@ -552,7 +552,7 @@
         :else
         :dont-know))
 
-(defn-memoized [class-type -class-type]
+(defn-memoized [class-primary-flag -class-primary-flag]
   "Takes a class-name and returns either :abstract, :interface, :public, or :final,
   or throws an ex-info exception."
   [t]
@@ -713,8 +713,8 @@
             false
 
             :else
-            (let [ct1 (class-type t1)
-                  ct2 (class-type t2)]
+            (let [ct1 (class-primary-flag t1)
+                  ct2 (class-primary-flag t2)]
               (cond
                 (or (= :final ct1)
                     (= :final ct2))
@@ -797,8 +797,8 @@
     (and (not? t2)
          (class-designator? t1)
          (class-designator? (second t2))
-         (member (class-type t1) '(:abstract :interface))
-         (member (class-type (second t2)) '(:abstract :interface))
+         (member (class-primary-flag t1) '(:abstract :interface))
+         (member (class-primary-flag (second t2)) '(:abstract :interface))
          (not (= (find-class t1) (find-class (second t2)))))
     false
 
@@ -807,8 +807,8 @@
          (not? t2)
          (class-designator? (second t1))
          (class-designator? (second t2))
-         (= :interface (class-type (second t1)))
-         (= :interface (class-type (second t2)))
+         (= :interface (class-primary-flag (second t1)))
+         (= :interface (class-primary-flag (second t2)))
          (not (= (find-class (second t1)) (find-class (second t2)))))
     false
 
