@@ -71,7 +71,7 @@
                             ((:client functions) expr functions)) patterns)))
    :or (fn [patterns functions]
          (cons :or (map (fn [expr]
-                           ((:client functions) expr functions)) patterns)))
+                          ((:client functions) expr functions)) patterns)))
    :not (fn [pattern functions]
           (cons :not ((:client functions) pattern functions)))
    :cat (fn [patterns functions]
@@ -166,7 +166,7 @@
            ([operand] operand)
            ([_ & _]
             (let [wrapped (for [operand (rest pattern)]
-                                   `(:cat ~sigma-* ~operand ~sigma-*))]
+                            `(:cat ~sigma-* ~operand ~sigma-*))]
               `(:and ~@(doall wrapped)))))
          (rest pattern)))
 
@@ -208,122 +208,122 @@
   ([given-pattern functions]
    (traverse-pattern 0 given-pattern functions))
   (
-  [depth given-pattern functions]
+   [depth given-pattern functions]
    (if (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
-                      depth given-pattern))
+                depth given-pattern))
    (assert (<= depth traversal-depth-max)
            (cl-format false "traverse pattern depth exceeded: ~A ~A"
                       depth given-pattern))
-  (letfn [(if-atom [pattern]
-            (cond
-              (member pattern '(:epsilon :empty-set :sigma))
-              ((functions pattern) pattern functions)
+   (letfn [(if-atom [pattern]
+             (cond
+               (member pattern '(:epsilon :empty-set :sigma))
+               ((functions pattern) pattern functions)
 
-              (*rte-known* pattern)
-              (traverse-pattern (inc depth) (*rte-known* pattern) functions)
+               (*rte-known* pattern)
+               (traverse-pattern (inc depth) (*rte-known* pattern) functions)
 
-              :else
-              ((:type functions) pattern functions)))
-          (if-nil [_]
-            ((:type functions) () functions))
-          (verify-type [obj]
-            (if (gns/valid-type? obj)
-              obj
-              (throw (ex-info (cl-format false "[219] invalid type designator ~A" obj)
-                              {:error-type :invalid-type-designator
-                               :obj obj
-                               :given-pattern given-pattern}))))
-          (convert-type-designator-to-rte [obj]
-            ;; e.g convert (and a b c) => (:and a b c)
-            ;;             (or a b c) => (:or a b c)
-            ;;             (not a) => (:and :sigma (:not a))
-            ;; We also verify that it is a valid.
-            ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
-            (if (not (sequential? obj))
-              obj
-              (case (first obj)
-                (or) (cons :or (rest (verify-type obj)))
-                (and) (cons :and (rest (verify-type obj)))
-                (not) `(:and (:not ~@(rest (verify-type obj))) :sigma)
-                obj)))
-          (if-singleton-list [pattern] ;; (:or)  (:and)
-            (let [[keyword] pattern]
-              (case keyword
-                (:or)  (traverse-pattern (inc depth) :empty-set functions)
-                (:and) (traverse-pattern (inc depth) sigma-* functions)
-                (:cat) (traverse-pattern (inc depth) :epsilon functions)
-                (:not
-                 :*) (throw (ex-info (format "[264] invalid pattern %s, expecting exactly one operand" pattern)
-                                     {:error-type :rte-syntax-error
-                                      :keyword keyword
-                                      :pattern pattern
-                                      :functions functions
-                                      :cause :unary-keyword
-                                      }))
-                ;; case-else
-                (cond
-                  (and (sequential? keyword)
-                       (registered-type? (first keyword)))
-                  ((:type functions) pattern functions)
+               :else
+               ((:type functions) pattern functions)))
+           (if-nil [_]
+             ((:type functions) () functions))
+           (verify-type [obj]
+             (if (gns/valid-type? obj)
+               obj
+               (throw (ex-info (cl-format false "[219] invalid type designator ~A" obj)
+                               {:error-type :invalid-type-designator
+                                :obj obj
+                                :given-pattern given-pattern}))))
+           (convert-type-designator-to-rte [obj]
+             ;; e.g convert (and a b c) => (:and a b c)
+             ;;             (or a b c) => (:or a b c)
+             ;;             (not a) => (:and :sigma (:not a))
+             ;; We also verify that it is a valid.
+             ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
+             (if (not (sequential? obj))
+               obj
+               (case (first obj)
+                 (or) (cons :or (rest (verify-type obj)))
+                 (and) (cons :and (rest (verify-type obj)))
+                 (not) `(:and (:not ~@(rest (verify-type obj))) :sigma)
+                 obj)))
+           (if-singleton-list [pattern] ;; (:or)  (:and)
+             (let [[keyword] pattern]
+               (case keyword
+                 (:or)  (traverse-pattern (inc depth) :empty-set functions)
+                 (:and) (traverse-pattern (inc depth) sigma-* functions)
+                 (:cat) (traverse-pattern (inc depth) :epsilon functions)
+                 (:not
+                  :*) (throw (ex-info (format "[264] invalid pattern %s, expecting exactly one operand" pattern)
+                                      {:error-type :rte-syntax-error
+                                       :keyword keyword
+                                       :pattern pattern
+                                       :functions functions
+                                       :cause :unary-keyword
+                                       }))
+                 ;; case-else
+                 (cond
+                   (and (sequential? keyword)
+                        (registered-type? (first keyword)))
+                   ((:type functions) pattern functions)
 
-                  :else
-                  (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
-          (if-exactly-one-operand [pattern] ;; (:or Long) (:* Long)
-            (let [[token operand] pattern]
-              (case token
-                (:or :and :cat)
-                (traverse-pattern (inc depth) operand functions)
-                
-                (:not :*)
-                ((functions token) operand functions)
+                   :else
+                   (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
+           (if-exactly-one-operand [pattern] ;; (:or Long) (:* Long)
+             (let [[token operand] pattern]
+               (case token
+                 (:or :and :cat)
+                 (traverse-pattern (inc depth) operand functions)
+                 
+                 (:not :*)
+                 ((functions token) operand functions)
 
-                (satisfies)
-                (if (not= pattern (gns/expand-satisfies pattern))
-                  (traverse-pattern (inc depth) (gns/expand-satisfies pattern) functions)
-                  ((:type functions) pattern functions))
-                
-                ;;case-else
-                (if (registered-type? (first pattern))
-                  ((:type functions) pattern functions)
-                  (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
-          (if-multiple-operands [pattern]
-            (let [[token & operands] pattern]
-              (case token
-                (:or
-                 :and
-                 :cat)
-                ((functions token) operands functions)
+                 (satisfies)
+                 (if (not= pattern (gns/expand-satisfies pattern))
+                   (traverse-pattern (inc depth) (gns/expand-satisfies pattern) functions)
+                   ((:type functions) pattern functions))
+                 
+                 ;;case-else
+                 (if (registered-type? (first pattern))
+                   ((:type functions) pattern functions)
+                   (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
+           (if-multiple-operands [pattern]
+             (let [[token & operands] pattern]
+               (case token
+                 (:or
+                  :and
+                  :cat)
+                 ((functions token) operands functions)
 
-                (:not :*)
-                (throw (ex-info (format "[301] invalid pattern %s, expecting exactly one operand" pattern)
-                                {:error-type :rte-syntax-error
-                                 :keyword keyword
-                                 :pattern pattern
-                                 :functions functions
-                                 :cause :unary-keyword
-                                 }))
+                 (:not :*)
+                 (throw (ex-info (format "[301] invalid pattern %s, expecting exactly one operand" pattern)
+                                 {:error-type :rte-syntax-error
+                                  :keyword keyword
+                                  :pattern pattern
+                                  :functions functions
+                                  :cause :unary-keyword
+                                  }))
 
-                ;;case-else
-                (if (registered-type? token)
-                  ((:type functions) pattern functions)
-                  (let [expanded (doall (rte-expand pattern functions))]
-                    (traverse-pattern (inc depth) expanded functions))))))]
-    (let [pattern (convert-type-designator-to-rte given-pattern)]
-      (cond (not (seq? pattern))
-            (if-atom pattern)
+                 ;;case-else
+                 (if (registered-type? token)
+                   ((:type functions) pattern functions)
+                   (let [expanded (doall (rte-expand pattern functions))]
+                     (traverse-pattern (inc depth) expanded functions))))))]
+     (let [pattern (convert-type-designator-to-rte given-pattern)]
+       (cond (not (seq? pattern))
+             (if-atom pattern)
 
-            (empty? pattern)
-            (if-nil pattern)
+             (empty? pattern)
+             (if-nil pattern)
 
-            (empty? (rest pattern)) ;; singleton list, (:and), (:or) etc
-            (if-singleton-list pattern)
+             (empty? (rest pattern)) ;; singleton list, (:and), (:or) etc
+             (if-singleton-list pattern)
 
-            (empty? (rest (rest pattern))) ;; (:and x)
-            (if-exactly-one-operand pattern)
+             (empty? (rest (rest pattern))) ;; (:and x)
+             (if-exactly-one-operand pattern)
 
-            ;; cond-else (:keyword args) or list-expr ;; (:and x y)
-            :else (if-multiple-operands pattern))))))
+             ;; cond-else (:keyword args) or list-expr ;; (:and x y)
+             :else (if-multiple-operands pattern))))))
 
 (defn nullable 
   "Determine whether the given rational type expression is nullable.
@@ -355,26 +355,26 @@
   (letfn [(mr [operands _functions]
             (reduce (fn [acc next]
                       (union acc (first-types next))) #{} operands))]
-  (traverse-pattern expr
-                    (assoc *traversal-functions*
-                           :epsilon (rte-constantly #{})
-                           :empty-set (rte-constantly #{})
-                           :sigma (rte-constantly #{:sigma})
-                           :type (fn [operand _functions]
-                                   #{operand})
-                           :or mr
-                           :and mr
-                           :not (fn [operand _functions]
-                                  (first-types operand))
-                           :cat (fn [[head & tail] _functions]
-                                  (cond (nullable head)
-                                        (union (first-types head)
-                                               (first-types (cons :cat tail)))
+    (traverse-pattern expr
+                      (assoc *traversal-functions*
+                             :epsilon (rte-constantly #{})
+                             :empty-set (rte-constantly #{})
+                             :sigma (rte-constantly #{:sigma})
+                             :type (fn [operand _functions]
+                                     #{operand})
+                             :or mr
+                             :and mr
+                             :not (fn [operand _functions]
+                                    (first-types operand))
+                             :cat (fn [[head & tail] _functions]
+                                    (cond (nullable head)
+                                          (union (first-types head)
+                                                 (first-types (cons :cat tail)))
 
-                                        :else
-                                        (first-types head)))
-                           :* (fn [operand _functions]
-                                (first-types operand))))))
+                                          :else
+                                          (first-types head)))
+                             :* (fn [operand _functions]
+                                  (first-types operand))))))
 
 (defn seq-matcher
   "Return a function, a closure, which can be used to determine whether
@@ -602,7 +602,7 @@
                                          (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
                                  (let [operands (dedupe
                                                  (sort-operands (map canonicalize-pattern
-                                                                             (reduce-redundant-or operands))))]
+                                                                     (reduce-redundant-or operands))))]
                                    (cl/cl-cond
                                     ;; TODO (:or (:cat A B sigma-*)
                                     ;;           (:cat A B ))
@@ -879,40 +879,40 @@
    (rte-to-dfa pattern true))
   ([pattern exit-value]
 
-  (let [given-pattern pattern
-        pattern (canonicalize-pattern pattern)
-        [triples derivatives] (find-all-derivatives pattern)
-        derivatives (cons pattern (remove #{pattern} derivatives))
-        index-map (zipmap derivatives (range (count derivatives)))
-        triples (map (fn [[primative wrt deriv]]
-                       [(index-map primative) wrt (index-map deriv)]
-                       ) triples)
-        grouped (group-by (fn [trip]
-                            (trip 0)) triples)]
-    (dfa/extend-with-sink-state
-     (dfa/map->Dfa
-      {:pattern given-pattern
-       :canonicalized pattern
-       :exit-map (constantly exit-value)
-       :combine-labels rte-combine-labels
-       :states
-       (into {}
-             (map (fn [deriv index]
-                    (let [transitions (if (and (grouped index)
-                                               (apply = (map (fn [[_src _wrt dst]]
-                                                               dst) (grouped index))))
-                                        ;; if all transitions have same dst, then don't draw
-                                        ;; multiple transitions, just draw with with label = :sigma
-                                        (list [:sigma ((first (grouped index)) 2)])
-                                        (map (fn [[_src wrt dst]]
-                                               [wrt dst]) (grouped index)))]
-                      [index
-                       (dfa/map->State {:index index
-                                        :initial (= 0 index)
-                                        :accepting (nullable deriv)
-                                        :pattern deriv
-                                        :transitions transitions})]))
-                  derivatives (range (count derivatives))))})))))
+   (let [given-pattern pattern
+         pattern (canonicalize-pattern pattern)
+         [triples derivatives] (find-all-derivatives pattern)
+         derivatives (cons pattern (remove #{pattern} derivatives))
+         index-map (zipmap derivatives (range (count derivatives)))
+         triples (map (fn [[primative wrt deriv]]
+                        [(index-map primative) wrt (index-map deriv)]
+                        ) triples)
+         grouped (group-by (fn [trip]
+                             (trip 0)) triples)]
+     (dfa/extend-with-sink-state
+      (dfa/map->Dfa
+       {:pattern given-pattern
+        :canonicalized pattern
+        :exit-map (constantly exit-value)
+        :combine-labels rte-combine-labels
+        :states
+        (into {}
+              (map (fn [deriv index]
+                     (let [transitions (if (and (grouped index)
+                                                (apply = (map (fn [[_src _wrt dst]]
+                                                                dst) (grouped index))))
+                                         ;; if all transitions have same dst, then don't draw
+                                         ;; multiple transitions, just draw with with label = :sigma
+                                         (list [:sigma ((first (grouped index)) 2)])
+                                         (map (fn [[_src wrt dst]]
+                                                [wrt dst]) (grouped index)))]
+                       [index
+                        (dfa/map->State {:index index
+                                         :initial (= 0 index)
+                                         :accepting (nullable deriv)
+                                         :pattern deriv
+                                         :transitions transitions})]))
+                   derivatives (range (count derivatives))))})))))
 
 (defn dfa-to-rte
   "Accepts an object of type Dfa, and returns a map which associates
