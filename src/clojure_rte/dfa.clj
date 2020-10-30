@@ -28,7 +28,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
-))
+            ))
 
 (defrecord State 
     ;; :index -- the index of this state in the array
@@ -73,7 +73,7 @@
 (defn states-as-map
   "Return a map index -> state"
   [dfa]
-    (assert (instance? Dfa dfa))
+  (assert (instance? Dfa dfa))
   (assert (map? (:states dfa)))
   (:states dfa))
 
@@ -87,7 +87,7 @@
 (defn ids-as-seq
   "Return a sequence of ids of the states which can be iterated over."
   [dfa]
-    (assert (instance? Dfa dfa))
+  (assert (instance? Dfa dfa))
   (map :index (states-as-seq dfa)))
 
 (defn check-dfa
@@ -140,10 +140,10 @@
 (defn serialize-state
   "Serialize a State for debugging"
   [state]
-   [:index (:index state)
-            :accepting (:accepting state)
-            :pattern (:pattern state)
-            :transitions (:transitions state)])
+  [:index (:index state)
+   :accepting (:accepting state)
+   :pattern (:pattern state)
+   :transitions (:transitions state)])
 
 (defn serialize-dfa
   "Serialize a Dfa for debugging"
@@ -290,7 +290,7 @@
   (let [[_ index] (first (filter (fn [[label dst-index]] (= label target-label))
                                  (:transitions source-state)))]
     (state-by-index dfa index)))
-  
+
 (defmethod print-method Dfa [v w]
   (.write w (format "#<Dfa %d states>" (count (states-as-seq v)))))
 
@@ -574,9 +574,9 @@
   [dfa]
   (assert (instance? Dfa dfa) (cl-format false "trim: expecting Dfa, not ~A ~A" (type dfa) dfa))
   (let [transition-pairs (mapcat (fn [q]
-                                     (map (fn [[_ dst-id]]
-                                            [(:index q) dst-id])
-                                          (:transitions q)))
+                                   (map (fn [[_ dst-id]]
+                                          [(:index q) dst-id])
+                                        (:transitions q)))
                                  (states-as-seq dfa))
         forward-map (group-by-mapped first second transition-pairs)
         backward-map (group-by-mapped second first transition-pairs)]
@@ -606,7 +606,7 @@
             ;; states which are not accessible.  This computes the set
             ;; of states which are both accessible and co-accessible
             useful (conj (trace-backward final-accessible (difference (set (ids-as-seq dfa))
-                                                                accessible))
+                                                                      accessible))
                          0)
             new-fids (filter (fn [id] (:accepting (state-by-index dfa id)))
                              useful)
