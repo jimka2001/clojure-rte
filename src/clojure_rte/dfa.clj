@@ -38,12 +38,11 @@
     ;; :pattern -- the derivative value representing an rte pattern matching
     ;;     any tail of the input sequence which is accepting from this point
     ;;     onward.
-    ;; :pattern -- 
     ;; :transitions -- A list of pairs, each pair is a 2 element array of the form
     ;;     [type next-state], e.g., [clojure.lang.Keyword 1]
     ;;     which means if the value at the head of the sequence is of type
-    ;;     clojure.lang.Keyword, then go to state 1.  The type is some value
-    ;;     compatible with isa?.  the state index is some index of the state
+    ;;     clojure.lang.Keyword, then go to state 1.  The type is some type designator
+    ;;     as specified in the genus library.  the state index is some index of the state
     ;;     array representing the finite atomaton.
     [index initial accepting pattern transitions])
 

@@ -54,12 +54,13 @@ git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 
 ## RTE in more depth
 
-* [Binary Decision Diagrams](bdd.md)
-* [Genus: A Simple Extensible Type System](genus.md)
-* [Expert details w.r.t. RTE](expert.md)
-* [API](api.md)
-* [destructuring-fn](dsc.md)
-* [destructuring-case](dsc.md/#destructuring-case)
+* [Binary Decision Diagrams](doc/bdd.md)
+* [Genus: A Simple Extensible Type System](doc/genus.md)
+* [(sigma) Deterministic Finite Automata](doc/dfa.md)
+* [Expert details w.r.t. RTE](doc/expert.md)
+* [API](doc/api.md)
+* [destructuring-fn](doc/dsc.md)
+* [destructuring-case](doc/dsc.md/#destructuring-case)
 ## Usage
 
 RTE allows the Clojure programmer to specify regular patterns of types
@@ -291,7 +292,7 @@ not useful to the end user.  However, internally `(:? x)` expands to
 
 * `(:not ...)` --- Takes exactly one operand.  Matches any sequence
 except ones which match the pattern.  This can be confusing. See section
-[Hierarchical Sequences](expert.md/#hierarchical-sequences) for details.
+[Hierarchical Sequences](doc/expert.md/#hierarchical-sequences) for details.
 
 Example -- `String` matches a singleton sequence whose element is a string.  
 So `(:not String)` matches any sequence except one of length 1 consisting of a

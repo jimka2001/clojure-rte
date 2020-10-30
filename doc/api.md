@@ -1,4 +1,4 @@
-## API
+## RTE API
 
 ### (`rte-compile` rte-pattern)
 Compiles an rte pattern into an internal representation representing a
