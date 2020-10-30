@@ -129,8 +129,8 @@
                    (let [my-label (:label node)
                          ;; two lazy sequences created by filter.  the filter loops are
                          ;; never called unless (empty? ...) is called below.
-                         disjoints (filter-eagerly (fn [x] (if my-label (gns/disjoint? x my-label (constantly false)))) parents)
-                         subtypes  (filter-eagerly (fn [x] (if my-label (gns/subtype?  x my-label (constantly false)))) parents)]
+                         disjoints (filter (fn [x] (if my-label (gns/disjoint? x my-label (constantly false)))) parents)
+                         subtypes  (filter (fn [x] (if my-label (gns/subtype?  x my-label (constantly false)))) parents)]
                      (cond
                        (= true node)
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B
