@@ -85,7 +85,6 @@
               ((:client functions) pattern functions))
    })
 
-
 (defmulti registered-type? identity)
 (defmethod registered-type? :default
   [type-designator]
@@ -101,12 +100,13 @@
 (defmethod registered-type? 'member [_] true)
 (defmethod registered-type? 'satisfies [_] true)
 
-(defn supported-nontrivial-types []
+(defn supported-nontrivial-types
   "Which types are currently supported?  This list denotes the
   type names which appear as (something maybe-args), which are
   supported by RTE.  The goal is to support all those supported
   by typep, but that may not yet be the case."
-  (clojure.set/difference (set (keys (methods registered-type?)))  #{:default}))
+  []
+  (difference (set (keys (methods registered-type?)))  #{:default}))
 
 (defmulti rte-expand
   "macro-like facility for rte" (fn [pattern _functions] (first pattern)))
@@ -137,7 +137,7 @@
            ([_ & _] (invalid-pattern pattern functions '[:+ [_ & _]])))
          (rest pattern)))
 
-(defmethod rte-expand :permute [pattern functions]
+(defmethod rte-expand :permute [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -149,7 +149,7 @@
                                                   (collect (cons :cat perm))) operands)))))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-any [pattern functions]
+(defmethod rte-expand :contains-any [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -160,7 +160,7 @@
                      ~sigma-*))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-every [pattern functions]
+(defmethod rte-expand :contains-every [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -194,7 +194,6 @@
              ([_ _ _ & _] 
               (invalid-pattern pattern functions '[:exp [_ _ _ & _]])))
            (rest pattern))))
-
 
 (def traversal-depth-max 10)
 (defn traverse-pattern
@@ -411,13 +410,14 @@
   [type-designator]
   (cons 'rte (map-eagerly canonicalize-pattern (rest type-designator))))
 
-(defn remove-first-duplicate [test seq]
+(defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
   for whcih (test a b) is a Boolean true.   If not found, return false.
   If found return a pair [prefix suffix] where prefix is a copy of the squence
   up to but not including a, and suffix is the tail after but not including a.
   The suffix sequence starts with b.   I.e., the length of the input sequence
   is 1 less than the some of the two output sequences, if a duplicate was found."
+  [test seq]
   (loop [seq seq
          head ()]
     (cond (empty? seq)

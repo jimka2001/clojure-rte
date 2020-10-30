@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-core
-  (:require [clojure.set :refer [union subset?]]
+  (:require [clojure.set :refer [union subset? difference]]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [with-first-match call-with-collector

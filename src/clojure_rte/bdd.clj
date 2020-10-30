@@ -22,11 +22,10 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [member call-with-collector
+  (:require [clojure-rte.util :refer [call-with-collector non-empty?
                                       filter-eagerly remove-eagerly map-eagerly]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
-            [clojure.set :refer [union difference intersection]]
 ))
 
 (alias 'c 'clojure.core)
@@ -78,8 +77,8 @@
       (let [l (:label bdd)
             p (itenf (:positive bdd))
             n (itenf (:negative bdd))]
-        (assert (c/not (= nil p)))
-        (assert (c/not (= nil n)))
+        (assert (not= nil p))
+        (assert (not= nil n))
         (pretty-or (pretty-and l p)
                    (pretty-and (pretty-not l) n))))))
 
@@ -113,13 +112,13 @@
                                 [a b])]
               (cond
                 ;; does the list contain A and (not A) ?
-                (c/not (empty? complements))
+                (non-empty? complements)
                 '(:sigma)
 
                 ;; does the list contain A and B where A is subtype B
                 :else
                 (remove-eagerly (fn [sub]
-                          (c/not (empty? (supertypes sub args))))
+                          (non-empty? (supertypes sub args)))
                         args))))]
 
     (pretty-or
@@ -157,11 +156,11 @@
                        (= false node)
                        nil ;; do not collect, and prune recursion
                        
-                       (c/not (empty? disjoints))
+                       (non-empty? disjoints)
                        (walk (:negative node)
                              parents)
                        
-                       (c/not (empty? subtypes))
+                       (non-empty? subtypes)
                        (walk (:positive node)
                              parents)
                        
@@ -438,11 +437,11 @@
      (dnf (and bdd1 bdd2))))
 
 (defn canonicalize-type
-  [type-designator]
   "Compute a canonicalized form of a given type designator.
    The intent is that given two type designators (as possibly different
    s-expressions), if they represent the same type, then they should
    be canonicalized to equal (=) s-expressions."
+  [type-designator]
   (with-hash []
     (dnf (bdd type-designator))))
 

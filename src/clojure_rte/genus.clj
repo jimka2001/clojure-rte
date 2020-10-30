@@ -21,10 +21,12 @@
 
 (ns clojure-rte.genus
   (:refer-clojure :exclude [satisfies?])
-  (:require [clojure.set :refer [intersection subset?]]
+  (:require [clojure.set :refer [subset?]]
             [clojure.repl :refer [source-fn]]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [exists-pair forall-pairs forall exists call-with-collector member find-simplifier defn-memoized]]
+            [clojure-rte.util :refer [exists-pair forall-pairs exists
+                                      call-with-collector member find-simplifier defn-memoized
+                                      ]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
   ))
@@ -59,14 +61,16 @@
   (and (sequential? t)
        (= 'satisfies (first t))))
 
-(defn class-designator? [t]
+(defn class-designator?
   "Predicate to determine whether the given symbol designates a java class."
+  [t]
   (and (symbol? t)
        (resolve t)
        (class? (resolve t))))
 
-(defn find-class [class-name]
+(defn find-class
   "Given a valid class-designator, return the (java) class or nil if not found."
+  [class-name]
   (if (class-designator? class-name)
     (resolve class-name)
     nil))
@@ -311,7 +315,7 @@
   [sub-designator super-designator]"
   subtype?-error)
 
-(defn-memoized [sort-method-keys -sort-method-keys ]
+(defn-memoized [sort-method-keys -sort-method-keys]
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
   method has been filtered away."
@@ -586,7 +590,7 @@
                      (recur ks)
                      (default type-designator)))))]
        (let [i (calc-inhabited type-designator (constantly :dont-know))]
-         (cond (= :dont-know)
+         (cond (= :dont-know i)
                (calc-inhabited (canonicalize-type type-designator) default)
 
                :else
@@ -785,7 +789,7 @@
                                 (class-designator? (second b)))
                             (not (disjoint? a b)))))
     true
-                        
+
     (exists-pair [[a b] (rest t1)]
                  (and (or (class-designator? a)
                           (not? a)
@@ -1173,13 +1177,13 @@
    ;;)
   )
 
-(defn expand-satisfies [type-designator]
+(defn expand-satisfies
   "Expand (satisfies rational?) to
   (or
     (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
     clojure.lang.Ratio BigDecimal)
   if possible.  Otherwise expand the given type-designator simply to itself."
-
+  [type-designator]
   (cl/cl-cond
    ((not (sequential? type-designator))
     type-designator)
