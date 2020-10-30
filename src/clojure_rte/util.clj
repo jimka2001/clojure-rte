@@ -363,3 +363,8 @@
   (let [[value str] (capture-output thunk)]
     (diversion-f str)
     value))
+
+(defn non-empty?
+  "like not-empty, but returns boolean rather than nil, or the collection"
+  [coll]
+  (boolean (not-empty coll)))
