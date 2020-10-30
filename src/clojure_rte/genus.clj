@@ -1138,44 +1138,41 @@
   "Look at the function definition s-expression of the named function, type-predicate,
   and apply heuristics to attempt to reverse-engineer the type being checked.  
   This works for type predicates as they are defined in core.clj."
-  ;;(memoize
-   (fn [type-predicate]
-     (let [fn-s-expression (get-fn-source type-predicate)]
-       (cond
-         (not (sequential? fn-s-expression))
-         nil
+  (fn [type-predicate]
+    (let [fn-s-expression (get-fn-source type-predicate)]
+      (cond
+        (not (sequential? fn-s-expression))
+        nil
 
-         (empty? fn-s-expression)
-         nil
+        (empty? fn-s-expression)
+        nil
 
-         (= 3 (count fn-s-expression))
-         (try (let [[_def name-1 [_fn name-2 [var-1] expr]] fn-s-expression]
-                (if (and (= name-1 name-2)
-                         (= _def 'def)
-                         (= _fn 'fn))
-                  (extract-type-from-expression var-1 expr)
-                  nil))
-              (catch Exception _
-                nil))
-         
-         (= 6 (count fn-s-expression))
-         (try
-           (let [[_defn name doc-string attr-map [var-1] expr]
-                 fn-s-expression]
-             (if (and (= _defn 'defn)
-                      (symbol? name)
-                      (string? doc-string)
-                      (map? attr-map)
-                      (symbol? var-1))
-               (extract-type-from-expression var-1 expr)
+        (= 3 (count fn-s-expression))
+        (try (let [[_def name-1 [_fn name-2 [var-1] expr]] fn-s-expression]
+               (if (and (= name-1 name-2)
+                        (= _def 'def)
+                        (= _fn 'fn))
+                 (extract-type-from-expression var-1 expr)
+                 nil))
+             (catch Exception _
                nil))
-           (catch Exception _
-             nil))
+        
+        (= 6 (count fn-s-expression))
+        (try
+          (let [[_defn name doc-string attr-map [var-1] expr]
+                fn-s-expression]
+            (if (and (= _defn 'defn)
+                     (symbol? name)
+                     (string? doc-string)
+                     (map? attr-map)
+                     (symbol? var-1))
+              (extract-type-from-expression var-1 expr)
+              nil))
+          (catch Exception _
+            nil))
 
-         :else
-         nil)))
-   ;;)
-  )
+        :else
+        nil))))
 
 (defn expand-satisfies
   "Expand (satisfies rational?) to
