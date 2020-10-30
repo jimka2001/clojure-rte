@@ -79,7 +79,7 @@ may draw the corresponding graph using the `dfa-to-dot` function.
   :state-legend false
   :view true)
 ```
-<img src="img/example-dfa.png" alt="Example Finite Automaton" width="600"/>
+<img src="../img/example-dfa.png" alt="Example Finite Automaton" width="600"/>
 
 
 
@@ -91,7 +91,7 @@ may draw the corresponding graph using the `dfa-to-dot` function.
   :state-legend false
   :view true)
 ```
-<img src="img/example-dfa-2.png" alt="Example Finite Automaton" width="400"/>
+<img src="../img/example-dfa-2.png" alt="Example Finite Automaton" width="400"/>
 
 ```clojure
 (clojure-rte.dot/dfa-to-dot
@@ -102,6 +102,6 @@ may draw the corresponding graph using the `dfa-to-dot` function.
   :state-legend false
   :view true)
 ```
-<img src="img/example-dfa-3.png" alt="Example Finite Automaton" width="400"/>
+<img src="../img/example-dfa-3.png" alt="Example Finite Automaton" width="400"/>
 
 

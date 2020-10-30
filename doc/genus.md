@@ -1,6 +1,6 @@
 # Genus - A Simple Extensible Type System
 
-<img src="img/Double_torus_illustration.png" 
+<img src="../img/Double_torus_illustration.png" 
 alt="Genus" width="300"/>
 
 The Genus Simple Extensible Type System, provides a way to reason about set of objects
