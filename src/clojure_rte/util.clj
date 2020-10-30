@@ -342,3 +342,24 @@
 (defmacro exists-pair  [[[v1 v2] seq] & body]
   `(some (fn [[~v1 ~v2]]
            ~@body) (lazy-pairs ~seq)))
+
+(defn capture-output
+  "Call the given 0-ary function, returning a vector of length 2.
+   The first element is the value returned from thunk.
+   The second element is the string comprising all the output
+   printed to *out*, or \"\" if it printed nothing."
+  [thunk]
+  (let [a (atom nil)]
+    (reverse [(with-out-str (reset! a (thunk)))
+              @a])))
+
+(defn call-diverting-stdout
+  "call the given 0-ary thunk, returning its return value.
+  If anything is printed to *out* during the dynamic extent
+  of thunk, it will be captured into a string.  diversion-f
+  will be called on that string (once).  If nothing was printed
+  then diversion-f will be called with empty string."
+  [thunk diversion-f]
+  (let [[value str] (capture-output thunk)]
+    (diversion-f str)
+    value))
