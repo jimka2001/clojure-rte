@@ -58,14 +58,14 @@
    (let [key (rand-nth *rte-keywords*)] 
      (gen-rte key size types)))
   ([key size types]
-    (case key
-      (:type) (rand-nth types)
-      (:sigma :empty-set :epsilon) key
-      ;;(:permute) (gen-rte :cat size types)
-      (:and :or :cat :contains-any
-            :contains-every :contains-none) (cons key (map (fn [k] (gen-rte (dec size) types))
-                                                           (range size)))
-      (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
+   (case key
+     (:type) (rand-nth types)
+     (:sigma :empty-set :epsilon) key
+     ;;(:permute) (gen-rte :cat size types)
+     (:and :or :cat :contains-any
+           :contains-every :contains-none) (cons key (map (fn [k] (gen-rte (dec size) types))
+                                                          (range size)))
+     (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
 
 (def ^:dynamic *test-types*
   '((satisfies integer?)
@@ -104,9 +104,9 @@
   (tester/random-test num-tries (fn [rte]
                                   (with-compile-env []
                                     (rte-to-dfa rte)))
-                        (fn [] (gen-rte size *test-types*))
-                        rte-components
-                        verbose))
+                      (fn [] (gen-rte size *test-types*))
+                      rte-components
+                      verbose))
 
 (defn test-canonicalize-pattern [num-tries size verbose]
   (tester/random-test num-tries canonicalize-pattern

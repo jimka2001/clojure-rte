@@ -23,7 +23,7 @@
   "This is an empty namespace to fool lein to load this file as part of
   the clojure-rte.rte-core ns."
   (:require [clojure-rte.genus-rte])
-)
+  )
 
 (in-ns 'clojure-rte.rte-core)
 
@@ -183,8 +183,8 @@
                              :lambda-list lambda-list
                              :parsed parsed
                              :unparsed others}))))))
-            
-            
+
+
 
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return value
@@ -280,9 +280,9 @@
          ~@others)))
 
     (every? (fn [clause]
-            (and (list? clause)
-                 (not (empty? clause))
-                 (vector? (first clause))))
+              (and (list? clause)
+                   (not (empty? clause))
+                   (vector? (first clause))))
             (rest args))
     (let [[name & clauses] args]
       `(destructuring-fn-many

@@ -91,8 +91,8 @@
     :else
     (let [sink-states (dfa/find-sink-states dfa)
           visible-states (if draw-sink
-                         (dfa/states-as-seq dfa)
-                         (remove (fn [q] (member q sink-states)) (dfa/states-as-seq dfa)))
+                           (dfa/states-as-seq dfa)
+                           (remove (fn [q] (member q sink-states)) (dfa/states-as-seq dfa)))
           visible-state-ids (map :index visible-states)
           transition-labels (distinct (for [q visible-states
                                             [label dst-id] (:transitions q)
@@ -170,7 +170,7 @@
              (println [:title title :view view
                        :pen-width pen-width :draw-false-leaf draw-false-leaf]))
            (let [stat (sh *dot-path* "-Tpng" "-o" png-file-name
-                           :in dot-string)]
+                          :in dot-string)]
              (if (not (= 0 (:exit stat)))
                (println stat)))
            (when (= "Mac OS X" (System/getProperty "os.name"))
@@ -208,9 +208,9 @@
                 (= false leaf)
                 (when draw-false-leaf
                   (cl-format *out* "~D [shape=~A,label=~S]~%"
-                          (node-to-index leaf)
-                          "box"
-                          "&perp;"))))
+                             (node-to-index leaf)
+                             "box"
+                             "&perp;"))))
             
             (top-sort [groups]
               ;; find all the labels which no bdd references,

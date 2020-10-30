@@ -42,7 +42,7 @@
   "Given a compiled rte, find a sequence of types which satisfy the corresponding pattern."
   (fn [rte]
     (dispatch rte 'rte-trace)))
-  
+
 (defmethod rte-trace :sequential
   [pattern]
   (rte-trace (rte-compile pattern)))
@@ -86,7 +86,7 @@
 
   (fn [rte _items & {:keys [promise-disjoint
                             hot-spot]}]
-   (dispatch rte 'rte-match)))
+    (dispatch rte 'rte-match)))
 
 (defmethod rte-match :sequential
   [pattern items & {:keys [promise-disjoint

@@ -29,7 +29,7 @@
                                       ]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
-  ))
+            ))
 
 (declare subtype?)
 (declare disjoint?)
@@ -302,7 +302,7 @@
 (def ^:dynamic *inhabited?-default*
   "doc string"
   inhabited?-error
-)
+  )
 
 (defn subtype?-error [sub-designator super-designator]
   (throw (ex-info (format "subtype? cannot decide %s vs %s" sub-designator super-designator)
@@ -485,7 +485,7 @@
         
         :else
         :dont-know))
-          
+
 (defmethod -disjoint? :member [t1 t2]
   (cond (member? t1)
         (every? (fn [e1]
@@ -706,34 +706,34 @@
         :dont-know))
 
 (defmethod -subtype? :and [t1 t2]
-   (cond
-     (and (and? t1)
-          (member t2 (rest t1)))
-     ;; (subtype? (and A B) A)
-     true
+  (cond
+    (and (and? t1)
+         (member t2 (rest t1)))
+    ;; (subtype? (and A B) A)
+    true
 
-     (and (and? t1)
-          (exists [t (rest t1)] (subtype? t t2)))
-     ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
-     true
+    (and (and? t1)
+         (exists [t (rest t1)] (subtype? t t2)))
+    ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
+    true
 
 
-     ;; (subtype? '(and A B) '(not A))
-     (and (and? t1)
-          (not? t2)
-          (exists [t (rest t1)]
-                  (= t (second t2)))
-          (inhabited? t1 (constantly false)))
-     false
+    ;; (subtype? '(and A B) '(not A))
+    (and (and? t1)
+         (not? t2)
+         (exists [t (rest t1)]
+                 (= t (second t2)))
+         (inhabited? t1 (constantly false)))
+    false
 
-     ;; (subtype? (and A B C X Y) (and A B C) )
-     (and (and? t1)
-          (and? t2)
-          (subset? (set (rest t2)) (set (rest t1))))
-     true
-     
-     :else
-     :dont-know))
+    ;; (subtype? (and A B C X Y) (and A B C) )
+    (and (and? t1)
+         (and? t2)
+         (subset? (set (rest t2)) (set (rest t1))))
+    true
+    
+    :else
+    :dont-know))
 
 (defmethod -disjoint? :subtype [sub super]
   (cond (and (subtype? sub super (constantly false))
@@ -1111,7 +1111,7 @@
                (symbol? type-designator))
         type-designator
         nil))
-         
+    
     ;; (symbol? x)
     (= 2 (count expr))
     (let [[type-predicate var-2] expr]
