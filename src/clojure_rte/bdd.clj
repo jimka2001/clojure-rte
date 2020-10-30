@@ -22,8 +22,7 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty?
-                                      filter-eagerly remove-eagerly map-eagerly]]
+  (:require [clojure-rte.util :refer [call-with-collector non-empty?]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
 ))
@@ -100,7 +99,7 @@
               (empty? (rest args)) (first args)
               :else (cons 'or args)))
           (supertypes [sub types]
-            (filter-eagerly (fn [super]
+            (filter (fn [super]
                       (c/and (not= sub super)
                              (gns/subtype? sub super (constantly false)))) types))
           (check-supers [args]
@@ -117,7 +116,7 @@
 
                 ;; does the list contain A and B where A is subtype B
                 :else
-                (remove-eagerly (fn [sub]
+                (remove (fn [sub]
                           (non-empty? (supertypes sub args)))
                         args))))]
 
@@ -141,7 +140,7 @@
                                          done '()]
                                     (if (empty? tail)
                                       done
-                                      (let [keeping (remove-eagerly (fn [b]
+                                      (let [keeping (remove (fn [b]
                                                               ;; if we don't know, then keep it.  it might
                                                               ;; be redunant, but it won't be wrong.
                                                               ;; Is (first tail) <: b ?
@@ -226,9 +225,9 @@
   (cond
     (sequential? type-designator)
     (case (first type-designator)
-      (and) (reduce and (map-eagerly bdd (rest type-designator)))
-      (or)  (reduce or (map-eagerly bdd (rest type-designator)))
-      (not) (apply not (map-eagerly bdd (rest type-designator)))
+      (and) (reduce and (map bdd (rest type-designator)))
+      (or)  (reduce or (map bdd (rest type-designator)))
+      (not) (apply not (map bdd (rest type-designator)))
       (node type-designator true false))
 
     (= :sigma type-designator)
