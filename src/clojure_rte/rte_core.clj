@@ -24,7 +24,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [with-first-match call-with-collector
-                                      exists setof
+                                      exists-pair exists setof
                                       defn-memoized
                                       fixed-point
                                       visit-permutations rte-constantly rte-identity

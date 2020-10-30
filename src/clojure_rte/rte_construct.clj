@@ -578,16 +578,17 @@
 
                                      ;; (:and of disjoint types) --> :empty-set
                                      ((let [atoms (filter-eagerly (complement seq?) operands)
+                                            types (filter-eagerly (fn [x] (not= x :epsilon)) atoms)
                                             ]
-                                        (when (some (fn [i1]
-                                                      (some (fn [i2]
-                                                              (and (not (= i1 i2))
-                                                                   (gns/disjoint? i1 i2))) atoms)) atoms)
+                                        (when (exists-pair [[i1 i2] types]
+                                                           (and (not= i1 i2)
+                                                                (gns/disjoint? i1 i2 (constantly false))))
                                           :empty-set)))
                                      
                                      ;; (:and subtype supertype x y z) --> (:and subtype x y z)
                                      ((let [atoms (filter-eagerly (complement seq?) operands)
-                                            max (gns/type-max atoms)
+                                            types (filter-eagerly (fn [x] (not= x :epsilon)) atoms)
+                                            max (gns/type-max types)
                                             ]
                                         (when max
                                           (cons :and (remove-eagerly #{max} operands)))))

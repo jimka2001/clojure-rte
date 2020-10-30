@@ -64,6 +64,16 @@
 
 (deftest t-rte-nullable-canonicalize-random
   (testing "canonicalize of :not"
+    (is (= (clojure-rte.rte-core/canonicalize-pattern '
+            (:or (satisfies decimal?)
+                 (:contains-any (:* (:* (:cat)))
+                                (:not :epsilon)
+                                (:contains-any (:* (:contains-any)) (:cat (:or))))
+                 (:contains-none (:contains-any (:or (:contains-every)) (:* (member 1 a)))
+                                 (:contains-any (:* (:or)) (:+ (:contains-none)))
+                                 (:and (satisfies ratio?) (:+ (:cat))))
+                 :sigma))
+           '(:* :sigma)) "test 076")
     (test-rte-canonicalize-nullable 500 ; num-tries
                                     4 ; size
                                     false ;verbose
