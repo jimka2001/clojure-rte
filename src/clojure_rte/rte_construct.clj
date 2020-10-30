@@ -67,15 +67,15 @@
    :* (fn [pattern functions]
         (cons :* ((:client functions) pattern functions)))
    :and (fn [patterns functions]
-          (cons :and (map-eagerly (fn [expr]
+          (cons :and (map (fn [expr]
                             ((:client functions) expr functions)) patterns)))
    :or (fn [patterns functions]
-         (cons :or (map-eagerly (fn [expr]
+         (cons :or (map (fn [expr]
                            ((:client functions) expr functions)) patterns)))
    :not (fn [pattern functions]
           (cons :not ((:client functions) pattern functions)))
    :cat (fn [patterns functions]
-          (cons :cat (map-eagerly (fn [expr]
+          (cons :cat (map (fn [expr]
                             ((:client functions) expr functions)) patterns)))
    :sigma (fn [pattern functions]
             ((:client functions) pattern functions))
@@ -408,7 +408,7 @@
 
 (defmethod gns/canonicalize-type 'rte
   [type-designator]
-  (cons 'rte (map-eagerly canonicalize-pattern (rest type-designator))))
+  (cons 'rte (map canonicalize-pattern (rest type-designator))))
 
 (defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
@@ -434,7 +434,7 @@
                  (cons (first seq) head)))))
 
 (defn reduce-redundant-or [operands]
-  (let [ands (doall (filter-eagerly and? operands))
+  (let [ands (doall (filter and? operands))
         xyz (doall (setof [x ands] (exists [y operands] (member y (rest x)))))
         abc (doall (setof [and1 ands]
                           (let [and1-operands (set (rest and1)) ]
@@ -442,7 +442,7 @@
                                     (let [and2-operands (set (rest and2))]
                                       (and (not (subset? and1-operands and2-operands))
                                            (subset? and2-operands and1-operands)))))))
-        superfluous-ands (concat-eagerly xyz abc)]
+        superfluous-ands (concat xyz abc)]
     (if (empty? superfluous-ands)
       operands
       ;; remove all superfluous-ands from or-operands
@@ -473,7 +473,7 @@
                                       operand ;; (:* (:* something)) --> (:* something)
                                       (list :* (canonicalize-pattern operand))))))
                            :cat (fn [operands _functions]
-                                  (let [operands (map-eagerly canonicalize-pattern operands)]
+                                  (let [operands (map canonicalize-pattern operands)]
                                     (assert (< 1 (count operands))
                                             (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
                                     (cl/cl-cond
@@ -489,7 +489,7 @@
 
                                      ;; (:cat x (:cat a b) y) --> (:cat x a b y)
                                      ((some cat? operands)
-                                      (cons :cat (mapcat-eagerly (fn [obj]
+                                      (cons :cat (mapcat (fn [obj]
                                                            (if (cat? obj)
                                                              (rest obj)
                                                              (list obj))) operands)))
@@ -500,7 +500,7 @@
 
                                      ;; (:cat x :epsilon y) --> (:cat x y)
                                      ((member :epsilon operands)
-                                      (cons :cat (remove-eagerly #{:epsilon} operands)))
+                                      (cons :cat (remove #{:epsilon} operands)))
 
                                      (:else
                                       (cons :cat operands)))))
@@ -516,11 +516,11 @@
                                         (second operand)
 
                                         (and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
-                                        (cons :or (map-eagerly (fn [obj]
+                                        (cons :or (map (fn [obj]
                                                          (list :not obj)) (rest operand)))
 
                                         (or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
-                                        (cons :and (map-eagerly (fn [obj]
+                                        (cons :and (map (fn [obj]
                                                           (list :not obj)) (rest operand)))
 
                                         :else
@@ -532,7 +532,7 @@
                                         (list :not operand))
                                       )))
                            :and (fn [operands _functions]
-                                  (let [operands (dedupe (sort-operands (map-eagerly canonicalize-pattern operands)))]
+                                  (let [operands (dedupe (sort-operands (map canonicalize-pattern operands)))]
                                     (cl/cl-cond
                                      ;; TODO - (:and :epsilon ...)
                                      ;;    if any of the :and arguments is not nullable,
@@ -553,32 +553,32 @@
                                       :empty-set)
 
                                      ((some and? operands)
-                                      (cons :and (mapcat-eagerly (fn [obj]
+                                      (cons :and (mapcat (fn [obj]
                                                            (if (and? obj)
                                                              (rest obj)
                                                              (list obj))) operands)))
 
                                      ((member sigma-* operands)
-                                      (cons :and (remove-eagerly (fn [obj]
+                                      (cons :and (remove (fn [obj]
                                                            (= sigma-* obj)) operands)))
 
                                      ((some or? operands)
                                       ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
                                       (with-first-match or? operands
                                         (fn [or-item]
-                                          (let [others (remove-eagerly (fn [x] (= or-item x)) operands)]
-                                            (cons :or (map-eagerly (fn [x] (list* :and x others)) (rest or-item)))))))
+                                          (let [others (remove (fn [x] (= or-item x)) operands)]
+                                            (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
 
                                      ;; (:and x (:not x)) --> :empty-set
-                                     ((let [nots (filter-eagerly not? operands)
-                                            others (remove-eagerly not? operands)]
+                                     ((let [nots (filter not? operands)
+                                            others (remove not? operands)]
                                         (when (some (fn [item]
                                                       (some #{(list :not item)} nots)) others)
                                           :empty-set)))
 
                                      ;; (:and of disjoint types) --> :empty-set
-                                     ((let [atoms (filter-eagerly (complement seq?) operands)
-                                            types (filter-eagerly (fn [x] (not= x :epsilon)) atoms)
+                                     ((let [atoms (filter (complement seq?) operands)
+                                            types (filter (fn [x] (not= x :epsilon)) atoms)
                                             ]
                                         (when (exists-pair [[i1 i2] types]
                                                            (and (not= i1 i2)
@@ -586,12 +586,12 @@
                                           :empty-set)))
                                      
                                      ;; (:and subtype supertype x y z) --> (:and subtype x y z)
-                                     ((let [atoms (filter-eagerly (complement seq?) operands)
-                                            types (filter-eagerly (fn [x] (not= x :epsilon)) atoms)
+                                     ((let [atoms (filter (complement seq?) operands)
+                                            types (filter (fn [x] (not= x :epsilon)) atoms)
                                             max (gns/type-max types)
                                             ]
                                         (when max
-                                          (cons :and (remove-eagerly #{max} operands)))))
+                                          (cons :and (remove #{max} operands)))))
                                      
                                      (:else
                                       (cons :and operands))
@@ -600,8 +600,8 @@
                            :or (fn [operands _functions]
                                  (assert (< 1 (count operands))
                                          (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
-                                 (let [operands (dedupe-eagerly
-                                                 (sort-operands (map-eagerly canonicalize-pattern
+                                 (let [operands (dedupe
+                                                 (sort-operands (map canonicalize-pattern
                                                                              (reduce-redundant-or operands))))]
                                    (cl/cl-cond
                                     ;; TODO (:or (:cat A B sigma-*)
@@ -618,13 +618,13 @@
                                                          (cond (and (*? x)
                                                                     (= y (second x)))
                                                                ;; (:or x A B C)
-                                                               (cons :or (cons x (remove-eagerly (fn [o] (or (= o :epsilon)
+                                                               (cons :or (cons x (remove (fn [o] (or (= o :epsilon)
                                                                                                      (= o obj))) operands)))
 
                                                                (and (*? y)
                                                                     (= x (second y)))
                                                                ;; (:or y A B C)
-                                                               (cons :or (cons y (remove-eagerly (fn [o] (or (= o :epsilon)
+                                                               (cons :or (cons y (remove (fn [o] (or (= o :epsilon)
                                                                                                      (= o obj))) operands)))
                                                                
                                                                :else
@@ -632,7 +632,7 @@
                                                 operands)))
 
                                     ((some or? operands)
-                                     (cons :or (mapcat-eagerly (fn [obj]
+                                     (cons :or (mapcat (fn [obj]
                                                          (if (or? obj)
                                                            (rest obj)
                                                            (list obj))) operands)))
@@ -641,21 +641,21 @@
                                      sigma-*)
 
                                     ((member :empty-set operands)
-                                     (cons :or (remove-eagerly #{:empty-set} operands)))
+                                     (cons :or (remove #{:empty-set} operands)))
 
                                     ;; (:or x (:not x)) --> :sigma
-                                    ((let [nots (filter-eagerly not? operands)
-                                           others (remove-eagerly not? operands)]
+                                    ((let [nots (filter not? operands)
+                                           others (remove not? operands)]
                                        (when (some (fn [item]
                                                      (some #{(list :not item)} nots)) others)
                                          sigma-*)))
 
                                     ;; (:or subtype supertype x y z) --> (:and supertype x y z)
-                                    ((let [atoms (filter-eagerly (complement seq?) operands)
+                                    ((let [atoms (filter (complement seq?) operands)
                                            min (gns/type-min atoms)
                                            ]
                                        (when min
-                                         (cons :or (remove-eagerly #{min} operands)))))
+                                         (cons :or (remove #{min} operands)))))
 
                                     (:else
                                      (cons :or operands))
@@ -696,7 +696,7 @@
   rte pattern with respect to the given type wrt."
   [expr wrt]
   (letfn [(walk [patterns]
-            (map-eagerly (fn [p]
+            (map (fn [p]
                    (derivative (canonicalize-pattern p) wrt))
                  patterns))]
     (canonicalize-pattern
@@ -791,8 +791,8 @@
                     (count-if gns/rte? right)) 1)
               (let [[left-rtes left] (partition-by-pred gns/rte? left)
                     [right-rtes right] (partition-by-pred gns/rte? right)
-                    left-patterns (map-eagerly second left-rtes)
-                    right-patterns (map-eagerly second right-rtes)]
+                    left-patterns (map second left-rtes)
+                    right-patterns (map second right-rtes)]
                 (cond (empty? left-rtes)
                       (let [new-rte (canonicalize-pattern `(:or ~@right-patterns))]
                         (collect-left-right collect
@@ -814,13 +814,13 @@
                                             right))))
 
               :else
-              (let [right (map-eagerly (fn [x]
+              (let [right (map (fn [x]
                                  (list 'not x)) right)]
                 (collect `(~'and ~@left ~@right)))))]
 
-    (let [independent (filter-eagerly independent? type-set)
-          dependent (remove-eagerly (set independent) type-set)]
-      (concat-eagerly independent (call-with-collector
+    (let [independent (filter independent? type-set)
+          dependent (remove (set independent) type-set)]
+      (concat independent (call-with-collector
                            (fn [collect]
                              (gns/map-type-partitions
                               (seq dependent)
@@ -856,9 +856,9 @@
             (let [firsts (first-types pattern)
                   disjoined (mdtd (conj firsts :sigma))
                   [new-triples new-derivatives] (reduce xx [[] ()] disjoined)]
-              (recur (concat-eagerly new-derivatives to-do-patterns)
+              (recur (concat new-derivatives to-do-patterns)
                      (conj done pattern)
-                     (concat-eagerly triples new-triples)))))))))
+                     (concat triples new-triples)))))))))
 
 (defn rte-combine-labels ""
   [label1 label2]
@@ -882,9 +882,9 @@
   (let [given-pattern pattern
         pattern (canonicalize-pattern pattern)
         [triples derivatives] (find-all-derivatives pattern)
-        derivatives (cons pattern (remove-eagerly #{pattern} derivatives))
+        derivatives (cons pattern (remove #{pattern} derivatives))
         index-map (zipmap derivatives (range (count derivatives)))
-        triples (map-eagerly (fn [[primative wrt deriv]]
+        triples (map (fn [[primative wrt deriv]]
                        [(index-map primative) wrt (index-map deriv)]
                        ) triples)
         grouped (group-by (fn [trip]
@@ -897,14 +897,14 @@
        :combine-labels rte-combine-labels
        :states
        (into {}
-             (map-eagerly (fn [deriv index]
+             (map (fn [deriv index]
                     (let [transitions (if (and (grouped index)
-                                               (apply = (map-eagerly (fn [[_src _wrt dst]]
+                                               (apply = (map (fn [[_src _wrt dst]]
                                                                dst) (grouped index))))
                                         ;; if all transitions have same dst, then don't draw
                                         ;; multiple transitions, just draw with with label = :sigma
                                         (list [:sigma ((first (grouped index)) 2)])
-                                        (map-eagerly (fn [[_src wrt dst]]
+                                        (map (fn [[_src wrt dst]]
                                                [wrt dst]) (grouped index)))]
                       [index
                        (dfa/map->State {:index index
