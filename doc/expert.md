@@ -34,7 +34,7 @@ will match sequence of length 2 whose second element is a `Long`, and whose
 first element is a member of the type `(not String)`, i.e., the set of all 
 values which are not strings.
 
-See section [Not yet implemented](README.md#not-yet-implemented) for more
+See section [Not yet implemented](../README.md#not-yet-implemented) for more
 details of the proposed type designator syntax.
 
 
