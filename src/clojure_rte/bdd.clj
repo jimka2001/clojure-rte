@@ -22,25 +22,24 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty?
-                                      filter-eagerly remove-eagerly map-eagerly]]
+  (:require [clojure-rte.util :refer [call-with-collector non-empty?]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
-))
+            ))
 
 (alias 'c 'clojure.core)
 
 (defrecord Bdd
-  [label positive negative])
+    [label positive negative])
 
 (defmethod print-method Bdd [bdd w]
   (.write w (cond
               (c/and (= true (:positive bdd))
-                   (= false (:negative bdd)))
+                     (= false (:negative bdd)))
               (cl-format false "#<Bdd ~A>" (:label bdd))
 
               (c/and (= false (:positive bdd))
-                   (= true (:negative bdd)))
+                     (= true (:negative bdd)))
               (cl-format false "#<Bdd not ~A>" (:label bdd))
 
               :else
@@ -100,7 +99,7 @@
               (empty? (rest args)) (first args)
               :else (cons 'or args)))
           (supertypes [sub types]
-            (filter-eagerly (fn [super]
+            (filter (fn [super]
                       (c/and (not= sub super)
                              (gns/subtype? sub super (constantly false)))) types))
           (check-supers [args]
@@ -117,7 +116,7 @@
 
                 ;; does the list contain A and B where A is subtype B
                 :else
-                (remove-eagerly (fn [sub]
+                (remove (fn [sub]
                           (non-empty? (supertypes sub args)))
                         args))))]
 
@@ -141,7 +140,7 @@
                                          done '()]
                                     (if (empty? tail)
                                       done
-                                      (let [keeping (remove-eagerly (fn [b]
+                                      (let [keeping (remove (fn [b]
                                                               ;; if we don't know, then keep it.  it might
                                                               ;; be redunant, but it won't be wrong.
                                                               ;; Is (first tail) <: b ?
@@ -212,8 +211,8 @@
   ;; TODO make sure two differnet symbols representing the same class
   ;; result in the same index.  eg. Double vs java.lang.Double
   (c/or (@*label-to-index* type-designator)
-      (do (swap! *label-to-index* assoc type-designator (count @*label-to-index*))
-          (@*label-to-index* type-designator))))
+        (do (swap! *label-to-index* assoc type-designator (count @*label-to-index*))
+            (@*label-to-index* type-designator))))
 
 (declare and) ;; bdd/and
 (declare or)  ;; bdd/or
@@ -226,9 +225,9 @@
   (cond
     (sequential? type-designator)
     (case (first type-designator)
-      (and) (reduce and (map-eagerly bdd (rest type-designator)))
-      (or)  (reduce or (map-eagerly bdd (rest type-designator)))
-      (not) (apply not (map-eagerly bdd (rest type-designator)))
+      (and) (reduce and (map bdd (rest type-designator)))
+      (or)  (reduce or (map bdd (rest type-designator)))
+      (not) (apply not (map bdd (rest type-designator)))
       (node type-designator true false))
 
     (= :sigma type-designator)
@@ -284,11 +283,11 @@
   (assert (map? @*hash*) "attempt to allocate a Bdd outside dynamically extend of call-with-hash")
   (assert (map? @*label-to-index*) "attempt to allocate a Bdd outside dynamically extend of call-with-hash")
   (assert (c/or (instance? Boolean positive)
-              (instance? Bdd positive))
+                (instance? Bdd positive))
           (cl-format false "wrong type of positive=~A type=~A"
                      positive (type positive)))
   (assert (c/or (instance? Boolean negative)
-              (instance? Bdd negative))
+                (instance? Bdd negative))
           (cl-format false "wrong type of negative=~A type=~A"
                      negative (type negative)))
   (assert (gns/valid-type? type-designator)
@@ -325,7 +324,7 @@
       (node (:label bdd2)
             (op bdd1 (:positive bdd2))
             (op bdd1 (:negative bdd2))))))
-  
+
 (defn and ;; bdd/and
   "Perform a Boolean AND on 0 or more Bdds."
   ([] true)
@@ -366,8 +365,8 @@
      (= bdd2 true) false
      (= bdd2 false) bdd1
      (= bdd1 true) (node (:label bdd2)
-                             (and-not true (:positive bdd2))
-                             (and-not true (:negative bdd2)))
+                         (and-not true (:positive bdd2))
+                         (and-not true (:negative bdd2)))
      :else (binary-op and-not bdd1 bdd2)))
   ([bdd1 bdd2 & bdds]
    (reduce and (apply cons bdd1 bdd2 bdds))))
@@ -424,9 +423,9 @@
     (= true bdd) true
     (= false bdd) false
     :else (typep value
-                     (if (gns/typep value (:label bdd))
-                         (:positive bdd)
-                         (:negative bdd)))))
+                 (if (gns/typep value (:label bdd))
+                   (:positive bdd)
+                   (:negative bdd)))))
 
 (defn disjoint?
   "Given two Bdds, determine whether it can be proven that the intersection of the

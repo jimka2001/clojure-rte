@@ -54,7 +54,7 @@
   (with-compile-env ()
     (binding [*rte-known* (apply assoc *rte-known* bindings)]
       (thunk))))
-      
+
 (defmacro with-rte
   "Evaluate the given body in a dynamic extend where 0 or more keys bound to
    un-quoted rte patterns.

@@ -124,7 +124,7 @@
 (def problematic-operands (atom ()))
 
 (defn sort-operands
- "Sort the given list of operands into deterministic order, making it possible
+  "Sort the given list of operands into deterministic order, making it possible
   to easily find identical elements, and to write test cases."
   [operands]
   (letfn [(cmp [a b]
@@ -181,9 +181,9 @@
              (nil? target) (some nil? items)
              (false? target) (some false? items)
              :else (reduce (fn [acc item]
-                                   (if (= item target)
-                                     (reduced true)
-                                     false)) false items))))
+                             (if (= item target)
+                               (reduced true)
+                               false)) false items))))
 
 (defn partition-by-pred 
   "Apply the predicate to every element of the sequence and return a vector of two
@@ -235,9 +235,9 @@
                      n N e1)
           (let [v1 (thunk1)]
 
-          (cl-format true "~A~%"
-                     v1)
-          (recur v1 (inc n) pairs)))))))
+            (cl-format true "~A~%"
+                       v1)
+            (recur v1 (inc n) pairs)))))))
 
 (defmacro print-vals ""
   [& args]
@@ -259,7 +259,7 @@
   (doseq [i seq]
     (f i))
   seq)
-  
+
 (defn assert-type 
   "Check the given value asserting it to be of the given type.
   If the type check is satisfied, the value is returned, otherwise
@@ -325,7 +325,7 @@
 (defmacro forall [[var seq] & body]
   "Return true if the given body evaluates to logical true for every element of the given sequence"
   `(every? (fn [~var]
-            ~@body) ~seq))
+             ~@body) ~seq))
 
 (defn lazy-pairs [seq]
   (cond (empty? seq)

@@ -22,7 +22,7 @@
 (ns clojure-rte.tester
   (:require [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [map-eagerly]])
-)
+  )
 
 
 (defn simplify [unary error-case gen-components]
@@ -61,5 +61,5 @@
           :let [data (de-lazify (arg-generator))]]
     (when verbose
       (cl-format true "~d/~d: trying ~A~%" n num-tries data))
-        
+    
     (unary-test-fun data)))
