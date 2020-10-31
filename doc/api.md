@@ -1,6 +1,6 @@
-## RTE API
+# RTE API
 
-### (`rte-compile` rte-pattern)
+## (`rte-compile` rte-pattern)
 Compiles an rte pattern into an internal representation representing a
 DFA (deterministic finite automaton).  The representation is designed
 to be human readable for debugging purposes, but its structure is not
@@ -33,7 +33,7 @@ time the code is evaluated.
 ```
 
 
-### (`rte-match` rte items)
+## (`rte-match` rte items)
 
 Returns Boolean value.
 
@@ -55,10 +55,10 @@ Match a given sequence against a pre-compiled RTE pattern.
 
 
 
-### (`with-rte` bindings & body)
+## (`with-rte` bindings & body)
 See section [Abbreviating patterns](#abbreviating-patterns) for more information
 
-### (`rte-trace` rte)
+## (`rte-trace` rte)
 
 See section [Algebra of RTEs](#algebra-of-rtes) for more information.
 
@@ -66,7 +66,7 @@ See section [Algebra of RTEs](#algebra-of-rtes) for more information.
 
 
 
-## Debugging
+# Debugging
 
 Once a dfa has been created with a call to `rte-compile` or `rte-to-dfa`, you 
 may draw the corresponding graph using the `dfa-to-dot` function.
