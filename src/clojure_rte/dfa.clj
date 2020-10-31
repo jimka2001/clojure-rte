@@ -789,7 +789,7 @@
                      ]
                  ;; one label per return value
                  ;; #10
-                 [exit-value pretty])))))))
+                 [exit-value (canonicalize-pattern pretty)])))))))
 
 (defn intersect-labels
   ""
