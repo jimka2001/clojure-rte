@@ -63,6 +63,7 @@ and non-accepting with accepting.  The transformation looses exit-value
 information.
 
 ## `extract-rte`
+This is an internal function, the public API is `clojure-rte.rte-core/dfa-to-rte`, See [dfa-to-rte](api.md/#dfa-to-rte-dfa).
 Accepts an object of type Dfa, and returns a map which associates
 exit values of the dfa with canonicalized rte patterns of the accepting
 langauge. If there are no accepting states in the Dfa, an empty map `{}`
