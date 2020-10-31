@@ -64,6 +64,47 @@ See section [Algebra of RTEs](#algebra-of-rtes) for more information.
 
 
 
+## (`dfa-to-rte` dfa)
+Extract rtes from a Dfa.  Since accepting states are distinguishable, a map is returned rather
+than simply an rte.  The map assoicates each exit-value with an rte.
+
+This does not guarantee to give the exact same 
+syntactical form as you started with.
+```clojure
+(rte-to-dfa
+   (dfa-to-rte (rte-to-dfa '(:* (:cat String Integer)))))
+==> {true (:or (:cat String
+                     (:* (:cat Integer String))
+                     Integer)
+               :epsilon)}
+
+(rte-to-dfa
+   (dfa-to-rte (rte-to-dfa '(:* (:cat String Integer)) 12)))
+==> {12 (:or (:cat String
+                   (:* (:cat Integer String))
+                   Integer)
+             :epsilon)}
+```
+
+The association of exit value to rte is important if the dfa in question is
+the result of a synchronized cross product, such as `synchronized-union` of two
+Dfas each with a different exit value.
+
+
+```clojure
+(let [dfa-1 (rte-to-dfa '(:* (:cat String Long)) :string-long)
+      dfa-2 (rte-to-dfa '(:* (:cat String Short)) :string-short)
+      dfa (dfa/synchronized-union  dfa-1 dfa-2)]
+  (dfa-to-rte dfa))
+==> {:string-long  (:or (:cat String
+                              Long
+                              (:* (:cat String Long))) 
+                        :epsilon),
+     :string-short (:cat String 
+                         Short 
+                         (:* (:cat String Short)))
+    }
+```
 
 
 # Debugging

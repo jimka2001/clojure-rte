@@ -65,7 +65,7 @@ information.
 ## `extract-rte`
 Accepts an object of type Dfa, and returns a map which associates
 exit values of the dfa with canonicalized rte patterns of the accepting
-langauge. If there are no accepting states in the Dfa, an empty map {}
+langauge. If there are no accepting states in the Dfa, an empty map `{}`
 is returned.
 
 ## `synchronized-product`
