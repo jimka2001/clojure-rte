@@ -1237,7 +1237,8 @@
                       (if (some member? (rest type-designator))
                         (let [member-candidates (filter member? (rest type-designator))
                               candidates (rest (first member-candidates))]
-                          (cons 'member (filter (fn [x] (typep x type-designator)) candidates)))
+                          (cons 'member (filter (fn [x]
+                                                  (typep x type-designator)) candidates)))
                         type-designator))
                     
                     (fn [type-designator]
@@ -1280,7 +1281,7 @@
                         :empty-set
                         type-designator))
                     (fn [type-designator]
-                      (if  (empty (rest (rest type-designator)))
+                      (if  (empty? (rest (rest type-designator)))
                         (list '= (second type-designator))
                         type-designator))]))
 

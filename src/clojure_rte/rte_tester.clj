@@ -31,7 +31,7 @@
 (defn rte-components [pattern]
   (cond
     (and (seq? pattern)
-         (empty pattern))
+         (empty? pattern))
     ()
 
     (seq? pattern)
