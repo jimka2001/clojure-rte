@@ -117,14 +117,15 @@ element of the designated type.
 ### Determine various characteristics of the new type
 
 The system reasons about types via an interface defined by the
-functions: `registered-type?`, `typep`, `inhabited?`, `disjoint?`, and 
+functions: `canonicalize-type`, `registered-type?`, `typep`, `inhabited?`, `disjoint?`, and 
 `subtype?`.  While you are expected to add a method `registered-type?` and 
 `typep` for your new type, you must not add methods to `inhabited?`, 
 `disjoint?`, or `subtype?`. To fully implement a new type, you must provide 
-several methods which extend some built-in multimethods:  `-inhabited?`, 
+several methods which extend some built-in multimethods:  `-canonicalize-type`, `-inhabited?`, 
 `-disjoint?`, and `-subtype?`.
 
-These multimethods should never be called; rather each method thereof
+The methods `-inhabited?`, `-disjoint?`, and `-subtype?`,
+should never be called; rather each method thereof
 will be called by a mechanism different from the multimethod.  In each
 case, the system calls the methods in some order (which you cannot
 control) until one method returns either `true` or `false`.  As a
@@ -171,9 +172,24 @@ as with a call to:
    )
 ```
 
+### Canonicalizing a type designator
+
+* `-canonicalize-type` ---
+
+While it is not strictly necessary, if there is a way to simplify your type
+designator to a lower form, you may add such a method specialzing on your type name.
+The top level function, `canonicalize-type` (which is a normal function, not a multimethod)
+expects the methods of `-canonicalize-type` to either simplify the form, including
+recursively, or return the same form (or a form which is `=` to the given form).
+The `canonicalize-type` calls `-canonicalize-type` as many times as necessary until
+a fixed point is reached.
+
+If the type designator contains other type-designators as operands,
+your method is responsible for calling `-canonicalize-type` on each of them as necessary.
+
 ### Determining whether a type is inhabited or vacuous
 
-* `-inhabited?` ---   
+* `-inhabited?` ---
 
 Applications may install methods via `(defmethod -inhabited? ...)`.
 The method accepts one argument which is a type-designator,
@@ -210,7 +226,7 @@ If `inhabited?` is called with a 3rd argument, then
 
 Applications may install methods via `(defmethod -disjoint? ...)`.
 The method accepts two arguments which are type-designators,
-`[t1 t2]`,  pontentially application specific.
+`[t1 t2]`,  potentially application specific.
 The method should examine the designated types to determine whether
 the designated types are disjoint, i.e., whether they have no
 element in common, i.e., whether their intersection is empty.

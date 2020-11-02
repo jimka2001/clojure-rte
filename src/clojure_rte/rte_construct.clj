@@ -406,7 +406,7 @@
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
-(defmethod gns/canonicalize-type 'rte
+(defmethod gns/-canonicalize-type 'rte
   [type-designator]
   (cons 'rte (map canonicalize-pattern (rest type-designator))))
 
@@ -460,7 +460,7 @@
   (traverse-pattern re
                     (assoc *traversal-functions*
                            :type (fn [tag _functions]
-                                   (gns/canonicalize-type tag))
+                                   (gns/-canonicalize-type tag))
                            :empty-set rte-identity
                            :epsilon rte-identity
                            :sigma rte-identity

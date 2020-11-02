@@ -24,7 +24,7 @@
   (:require [clojure.set :refer [subset?]]
             [clojure.repl :refer [source-fn]]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [exists-pair forall-pairs exists
+            [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       member find-simplifier defn-memoized
                                       ]]
             [clojure-rte.cl-compat :as cl]
@@ -157,11 +157,16 @@
       (first type-designator)
       type-designator)))
 
-(defmulti canonicalize-type
+(defmulti -canonicalize-type
   (fn [type-designator]
     (if (sequential? type-designator)
       (first type-designator)
       type-designator)))
+
+(defn canonicalize-type
+  "Simplify the given type-designator to a stable form"
+  [type-designator]
+  (fixed-point type-designator -canonicalize-type =))
 
 (defmulti valid-type?
   "Look at a type-designator and determine whether it is syntactically correct"
@@ -258,7 +263,7 @@
 
 (declare expand-satisfies)
 
-(defmethod canonicalize-type 'satisfies
+(defmethod -canonicalize-type 'satisfies
   [type-designator]
   (expand-satisfies type-designator))
 
@@ -378,8 +383,8 @@
        (let [try1 (check-disjoint t1 t2 (constantly :dont-know))]
          (if (not= :dont-know try1)
            try1
-           (let [t1-simple (canonicalize-type t1)
-                 t2-simple (canonicalize-type t2)]
+           (let [t1-simple (-canonicalize-type t1)
+                 t2-simple (-canonicalize-type t2)]
              (if (and (= t1-simple t1)
                       (= t2-simple t2))
                (default t1 t2)
@@ -617,7 +622,7 @@
                      (default type-designator)))))]
        (let [i (calc-inhabited type-designator (constantly :dont-know))]
          (cond (= :dont-know i)
-               (calc-inhabited (canonicalize-type type-designator) default)
+               (calc-inhabited (-canonicalize-type type-designator) default)
 
                :else
                i))))))
@@ -830,7 +835,7 @@
     (exists [t (rest t1)]
             (and (not? t)
                  (member? (second t))))
-    (inhabited? (canonicalize-type (cons 'and
+    (inhabited? (-canonicalize-type (cons 'and
                                          (remove (fn [t]
                                                    (and (not? t)
                                                         (member? (second t)))) (rest t1))))
@@ -1182,7 +1187,7 @@
    (:else
     type-designator)))
 
-(defmethod canonicalize-type 'not
+(defmethod -canonicalize-type 'not
   [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
@@ -1199,7 +1204,7 @@
                         :sigma
                         type-designator))]))                    
 
-(defmethod canonicalize-type 'and
+(defmethod -canonicalize-type 'and
   [type-designator]
   
   (find-simplifier type-designator
@@ -1237,7 +1242,7 @@
                     
                     (fn [type-designator]
                       (if (member :sigma (rest type-designator))
-                        (cons 'and (map canonicalize-type (remove #{:sigma} (rest type-designator))))
+                        (cons 'and (map -canonicalize-type (remove #{:sigma} (rest type-designator))))
                         type-designator))
 
                     (fn [type-designator]
@@ -1265,9 +1270,9 @@
                         type-designator))
 
                     (fn [type-designator]
-                      (cons 'and (map canonicalize-type (rest type-designator))))]))
+                      (cons 'and (map -canonicalize-type (rest type-designator))))]))
 
-(defmethod canonicalize-type 'member
+(defmethod -canonicalize-type 'member
   [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
@@ -1279,12 +1284,12 @@
                         (list '= (second type-designator))
                         type-designator))]))
 
-(defmethod canonicalize-type 'or
+(defmethod -canonicalize-type 'or
   [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
-                      (if (member :emtpy-set (rest type-designator))
-                        (cons 'or (map canonicalize-type
+                      (if (member :empty-set (rest type-designator))
+                        (cons 'or (map -canonicalize-type
                                        (remove #{:empty-set} (rest type-designator))))
                         type-designator))
 
@@ -1317,9 +1322,14 @@
                                        :else
                                        t))
                                    (rest type-designator)))
-                        type-designator))]))
+                        type-designator))
 
-(defmethod canonicalize-type :default
+                    (fn [type-designator]
+                      (cons 'or (map -canonicalize-type (rest type-designator))))
+                    
+                    ]))
+
+(defmethod -canonicalize-type :default
   [type-designator]
   (cond   
     (class-designator? type-designator)
@@ -1329,12 +1339,12 @@
     type-designator
 
     (not (sequential? type-designator))
-    (throw (ex-info (format "canonicalize-type: warning unknown type %s" type-designator)
+    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :not-a-sequence
                      :type type-designator }))
 
     (not (valid-type? type-designator))
-    (throw (ex-info (format "canonicalize-type: warning unknown type %s" type-designator)
+    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :unknown-type
                      :type type-designator }))
 
