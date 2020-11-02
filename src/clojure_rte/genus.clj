@@ -432,7 +432,7 @@
           :dont-know
 
           (exists [t (rest t1)]
-                       (disjoint? t2 t))
+                  (disjoint? t2 t))
           ;; (disjoint? (and A B C) X)
           true
 
