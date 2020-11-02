@@ -8,7 +8,7 @@ intended as an API.  I.e., the structure might change in future
 releases.
 
 The return value of this function is memoized.  Thus if the same rte
-pattern is encountered again the previously compiled dfa is returned
+pattern is encountered again the previously compiled Dfa is returned
 as an `O(1)` operation.
 
 The return value of `rte-compile` may be used as first argument of `rte-match`.
@@ -66,7 +66,7 @@ See section [Algebra of RTEs](#algebra-of-rtes) for more information.
 
 ## (`dfa-to-rte` dfa)
 Extract rtes from a Dfa.  Since accepting states are distinguishable, a map is returned rather
-than simply an rte.  The map assoicates each exit-value with an rte.
+than simply an rte.  The map associates each exit-value with an rte.
 
 This does not guarantee to give the exact same 
 syntactical form as you started with.
@@ -86,7 +86,7 @@ syntactical form as you started with.
              :epsilon)}
 ```
 
-The association of exit value to rte is important if the dfa in question is
+The association of exit value to rte is important if the Dfa in question is
 the result of a synchronized cross product, such as `synchronized-union` of two
 Dfas each with a different exit value.
 
@@ -111,7 +111,7 @@ Dfas each with a different exit value.
 
 # Debugging
 
-Once a dfa has been created with a call to `rte-compile` or `rte-to-dfa`, you 
+Once a Dfa has been created with a call to `rte-compile` or `rte-to-dfa`, you 
 may draw the corresponding graph using the `dfa-to-dot` function.
 
 ```clojure
@@ -148,3 +148,6 @@ may draw the corresponding graph using the `dfa-to-dot` function.
 <img src="../img/example-dfa-3.png" alt="Example Finite Automaton" width="400"/>
 
 
+
+<!--  LocalWords:  memoized rte Dfa RTE DFA API
+ -->

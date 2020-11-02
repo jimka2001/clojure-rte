@@ -1,6 +1,4 @@
-# xymbolyco.md
-
-# Deterministic Finite Automata
+# Xymbolyco: Sigma Complete Deterministic Finite Automata
 
 <img src="../img/example-dfa.png" alt="Example Finite Automaton" width="600"/>
 
@@ -26,7 +24,7 @@ onward.
 which means if the value at the head of the sequence is of type
 `clojure.lang.Keyword`, then go to state 1.  The type is some type designator
 as specified in the `genus` library.  The state index is some index of the state
-map representing the finite atomaton.
+map representing the finite automaton.
 
 # Dfa API
 
@@ -34,9 +32,9 @@ map representing the finite atomaton.
 Dfa factory function, which checks consistency.  
 1-ary version, `(make-dfa attribute-map)`, takes an attribute map with the keys of the Dfa record.
 2-ary version, `(make-dfa dfa attribute-map)`, creates a new Dfa by copying the given one but overriding
-with any given attriburts in the `attribute-map`.
+with any given attributes in the `attribute-map`.
 ## `rte-compile`
-Creates a Dfa from an Rte.  See [RTE API](api.md).
+Creates a Dfa from an rte.  See [RTE API](api.md).
 ## `complete `
 Render complete the given Dfa.
 If it is already complete, then simply return it,
@@ -65,19 +63,19 @@ information.
 ## `extract-rte`
 This is an internal function, the public API is `clojure-rte.rte-core/dfa-to-rte`, See [dfa-to-rte](api.md/#dfa-to-rte-dfa).
 Accepts an object of type Dfa, and returns a map which associates
-exit values of the dfa with canonicalized rte patterns of the accepting
-langauge. If there are no accepting states in the Dfa, an empty map `{}`
+exit values of the Dfa with canonicalized rte patterns of the accepting
+language. If there are no accepting states in the Dfa, an empty map `{}`
 is returned.
 
 ## `synchronized-product`
-Assuming that the given Dfas are complete, we compute the syncronized cross product SXP
+Assuming that the given Dfas are complete, we compute the synchronized cross product SXP
 of the two Dfas.
-*  `f-arbitrate-accepting` - binary function which accepts two Boolean values, [a1,a2]
+*  `f-arbitrate-accepting` - binary function which accepts two Boolean values, `[a1,a2]`
 Then function is called when determining whether a computed state in the SXP
-should be an accepting state.  a1 indicates whether the state from dfa-1 is
-accepting.  a2 indicates whether the state from dfa-2 is accepting.
-To effectuate the intersection of dfa-1 with dfa-2, f-arbitrate-accepting should
-perform an (and a1 a2).
+should be an accepting state.  `a1` indicates whether the state from `dfa-1` is
+accepting.  `a2` indicates whether the state from `dfa-2` is accepting.
+To effectuate the intersection of `dfa-1` with `dfa-2`, `f-arbitrate-accepting` should
+perform an `(and a1 a2)`.
 * `f-arbitrate-exit-value` - binary function called with `[q1,q2]`.  `q1` is an accepting state
 of `dfa-1`.  `q2` is an accepting state in `dfa-2`.
 `f-arbitrate-exit-value` is called when `q1` and `q2` are both accepting state or
@@ -108,5 +106,10 @@ recognize the same language.
 
 # Dfa as a graph
 
-The function `clojure-rte.dot/dfa-to-dot` can be used to generate a gaphical
+The function `clojure-rte.dot/dfa-to-dot` can be used to generate a graphical
 image of a Dfa.  See [RTE API Debugging](api.md/#debugging)
+
+<!--  LocalWords:  rte Dfa alt img png src xymbolyco RTE API Dfas 
+ -->
+<!--  LocalWords:  Hopcroft  SXP
+ -->

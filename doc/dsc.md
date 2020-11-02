@@ -59,7 +59,7 @@ you may also specify type constraints, with as meta-data within
 the argument list itself, or in the map specified after the
 argument list.  Within the argument list you may only specify
 very simply type constraints, i.e., symbols which designate types, such as `^Boolean` and `^Number`.
-However in the map, you may specify Boolean cominations of any type designator
+However in the map, you may specify Boolean combinations of any type designator
 supported by `clojure-rte.type`.  See [Extensible types](genus.md) for more details.
 
 ```clojure
@@ -76,7 +76,7 @@ supported by `clojure-rte.type`.  See [Extensible types](genus.md) for more deta
  true [2 "three"] 4)
 ```
 
-The followign expression returns `nil` because although `(1 2 (3 4))`
+The following expression returns `nil` because although `(1 2 (3 4))`
 matches the structure `[a b [c d]]`, the type of `a` is not `Boolean`.
 
 ```clojure
@@ -137,7 +137,7 @@ The first *consequent* is evaluated for which the *pattern* matches the given ex
 )
 ```
 
-The following is equivent but arguably more readable as the type constraints and
+The following is equivalent but arguably more readable as the type constraints and
 structure constraints are presented separately.
 
 ```clojure
@@ -170,7 +170,7 @@ structure constraints are presented separately.
 `[[a b & c] {c String}` means that `c` is a sequence of elements each of type `String`
 not that `c` has type string.
 
-- If there are multiple type constratins on the same variable, the semantics is intersection.
+- If there are multiple type constraints on the same variable, the semantics is intersection.
 I.e., both constraints are required.
 `[[^Number a b] {a (not (= 0))}]` this means that `a` is both a `Number` and also different from zero, effectively `a` has type `(and Number (not (= 0)))`.
 
@@ -196,3 +196,8 @@ semantics.  For example, the following evaluates to `13`, not to
   13
 )
 ```
+
+<!--  LocalWords:  memoized rte Dfa RTE DFA API Bdds Clojure ary
+ -->
+<!--  LocalWords:  destructured
+ -->

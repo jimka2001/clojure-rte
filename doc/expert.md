@@ -175,3 +175,8 @@ there exist a sequence which matches the first but not the second?
 
 We see that indeed the empty sequence matches `pattern1` but does not match 
 `pattern2`.
+
+<!--  LocalWords:  memoized rte Dfa RTE DFA API Bdds Clojure ary
+ -->
+<!--  LocalWords:  destructured
+ -->

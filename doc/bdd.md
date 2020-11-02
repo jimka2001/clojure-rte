@@ -60,9 +60,9 @@ Serialize a Bdd into disjunctive-normal-form, i.e. an OR of ANDs
 This macro wraps a piece of code which needs to allocate Bdds. The macro
 wraps a call to the function call-with-bdd-hash, which provides an environment,
 of sorts, which makes it possible to allocate and manipulate Bdd instances.
-If `with-bdd-hash` is called recursively (intentially or accidentally), the
+If `with-bdd-hash` is called recursively (intentionally or accidentally), the
 inner-most call recognizes this and does not re-bind any dynamic variables,
-thus the innter-most call is innocuous and harmless.
+thus the inner-most call is innocuous and harmless.
 
 
 ### (`bdd-and` & bdds)
@@ -80,7 +80,7 @@ Perform a Boolean not of a given Bdd
 
 ### (`bdd-typep` value bdd)
 Given a value in question, and a Bdd representing a type designator,
-determine whether the value is an alement of the designated type.
+determine whether the value is an element of the designated type.
 
 ```clojure
 (with-bdd-hash []
@@ -106,3 +106,6 @@ If it cannot be proven that they are disjoint, `false` is returned.
 ### (`bdd-type-subtype?` type-sub type-super)
 Given two type designators, use Bdds to determine whether one is a subtype of the other.
 If it cannot be proven, `false` is returned.
+
+<!--  LocalWords:  memoized rte Dfa RTE DFA API Bdds Clojure ary
+ -->
