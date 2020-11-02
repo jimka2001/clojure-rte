@@ -866,83 +866,75 @@
 
 (defmethod -disjoint? :not [t1 t2]
   (cond
+    (not (not? t1))
+    :dont-know
+    
     ;; (disjoint? (not Object) X)
-    (and (not? t1)
-         (class-designator? (second t1))
+    (and (class-designator? (second t1))
          (isa? Object (find-class (second t1))))
     true
 
-    ;; (disjoint? X (not X))
-    (and (not? t2)
-         (= t1 (second t2)))
+    ;; (disjoint? (not X) X)
+    (= t2 (second t1))
     true
     
     ;; (disjoint? A (not B)) ;; when A
-    ;; (disjoint? 'Number '(not java.io.Serializable))   as Number is a subclass of java.io.Serializable
-    (and (not? t2)
-         (class-designator? (second t2))
-         (class-designator? t1)
-         (subtype? t1 (second t2) (constantly false)))
+    ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
+    (and (class-designator? (second t1))
+         (class-designator? t2)
+         (subtype? t2 (second t1) (constantly false)))
     true
 
-    ;; (disjoint? A (not B)) ;; when A and B are disjoint
-    (and (not? t2)
-         (disjoint? t1 (second t2) (constantly false)))
+    ;; (disjoint? (not B) A) ;; when A and B are disjoint
+    (disjoint? t2 (second t1) (constantly false))
     false
 
-    ;; (disjoint? 'BigDecimal '(not clojure.lang.IMeta))
+    ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
     ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
-    (and (not? t2)
-         (class-designator? t1)
-         (class-designator? (second t2))
-         (or (= :interface (class-primary-flag (second t2)))
-             (= :interface (class-primary-flag t1)))
-         (empty? (find-incompatible-members (second t2) t1)))
+    (and (class-designator? t2)
+         (class-designator? (second t1))
+         (or (= :interface (class-primary-flag (second t1)))
+             (= :interface (class-primary-flag t2)))
+         (empty? (find-incompatible-members (second t1) t2)))
     false
 
-    ;; (disjoint?   'java.io.Serializable '(not java.lang.Comparable))  ;; i.e., :interface vs :interface
-    ;; (disjoint? 'clojure.lang.ISeq '(not java.lang.Number)) ;; i.e. :interface vs (not :abstract)
-    (and (not? t2)
-         (class-designator? t1)
-         (class-designator? (second t2))
-         (member (class-primary-flag t1) '(:abstract :interface))
-         (member (class-primary-flag (second t2)) '(:abstract :interface))
-         (not (= (find-class t1) (find-class (second t2)))))
+    ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
+    ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
+    (and (class-designator? t2)
+         (class-designator? (second t1))
+         (member (class-primary-flag t2) '(:abstract :interface))
+         (member (class-primary-flag (second t1)) '(:abstract :interface))
+         (not (= (find-class t2) (find-class (second t1)))))
     false
 
     ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
-    (and (not? t1)
-         (not? t2)
+    (and (not? t2)
          (class-designator? (second t1))
          (class-designator? (second t2)))
     false
 
-    ;; if t1 < t2, then t1 disjoint from (not t2)
-    ;; (disjoint? '(member 1 2 3) '(not (member a b c 1 2 3)))
-    (and (not? t2)
-         (subtype? t1 (second t2) (constantly false))
-         (not (subtype? (second t2) t1 (constantly true))))
+    ;; if t2 < t1, then t2 disjoint from (not t1)
+    ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
+    (and (subtype? t2 (second t1) (constantly false))
+         (not (subtype? (second t1) t2 (constantly true))))
     true
 
-    ;; (disjoint? '(member a b c 1 2 3) '(not (member 1 2 3)))
-    (and (not? t2)
-         (subtype? (second t2) t1 (constantly false))
-         (not (subtype? t1 (second t2) (constantly true))))
+    ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
+    (and (subtype? (second t1) t2 (constantly false))
+         (not (subtype? t2 (second t1) (constantly true))))
     false
 
-    ;; (disjoint? 'Number '(not Long))
-    (and (class-designator? t1)
-         (not? t2)
-         (class-designator? (second t2))
-         (not (= (find-class (second t2)) (find-class t1)))
-         (isa? (find-class (second t2)) (find-class t1)))
+    ;; (disjoint? '(not Long) 'Number)
+    (and (class-designator? t2)
+         (class-designator? (second t1))
+         (not (= (find-class (second t1)) (find-class t2)))
+         (isa? (find-class (second t1)) (find-class t2)))
     false
 
     ;; (disjoint? '(not Boolean) '(not Long))
     ;; (disjoint? '(not A) '(not B))
     ;; if disjoint classes A and B
-    (and (not? t1)
-         (not? t2)
+    (and (not? t2)
          ;;(class-designator? (second t1))
          ;;(class-designator? (second t2))
          (disjoint? (second t1) (second t2) (constantly false)))
