@@ -943,33 +943,28 @@
     :else
     :dont-know))
 
-(defn type-min 
-  "Find an element of the given sequence which is a subtype
-  of some other type and is not =.  not necessarily the global minimum."
-  [atoms]
-  (some (fn [sub]
-          (when (class-designator? sub)
-            (let [csub (find-class sub)]
-              (some (fn [super]
-                      (when (class-designator? super)
-                        (let [csuper (find-class super)]
-                          (and (not (= csub csuper))
-                               (isa? csub csuper)
-                               sub)))) atoms)))) atoms))
 
-(defn type-max 
-  "Find an element of the given sequence which is a supertype
+(letfn [(type-min-max [atoms selector]
+          (some (fn [sub]
+                  (when (class-designator? sub)
+                    (let [csub (find-class sub)]
+                      (some (fn [super]
+                              (when (class-designator? super)
+                                (let [csuper (find-class super)]
+                                  (and (not (= csub csuper))
+                                       (isa? csub csuper)
+                                       (selector sub super))))) atoms)))) atoms))]
+  (defn type-min
+    "Find an element of the given sequence which is a subtype
+  of some other type and is not =.  not necessarily the global minimum."
+    [atoms]
+    (type-min-max atoms (fn [sub _] sub)))
+
+  (defn type-max
+    "Find an element of the given sequence which is a supertype
   of some other type and is not =.  not necessarily the global maximum"
-  [atoms]
-  (some (fn [sub]
-          (when (class-designator? sub)
-            (let [csub (find-class sub)]
-              (some (fn [super]
-                      (when (class-designator? super)
-                        (let [csuper (find-class super)]
-                          (and (not (= csub csuper))
-                               (isa? csub csuper)
-                               super)))) atoms)))) atoms))
+    [atoms]
+    (type-min-max atoms (fn [_ super] super))))
 
 (defn map-type-partitions
   "Iterate through all the ways to partition types between a right and left set.
