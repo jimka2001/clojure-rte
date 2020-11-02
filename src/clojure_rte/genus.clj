@@ -968,7 +968,11 @@
 
 (defn map-type-partitions
   "Iterate through all the ways to partition types between a right and left set.
-  Some care is made to prune branches which are provably empty."
+  Some care is made to prune branches which are provably empty.
+  The given binary-fun will be called on all such pairs [(l1 l2 ... ln) (r1 r2 ... rm)]
+  for which is provable that (and l1 l2 .. ln
+                                  (not r1) (not r2) ... (not rm))
+  is non-empty."
   [items binary-fun]
   (letfn [(remove-supertypes [types]
             ;; Given a list of symbols designating types, return a new list
@@ -985,7 +989,7 @@
                                              (isa? c1 c2))
                                     (collect t2)))))))]
               (for [x types
-                    :when (not (some #{x} supers))]
+                    :when (not (member x supers))]
                 x)))
           (remove-subtypes [types]
             ;; Given a list of symbols designating types, return a new list
@@ -1009,20 +1013,22 @@
                    right right]
               (cond
                 (and (< 1 (count left))
-                     (some #{:sigma} left))
+                     (member :sigma left))
                 (recur (remove #{:sigma} left) right)
 
                 :else [left right])))
           (recurring [items left right]
             (cl/cl-cond
-             ((some #{:sigma} right)
+             ((member :sigma right)
+              ;; prune
               )
-             ((and (some #{:sigma} left)
+             ((and (member :sigma left)
                    right)
               (recurring items (remove #{:sigma} left) right))
              ((and left
                    (some (fn [t2]
                            (disjoint? t2 (first left))) (rest left)))
+              ;; prune
               )
              ((and (not-empty left) (not-empty right)
                    ;; exists t2 in right such that t1 < t2
@@ -1054,12 +1060,12 @@
                   (nil) (recurring (rest items) left right)
                   (:sigma) (recurring (rest items) (cons new-type left) right)
                   (do
-                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type)) right))
-                    (if (some (fn [t2] (disjoint? new-type t2)) left)
+                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type (constantly false)))
+                                                                         right))
+                    (if (some (fn [t2] (disjoint? new-type t2 (constantly false))) left)
                       (recurring (rest items) left right) ;;   Double & !Float, we can omit Float in right
                       (recurring (rest items) left (cons new-type right)))))))))]
     (recurring items () ())))
-
 
 (defn- get-fn-source
   "Use the clojure.repl/source-fn function to extract a string representing the
