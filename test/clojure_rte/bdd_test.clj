@@ -22,6 +22,7 @@
 
 (ns clojure-rte.bdd-test
   (:require [clojure-rte.bdd :as bdd]
+            [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [print-vals member]]
             [clojure.test :refer :all])
@@ -328,3 +329,21 @@
                                                   (not Boolean))))
                '((and (not Long) (not Boolean))
                  (and (not Boolean) (not Long)))))))
+
+(deftest t-type-subtypep
+  (testing "issue #52"
+    (let [t1 '(or (and (not (member -1 0 1))
+                       (not (member 0 2 4 6)))
+                  (and (not (member -1 0 1))
+                       (member 0 2 4 6))
+                  (and (member -1 0 1) 
+                       (not (member 0 2 4 6)))
+                  (and (member -1 0 1)
+                       (member 0 2 4 6) 
+                       (not (= 0))))
+          t2 '(or (not (member -1 0 1))
+                  (and (member -1 0 1)
+                       (not (member 0 2 4 6))))]
+      (is (= (bdd/type-subtype? t1 t2)
+             (bdd/type-subtype? (gns/canonicalize-type t1)
+                                (gns/canonicalize-type t2))) "line 349"))))
