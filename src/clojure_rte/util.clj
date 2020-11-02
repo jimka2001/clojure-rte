@@ -191,9 +191,13 @@
   in the original sequence for which the predicate returned a Boolean true value,
   the right vector are the other values from the given sequence."  
   [pred items]
-  (let [g (group-by (fn [i]
-                      (boolean (pred i))) items)]
-    [(g true) (g false)]))
+
+  (reduce (fn [[good bad] item]
+            (if (pred item)
+              [(conj good item) bad]
+              [good             (conj bad item)]))
+          [[] []]
+          items))
 
 (defn find-simplifier [obj simplifiers]
   (if (empty? simplifiers)
