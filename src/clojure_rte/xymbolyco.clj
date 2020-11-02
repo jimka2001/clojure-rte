@@ -19,8 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.dfa
-  "Definition of records State and Dfa."
+(ns clojure-rte.xymbolyco
+  "Implementation of Sigma Complete Deterministic Finite Automata
+  to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [fixed-point member group-by-mapped print-vals defn-memoized]]

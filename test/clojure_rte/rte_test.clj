@@ -25,7 +25,8 @@
             [clojure-rte.util :refer [sort-operands remove-once call-with-collector visit-permutations member]]
             [clojure-rte.genus :refer [disjoint? typep inhabited?]]
             [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure-rte.rte-tester :refer :all]))
+            [clojure-rte.rte-tester :refer :all]
+            [clojure-rte.xymbolyco :as xym]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.rte-test))
@@ -687,13 +688,13 @@
     (is (= '{13 (:cat Integer (:* Integer))
              17 (:cat String (:* String))}
            (dfa-to-rte
-            (clojure-rte.dfa/synchronized-union (rte-to-dfa '(:+ Integer) 13)
-                                                (rte-to-dfa '(:+ String) 17))))
+            (xym/synchronized-union (rte-to-dfa '(:+ Integer) 13)
+                                    (rte-to-dfa '(:+ String) 17))))
         "synchronized union a")
 
     (is (member (dfa-to-rte
-                 (clojure-rte.dfa/synchronized-union (rte-to-dfa '(:* Integer) 13)
-                                                     (rte-to-dfa '(:* String) 17)))
+                 (xym/synchronized-union (rte-to-dfa '(:* Integer) 13)
+                                         (rte-to-dfa '(:* String) 17)))
                 '({13 (:* Integer)
                    17 (:cat String (:* String))}
                   {13 (:* Integer)

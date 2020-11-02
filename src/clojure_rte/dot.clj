@@ -26,7 +26,7 @@
             [clojure.set]
             [clojure-rte.cl-compat :as cl]
             [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure-rte.dfa :as dfa]
+            [clojure-rte.xymbolyco :as xym]
             [clojure-rte.bdd :as bdd]
             [clojure-rte.util :refer [member print-vals mapc]]
             [clojure.java.shell :refer [sh]]))
@@ -89,10 +89,10 @@
                  (println dot-string))
                stat)))
     :else
-    (let [sink-states (dfa/find-sink-states dfa)
+    (let [sink-states (xym/find-sink-states dfa)
           visible-states (if draw-sink
-                           (dfa/states-as-seq dfa)
-                           (remove (fn [q] (member q sink-states)) (dfa/states-as-seq dfa)))
+                           (xym/states-as-seq dfa)
+                           (remove (fn [q] (member q sink-states)) (xym/states-as-seq dfa)))
           visible-state-ids (map :index visible-states)
           transition-labels (distinct (for [q visible-states
                                             [label dst-id] (:transitions q)
@@ -123,7 +123,7 @@
         (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
         (cl-format *out* "  edge [fontname=Helvetica, fontsize=20];~%")
 
-        (doseq [q (dfa/states-as-seq dfa)]
+        (doseq [q (xym/states-as-seq dfa)]
           (cl/cl-cond
            ((and (member q sink-states)
                  (not draw-sink)))
@@ -145,7 +145,7 @@
                                    type-desigs)
                           label (str/join "," labels)]]
               (cl/cl-cond
-               ((and (member (dfa/state-by-index dfa next-state) sink-states)
+               ((and (member (xym/state-by-index dfa next-state) sink-states)
                      (not draw-sink)))
                (:else
                 (cl-format *out* "   q~D -> q~D [label=\"~a\"];~%" (:index q) next-state label)))))))

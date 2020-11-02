@@ -6,7 +6,7 @@ alt="Genus" width="300"/>
 The Genus Simple Extensible Type System, provides a way to reason about set of objects
 at run-time.  
 
-When we use the word `type` we DO NOT mean Java type, rather we mean a set of clojure values or objects.
+When we use the word `type` we DO NOT mean Java type, rather we mean a set of Clojure values or objects.
 Any set of values is a type, and some types are designatable.   Types correspond to sets, and subtypes
 correspond to subsets.
 
@@ -32,8 +32,8 @@ A *type designator* is defined by the following recursive definition.
 
   - `(member x y z ...)` is a type designator equivalent to `(or (= x) (= y) (= z) ...)`.
   
-  - `(satisfies f)` is a type designator if `f` names a function which implements a type predicate. The type predicate designator may be a simple symbol indicating a type predicate built in clojure (i.e., defined in clojure.core), such as `int?`, `decimal?`, `vector?`.
- A user defined function may also be used, but its fully qualified name must be specified such as `(satisfies my-namespace/my-f)`. The behavior is expressly undefined if the definition of such a function (such as `my-f`) is redefined.  The system may well have cached information about the function which becomes incorrect but never invalided.
+  - `(satisfies f)` is a type designator if `f` names a function which implements a type predicate. The type predicate designator may be a simple symbol indicating a type predicate built in Clojure (i.e., defined in clojure.core), such as `int?`, `decimal?`, `vector?`.
+ A user defined function may also be used, but its fully qualified name must be specified such as `(satisfies my-namespace/my-f)`. The behavior is expressly undefined if the definition of such a function (such as `my-f`) is redefined.  The system may well have cached information about the function which becomes incorrect but never invalidated.
  The system attempts to implement `satisfies` efficiently when possible.  For example, `(satisfies int?)` expands internally to `(or Long Integer Short Byte)`.  Such optimization applies equally well to user defined functions.
 
   - `(rte pattern)` is a type designator which specifies the set of sequences which match the given rte pattern.  For example, the type `(rte (:cat Long String))` is the set of two element sequences whose first element is a `Long` and whose second element is a string.
@@ -78,7 +78,7 @@ Example
 An application may extend the type system by adding a new type
 designator syntax.  To do so, several steps must be followed.
 
-### Registering the existance of the new type
+### Registering the existence of the new type
 
 To declare a new type as existing and supported by rte, you must register
 by added a method via `defmethod registered-type?` returning `true`.
@@ -95,7 +95,7 @@ the system to reason about the new type.
 
 * `typep [value type-designator]` --- Applications defining new types
 should define a method on `typep` which decides whether a given value 
-is a member of that type.  This method will be called when the sytem has 
+is a member of that type.  This method will be called when the system has 
 already determined that the type designator is a `sequential?` whose first 
 element is your type name e.g., `my-type`. Thus the logic within the method 
 body has the task of determining whether the given  object `my-value` is an 
@@ -177,7 +177,7 @@ as with a call to:
 
 Applications may install methods via `(defmethod -inhabited? ...)`.
 The method accepts one argument which is a type-designator,
-pontentially application specific.  The method should examine the type
+potentially application specific.  The method should examine the type
 designator and return `true`, `false`, or `:dont-know` depending on
 whether there exists an object of this type.  If the designated type
 is empty, return `false`; if it is not empty, return `true`; if it is
@@ -234,7 +234,7 @@ If `disjoint?` is called with a 3rd argument, then
 
 Applications may install methods via `(defmethod -subtype? ...)`.
 The method accepts two arguments which are type-designators,
-`[sub-designator super-designator]`,  pontentially application specific.
+`[sub-designator super-designator]`,  potentially application specific.
 The method should examine the designated types to determine whether
 they have a subtype relation, and return `true`, `false`, or `:dont-know`.
 When `subtype?` (the public calling interface) is called,
@@ -248,3 +248,10 @@ If subtype? is called with a 3rd argument, then
 
 For more information, see the documentation in the source code.
 
+
+<!--  LocalWords:  memoized rte Dfa RTE DFA API Bdds Clojure ary img
+ -->
+<!--  LocalWords:  destructured designatable alt clojure multimethods
+ -->
+<!--  LocalWords:  multimethod
+ -->
