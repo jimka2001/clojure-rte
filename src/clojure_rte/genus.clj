@@ -884,7 +884,7 @@
     (= t2 (second t1))
     true
     
-    ;; (disjoint? A (not B)) ;; when A
+    ;; (disjoint? (not B) A)
     ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
     (and (class-designator? (second t1))
          (class-designator? t2)
@@ -918,7 +918,7 @@
          (class-designator? (second t1))
          (class-designator? (second t2)))
     false
-
+    
     ;; if t2 < t1, then t2 disjoint from (not t1)
     ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
     (and (subtype? t2 (second t1) (constantly false))
@@ -945,6 +945,11 @@
          ;;(class-designator? (second t2))
          (disjoint? (second t1) (second t2) (constantly false)))
     false
+
+    ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
+    (and (not? t2)
+         (not (disjoint? (second t1) (second t2) (constantly true))))
+    false         
 
     :else
     :dont-know))
@@ -1313,7 +1318,7 @@
                     
                     (fn [type-designator]
                       ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
-                      (if (= 2 (count (take 2 (filter member? (rest type-designator)))))
+                      (if (<= 2 (bounded-count 2 (filter member? (rest type-designator))))
                         (let [[members others] (partition-by-pred member? (rest type-designator))]
                           (cons 'or (cons (cons 'member (distinct (mapcat rest members)))
                                           others)))
@@ -1335,10 +1340,8 @@
                           (cons 'or mapped))
                         type-designator))
 
-
                     (fn [type-designator]
                       (cons 'or (map -canonicalize-type (rest type-designator))))
-                    
                     ]))
 
 (defmethod -canonicalize-type :default
