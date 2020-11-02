@@ -1208,7 +1208,9 @@
                     (fn [type-designator]
                       (if (= :empty-set (second type-designator))
                         :sigma
-                        type-designator))]))                    
+                        type-designator))
+                    (fn [type-designator]
+                      (list 'not (-canonicalize-type (second type-designator))))]))
 
 (defmethod -canonicalize-type 'and
   [type-designator]
