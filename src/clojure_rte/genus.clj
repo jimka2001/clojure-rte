@@ -25,6 +25,7 @@
             [clojure.repl :refer [source-fn]]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
+                                      partition-by-pred
                                       member find-simplifier defn-memoized
                                       ]]
             [clojure-rte.cl-compat :as cl]
@@ -1309,21 +1310,31 @@
                         :sigma
                         type-designator))
 
+                    
+                    (fn [type-designator]
+                      ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+                      (if (= 2 (count (take 2 (filter member? (rest type-designator)))))
+                        (let [[members others] (partition-by-pred member? (rest type-designator))]
+                          (cons 'or (cons (cons 'member (distinct (mapcat rest members)))
+                                          others)))
+                        type-designator))
+
                     (fn [type-designator]
                       ;; (or Double (member 1.0 2.0 "a" "b")) --> (or Double (member "a" "b"))
                       (if (some member? (rest type-designator))
-                        (cons 'or
-                              (map (fn [t]
-                                     (cond
-                                       (member? t)
-                                       (let [td2 (cons 'or (remove #{t} (rest type-designator)))]
-                                         (cons 'member (filter (fn [candidate]
-                                                                 (not (typep candidate td2)))
-                                                               (rest t))))
-                                       :else
-                                       t))
-                                   (rest type-designator)))
+                        (let [mapped (map (fn [t]
+                                            (cond
+                                              (member? t)
+                                              (let [td2 (cons 'or (remove #{t} (rest type-designator)))]
+                                                (cons 'member (filter (fn [candidate]
+                                                                        (not (typep candidate td2)))
+                                                                      (rest t))))
+                                              :else
+                                              t))
+                                          (rest type-designator))]
+                          (cons 'or mapped))
                         type-designator))
+
 
                     (fn [type-designator]
                       (cons 'or (map -canonicalize-type (rest type-designator))))
