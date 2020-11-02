@@ -428,23 +428,23 @@
 (defmethod -disjoint? :and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 (constantly false)))
         inhabited-t2 (delay (inhabited? t2 (constantly false)))]
-    (cond (and (and? t1)
-               (exists [t (rest t1)]
-                       (disjoint? t2 t)))
+    (cond (not (and? t1))
+          :dont-know
+
+          (exists [t (rest t1)]
+                       (disjoint? t2 t))
           ;; (disjoint? (and A B C) X)
           true
 
           ;; (disjoint? (and A B C) B)
-          (and (and? t1)
-               (member t2 (rest t1))
+          (and (member t2 (rest t1))
                @inhabited-t2
                @inhabited-t1)
           false
           
           ;; (disjoint? '(and B C) 'A)
           ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
-          (and (and? t1)
-               @inhabited-t2
+          (and @inhabited-t2
                @inhabited-t1
                (exists [t1' (rest t1)]
                        (or (subtype? t1' t2 (constantly false))
@@ -452,16 +452,14 @@
                            )))
           false
 
-          (and (and? t1)
-               (class-designator? t2)
+          (and (class-designator? t2)
                (= (find-class t2) java.lang.Object)
                (some class-designator? (rest t1)))
           false
 
           
           ;; (disjoint? (and A B C) X)
-          (and (and? t1)
-               (class-designator? t2)
+          (and (class-designator? t2)
                (every? class-designator? (rest t1)))
           (not (forall-pairs [[a b] (conj (rest t1) t2)]
                              (or (isa? (find-class a) (find-class b))
