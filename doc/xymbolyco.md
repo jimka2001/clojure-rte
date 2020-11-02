@@ -1,10 +1,10 @@
-# dfa.bdd
+# xymbolyco.md
 
 # Deterministic Finite Automata
 
 <img src="../img/example-dfa.png" alt="Example Finite Automaton" width="600"/>
 
-The `clojure-rte.dfa` library implements a data structure (defined by `defrecord`)
+The `clojure-rte.xymbolyco` library implements a data structure (defined by `defrecord`)
 which models a deterministic finite automaton.
 
 ## Dfa --- `(defrecord Dfa [pattern states exit-map])`

@@ -92,6 +92,8 @@ Dfas each with a different exit value.
 
 
 ```clojure
+(require '[clojure-rte.xymbolyco :as dfa])
+
 (let [dfa-1 (rte-to-dfa '(:* (:cat String Long)) :string-long)
       dfa-2 (rte-to-dfa '(:* (:cat String Short)) :string-short)
       dfa (dfa/synchronized-union  dfa-1 dfa-2)]

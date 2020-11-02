@@ -32,7 +32,7 @@
                                       print-vals sort-operands member
                                       ]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.dfa :as dfa ]
+            [clojure-rte.xymbolyco :as xym]
             [clojure-rte.rte-construct]
             [clojure-rte.memoize]
             [clojure-rte.api]

@@ -889,8 +889,8 @@
                         ) triples)
          grouped (group-by (fn [trip]
                              (trip 0)) triples)]
-     (dfa/extend-with-sink-state
-      (dfa/map->Dfa
+     (xym/extend-with-sink-state
+      (xym/map->Dfa
        {:pattern given-pattern
         :canonicalized pattern
         :exit-map (constantly exit-value)
@@ -907,7 +907,7 @@
                                          (map (fn [[_src wrt dst]]
                                                 [wrt dst]) (grouped index)))]
                        [index
-                        (dfa/map->State {:index index
+                        (xym/map->State {:index index
                                          :initial (= 0 index)
                                          :accepting (nullable deriv)
                                          :pattern deriv
@@ -920,6 +920,6 @@
   langauge.  If there are no accepting states in the Dfa, an empty map {}
   is returned."
   [dfa]
-  (assert (instance? (dfa/record-name) dfa)
+  (assert (instance? (xym/record-name) dfa)
           (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
-  (dfa/extract-rte dfa canonicalize-pattern))
+  (xym/extract-rte dfa canonicalize-pattern))

@@ -32,7 +32,7 @@
   "Helper function for macro-expanding rte-case.
   Returns a complete Dfa which is the union of the input clauses."
   [pairs]
-  (reduce dfa/synchronized-union
+  (reduce xym/synchronized-union
           (map (fn [[index rte]]
                  (rte-to-dfa rte index))
                pairs)))

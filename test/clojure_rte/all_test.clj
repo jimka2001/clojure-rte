@@ -24,7 +24,7 @@
               clojure-rte.api-test
               clojure-rte.bdd-test
               clojure-rte.cl-compat-test
-              clojure-rte.dfa-test
+              clojure-rte.xymbolyco-test
               clojure-rte.dot-test
               clojure-rte.rte-test
               clojure-rte.rte-case-test
@@ -40,7 +40,7 @@
   (clojure.test/run-tests 'clojure-rte.api-test
                           'clojure-rte.bdd-test
                           'clojure-rte.cl-compat-test
-                          'clojure-rte.dfa-test
+                          'clojure-rte.xymbolyco-test
                           'clojure-rte.dot-test
                           'clojure-rte.rte-test
                           'clojure-rte.rte-case-test

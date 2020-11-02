@@ -26,7 +26,7 @@
 (in-ns 'clojure-rte.rte-core)
 
 (defn dispatch [obj caller]
-  (cond (instance? (dfa/record-name) ;; parser cannot handle dfa/Dfa
+  (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
                    obj)
         :Dfa
         (sequential? obj)
@@ -68,7 +68,7 @@
   (rte-inhabited? (rte-compile pattern)))
 
 (defmethod rte-inhabited? :Dfa [dfa]
-  (some :accepting (dfa/states-as-seq dfa)))
+  (some :accepting (xym/states-as-seq dfa)))
 
 (defn rte-vacuous? [dfa]
   (not (rte-inhabited? dfa)))
@@ -121,9 +121,9 @@
                        hot-spot
                        ]}]
   (let [state-vec (:states dfa)
-        sink-states (set (dfa/find-sink-states dfa))]
+        sink-states (set (xym/find-sink-states dfa))]
     (if (empty? sink-states)
-      (rte-match (dfa/extend-with-sink-state dfa) items
+      (rte-match (xym/extend-with-sink-state dfa) items
                  :promise-disjoint promise-disjoint
                  :not-spot hot-spot)
       (let [sink-state-id (:index (first sink-states))]
@@ -153,7 +153,7 @@
                               false))
                           transitions)))
                 (fast-transition-function [transitions]
-                  (dfa/optimized-transition-function transitions promise-disjoint sink-state-id))
+                  (xym/optimized-transition-function transitions promise-disjoint sink-state-id))
                 (transition-function [transitions]
                   (if hot-spot
                     (fast-transition-function transitions)

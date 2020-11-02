@@ -19,18 +19,18 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.dfa-test
+(ns clojure-rte.xymbolyco-test
   (:refer-clojure :exclude [complement])
   (:require ;; [clojure-rte.core :refer :all]
             [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure-rte.dfa :refer :all]
+            [clojure-rte.xymbolyco :refer :all]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
             [clojure.test :refer :all :exclude [testing]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.dfa-test))
+  (clojure.test/run-tests 'clojure-rte.xymbolyco-test))
 
 
 
@@ -175,7 +175,7 @@
                        (:cat (:* String) Long))))
 
 (deftest t-complete
-  (testing "testing dfa/complete"
+  (testing "testing clojure-rte.xymbolyco/complete"
     (bdd/with-hash []
       (doseq [rte test-rtes
               :let [dfa (rte-to-dfa rte)
