@@ -25,7 +25,7 @@
             [clojure.repl :refer [source-fn]]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists
-                                      call-with-collector member find-simplifier defn-memoized
+                                      member find-simplifier defn-memoized
                                       ]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -974,40 +974,31 @@
                                   (not r1) (not r2) ... (not rm))
   is non-empty."
   [items binary-fun]
-  (letfn [(remove-supertypes [types]
-            ;; Given a list of symbols designating types, return a new list
-            ;; excluding those which are supertypes of others in the list.
-            (let [supers (call-with-collector
-                          (fn [collect]
-                            (doseq [t1 types
-                                    t2 types]
-                              (when (and (class-designator? t1)
-                                         (class-designator? t2))
-                                (let [c1 (find-class t1)
-                                      c2 (find-class t2)]
-                                  (when (and (not (= c1 c2))
-                                             (isa? c1 c2))
-                                    (collect t2)))))))]
+  (letfn [(remove-s*types [types isa]
+            ;; generalization of remove-supertypes and remove-subtypes,
+            ;; caller must either pass isa? or an isa? which reverse the arguments.
+            (let [supers (for [t1 types
+                               :when (class-designator? t1)
+                               :let [c1 (find-class t1)]
+                               t2 types
+                               :when (and (not= t1 t2)
+                                          (class-designator? t2))
+                               :let [c2 (find-class t2)]
+                               :when (and (not (= c1 c2))
+                                          (isa c1 c2))
+                               ]
+                           t2)]
               (for [x types
                     :when (not (member x supers))]
                 x)))
+          (remove-supertypes [types]
+            ;; Given a list of symbols designating types, return a new list
+            ;; excluding those which are supertypes of others in the list.
+            (remove-s*types types isa?))
           (remove-subtypes [types]
             ;; Given a list of symbols designating types, return a new list
             ;; excluding those which are subypes of others in the list.
-            (let [supers (call-with-collector
-                          (fn [collect]
-                            (doseq [t1 types
-                                    t2 types]
-                              (when (and (class-designator? t1)
-                                         (class-designator? t2))
-                                (let [c1 (find-class t1)
-                                      c2 (find-class t2)]
-                                  (when (and (not (= c1 c2))
-                                             (isa? c2 c1))
-                                    (collect t2)))))))]
-              (for [x types
-                    :when (not (some #{x} supers))]
-                x)))
+            (remove-s*types types (fn [c1 c2] (isa? c2 c1))))
           (type-reduce [left right]
             (loop [left left
                    right right]
