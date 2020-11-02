@@ -467,6 +467,34 @@
                                  ;; TODO isn't this wrong? because () is not false
                                  (compatible-members? a b))))
 
+          ;; I don't know the general form of this, so make it a special case for the moment.
+          ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)
+          ;;                      A   (not B)                     C
+          ;; should return false
+          ;; TODO generalize this special case.
+          ;; If B < A and A !< B    and A < C and C !< A
+          ;;   then (and A !B) is NOT disjoint from C
+          (and (= 3 (count t1)) ;; t1 of the form (and x y)
+               (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (let [[_ A [_ B]] t1
+                     C t2]
+                 (and (subtype? B A (constantly false))
+                      (not (subtype? A B (constantly true)))
+                      (subtype? A C (constantly false))
+                      (not (subtype? C A (constantly true))))))
+          false
+
+          ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
+          ;;                       A    (not B)                     C
+          ;;  since A and B are disjoint
+          ;;  we may ask (disjoint? A C)
+          (and (= 3 (count t1)) ;; t1 of the form (and x y)
+               (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (let [[_ A [_ B]] t1
+                     C t2]
+                 (disjoint? A B (constantly false))))
+          (disjoint? (second t1) t2 (constantly :dont-know))
+
           :else
           :dont-know)))
 
@@ -920,36 +948,6 @@
          (disjoint? (second t1) (second t2) (constantly false)))
     false
 
-    ;; I don't know the general form of this, so make it a special case for the moment.
-    ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)
-    ;;                      A   (not B)                     C
-    ;; should return false
-    ;; TODO generalize this special case.
-    ;; If B < A and A !< B    and A < C and C !< A
-    ;;   then (and A !B) is NOT disjoint from C
-    (and (and? t1) ;; t1 of the form (and ...)
-         (= 3 (count t1)) ;; t1 of the form (and x y)
-         (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
-         (let [[_ A [_ B]] t1
-               C t2]
-           (and (subtype? B A (constantly false))
-                (not (subtype? A B (constantly true)))
-                (subtype? A C (constantly false))
-                (not (subtype? C A (constantly true))))))
-    false
-    
-    ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
-    ;;                       A    (not B)                     C
-    ;;  since A and B are disjoint
-    ;;  we may ask (disjoint? A C)
-    (and (and? t1) ;; t1 of the form (and ...)
-         (= 3 (count t1)) ;; t1 of the form (and x y)
-         (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
-         (let [[_ A [_ B]] t1
-               C t2]
-           (disjoint? A B (constantly false))))
-    (disjoint? (second t1) t2)
-    
     :else
     :dont-know))
 
