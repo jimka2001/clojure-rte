@@ -705,28 +705,28 @@
 
 (defmethod -subtype? :and [t1 t2]
   (cond
-    (and (and? t1)
-         (member t2 (rest t1)))
+    (not (and? t1))
+    :dont-know
+    
+    (member t2 (rest t1))
     ;; (subtype? (and A B) A)
     true
 
-    (and (and? t1)
-         (exists [t (rest t1)] (subtype? t t2)))
+    
+    (exists [t (rest t1)] (subtype? t t2))
     ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
     true
 
 
     ;; (subtype? '(and A B) '(not A))
-    (and (and? t1)
-         (not? t2)
+    (and (not? t2)
          (exists [t (rest t1)]
                  (= t (second t2)))
          (inhabited? t1 (constantly false)))
     false
 
     ;; (subtype? (and A B C X Y) (and A B C) )
-    (and (and? t1)
-         (and? t2)
+    (and (and? t2)
          (subset? (set (rest t2)) (set (rest t1))))
     true
     
