@@ -57,7 +57,7 @@ Example
 (subtype? 'Long '(or String (not Long))) ;; false
 ```
 
-* `disjoint? [t1 t2 default]` --- predicate to determine whether two types are disjoint in the sense that their intersection is empty. There are three possible answers to this question, `true`, `false`, and `:dont-know`.  The four possible values of `default` are `true`, `false`, `:dont-know`, `:warning`.  If it cannot be determined whether the designated types are disjoint, and `default` is `warning` then a warning message is emitted and `false` is returned.
+* `disjoint? [t1 t2 default]` --- predicate to determine whether two types are disjoint in the sense that their intersection is empty. There are three possible answers to this question, `true`, `false`, and `:dont-know`. If it cannot be determined whether the designated types are disjoint, then the `default` value is returned.
 
 Example 
 ```clojure
@@ -65,12 +65,12 @@ Example
 (disjoint? 'Number 'java.io.Serializable :dont-know) ;; false
 ```
 
-* `inhabited? [type-designator]` --- predicate to determine whether there exists an element of a given type.  Any type which is not inhabited is vacuous. There are three possible answers to this question, `true`, `false`, and `:dont-know`.
+* `inhabited? [type-designator default]` --- predicate to determine whether there exists an element of a given type.  Any type which is not inhabited is vacuous. There are three possible answers to this question, `true`, `false`, and `:dont-know`.
 
 Example 
 ```clojure
-(inhabited? 'Long) ;; true
-(inhabited? '(rte (:and (:+ Number) (:+ String)))) ;; false
+(inhabited? 'Long :dont-know) ;; true
+(inhabited? '(rte (:and (:+ Number) (:+ String))) :dont-know) ;; false
 ```
 
 ## How to extend the type system
@@ -207,9 +207,7 @@ the methods of `-inhabited?` are called in some order
 (`:primary` first) until one method returns `true` or `false`,
 in which case `inhabited?` returns that value.
 If no method returns `true` or `false`, then the function
-`*inhabited?-default*` is called, and its value returned.
-If `inhabited?` is called with a 3rd argument, then
-`*inhabited?-default*` is dynamically bound to that value."
+returns the given default value..
 
 ```clojure
 (defmethod -inhabited? 'my-type [type-designator]
@@ -258,9 +256,7 @@ the methods of `-subtype?` are called in some order
 (`:primary` first) until one method returns `true` or `false`,
 in which case `subtype?` returns that value.
 If no method returns `true` or `false`, then the function
-`*subtype?-default*` is called, and its value returned.
-If subtype? is called with a 3rd argument, then
-`*inhabited?-default*` is dynamically bound to that value.
+returns the given default value.
 
 For more information, see the documentation in the source code.
 

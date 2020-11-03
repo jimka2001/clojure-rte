@@ -448,6 +448,25 @@
       ;; remove all superfluous-ands from or-operands
       (remove (fn [to-remove] (member to-remove superfluous-ands)) operands))))
 
+(defn disjoint?-false-warn [t1 t2]
+  ;; don't complain about rte nor satisfies
+  (letfn [(dont-complain [t]
+            (and (sequential? t)
+                 (not (empty? t))
+                 (member (first t) '(satisfies rte))))]
+    (let [types-disjoint (gns/disjoint? t1 t2 :dont-know)]
+      (cond (member types-disjoint '(true false))
+            types-disjoint
+
+            (or (dont-complain t1)
+                (dont-complain t2))
+            false
+            
+            :else
+            (do
+              (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%" t1 t2)
+              false)))))
+
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -582,7 +601,7 @@
                                             ]
                                         (when (exists-pair [[i1 i2] types]
                                                            (and (not= i1 i2)
-                                                                (gns/disjoint? i1 i2 false)))
+                                                                (disjoint?-false-warn i1 i2)))
                                           :empty-set)))
                                      
                                      ;; (:and subtype supertype x y z) --> (:and subtype x y z)
@@ -719,7 +738,7 @@
                                          :epsilon)
                                 :type (fn [type _functions]
                                         (cond 
-                                          (gns/disjoint? wrt type false)
+                                          (disjoint?-false-warn wrt type)
                                           :empty-set
 
                                           (gns/subtype? wrt type false)
@@ -767,7 +786,7 @@
   (letfn [(independent? [t1]
             (every? (fn [t2]
                       (or (= t1 t2)
-                          (gns/disjoint? t1 t2 false))) type-set))
+                          (disjoint?-false-warn t1 t2))) type-set))
           (count-if [pred items]
             (reduce (fn [acc item]
                       (if (pred item)

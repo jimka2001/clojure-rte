@@ -111,29 +111,24 @@
   (empty? (find-incompatible-members c1 c2)))
 
 (defn type-equivalent?
+  "Test whether two type designators represent the same type."
   [t1 t2 default]
-  {:pre [(member default '(true false :dont-know :error))]
+  {:pre [(member default '(true false :dont-know))]
    :post [(fn [v] (member v '(true false :dont-know)))]}
   (if (= t1 t2)
     true
-    (letfn [(conclude [t1-designator t2-designator]
-              (if (= :error default)
-                (throw (ex-info (format "type-equivalent? cannot decide %s vs %s" t1-designator t2-designator)
-                                {:error-type :not-yet-implemented
-                                 :type-designators [t1-designator t1-designator]}))
-                default))]
-      ;; two types are equivalent if each is a subtype of the other.
-      ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
-      ;;    as that may be compute intensive.
-      (let [s1 (subtype? t1 t2 :dont-know)
-            s2 (delay (subtype? t2 t1 :dont-know))]
-        (case s1
+    ;; two types are equivalent if each is a subtype of the other.
+    ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
+    ;;    as that may be compute intensive.
+    (let [s1 (subtype? t1 t2 :dont-know)
+          s2 (delay (subtype? t2 t1 :dont-know))]
+      (case s1
+        (false) false
+        (case @s2
           (false) false
-          (case @s2
-            (false) false
-            (if (= true s1 @s2)
-              true
-              (conclude t1 t2))))))))
+          (if (= true s1 @s2)
+            true
+            default))))))
 
 (defmulti typep 
   "(typep value type-descriptor)
@@ -274,20 +269,6 @@
 (defmethod valid-type? 'member [[_ & _]]
   true)
 
-(defn disjoint?-false-warn [t1 t2]
-  ;; don't complain about rte nor satisfies
-  (letfn [(dont-complain [t]
-            (and (sequential? t)
-                 (not (empty? t))
-                 (member (first t) '(satisfies rte))))]
-    (cond (or (dont-complain t1)
-              (dont-complain t2))
-          false
-          :else
-          (do
-            (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%" t1 t2)
-            false))))
-
 (defn-memoized [sort-method-keys -sort-method-keys]
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
@@ -311,10 +292,8 @@
   the methods of -disjoint? are called in some order
   (:primary first) until one method returns true or false,
   in which case disjoint? returns that value.
-  If no method returns true or false, then the function
-  *disjoint?-default* is called, and its value returned.
-  If disjoint? is called with a 3rd argument, then
-  *disjoint?-default* is dynamically bound to that value."
+  If no method returns true or false, then disjoint?
+  the function returns the given default value."
   (fn [t1 t2]
     (throw (ex-info "-disjoint? should not be called directly"
                     {:error-type :should-not-be-called-directly
@@ -322,15 +301,13 @@
                      :t2 t2}))))
 
 (defn disjoint?
-  "Predicate to determine whether the two types overlap."
+  "Predicate to determine whether the two types overlap.
+  If it cannot be determined whether the two designated types
+  are disjoint, then the default value is returned."
   [t1 t2 default]
-  {:pre [(member default '(true false :dont-know :warning))]
+  {:pre [(member default '(true false :dont-know))]
    :post [(fn [v] (member v '(true false :dont-know)))]}
-  (letfn [(conclude [t1' t2']
-            (if (= default :warning)
-              (disjoint?-false-warn t1' t2')
-              default))
-          (check-disjoint [t1' t2' default]
+  (letfn [(check-disjoint [t1' t2' default]
             (loop [[k & ks] (sort-method-keys -disjoint?)]
               (case ((k (methods -disjoint?)) t1' t2')
                 (true) true
@@ -340,7 +317,7 @@
                   (false) false
                   (if ks
                     (recur ks)
-                    (conclude t1' t2'))))))]
+                    default)))))]
     (cond
       (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
       true
@@ -349,14 +326,14 @@
       true
 
       :else
-      (let [try1 (check-disjoint t1 t2 (constantly :dont-know))]
+      (let [try1 (check-disjoint t1 t2 :dont-know)]
         (if (not= :dont-know try1)
           try1
           (let [t1-simple (-canonicalize-type t1)
                 t2-simple (-canonicalize-type t2)]
             (if (and (= t1-simple t1)
                      (= t2-simple t2))
-              (conclude t1 t2)
+              default
               (check-disjoint t1-simple t2-simple default))))))))
 
 (defmethod -disjoint? :primary [t1 t2]
@@ -519,9 +496,7 @@
   (:primary first) until one method returns true or false,
   in which case subtype? returns that value.
   If no method returns true or false, then the default is
-  examined.  If the default is true, false, or :dont-know,
-  then that value is returned.  If the 3rd argument is
-  :error, then an exception is thrown."
+  returned."
   (fn [sub super]
     (throw (ex-info "-subtype? should not be called directly"
                     {:error-type :should-not-be-called-directly
@@ -535,21 +510,15 @@
   function which is called, and its value returned.  The default value
   of default is one of: true, false, :dont-know or :error."
   [sub-designator super-designator default]
-  {:pre [(member default '(true false :dont-know :error))]
+  {:pre [(member default '(true false :dont-know))]
    :post [(fn [v] (member v '(true false :dont-know)))]}
-  (letfn [(conclude [sub super]
-            (if (= default :error)
-              (throw (ex-info (format "subtype? cannot decide %s vs %s" sub super)
-                              {:error-type :not-yet-implemented
-                               :type-designators [sub super]}))
-              default))]
-    (loop [[k & ks] (sort-method-keys -subtype?)]
-      (let [s ((k (methods -subtype?)) sub-designator super-designator)]
-        (case s
-          (true false) s
-          (if ks
-            (recur ks)
-            (conclude sub-designator super-designator)))))))
+  (loop [[k & ks] (sort-method-keys -subtype?)]
+    (let [s ((k (methods -subtype?)) sub-designator super-designator)]
+      (case s
+        (true false) s
+        (if ks
+          (recur ks)
+          default)))))
 
 (defmulti -inhabited?
   "This function should never be called.
@@ -572,22 +541,16 @@
   determine whether the type is inhabited, i.e., not the
   empty type."
   [type-designator default]
-  {:pre [(member default '(true false :dont-know :error))]
+  {:pre [(member default '(true false :dont-know))]
    :post [(fn [v] (member v '(true false :dont-know)))]}
-  (letfn [(conclude [type-designator default]
-            (if (= :error default)
-              (throw (ex-info (format "inhabited? cannot decide %s" type-designator)
-                              {:error-type :not-yet-implemented
-                               :type-designator [type-designator]}))
-              default))
-          (calc-inhabited [type-designator default]
+  (letfn [(calc-inhabited [type-designator default]
             (loop [[k & ks] (sort-method-keys -inhabited?)]
               (case ((k (methods -inhabited?)) type-designator)
                 (true) true
                 (false) false
                 (if ks
                   (recur ks)
-                  (conclude type-designator default)))))]
+                  default))))]
     (let [i (calc-inhabited type-designator :dont-know)]
       (cond (= :dont-know i)
             (calc-inhabited (-canonicalize-type type-designator) default)
