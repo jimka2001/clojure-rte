@@ -98,38 +98,42 @@
         :else :dont-know))
 
 (defmethod gns/-subtype? :rte [sub-designator super-designator]
-  (cond (and (gns/rte? sub-designator)
-             (gns/rte? super-designator))
-        (let [[_ pat-sub] sub-designator
-              [_ pat-super] super-designator]
-          (rte-vacuous? (rte-compile `(:and ~pat-sub (:not ~pat-super)))))
-        
-        (and (gns/rte? super-designator)
-             (gns/class-designator? sub-designator)
-             (isa? (gns/find-class sub-designator) java.lang.CharSequence))
-        (gns/subtype? '(rte (:* java.lang.Character)) super-designator)
-        
-        (and (gns/rte? sub-designator)
-             (gns/class-designator? super-designator)
-             (isa? (gns/find-class super-designator) java.lang.CharSequence))
-        (gns/subtype? sub-designator '(rte (:* java.lang.Character)))
-        
-        (and (gns/rte? super-designator)
-             (gns/class-designator? sub-designator)
-             (not (isa? (gns/find-class sub-designator) clojure.lang.Sequential)))
-        false
-        
-        (and (gns/rte? sub-designator)
-             (gns/class-designator? super-designator)
-             (not (isa? (gns/find-class super-designator) clojure.lang.Sequential)))
-        false
-        
-        (and (gns/rte? super-designator)
-             (gns/and? sub-designator)
-             (some (fn [and-operand]
-                     (gns/rte? and-operand)
-                     (gns/subtype? and-operand super-designator
-                                   (constantly false))) (rest sub-designator)))
-        true
-        
-        :else :dont-know))
+  (let [s1 (delay (gns/subtype? '(rte (:* java.lang.Character)) super-designator :dont-know))
+        s2 (delay (gns/subtype? sub-designator '(rte (:* java.lang.Character)) :dont-know))]
+    (cond (and (gns/rte? sub-designator)
+               (gns/rte? super-designator))
+          (let [[_ pat-sub] sub-designator
+                [_ pat-super] super-designator]
+            (rte-vacuous? (rte-compile `(:and ~pat-sub (:not ~pat-super)))))
+          
+          (and (gns/rte? super-designator)
+               (gns/class-designator? sub-designator)
+               (isa? (gns/find-class sub-designator) java.lang.CharSequence)
+               (member @s1 '(true false)))
+          @s1
+          
+          (and (gns/rte? sub-designator)
+               (gns/class-designator? super-designator)
+               (isa? (gns/find-class super-designator) java.lang.CharSequence)
+               (member @s2 '(true false)))
+          @s2
+          
+          (and (gns/rte? super-designator)
+               (gns/class-designator? sub-designator)
+               (not (isa? (gns/find-class sub-designator) clojure.lang.Sequential)))
+          false
+          
+          (and (gns/rte? sub-designator)
+               (gns/class-designator? super-designator)
+               (not (isa? (gns/find-class super-designator) clojure.lang.Sequential)))
+          false
+          
+          (and (gns/rte? super-designator)
+               (gns/and? sub-designator)
+               (exists [and-operand (rest sub-designator)]
+                       (and (gns/rte? and-operand)
+                            (gns/subtype? and-operand super-designator
+                                          false))))
+          true
+               
+          :else :dont-know)))

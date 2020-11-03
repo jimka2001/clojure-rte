@@ -34,16 +34,16 @@
              (resolve 'java.lang.Comparable))
     (testing "disjoint?"
 
-      (is (not (gns/disjoint? 'java.io.Serializable '(and clojure.lang.Symbol (not (member a b))) (constantly true))) "case-1")
-      (is (not (gns/disjoint? 'java.lang.CharSequence 'String)) "case-2")
-      (is (not (gns/disjoint? 'java.io.Serializable 'java.lang.Comparable)) "case-3")
-      (is (gns/disjoint? 'Integer 'String) "case-4")
-      (is (not (gns/disjoint? 'java.lang.Comparable '(not java.io.Serializable))) "case-5")
-      (is (not (gns/disjoint? '(and java.lang.Comparable (not clojure.lang.Symbol)) 'java.lang.Object)) "case-6")
+      (is (not (gns/disjoint? 'java.io.Serializable '(and clojure.lang.Symbol (not (member a b))) true)) "case-1")
+      (is (not (gns/disjoint? 'java.lang.CharSequence 'String true)) "case-2")
+      (is (not (gns/disjoint? 'java.io.Serializable 'java.lang.Comparable true)) "case-3")
+      (is (gns/disjoint? 'Integer 'String false) "case-4")
+      (is (not (gns/disjoint? 'java.lang.Comparable '(not java.io.Serializable) true)) "case-5")
+      (is (not (gns/disjoint? '(and java.lang.Comparable (not clojure.lang.Symbol)) 'java.lang.Object true)) "case-6")
 
       ;; (disjoint? (and A1 A2 .. An) S)
       ;; if Ai is non empty subset of S
-      (is (not (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)) "case-7")
+      (is (not (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable true)) "case-7")
 
       ;; disjoint? is not smart enough to determine the following,
       ;; must use bdd-type-disjoint? instead
@@ -69,13 +69,13 @@
   (when (and (resolve 'java.lang.Number)
              (resolve 'clojure.lang.ISeq))
     (testing "disjoint not"
-      (is (gns/disjoint? '(not Boolean) '(not Object) (constantly false))) ;; currently broken
-      (is (gns/disjoint? 'Long 'Boolean (constantly false)))
-      (is (not (gns/disjoint? '(not Long) '(not Boolean) (constantly true))))
-      (is (not (gns/disjoint? 'clojure.lang.ISeq '(not java.lang.Number))))
+      (is (gns/disjoint? '(not Boolean) '(not Object) false)) ;; currently broken
+      (is (gns/disjoint? 'Long 'Boolean  false))
+      (is (not (gns/disjoint? '(not Long) '(not Boolean) true)))
+      (is (not (gns/disjoint? 'clojure.lang.ISeq '(not java.lang.Number) true)))
       ;; because Number is a subtype of java.io.Serializable
       ;;   then Number should be disjoint from (not java.io.Serializable)
-      (is (gns/disjoint? 'Number '(not java.io.Serializable) (constantly false)))
+      (is (gns/disjoint? 'Number '(not java.io.Serializable) false))
       )))
 
 (deftest t-disjoint-2-14
@@ -83,42 +83,42 @@
            (resolve 'clojure.lang.IMeta))   
     (testing "disjoint 2 14"
       ;; interface vs interface - never disjoint
-      (is (not (gns/disjoint? 'java.lang.Comparable 'clojure.lang.IMeta)))
-      (is (not (gns/disjoint? 'clojure.lang.IMeta 'java.lang.Comparable)))
+      (is (not (gns/disjoint? 'java.lang.Comparable 'clojure.lang.IMeta true)))
+      (is (not (gns/disjoint? 'clojure.lang.IMeta 'java.lang.Comparable true)))
 
       ;; final vs interface is superclass
-      (is (not (gns/disjoint? 'Integer 'java.lang.Comparable)))
-      (is (not (gns/disjoint? 'java.lang.Comparable 'Integer)))
+      (is (not (gns/disjoint? 'Integer 'java.lang.Comparable true)))
+      (is (not (gns/disjoint? 'java.lang.Comparable 'Integer true)))
       )))
 
 (deftest t-disjoint-2
   (testing "disjoint 2"
 
-    (is (gns/disjoint? 'Integer 'String)) ; final vs final
-    (is (gns/disjoint? 'String 'Integer)) ; final vs final
+    (is (gns/disjoint? 'Integer 'String false)) ; final vs final
+    (is (gns/disjoint? 'String 'Integer false)) ; final vs final
 
     ;; final vs interface not a superclass
-    (is (gns/disjoint? 'Integer 'java.lang.CharSequence))
-    (is (gns/disjoint? 'java.lang.CharSequence 'Integer))
+    (is (gns/disjoint? 'Integer 'java.lang.CharSequence false))
+    (is (gns/disjoint? 'java.lang.CharSequence 'Integer false))
 
     ;; abstract vs abstract
-    (is (gns/disjoint? 'Number 'clojure.lang.ASeq))
-    (is (gns/disjoint? 'clojure.lang.ASeq 'Number))
+    (is (gns/disjoint? 'Number 'clojure.lang.ASeq false))
+    (is (gns/disjoint? 'clojure.lang.ASeq 'Number false))
 
     ;; abstract vs interface
-    (is (not (gns/disjoint? 'clojure.lang.IHashEq 'clojure.lang.ASeq)))
-    (is (not (gns/disjoint? 'clojure.lang.ASeq 'clojure.lang.IHashEq)))
+    (is (not (gns/disjoint? 'clojure.lang.IHashEq 'clojure.lang.ASeq true)))
+    (is (not (gns/disjoint? 'clojure.lang.ASeq 'clojure.lang.IHashEq true)))
 
     ;;clojure.lang.PersistentList java.lang.Object  java.lang.Number
-    (is (not (gns/disjoint? 'clojure.lang.PersistentList 'java.lang.Object  )))
-    (is (not (gns/disjoint? 'java.lang.Object  'java.lang.Number)))
-    (is (gns/disjoint? 'clojure.lang.PersistentList 'java.lang.Number))
+    (is (not (gns/disjoint? 'clojure.lang.PersistentList 'java.lang.Object true)))
+    (is (not (gns/disjoint? 'java.lang.Object  'java.lang.Number true)))
+    (is (gns/disjoint? 'clojure.lang.PersistentList 'java.lang.Number false))
 
-    (is (gns/disjoint? 'Long '(not Long)))
-    (is (gns/disjoint? '(not Long) 'Long))
+    (is (gns/disjoint? 'Long '(not Long) false))
+    (is (gns/disjoint? '(not Long) 'Long false))
 
-    (is (gns/disjoint? 'Long '(not java.io.Serializable)))
-    (is (gns/disjoint? '(not java.io.Serializable) 'Long))
+    (is (gns/disjoint? 'Long '(not java.io.Serializable) false))
+    (is (gns/disjoint? '(not java.io.Serializable) 'Long false))
     ))
 
 (deftest t-typep
@@ -180,97 +180,97 @@
 
 (deftest t-disjoint-member
   (testing "disjoint member"
-    (is (gns/disjoint? '(member 1 2 3) '(member 5 6 )) "line 139")
-    (is (not (gns/disjoint? '(member 1 2 3) '(member 3 6 ))) "line 140")
-    (is (gns/disjoint? '(= 1) '(= 2)) "line 141")
-    (is (gns/disjoint? '(= 1) '(member 2 3 4)) "line 142")
-    (is (gns/disjoint? '(member 2 3 4) '(= 1)) "line 143")
-    (is (not (gns/disjoint? '(= 3) '(member 2 3 4))) "line 144")
-    (is (not (gns/disjoint? '(member 2 3 4) '(= 3))) "line 145")
+    (is (gns/disjoint? '(member 1 2 3) '(member 5 6 ) false) "line 139")
+    (is (not (gns/disjoint? '(member 1 2 3) '(member 3 6 ) true)) "line 140")
+    (is (gns/disjoint? '(= 1) '(= 2) false) "line 141")
+    (is (gns/disjoint? '(= 1) '(member 2 3 4) false) "line 142")
+    (is (gns/disjoint? '(member 2 3 4) '(= 1) false) "line 143")
+    (is (not (gns/disjoint? '(= 3) '(member 2 3 4) true)) "line 144")
+    (is (not (gns/disjoint? '(member 2 3 4) '(= 3) true)) "line 145")
 
-    (is (gns/disjoint? '(member 1 2 3) '(not Long))  "line 147")
-    (is (not (gns/disjoint? '(member 1 "2" 3) '(not Long))) "line 148")
+    (is (gns/disjoint? '(member 1 2 3) '(not Long) false)  "line 147")
+    (is (not (gns/disjoint? '(member 1 "2" 3) '(not Long) true)) "line 148")
 
-    (is (not (gns/disjoint? '(member a b c 1 2 3) '(not (member 1 2 3)))) "line 150")
+    (is (not (gns/disjoint? '(member a b c 1 2 3) '(not (member 1 2 3)) true)) "line 150")
 
-    (is (gns/disjoint? '(member 1 2 3) '(not (member a b c 1 2 3))) "line 152")
+    (is (gns/disjoint? '(member 1 2 3) '(not (member a b c 1 2 3)) false) "line 152")
     
-    (is (gns/disjoint? 'Long '(not Long)) "line 154")
-    (is (gns/disjoint? '(not Long) 'Long) "line 155")
+    (is (gns/disjoint? 'Long '(not Long) false) "line 154")
+    (is (gns/disjoint? '(not Long) 'Long false) "line 155")
 
-    (is (gns/disjoint? 'String '(member 1 2 3)))
-    (is (gns/disjoint? '(member 1 2 3) 'String))
+    (is (gns/disjoint? 'String '(member 1 2 3) false))
+    (is (gns/disjoint? '(member 1 2 3) 'String false))
 
     (is (not (gns/disjoint? 'String '(not (member 1 2 3))
-                        (constantly true))))
+                            true)))
     (is (not (gns/disjoint? 'Long '(not (member 1 2 3))
-                        (constantly true))))
+                            true)))
     (is (not (gns/disjoint? 'Object '(not (member 1 2 3))
-                        (constantly true))))
+                            true)))
     (is (not (gns/disjoint? 'Object '(not (= 0))
-                        (constantly true))))
+                            true)))
     (is (not (gns/disjoint? 'Long '(not (= 0))
-                        (constantly true))))
+                            true)))
     (is (not (gns/disjoint? 'java.lang.CharSequence '(not (member a b c a b c))
-                        (constantly true))))
+                            true)))
     (is (not (gns/disjoint? '(member 3 2)
                         '(member 3 4)
-                        (constantly true))))
+                        true)))
     (is (not (gns/disjoint? '(member 3 2)
                         '(not (member 3 4))
-                        (constantly true))))
+                        true)))
     (is (not (gns/disjoint? '(member [1 2 3] [1 2] [1] [])
                         '(not (member [1 2 3] [2 1 3]))
-                        (constantly true))))
+                        true)))
     (is (not (gns/disjoint? '(and String (not (member a b c 1 2 3)))
                         'java.lang.Comparable
-                        (constantly true))))
+                        true)))
     ))
 
 (deftest t-subtype?-and
   (testing "subtype? and"
     (is (gns/subtype? '(and String (not (= "a")))
                       'String
-                      (constantly false))
+                      false)
         "test 1")
     (is (gns/subtype? '(and String (not (member "a" "b" "c")))
                       'java.io.Serializable
-                      (constantly false))
+                      false)
         "test 2")
     (is (gns/subtype? '(and Long (not (member 1 2)) (satisfies odd?))
                       '(and Long (satisfies odd?))
-                      (constantly false))
+                      false)
         "test 3")
 
     (is (not (gns/subtype? '(and Long (not (member 0 2 4 6)))
                            '(not Long)
-                           (constantly :dont-know)))
+                           :dont-know))
         "test 4")
 ))
 
 (deftest t-subtype?
   (testing "subtype?"
     ;; adding failing test, TODO need to fix
-    (is (not (gns/subtype? 'Long '(not Long) (constantly :dont-know))))
-    (is (gns/subtype? 'Long '(not Double) (constantly false)))
+    (is (not (gns/subtype? 'Long '(not Long) :dont-know)))
+    (is (gns/subtype? 'Long '(not Double) false))
 
-    (is (not (gns/subtype? '(not Long) '(not Boolean) (constantly true))))
-    (is (not (gns/subtype? '(not Boolean) '(not Long) (constantly true))))
+    (is (not (gns/subtype? '(not Long) '(not Boolean) true)))
+    (is (not (gns/subtype? '(not Boolean) '(not Long) true)))
     
-    (is (not (gns/subtype? 'Long '(member 1 2 3) (constantly true))))
-    (is (not (gns/subtype? 'Long '(member 1 1.2 1.3) (constantly true))))
-    (is (not (gns/subtype? 'Long '(member 1.1 1.2 1.3) (constantly true))))
+    (is (not (gns/subtype? 'Long '(member 1 2 3) true)))
+    (is (not (gns/subtype? 'Long '(member 1 1.2 1.3) true)))
+    (is (not (gns/subtype? 'Long '(member 1.1 1.2 1.3) true)))
 
-    (is (not (gns/subtype? 'Long '(not (member 1 2 3)) (constantly true))))
-    (is (not (gns/subtype? 'Long '(not (member 1 1.2 1.3)) (constantly true))))
-    (is (gns/subtype? 'Long '(not (member 1.1 1.2 1.3)) (constantly false)))
+    (is (not (gns/subtype? 'Long '(not (member 1 2 3)) true)))
+    (is (not (gns/subtype? 'Long '(not (member 1 1.2 1.3)) true)))
+    (is (gns/subtype? 'Long '(not (member 1.1 1.2 1.3)) false))
     
-    (is (gns/subtype? '(member 1 2) '(member 0 1 2 3)))
-    (is (not (gns/subtype? '(member 0 1 2 3) '(member 1 2))))
-    (is (gns/subtype? '(member 1 2) 'Long) "line 154")
-    (is (not (gns/subtype? '(member 1 2) 'String)) "line 155")
-    (is (not (gns/subtype? '(member 1 2) '(not Long))) "line 156")
-    (is (gns/subtype? '(member 1 2) '(not String)) "line 157")))
+    (is (gns/subtype? '(member 1 2) '(member 0 1 2 3) false))
+    (is (not (gns/subtype? '(member 0 1 2 3) '(member 1 2) true)))
+    (is (gns/subtype? '(member 1 2) 'Long false) "line 154")
+    (is (not (gns/subtype? '(member 1 2) 'String true)) "line 155")
+    (is (not (gns/subtype? '(member 1 2) '(not Long) true)) "line 156")
+    (is (gns/subtype? '(member 1 2) '(not String) false) "line 157")))
   
 (deftest t-inhabited
   (testing "inhabited?"
@@ -353,8 +353,8 @@
                    clojure.lang.IPersistentVector
                    (not (rte (:* (:cat clojure.lang.IPersistentVector (:* :sigma))))))]
       (is (=
-           (gns/disjoint? t1 t2)
-           (gns/disjoint? t2 t1 ))))))
+           (gns/disjoint? t1 t2 :dont-know)
+           (gns/disjoint? t2 t1 :dont-know))))))
 
 (deftest t-disjoint-interfaces
   (testing "disjoint interfaces"
@@ -364,31 +364,31 @@
                                                     java.net.http.WebSocket))))
     (is (gns/disjoint? 'javax.security.auth.spi.LoginModule
                        'java.net.http.WebSocket
-                       (constantly false)))))
+                       false))))
 
 (deftest t-disjoint-and
   (testing "disjoint of intersection types"
-    (is (= false (gns/disjoint? '(and BigDecimal clojure.lang.IMeta) 'java.lang.Number (constantly :dont-know))) "test 1")
-    (is (= false (gns/disjoint? '(and clojure.lang.IMeta BigInteger) 'java.lang.Number (constantly :dont-know))) "test 2")
-    (is (= false (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'java.lang.Number (constantly :dont-know))) "test 3")
-    (is (= true  (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'String (constantly :dont-know))) "test 4")
+    (is (= false (gns/disjoint? '(and BigDecimal clojure.lang.IMeta) 'java.lang.Number :dont-know)) "test 1")
+    (is (= false (gns/disjoint? '(and clojure.lang.IMeta BigInteger) 'java.lang.Number :dont-know)) "test 2")
+    (is (= false (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'java.lang.Number :dont-know)) "test 3")
+    (is (= true  (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'String :dont-know)) "test 4")
 
     (is (= true  (gns/inhabited? '(and BigDecimal (not clojure.lang.IMeta)) (constantly :dont-know))) "test 5")
     (is (= false (gns/inhabited? '(not Object) (constantly :dont-know))) "test 6")
     (is (= false (gns/inhabited? '(and (not Object)) (constantly :dont-know))) "test 7")
-    (is (= false (gns/disjoint? 'BigDecimal 'clojure.lang.IMeta (constantly :dont-know))) "test 8")
-    (is (= false (gns/disjoint? 'BigDecimal '(not clojure.lang.IMeta) (constantly :dont-know))) "test 9")
+    (is (= false (gns/disjoint? 'BigDecimal 'clojure.lang.IMeta :dont-know)) "test 8")
+    (is (= false (gns/disjoint? 'BigDecimal '(not clojure.lang.IMeta) :dont-know)) "test 9")
 
-    (is (= false (gns/disjoint? '(and BigDecimal (not clojure.lang.IMeta)) 'java.lang.Number (constantly :dont-know)))
+    (is (= false (gns/disjoint? '(and BigDecimal (not clojure.lang.IMeta)) 'java.lang.Number :dont-know))
         "test 10")
-    (is (= false  (gns/disjoint? '(and BigInteger (not clojure.lang.IMeta)) 'java.lang.Number (constantly :dont-know)))
+    (is (= false  (gns/disjoint? '(and BigInteger (not clojure.lang.IMeta)) 'java.lang.Number :dont-know))
         "test 11")
-    (is (= false (gns/disjoint? '(and clojure.lang.Ratio (not clojure.lang.IMeta)) 'java.lang.Number (constantly :dont-know)))
+    (is (= false (gns/disjoint? '(and clojure.lang.Ratio (not clojure.lang.IMeta)) 'java.lang.Number :dont-know))
         "test 12")
 
-    (is (= false (gns/disjoint? 'java.io.Serializable '(not Long) (constantly :dont-know)))
+    (is (= false (gns/disjoint? 'java.io.Serializable '(not Long) :dont-know))
         "test 13")
-    (is (= true (gns/disjoint? '(not java.io.Serializable) 'Long (constantly :dont-know)))
+    (is (= true (gns/disjoint? '(not java.io.Serializable) 'Long :dont-know))
         "test 14")
     ))
 

@@ -57,12 +57,12 @@ Example
 (subtype? 'Long '(or String (not Long))) ;; false
 ```
 
-* `disjoint? [t1 t2]` --- predicate to determine whether two types are disjoint in the sense that their intersection is empty. There are three possible answers to this question, `true`, `false`, and `:dont-know`.
+* `disjoint? [t1 t2 default]` --- predicate to determine whether two types are disjoint in the sense that their intersection is empty. There are three possible answers to this question, `true`, `false`, and `:dont-know`.  The four possible values of `default` are `true`, `false`, `:dont-know`, `:warning`.  If it cannot be determined whether the designated types are disjoint, and `default` is `warning` then a warning message is emitted and `false` is returned.
 
 Example 
 ```clojure
-(disjoint? 'Long 'Double) ;; true
-(disjoint? 'Number 'java.io.Serializable) ;; false
+(disjoint? 'Long 'Double :dont-know) ;; true
+(disjoint? 'Number 'java.io.Serializable :dont-know) ;; false
 ```
 
 * `inhabited? [type-designator]` --- predicate to determine whether there exists an element of a given type.  Any type which is not inhabited is vacuous. There are three possible answers to this question, `true`, `false`, and `:dont-know`.
@@ -225,7 +225,7 @@ If `inhabited?` is called with a 3rd argument, then
 * `-disjoint?` ---   
 
 Applications may install methods via `(defmethod -disjoint? ...)`.
-The method accepts two arguments which are type-designators,
+The method accepts two type-designators,
 `[t1 t2]`,  potentially application specific.
 The method should examine the designated types to determine whether
 the designated types are disjoint, i.e., whether they have no
@@ -238,10 +238,10 @@ When `disjoint?` (the public calling interface) is called,
 the methods of -disjoint? are called in some order
 (`:primary` first) until one method returns `true` or `false`,
 in which case `disjoint?` returns that value.
-If no method returns `true` or `false`, then the function
-`*disjoint?-default*` is called, and its value returned.
-If `disjoint?` is called with a 3rd argument, then
-`*disjoint?-default*` is dynamically bound to that value.
+If no method returns `true` or `false`, then that is a signal
+for the `disjoint?` function to return that value.  If the method
+returns `:dont-know` that is a signal for the `disjoint?` function
+to keep trying until all possibilities are exhausted.
     
 
 ### Determining whether one type is a subtype of another

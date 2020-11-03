@@ -131,8 +131,8 @@
        ;; two types are equivalent if each is a subtype of the other.
        ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
        ;;    as that may be compute intensive.
-       (let [s1 (subtype? t1 t2 (constantly :dont-know))
-             s2 (delay (subtype? t2 t1 (constantly :dont-know)))]
+       (let [s1 (subtype? t1 t2 :dont-know)
+             s2 (delay (subtype? t2 t1 :dont-know))]
          (case s1
            (false) false
            (case @s2
@@ -287,18 +287,12 @@
                  (not (empty? t))
                  (member (first t) '(satisfies rte))))]
     (cond (or (dont-complain t1)
-              (dont-complain 2))
+              (dont-complain t2))
           false
           :else
           (do
             (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%" t1 t2)
             false))))
-
-(def ^:dynamic *disjoint?-default*
-  "Default to return when disjoint-ness cannot be determined.  This value is a binary
-  function which is called with the two type designators in question:
-  [t1 t2]"
-  disjoint?-false-warn)
 
 (defn inhabited?-error [type-designator]       
   (throw (ex-info (format "inhabited? cannot decide %s" type-designator)
@@ -309,17 +303,6 @@
   "doc string"
   inhabited?-error
   )
-
-(defn subtype?-error [sub-designator super-designator]
-  (throw (ex-info (format "subtype? cannot decide %s vs %s" sub-designator super-designator)
-                  {:error-type :not-yet-implemented
-                   :type-designators [sub-designator super-designator]})))
-
-(def ^:dynamic *subtype?-default*
-  "Default to return when subtype-ness cannot be determined.  This value is a binary
-  function which is called with the two type designators in question:
-  [sub-designator super-designator]"
-  subtype?-error)
 
 (defn-memoized [sort-method-keys -sort-method-keys]
   "Given a multimethod object, return a list of method keys.
@@ -356,40 +339,41 @@
 
 (defn disjoint?
   "Predicate to determine whether the two types overlap."
-  ([t1 t2]
-   (disjoint? t1 t2 *disjoint?-default*))
-  ([t1 t2 default]
-   {:pre [(fn? default)]
-    :post [(fn [v] (member v '(true false :dont-know)))]}
-   (letfn [(check-disjoint [t1' t2' default]
-             (binding [*disjoint?-default* default]
-               (loop [[k & ks] (sort-method-keys -disjoint?)]
-                 (case ((k (methods -disjoint?)) t1' t2')
-                   (true) true
-                   (false) false
-                   (case ((k (methods -disjoint?)) t2' t1')
-                     (true) true
-                     (false) false
-                     (if ks
-                       (recur ks)
-                       (default t1 t2)))))))]
-     (cond
-       (not (inhabited? t1 (constantly true))) ;; if t1 is empty, t1 and t2 are disjoint
-       true
+  [t1 t2 default]
+  {:pre [(member default '(true false :dont-know :warning))]
+   :post [(fn [v] (member v '(true false :dont-know)))]}
+  (letfn [(conclude [t1' t2']
+            (if (= default :warning)
+              (disjoint?-false-warn t1' t2')
+              default))
+          (check-disjoint [t1' t2' default]
+            (loop [[k & ks] (sort-method-keys -disjoint?)]
+              (case ((k (methods -disjoint?)) t1' t2')
+                (true) true
+                (false) false
+                (case ((k (methods -disjoint?)) t2' t1')
+                  (true) true
+                  (false) false
+                  (if ks
+                    (recur ks)
+                    (conclude t1' t2'))))))]
+    (cond
+      (not (inhabited? t1 (constantly true))) ;; if t1 is empty, t1 and t2 are disjoint
+      true
 
-       (not (inhabited? t2 (constantly true))) ;; if t2 is empty, t1 and t2 are disjoint
-       true
+      (not (inhabited? t2 (constantly true))) ;; if t2 is empty, t1 and t2 are disjoint
+      true
 
-       :else
-       (let [try1 (check-disjoint t1 t2 (constantly :dont-know))]
-         (if (not= :dont-know try1)
-           try1
-           (let [t1-simple (-canonicalize-type t1)
-                 t2-simple (-canonicalize-type t2)]
-             (if (and (= t1-simple t1)
-                      (= t2-simple t2))
-               (default t1 t2)
-               (check-disjoint t1-simple t2-simple default)))))))))
+      :else
+      (let [try1 (check-disjoint t1 t2 (constantly :dont-know))]
+        (if (not= :dont-know try1)
+          try1
+          (let [t1-simple (-canonicalize-type t1)
+                t2-simple (-canonicalize-type t2)]
+            (if (and (= t1-simple t1)
+                     (= t2-simple t2))
+              (conclude t1 t2)
+              (check-disjoint t1-simple t2-simple default))))))))
 
 (defmethod -disjoint? :primary [t1 t2]
   (cond
@@ -425,7 +409,7 @@
 
 (defmethod -disjoint? :or [t1 t2]
   (and (or? t1)
-       (every? (fn [t1'] (disjoint? t1' t2)) (rest t1)))
+       (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1)))
   true
 
   :else
@@ -438,7 +422,7 @@
           :dont-know
 
           (exists [t (rest t1)]
-                  (disjoint? t2 t))
+                  (disjoint? t2 t false))
           ;; (disjoint? (and A B C) X)
           true
 
@@ -453,8 +437,8 @@
           (and @inhabited-t2
                @inhabited-t1
                (exists [t1' (rest t1)]
-                       (or (subtype? t1' t2 (constantly false))
-                           (subtype? t2 t1' (constantly false))
+                       (or (subtype? t1' t2 false)
+                           (subtype? t2 t1' false)
                            )))
           false
 
@@ -484,10 +468,10 @@
                (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1
                      C t2]
-                 (and (subtype? B A (constantly false))
-                      (not (subtype? A B (constantly true)))
-                      (subtype? A C (constantly false))
-                      (not (subtype? C A (constantly true))))))
+                 (and (subtype? B A false)
+                      (not (subtype? A B true))
+                      (subtype? A C false)
+                      (not (subtype? C A true)))))
           false
 
           ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
@@ -498,8 +482,8 @@
                (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1
                      C t2]
-                 (disjoint? A B (constantly false))))
-          (disjoint? (second t1) t2 (constantly :dont-know))
+                 (disjoint? A B false)))
+          (disjoint? (second t1) t2 :dont-know)
 
           :else
           :dont-know)))
@@ -550,10 +534,10 @@
   the methods of -subtype? are called in some order
   (:primary first) until one method returns true or false,
   in which case subtype? returns that value.
-  If no method returns true or false, then the function
-  *subtype?-default* is called, and its value returned.
-  If subtype? is called with a 3rd argument, then
-  *inhabited?-default* is dynamically bound to that value."
+  If no method returns true or false, then the default is
+  examined.  If the default is true, false, or :dont-know,
+  then that value is returned.  If the 3rd argument is
+  :error, then an exception is thrown."
   (fn [sub super]
     (throw (ex-info "-subtype? should not be called directly"
                     {:error-type :should-not-be-called-directly
@@ -565,23 +549,23 @@
   of super-designator. Sometimes this decision cannot be made/computed, in
   which case the given default value is interpreted as a binary
   function which is called, and its value returned.  The default value
-  of default is a function which raises an exception.  This default
-  value is controlled by the dynamic variable *subtype?-default* It is
-  assumed that the arguments have already been valided by
-  class-designator?"
-  ([sub-designator super-designator]
-   (subtype? sub-designator super-designator *subtype?-default*))
-  ([sub-designator super-designator default]
-   {:pre [(fn? default)]
-    :post [(fn [v] (member v '(true false :dont-know)))]}
-   (binding [*subtype?-default* default]
-     (loop [[k & ks] (sort-method-keys -subtype?)]
-       (let [s ((k (methods -subtype?)) sub-designator super-designator)]
-         (case s
-           (true false) s
-           (if ks
-             (recur ks)
-             (default sub-designator super-designator))))))))
+  of default is one of: true, false, :dont-know or :error."
+  [sub-designator super-designator default]
+  {:pre [(member default '(true false :dont-know :error))]
+   :post [(fn [v] (member v '(true false :dont-know)))]}
+  (letfn [(conclude [sub super]
+            (if (= default :error)
+              (throw (ex-info (format "subtype? cannot decide %s vs %s" sub super)
+                              {:error-type :not-yet-implemented
+                               :type-designators [sub super]}))
+              default))]
+    (loop [[k & ks] (sort-method-keys -subtype?)]
+      (let [s ((k (methods -subtype?)) sub-designator super-designator)]
+        (case s
+          (true false) s
+          (if ks
+            (recur ks)
+            (conclude sub-designator super-designator)))))))
 
 (defmulti -inhabited?
   "This function should never be called.
@@ -636,7 +620,10 @@
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
   [type-designator]
-  (not (inhabited? type-designator)))
+  (let [inh (inhabited? type-designator (constantly :dont-know))]
+    (if (= :dont-know inh)
+      :dont-know
+      (not inh))))
 
 (defmethod -subtype? :primary [sub-designator super-designator]
   (cond (and (class-designator? super-designator)
@@ -677,22 +664,22 @@
 
 (defmethod -subtype? := [sub super]
   (cond (=? sub)
-        (subtype? (cons 'member (rest sub)) super)
+        (subtype? (cons 'member (rest sub)) super :dont-know)
 
         (=? super)
-        (subtype? sub (cons 'member (rest super)))
+        (subtype? sub (cons 'member (rest super)) :dont-know)
 
         :else
         :dont-know))
 
 (defmethod -subtype? :not [sub super]
   (cond (and (not? super)  ; (subtype? 'Long '(not Double))
-             (disjoint? sub (second super) (constantly false)))
+             (disjoint? sub (second super) false))
         true
 
         ;; (subtype? '(not Double) 'Long)
         (and (not? sub)
-             (disjoint? super (second sub) (constantly false)))
+             (disjoint? super (second sub) false))
         false
 
         (and (not? sub)
@@ -710,7 +697,7 @@
         :dont-know
 
         :else
-        (let [x (subtype? (second super) (second sub) (constantly :dont-know))]
+        (let [x (subtype? (second super) (second sub) :dont-know)]
           (if (= :dont-know x)
             :dont-know
             x))))
@@ -747,7 +734,7 @@
     true
 
     
-    (exists [t (rest t1)] (subtype? t t2))
+    (exists [t (rest t1)] (subtype? t t2 false))
     ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
     true
 
@@ -768,7 +755,7 @@
     :dont-know))
 
 (defmethod -disjoint? :subtype [sub super]
-  (cond (and (subtype? sub super (constantly false))
+  (cond (and (subtype? sub super false)
              (inhabited? sub (constantly false)))
         false
         
@@ -819,7 +806,7 @@
                             (or (class-designator? b)
                                 (not? b)
                                 (class-designator? (second b)))
-                            (not (disjoint? a b)))))
+                            (not (disjoint? a b true)))))
     true
 
     (exists-pair [[a b] (rest t1)]
@@ -829,7 +816,7 @@
                       (or (class-designator? b)
                           (not? b)
                           (class-designator? (second b)))
-                      (disjoint? a b)))
+                      (disjoint? a b false)))
     false
     
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
@@ -888,11 +875,11 @@
     ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
     (and (class-designator? (second t1))
          (class-designator? t2)
-         (subtype? t2 (second t1) (constantly false)))
+         (subtype? t2 (second t1) false))
     true
 
     ;; (disjoint? (not B) A) ;; when A and B are disjoint
-    (disjoint? t2 (second t1) (constantly false))
+    (disjoint? t2 (second t1) false)
     false
 
     ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
@@ -921,13 +908,13 @@
     
     ;; if t2 < t1, then t2 disjoint from (not t1)
     ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
-    (and (subtype? t2 (second t1) (constantly false))
-         (not (subtype? (second t1) t2 (constantly true))))
+    (and (subtype? t2 (second t1) false)
+         (not (subtype? (second t1) t2 true)))
     true
 
     ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
-    (and (subtype? (second t1) t2 (constantly false))
-         (not (subtype? t2 (second t1) (constantly true))))
+    (and (subtype? (second t1) t2 false)
+         (not (subtype? t2 (second t1) true)))
     false
 
     ;; (disjoint? '(not Long) 'Number)
@@ -943,12 +930,12 @@
     (and (not? t2)
          ;;(class-designator? (second t1))
          ;;(class-designator? (second t2))
-         (disjoint? (second t1) (second t2) (constantly false)))
+         (disjoint? (second t1) (second t2) false))
     false
 
     ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
     (and (not? t2)
-         (not (disjoint? (second t1) (second t2) (constantly true))))
+         (not (disjoint? (second t1) (second t2) true)))
     false         
 
     :else
@@ -1029,14 +1016,14 @@
               (recurring items (remove #{:sigma} left) right))
              ((and left
                    (some (fn [t2]
-                           (disjoint? t2 (first left))) (rest left)))
+                           (disjoint? t2 (first left) false)) (rest left)))
               ;; prune
               )
              ((and (not-empty left) (not-empty right)
                    ;; exists t2 in right such that t1 < t2
                    ;; then t1 & !t2 = nil
                    (exists [t2 right]
-                           (subtype? (first left) t2 (constantly false))))
+                           (subtype? (first left) t2 false)))
               ;; prune
               )
 
@@ -1044,7 +1031,7 @@
                    ;; exists t1 in left such that t1 < t2
                    ;; then t1 & !t2 = nil
                    (exists [t1 left]
-                           (subtype? t1 (first right) (constantly false))))
+                           (subtype? t1 (first right) false)))
               ;; prune
               )
 
@@ -1062,9 +1049,9 @@
                   (nil) (recurring (rest items) left right)
                   (:sigma) (recurring (rest items) (cons new-type left) right)
                   (do
-                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type (constantly false)))
+                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type false))
                                                                          right))
-                    (if (some (fn [t2] (disjoint? new-type t2 (constantly false))) left)
+                    (if (some (fn [t2] (disjoint? new-type t2 false)) left)
                       (recurring (rest items) left right) ;;   Double & !Float, we can omit Float in right
                       (recurring (rest items) left (cons new-type right)))))))))]
     (recurring items () ())))

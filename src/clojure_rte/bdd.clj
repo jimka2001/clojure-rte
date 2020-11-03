@@ -85,7 +85,7 @@
   "Serialize a Bdd to dnf disjunctive normal form.
   This dnf form is cleaned up so that an (and ...) or (or ...) clause contains
   no subtype/supertype pairs.  This subtype relation is determined by
-  (gns/subtype? a b (constantly false)).  
+  (gns/subtype? a b false).  
   "
   [bdd]
   (letfn [(pretty-and [args]
@@ -101,7 +101,7 @@
           (supertypes [sub types]
             (filter (fn [super]
                       (c/and (not= sub super)
-                             (gns/subtype? sub super (constantly false)))) types))
+                             (gns/subtype? sub super false))) types))
           (check-supers [args]
             (let [args (distinct args)
                   complements (for [a args
@@ -128,8 +128,8 @@
                    (let [my-label (:label node)
                          ;; two lazy sequences created by filter.  the filter loops are
                          ;; never called unless (empty? ...) is called below.
-                         disjoints (filter (fn [x] (if my-label (gns/disjoint? x my-label (constantly false)))) parents)
-                         subtypes  (filter (fn [x] (if my-label (gns/subtype?  x my-label (constantly false)))) parents)]
+                         disjoints (filter (fn [x] (if my-label (gns/disjoint? x my-label false))) parents)
+                         subtypes  (filter (fn [x] (if my-label (gns/subtype?  x my-label false))) parents)]
                      (cond
                        (= true node)
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B
@@ -146,7 +146,7 @@
                                                               ;; Is (first tail) <: b ?
                                                               ;;   if yes, then omit b in recur call
                                                               ;;   if :dont-know then keep it.
-                                                              (gns/subtype? (first tail) b (constantly false)))
+                                                              (gns/subtype? (first tail) b false))
                                                             (rest tail))]
                                         (recur keeping
                                                (cons (first tail) done)))))]
