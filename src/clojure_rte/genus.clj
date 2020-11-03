@@ -110,36 +110,30 @@
 (defn compatible-members? [c1 c2]
   (empty? (find-incompatible-members c1 c2)))
 
-(defn type-equivalent?-error [t1-designator t2-designator]
-  (throw (ex-info (format "type-equivalent? cannot decide %s vs %s" t1-designator t2-designator)
-                  {:error-type :not-yet-implemented
-                   :type-designators [t1-designator t1-designator]})))
-
-(def ^:dynamic *type-equivalent?-default*
-  "Default to return when type-equivalence cannot be determined.  This value is a binary
-  function which is called with the two type designators in question:
-  [t1 t2]"
-  type-equivalent?-error)
-
 (defn type-equivalent?
-  ([t1 t2]
-   (type-equivalent? t1 t2 *type-equivalent?-default*))
-  ([t1 t2 default]
-   (if (= t1 t2)
-     true
-     (binding [*type-equivalent?-default* default]
-       ;; two types are equivalent if each is a subtype of the other.
-       ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
-       ;;    as that may be compute intensive.
-       (let [s1 (subtype? t1 t2 :dont-know)
-             s2 (delay (subtype? t2 t1 :dont-know))]
-         (case s1
-           (false) false
-           (case @s2
-             (false) false
-             (if (= true s1 @s2)
-               true
-               (default t1 t2)))))))))
+  [t1 t2 default]
+  {:pre [(member default '(true false :dont-know :error))]
+   :post [(fn [v] (member v '(true false :dont-know)))]}
+  (if (= t1 t2)
+    true
+    (letfn [(conclude [t1-designator t2-designator]
+              (if (= :error default)
+                (throw (ex-info (format "type-equivalent? cannot decide %s vs %s" t1-designator t2-designator)
+                                {:error-type :not-yet-implemented
+                                 :type-designators [t1-designator t1-designator]}))
+                default))]
+      ;; two types are equivalent if each is a subtype of the other.
+      ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
+      ;;    as that may be compute intensive.
+      (let [s1 (subtype? t1 t2 :dont-know)
+            s2 (delay (subtype? t2 t1 :dont-know))]
+        (case s1
+          (false) false
+          (case @s2
+            (false) false
+            (if (= true s1 @s2)
+              true
+              (conclude t1 t2))))))))
 
 (defmulti typep 
   "(typep value type-descriptor)
@@ -683,11 +677,11 @@
         false
 
         (and (not? sub)
-             (type-equivalent? (second sub) super (constantly false)))
+             (type-equivalent? (second sub) super false))
         false
 
         (and (not? super)
-             (type-equivalent? sub (second super) (constantly false)))
+             (type-equivalent? sub (second super) false))
         false
         
         (not (not? sub))
