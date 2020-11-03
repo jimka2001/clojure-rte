@@ -288,16 +288,6 @@
             (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%" t1 t2)
             false))))
 
-(defn inhabited?-error [type-designator]       
-  (throw (ex-info (format "inhabited? cannot decide %s" type-designator)
-                  {:error-type :not-yet-implemented
-                   :type-designator [type-designator]})))
-
-(def ^:dynamic *inhabited?-default*
-  "doc string"
-  inhabited?-error
-  )
-
 (defn-memoized [sort-method-keys -sort-method-keys]
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
@@ -352,10 +342,10 @@
                     (recur ks)
                     (conclude t1' t2'))))))]
     (cond
-      (not (inhabited? t1 (constantly true))) ;; if t1 is empty, t1 and t2 are disjoint
+      (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
       true
 
-      (not (inhabited? t2 (constantly true))) ;; if t2 is empty, t1 and t2 are disjoint
+      (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
       true
 
       :else
@@ -410,8 +400,8 @@
   :dont-know)
 
 (defmethod -disjoint? :and [t1 t2]
-  (let [inhabited-t1 (delay (inhabited? t1 (constantly false)))
-        inhabited-t2 (delay (inhabited? t2 (constantly false)))]
+  (let [inhabited-t1 (delay (inhabited? t1 false))
+        inhabited-t2 (delay (inhabited? t2 false))]
     (cond (not (and? t1))
           :dont-know
 
@@ -571,11 +561,7 @@
   When inhabited? (the public calling interface) is called,
   the methods of -inhabited? are called in some order
   (:primary first) until one method returns true or false,
-  in which case inhabited? returns that value.
-  If no method returns true or false, then the function
-  *inhabited?-default* is called, and its value returned.
-  If inhabited? is called with a 3rd argument, then
-  *inhabited?-default* is dynamically bound to that value."
+  in which case inhabited? returns that value."
   (fn [type-designator]
     (throw (ex-info "-inhabited? should not be called directly"
                     {:type-designator type-designator
@@ -585,26 +571,29 @@
   "Given a type-designator, perhaps application specific,
   determine whether the type is inhabited, i.e., not the
   empty type."
-  ([type-designator]
-   (inhabited? type-designator *inhabited?-default*))
-  ([type-designator default]
-   {:pre [(fn? default)]
-    :post [(fn [v] (#{true false :dont-know} v))]}
-   (binding [*inhabited?-default* default]
-     (letfn [(calc-inhabited [type-designator default]
-               (loop [[k & ks] (sort-method-keys -inhabited?)]
-                 (case ((k (methods -inhabited?)) type-designator)
-                   (true) true
-                   (false) false
-                   (if ks
-                     (recur ks)
-                     (default type-designator)))))]
-       (let [i (calc-inhabited type-designator (constantly :dont-know))]
-         (cond (= :dont-know i)
-               (calc-inhabited (-canonicalize-type type-designator) default)
-
-               :else
-               i))))))
+  [type-designator default]
+  {:pre [(member default '(true false :dont-know :error))]
+   :post [(fn [v] (member v '(true false :dont-know)))]}
+  (letfn [(conclude [type-designator default]
+            (if (= :error default)
+              (throw (ex-info (format "inhabited? cannot decide %s" type-designator)
+                              {:error-type :not-yet-implemented
+                               :type-designator [type-designator]}))
+              default))
+          (calc-inhabited [type-designator default]
+            (loop [[k & ks] (sort-method-keys -inhabited?)]
+              (case ((k (methods -inhabited?)) type-designator)
+                (true) true
+                (false) false
+                (if ks
+                  (recur ks)
+                  (conclude type-designator default)))))]
+    (let [i (calc-inhabited type-designator :dont-know)]
+      (cond (= :dont-know i)
+            (calc-inhabited (-canonicalize-type type-designator) default)
+            
+            :else
+            i))))
 
 (defmethod -inhabited? :primary [type-designator]
   (if (class-designator? type-designator)
@@ -614,7 +603,7 @@
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
   [type-designator]
-  (let [inh (inhabited? type-designator (constantly :dont-know))]
+  (let [inh (inhabited? type-designator :dont-know)]
     (if (= :dont-know inh)
       :dont-know
       (not inh))))
@@ -737,7 +726,7 @@
     (and (not? t2)
          (exists [t (rest t1)]
                  (= t (second t2)))
-         (inhabited? t1 (constantly false)))
+         (inhabited? t1 false))
     false
 
     ;; (subtype? (and A B C X Y) (and A B C) )
@@ -750,7 +739,7 @@
 
 (defmethod -disjoint? :subtype [sub super]
   (cond (and (subtype? sub super false)
-             (inhabited? sub (constantly false)))
+             (inhabited? sub false))
         false
         
         :else
@@ -821,7 +810,7 @@
                                          (remove (fn [t]
                                                    (and (not? t)
                                                         (member? (second t)))) (rest t1))))
-                (constantly :dont-know))
+                :dont-know)
 
     :else
     :dont-know))

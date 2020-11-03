@@ -275,14 +275,14 @@
 (deftest t-inhabited
   (testing "inhabited?"
     (with-compile-env ()
-      (is (gns/inhabited? '(and Number (not (member 1 2 3))) (constantly false)))
-      (is (gns/inhabited? 'Long))
-      (is (gns/inhabited? '(not Long)))
-      (is (gns/inhabited? 'Object))
-      (is (not (gns/inhabited? '(not Object))))
-      (is (gns/inhabited? '(rte (:+ Number))))
+      (is (gns/inhabited? '(and Number (not (member 1 2 3))) false))
+      (is (gns/inhabited? 'Long false))
+      (is (gns/inhabited? '(not Long) false))
+      (is (gns/inhabited? 'Object false))
+      (is (not (gns/inhabited? '(not Object) true)))
+      (is (gns/inhabited? '(rte (:+ Number)) false))
       (is (not (gns/inhabited? '(rte (:and (:+ Number)
-                                       (:+ String)))))))))
+                                       (:+ String))) false))))))
 
 (deftest t-expand-satisfies
   (testing "expand-satisfies"
@@ -373,9 +373,9 @@
     (is (= false (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'java.lang.Number :dont-know)) "test 3")
     (is (= true  (gns/disjoint? '(and clojure.lang.IMeta clojure.lang.Ratio) 'String :dont-know)) "test 4")
 
-    (is (= true  (gns/inhabited? '(and BigDecimal (not clojure.lang.IMeta)) (constantly :dont-know))) "test 5")
-    (is (= false (gns/inhabited? '(not Object) (constantly :dont-know))) "test 6")
-    (is (= false (gns/inhabited? '(and (not Object)) (constantly :dont-know))) "test 7")
+    (is (= true  (gns/inhabited? '(and BigDecimal (not clojure.lang.IMeta)) :dont-know)) "test 5")
+    (is (= false (gns/inhabited? '(not Object) :dont-know)) "test 6")
+    (is (= false (gns/inhabited? '(and (not Object)) :dont-know)) "test 7")
     (is (= false (gns/disjoint? 'BigDecimal 'clojure.lang.IMeta :dont-know)) "test 8")
     (is (= false (gns/disjoint? 'BigDecimal '(not clojure.lang.IMeta) :dont-know)) "test 9")
 

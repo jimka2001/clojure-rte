@@ -258,7 +258,7 @@
             ]
       (let [types (map first transitions)
             duplicate-types (find-duplicates types)
-            inhabited-types (delay (filter (fn [td] (gns/inhabited? td (constantly false)))
+            inhabited-types (delay (filter (fn [td] (gns/inhabited? td false))
                                            types))
             consequents (map second transitions)]
         
