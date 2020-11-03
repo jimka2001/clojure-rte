@@ -41,54 +41,56 @@
     (boolean (rte-inhabited? (rte-compile (second t1))))
     :dont-know))
 
+(defmethod gns/-disjoint? :not-rte [t1 t2]
+  ;; (disjoint? (not (rte ...)) clojure.lang.IPersistentVector )
+
+  (cond (not (and (gns/not? t1)
+                  (gns/rte? (second t1))))
+        :dont-know
+
+        (and (gns/class-designator? t2)
+             (or (isa? (gns/find-class t2) clojure.lang.Seqable)
+                 (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        true
+
+        (and (gns/class-designator? t2)
+             (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        false
+
+        :else
+        :dont-know))
+
 (defmethod gns/-disjoint? :rte [t1 t2]
-  (cond (and (gns/rte? t1)
-             (gns/rte? t2))
+  (cond (not (gns/rte? t1))
+        :dont-know
+
+        (gns/rte? t2)
         (let [[_ pat1] t1
               [_ pat2] t2]
           (rte-vacuous? (rte-compile `(:and ~pat1 ~pat2))))
 
         ;; (disjoint? (rte ...) clojure.lang.IPersistentVector )
-        (and (gns/rte? t1)
-             (gns/class-designator? t2)
+        (and (gns/class-designator? t2)
              (or (isa? (gns/find-class t2) clojure.lang.Seqable)
                  (isa? (gns/find-class t2) clojure.lang.Sequential)))
         false
-
-        ;; (disjoint? (not (rte ...)) clojure.lang.IPersistentVector )
-        (and (gns/not? t1)
-             (gns/rte? (second t1))
-             (gns/class-designator? t2)
-             (or (isa? (gns/find-class t2) clojure.lang.Seqable)
-                 (isa? (gns/find-class t2) clojure.lang.Sequential)))
-        true
         
-        (and (gns/rte? t1)
-             (gns/not? t2)
+        (and (gns/not? t2)
              (gns/rte? (second t2)))
         (let [[_ pat1] t1
               [_ [_ pat2]] t2]
           (rte-vacuous? (rte-compile `(:and ~pat1 (:not ~pat2)))))
         
-        (and (gns/rte? t1)
-             (gns/class-designator? t2)
+        (and (gns/class-designator? t2)
              (isa? (gns/find-class t2) java.lang.CharSequence))
         (let [[_ pat1] t1]
           (rte-vacuous? (rte-compile `(:and ~pat1 (:* java.lang.Character)))))
         
-        (and (gns/rte? t1)
-             (gns/class-designator? t2)
+        (and (gns/class-designator? t2)
              (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
         true
         
-        (and (gns/not? t1)
-             (gns/rte? (second t1))
-             (gns/class-designator? t2)
-             (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
-        false
-        
-        (and (gns/rte? t1)
-             (gns/not? t2)
+        (and (gns/not? t2)
              (gns/class-designator? (second t2))
              (not (isa? (gns/find-class (second t2)) clojure.lang.Sequential)))
         false
