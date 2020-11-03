@@ -20,8 +20,6 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-case
-  "This is an empty namespace to fool lein to load this file as part of
-  the clojure-rte.rte-core ns."
   (:require [clojure-rte.genus-rte])
   )
 
