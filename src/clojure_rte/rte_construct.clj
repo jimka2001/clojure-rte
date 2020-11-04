@@ -104,6 +104,9 @@
 (defmethod rte-expand :default [pattern functions]
   pattern)
 
+(defmethod rte-expand 'satisfies [pattern functions]
+  (gns/expand-satisfies pattern))
+
 (defmethod rte-expand :? [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:? []]))
