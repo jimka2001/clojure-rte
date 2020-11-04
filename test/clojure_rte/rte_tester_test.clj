@@ -20,7 +20,10 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-tester-test
-  (:require [clojure-rte.rte-tester :refer :all]
+  (:require [clojure-rte.rte-core ]
+            [clojure-rte.rte-construct :refer [rte-match with-compile-env
+                                               canonicalize-pattern canonicalize-pattern-once]]
+            [clojure-rte.rte-tester :refer :all]
             [clojure.test :refer :all :exclude [testing]]))
 
 (defn -main []
@@ -64,8 +67,8 @@
 
 (deftest t-rte-nullable-canonicalize-random
   (testing "canonicalize of :not"
-    (is (= (clojure-rte.rte-core/canonicalize-pattern '
-            (:or (satisfies decimal?)
+    (is (= (canonicalize-pattern 
+            '(:or (satisfies decimal?)
                  (:contains-any (:* (:* (:cat)))
                                 (:not :epsilon)
                                 (:contains-any (:* (:contains-any)) (:cat (:or))))

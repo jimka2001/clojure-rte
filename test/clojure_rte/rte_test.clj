@@ -20,11 +20,18 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-test
-  (:require [clojure.test :refer :all :exclude [testing]]
+  (:require [clojure-rte.rte-core]
+            [clojure-rte.rte-construct :refer [nullable first-types
+                                               canonicalize-pattern canonicalize-pattern-once
+                                               derivative rte-to-dfa
+                                               with-compile-env rte-match rte-compile rte-trace
+                                               rte-inhabited? rte-vacuous? rte-to-dfa
+                                               rte-combine-labels dfa-to-rte
+                                               mdtd with-rte reduce-redundant-or]]
+            [clojure.test :refer :all :exclude [testing]]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [sort-operands remove-once call-with-collector visit-permutations member]]
             [clojure-rte.genus :refer [disjoint? typep inhabited?]]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
             [clojure-rte.rte-tester :refer :all]
             [clojure-rte.xymbolyco :as xym]))
 

@@ -25,7 +25,8 @@
             [clojure.pprint :refer [cl-format]]
             [clj-async-profiler.core :as prof] ;; this requirement is only temporary while trying to debug the out-of-memory error
             ;; [clojure-rte.dot :as dot]
-            [clojure-rte.rte-core :refer [dfa-to-rte rte-to-dfa canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once nullable with-compile-env]]
+            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable
+                                               canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
             ))
 
 (defn rte-components [pattern]

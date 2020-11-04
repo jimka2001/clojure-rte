@@ -20,15 +20,17 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-case
-  (:require [clojure-rte.genus-rte])
+  (:require [clojure-rte.xymbolyco :as xym]
+            [clojure-rte.util :refer :all]
+            [clojure-rte.rte-construct :refer :all]
+            [clojure.pprint :refer [cl-format]]
+            )
   )
-
-(in-ns 'clojure-rte.rte-core)
 
 (defn-memoized [memoized-rte-case-clauses-to-dfa
                 rte-case-clauses-to-dfa]
-  "Helper function for macro-expanding rte-case.
-  Returns a complete Dfa which is the union of the input clauses."
+  "helper function for macro-expanding rte-case.
+  returns a complete dfa which is the union of the input clauses."
   [pairs]
   (reduce xym/synchronized-union
           (map (fn [[index rte]]
@@ -181,8 +183,6 @@
                              :lambda-list lambda-list
                              :parsed parsed
                              :unparsed others}))))))
-
-
 
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return value

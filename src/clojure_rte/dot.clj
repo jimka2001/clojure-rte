@@ -25,7 +25,6 @@
             [clojure.string :as str]
             [clojure.set]
             [clojure-rte.cl-compat :as cl]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
             [clojure-rte.xymbolyco :as xym]
             [clojure-rte.bdd :as bdd]
             [clojure-rte.util :refer [member print-vals mapc]]

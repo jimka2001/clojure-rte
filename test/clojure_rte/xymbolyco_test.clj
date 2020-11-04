@@ -21,8 +21,8 @@
 
 (ns clojure-rte.xymbolyco-test
   (:refer-clojure :exclude [complement])
-  (:require ;; [clojure-rte.core :refer :all]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
+  (:require [clojure-rte.rte-core ]
+            [clojure-rte.rte-construct :refer [rte-to-dfa rte-match with-compile-env]]
             [clojure-rte.xymbolyco :refer :all]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
@@ -31,8 +31,6 @@
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.xymbolyco-test))
-
-
 
 (defmacro testing
   [string & body]

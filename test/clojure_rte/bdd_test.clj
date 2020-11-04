@@ -21,7 +21,8 @@
 
 
 (ns clojure-rte.bdd-test
-  (:require [clojure-rte.bdd :as bdd]
+  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+            [clojure-rte.bdd :as bdd]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [print-vals member]]

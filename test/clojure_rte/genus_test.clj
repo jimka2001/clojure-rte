@@ -20,7 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.genus-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+  (:require [clojure-rte.rte-core]
+            [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [call-with-collector member]]
             [clojure.test :refer :all]))

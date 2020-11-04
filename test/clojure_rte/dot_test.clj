@@ -21,7 +21,9 @@
 
 
 (ns clojure-rte.dot-test
-  (:require [clojure-rte.dot :as sut]
+  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+            [clojure-rte.rte-construct :refer [rte-compile with-compile-env]]
+            [clojure-rte.dot :as sut]
             [clojure-rte.rte-core :refer :all :exclude [-main]]
             [clojure.test :refer :all]))
 

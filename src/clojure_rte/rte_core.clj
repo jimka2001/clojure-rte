@@ -20,24 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-core
-  (:require [clojure.set :refer [union subset? difference]]
-            [clojure.pprint :refer [cl-format]]
-            [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [with-first-match call-with-collector
-                                      exists-pair exists setof
-                                      defn-memoized
-                                      fixed-point
-                                      visit-permutations rte-constantly rte-identity
-                                      partition-by-pred
-                                      print-vals sort-operands member
-                                      ]]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.rte-construct]
-            [clojure-rte.memoize]
-            [clojure-rte.api]
+  (:require [clojure-rte.rte-construct]
             [clojure-rte.rte-case]
-            [clojure-rte.genus-rte]
+            [clojure-rte.genus-spec]
             ))
 
 ;; (defn funny-function [n f]

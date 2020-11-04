@@ -20,7 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.cl-compat-test
-  (:require [clojure-rte.cl-compat :as cl]
+  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+            [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [call-with-collector]]
             [clojure.test :refer :all]))
 

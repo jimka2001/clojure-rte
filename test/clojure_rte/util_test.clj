@@ -20,7 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.util-test
-  (:require [clojure-rte.util :refer :all]
+  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+            [clojure-rte.util :refer :all]
             [clojure.test :refer :all]))
 
 (defn -main []

@@ -19,19 +19,24 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-construct)
-
-(in-ns 'clojure-rte.genus)
-(declare rte?)
-
-(in-ns 'clojure-rte.rte-core)
+(ns clojure-rte.rte-construct
+  (:require [clojure-rte.genus :as gns]
+            [clojure-rte.util :refer :all]
+            [clojure-rte.xymbolyco :as xym]
+            [clojure.pprint :refer [cl-format pprint]]
+            [clojure.set :refer [union subset? difference]]
+            [clojure-rte.cl-compat :as cl]
+))
 
 (declare traverse-pattern)
 (declare canonicalize-pattern)
-
-(def sigma-* '(:* :sigma))
-(def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
-(def not-epsilon `(:cat :sigma ~sigma-*))
+(declare rte-match)
+(declare rte-compile)
+(declare rte-inhabited?)
+(declare rte-vacuous?)
+(declare rte-to-dfa)
+(declare canonicalize-pattern-once)
+(declare -canonicalize-pattern-once)
 
 (def ^:dynamic *rte-known*
   "Dynamic variable whose value is a map.
@@ -44,6 +49,175 @@
   {
    'real? 'Number
    })
+
+(def ^:dynamic rte-compile 
+  "Compile an rte pattern into a finite automaton."
+  (memoize rte-to-dfa)
+  )
+
+(defn call-with-compile-env [thunk]
+  (binding [rte-compile (memoize rte-to-dfa)
+            canonicalize-pattern-once (memoize -canonicalize-pattern-once)
+            ]
+    (thunk)))
+
+(defmacro with-compile-env [[] & body]
+  `(call-with-compile-env (fn [] ~@body)))
+
+(defn call-with-rte
+  "Call the given 0-ary function with 0 or more rte keys bound to rte patterns.
+   with-rte is a macro API to this function.
+   E.g.,
+   (call-with-rte [::a '(:permute Long Long String)
+                   ::b '(:permute Double Double String)]
+     (fn []
+      (rte-match '(:cat ::a ::b) [1 \"hello\" 2
+                                  \"world\" 1.0 2.0])))"
+  [bindings thunk]
+  ;; TODO need to detect if every a local key is defined differently,
+  ;; and if so purge the memoize cache of rte-compile.
+  (with-compile-env ()
+    (binding [*rte-known* (apply assoc *rte-known* bindings)]
+      (thunk))))
+
+(defmacro with-rte
+  "Evaluate the given body in a dynamic extend where 0 or more keys bound to
+   un-quoted rte patterns.
+   E.g.,
+   (with-rte [::a (:permute Long Long String)
+              ::b (:permute Double Double String)]
+     (rte-match '(:cat ::a ::b) [1 \"hello\" 2
+                                \"world\" 1.0 2.0])))
+   Warning, any rte patterns which are compiled during the dynamic extent
+   of with-rte, survive the dynamic extend.  I.e., they are not compiled
+   twice, rather they are memoized.   
+   Any patterns which were compiled before the dynamic extend are ignored.
+   Any patterns compiled within the dynamic extend are abandoned when
+   the dynamic extend ends."
+  [bindings & body]
+  `(call-with-rte '~bindings (fn [] ~@body)))
+
+
+
+(defn rte? [t]
+  (and (sequential? t)
+       (= 'rte (first t))))
+
+(defmethod gns/typep 'rte [a-value [_a-type pattern]]
+  (and (sequential? a-value)
+       (rte-match pattern a-value)))
+
+(defmethod gns/valid-type? 'rte [[_ pattern]]
+  (boolean (rte-compile pattern)))
+
+(defmethod gns/-inhabited? :rte [t1]
+  (if (rte? t1)
+    (boolean (rte-inhabited? (rte-compile (second t1))))
+    :dont-know))
+
+(defmethod gns/-disjoint? :not-rte [t1 t2]
+  ;; (disjoint? (not (rte ...)) clojure.lang.IPersistentVector )
+
+  (cond (not (and (gns/not? t1)
+                  (rte? (second t1))))
+        :dont-know
+
+        (and (gns/class-designator? t2)
+             (or (isa? (gns/find-class t2) clojure.lang.Seqable)
+                 (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        true
+
+        (and (gns/class-designator? t2)
+             (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        false
+
+        :else
+        :dont-know))
+
+(defmethod gns/-disjoint? :rte [t1 t2]
+  (cond (not (rte? t1))
+        :dont-know
+
+        (rte? t2)
+        (let [[_ pat1] t1
+              [_ pat2] t2]
+          (rte-vacuous? (rte-compile `(:and ~pat1 ~pat2))))
+
+        ;; (disjoint? (rte ...) clojure.lang.IPersistentVector )
+        (and (gns/class-designator? t2)
+             (or (isa? (gns/find-class t2) clojure.lang.Seqable)
+                 (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        false
+        
+        (and (gns/not? t2)
+             (rte? (second t2)))
+        (let [[_ pat1] t1
+              [_ [_ pat2]] t2]
+          (rte-vacuous? (rte-compile `(:and ~pat1 (:not ~pat2)))))
+        
+        (and (gns/class-designator? t2)
+             (isa? (gns/find-class t2) java.lang.CharSequence))
+        (let [[_ pat1] t1]
+          (rte-vacuous? (rte-compile `(:and ~pat1 (:* java.lang.Character)))))
+        
+        (and (gns/class-designator? t2)
+             (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        true
+        
+        (and (gns/not? t2)
+             (gns/class-designator? (second t2))
+             (not (isa? (gns/find-class (second t2)) clojure.lang.Sequential)))
+        false
+        
+        :else :dont-know))
+
+(defmethod gns/-subtype? :rte [sub-designator super-designator]
+  (let [s1 (delay (gns/subtype? '(rte (:* java.lang.Character)) super-designator :dont-know))
+        s2 (delay (gns/subtype? sub-designator '(rte (:* java.lang.Character)) :dont-know))]
+    (cond (and (rte? sub-designator)
+               (rte? super-designator))
+          (let [[_ pat-sub] sub-designator
+                [_ pat-super] super-designator]
+            (rte-vacuous? (rte-compile `(:and ~pat-sub (:not ~pat-super)))))
+          
+          (and (rte? super-designator)
+               (gns/class-designator? sub-designator)
+               (isa? (gns/find-class sub-designator) java.lang.CharSequence)
+               (member @s1 '(true false)))
+          @s1
+          
+          (and (rte? sub-designator)
+               (gns/class-designator? super-designator)
+               (isa? (gns/find-class super-designator) java.lang.CharSequence)
+               (member @s2 '(true false)))
+          @s2
+          
+          (and (rte? super-designator)
+               (gns/class-designator? sub-designator)
+               (not (isa? (gns/find-class sub-designator) clojure.lang.Sequential)))
+          false
+          
+          (and (rte? sub-designator)
+               (gns/class-designator? super-designator)
+               (not (isa? (gns/find-class super-designator) clojure.lang.Sequential)))
+          false
+          
+          (and (rte? super-designator)
+               (gns/and? sub-designator)
+               (exists [and-operand (rest sub-designator)]
+                       (and (rte? and-operand)
+                            (gns/subtype? and-operand super-designator
+                                          false))))
+          true
+               
+          :else :dont-know)))
+
+
+(def sigma-* '(:* :sigma))
+(def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
+(def not-epsilon `(:cat :sigma ~sigma-*))
+
+
 
 (def ^:dynamic *traversal-functions*
   "Default callbacks for walking an rte tree.
@@ -776,10 +950,10 @@
                    (empty? left))
               :sigma
 
-              (> (+ (count-if gns/rte? left)
-                    (count-if gns/rte? right)) 1)
-              (let [[left-rtes left] (partition-by-pred gns/rte? left)
-                    [right-rtes right] (partition-by-pred gns/rte? right)
+              (> (+ (count-if rte? left)
+                    (count-if rte? right)) 1)
+              (let [[left-rtes left] (partition-by-pred rte? left)
+                    [right-rtes right] (partition-by-pred rte? right)
                     left-patterns (map second left-rtes)
                     right-patterns (map second right-rtes)]
                 (cond (empty? left-rtes)
@@ -912,3 +1086,157 @@
   (assert (instance? (xym/record-name) dfa)
           (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
   (xym/extract-rte dfa canonicalize-pattern))
+
+
+(defn dispatch [obj caller]
+  (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
+                   obj)
+        :Dfa
+        (sequential? obj)
+        :sequential
+
+        :else
+        (throw (ex-info (format "invalid argument for %s, expecting, sequential? or Dfa, not %s"
+                                caller obj)
+                        {:obj obj
+                         }))))
+
+(defmulti rte-trace
+  "Given a compiled rte, find a sequence of types which satisfy the corresponding pattern."
+  (fn [rte]
+    (dispatch rte 'rte-trace)))
+
+(defmethod rte-trace :sequential
+  [pattern]
+  (rte-trace (rte-compile pattern)))
+
+(defmethod rte-trace :Dfa
+  [dfa]
+  (let [state-vec (:states dfa)]
+    (letfn [(recurring [state path lineage]
+              (cond
+                (:accepting (state-vec state)) path
+                (some #{state} lineage) false
+                :else (some (fn [[type dst-state]]
+                              (recurring dst-state (conj path type) (conj lineage state)))
+                            (:transitions (state-vec state))))
+              )]
+      (recurring 0 [] ()))))
+
+(defmulti rte-inhabited?
+  (fn [rte]
+    (dispatch rte 'rte-inhabited?)))
+
+(defmethod rte-inhabited? :sequential [pattern]
+  (rte-inhabited? (rte-compile pattern)))
+
+(defmethod rte-inhabited? :Dfa [dfa]
+  (some :accepting (xym/states-as-seq dfa)))
+
+(defn rte-vacuous? [dfa]
+  (not (rte-inhabited? dfa)))
+
+(defmulti rte-match
+  "(rte-match rte sequence :promise-disjoint true|false)
+   Given an rte pattern or finite automaton generated by rte-to-dfa (or rte-compile), 
+   determine whether the given sequence, items, matches the regular type expression.
+
+   If the caller wishes to check more than one sequence against the same
+   pattern, it is probably better to call rte-compile, to get an automaton, and
+   use that same automaton in several calls to rte-match to avoid
+   multiple conversions/look-ups, as the correspondence of pattern
+   to compiled Dfa is maintained via the memoize function."
+
+  (fn [rte _items & {:keys [promise-disjoint
+                            hot-spot]}]
+    (dispatch rte 'rte-match)))
+
+(defmethod rte-match :sequential
+  [pattern items & {:keys [promise-disjoint
+                           hot-spot]}]
+  (rte-match (rte-compile pattern) items :promise-disjoint true :hot-spot hot-spot))
+
+(defmethod rte-match :Dfa
+  [dfa items & {:keys [
+                       ;; if the caller promises that never are two transitions in
+                       ;;   the Dfa labeled with intersecting types, the use
+                       ;;   :promise-disjoint true, in this case rte-match
+                       ;;   can be more efficient and can assume that the
+                       ;;   clauses can be tested in any order.  If the transitions
+                       ;;   are not guaranteed disjoint, then rte-match must
+                       ;;   build new type designators each one containing an and-not
+                       ;;   of the previously seen types. 
+                       promise-disjoint
+                       ;; hot-spot = true -- lazily compile the type checks into Bdds
+                       ;;    which is slow-going but becomes faster the more often you
+                       ;;    re-use the same pattern, either because of loops in the
+                       ;;    Dfa, or when the same Dfa is used to match different
+                       ;;    input sequences.
+                       ;; TODO -- the value of promise-disjoint should really come from
+                       ;;    a slot in the dfa.  when the dfa is created, it should me
+                       ;;    *marked* as being disjoint.  I believe it already is always
+                       ;;    disjoint.
+                       ;;    
+                       ;; hot-spot = false -- always interpret the type checks rather
+                       ;;    than converting them to Bdd.  This option is probably faster
+                       ;;    if there are few loops in the Dfa, or if you only use the
+                       ;;    pattern once to check a single input sequence.
+                       hot-spot
+                       ]}]
+  (let [state-vec (:states dfa)
+        sink-states (set (xym/find-sink-states dfa))]
+    (if (empty? sink-states)
+      (rte-match (xym/extend-with-sink-state dfa) items
+                 :promise-disjoint promise-disjoint
+                 :not-spot hot-spot)
+      (let [sink-state-id (:index (first sink-states))]
+        ;; There are two possible transition functions
+        ;;   slow-transition-function -- this is faster if the caller intends to match
+        ;;       the pattern only once.   The pattern is matched by an interpreter,
+        ;;       and it is possible that the same type predicate will be tested multiple
+        ;;       times on the same candidate objects.  If one of the type predicates
+        ;;       is (satisfies slow-predicate) then that slow-predicate may be called
+        ;;       multiple times, resulting in poor performance, especially if the
+        ;;       pattern is used to test multiple sequences.
+        ;;   fast-transition-function -- this is faster if the caller intends to match
+        ;;       the pattern multiple times with different input sequences.  The
+        ;;       pattern is *compiled* into a form where type-designators are converted
+        ;;       to Bdds thus each type check guarantees to never check the same
+        ;;       type predicate multiple times, and sometimes not at all.
+        (letfn [(slow-transition-function [transitions]
+                  (fn [candidate sink-state-id]
+                    (some (fn [[type next-state-index]]
+                            (if (gns/typep candidate type)
+                              next-state-index
+                              ;; TODO I'm not sure this is correct, do we need to return false
+                              ;;   indicating no-match, or return the sink-stat-id.
+                              ;;   false makes the tests pass, but sink-state-id seems more
+                              ;;   logical.  need to investigate whether something more fundamental
+                              ;;   is wrong.
+                              false))
+                          transitions)))
+                (fast-transition-function [transitions]
+                  (xym/optimized-transition-function transitions promise-disjoint sink-state-id))
+                (transition-function [transitions]
+                  (if hot-spot
+                    (fast-transition-function transitions)
+                    (slow-transition-function transitions)))
+                (consume [state-index item]
+                  (let [state-obj (state-vec state-index)]
+                    (cl/cl-cond
+                     ((member state-obj sink-states)
+                      (reduced false))
+                     (((transition-function (:transitions state-obj)) item sink-state-id))
+                     (:else (reduced false)))))]
+          (let [final-state (reduce consume 0 items)]
+            ;; final-state may be integer desgnating the state which was
+            ;;  reached on iterating successfully through the input
+            ;;  sequence, items.  Or final-state may false, if the
+            ;;  iteration finished without iterating through the entire
+            ;;  sequence, either because we found ourselves in a
+            ;;  sink-state, or we encountered a item for which no transition
+            ;;  was possible.
+            (cond
+              (= false final-state) false
+              (:accepting (state-vec final-state)) ((:exit-map dfa) final-state)
+              :else false)))))))
