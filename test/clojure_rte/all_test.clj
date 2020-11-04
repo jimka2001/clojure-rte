@@ -31,6 +31,7 @@
               clojure-rte.rte-tester-test
               clojure-rte.genus-test
               clojure-rte.util-test             
+              clojure-rte.genus-spec-test
               )
   (:gen-class))
 
@@ -47,6 +48,7 @@
                           'clojure-rte.rte-tester-test
                           'clojure-rte.genus-test
                           'clojure-rte.util-test
+                          'clojure-rte.genus-spec-test
                           ))
 
 (defn -main []

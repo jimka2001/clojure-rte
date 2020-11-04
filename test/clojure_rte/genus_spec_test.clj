@@ -25,6 +25,10 @@
             [clojure-rte.genus-spec :as gs]
             [clojure.test :as t]))
 
+(defn -main []
+  (clojure.test/run-tests 'clojure-rte.genus-spec-test))
+
+
 (s/def ::test-1 (s/* (s/alt :x  (s/cat :a neg? :b even?)  
                             :y  (s/cat :c odd? :d pos?))))
 
