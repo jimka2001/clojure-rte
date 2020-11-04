@@ -54,6 +54,18 @@
   (= (resolve x)
      (resolve y)))
 
+(defn recuperate-closure
+  "Takes an expression something like:
+  (clojure.core/fn [%] (clojure.core/> % 1000))
+  and returns an equivalent function object.
+  In case the function object has a free variable, it
+  is not possible to recuperate a function object, so
+  an Exception is thrown"
+  [expr]
+  {:pre [(and (sequential? expr)
+              (symbol= (first expr) 'fn)
+              (vector? (second expr)))]}
+  (eval expr))
 (defn spec-to-rte 
   [pattern]
   (cond (and (symbol? pattern)
@@ -62,17 +74,53 @@
         (list 'satisfies pattern)
 
         (sequential? pattern)
-        (let [[tag & operands] pattern
-              transformed (condp symbol= tag
-                            'fn (list 'spec pattern)
-                            's/and (cons 'and (for [operand operands]
-                                                 (list 'spec operand)))
-                            's/or (cons 'or (for [operand operands]
-                                               (list 'spec operand)))
-                            pattern)
-              ]
-          transformed 
-          )
+        (letfn [(specify [operands]
+                  (for [operand operands]
+                    (list 'spec (strip-keys operand))))
+                (transform-sequence-pattern [pattern]
+                  (if (sequential? pattern)
+                    (let [[tag & operands] pattern]
+                      (condp symbol= tag
+                        's/cat (cons :cat (transform-sequence-patterns (strip-keys operands)))
+                        's/alt (cons :or (transform-sequence-patterns (strip-keys operands)))
+                        's/* (cons :* (transform-sequence-patterns operands))
+                        's/? (cons :? (transform-sequence-patterns operands))
+                        's/+ (cons :+ (transform-sequence-patterns operands))
+                        's/& (unsupported pattern)
+                        (list 'spec pattern)))
+                    (list 'spec pattern)))
+                (transform-sequence-patterns [patterns]
+                  (map transform-sequence-pattern patterns))
+                (strip-keys [operands]
+                  (loop [operands operands
+                         stripped ()]
+                    (cond (empty? operands)
+                          (reverse stripped)
+
+                          :else
+                          (recur (rest (rest operands))
+                                 (cons (second operands)  stripped)))))
+                (unsupported [pattern]
+                  (throw (ex-info "unsupported pattern"
+                                  {:pattern pattern})))]
+          (let [[tag & operands] pattern
+                transformed (condp symbol= tag
+                              'fn (list 'satisfies (recuperate-closure pattern))
+                              's/and (cons 'and (specify operands))
+                              's/or (cons 'or (specify (strip-keys operands)))
+
+                              's/cat (list 'rte (transform-sequence-pattern pattern))
+                              's/alt (list 'rte (transform-sequence-pattern pattern))
+                              's/* (list 'rte (transform-sequence-pattern pattern))
+                              's/? (list 'rte (transform-sequence-pattern pattern))
+                              's/+ (list 'rte (transform-sequence-pattern pattern))
+                              's/& (unsupported pattern)
+                              
+                              pattern)
+
+                ]
+            transformed 
+            ))
 
         :else
         (list 'spec pattern)
@@ -80,11 +128,12 @@
 
 (defmethod gns/-canonicalize-type 'spec
   [[_spec pattern]]
-  (let [got-spec (s/get-spec pattern)
-        decompiled (delay (s/form pattern))]
-    (cond
-      (not got-spec)
-      (spec-to-rte pattern)
+  (cond
+    (s/regex? pattern)
+    (spec-to-rte (s/form pattern))
 
-      :else
-      (spec-to-rte @decompiled))))
+    (s/get-spec pattern)
+    (spec-to-rte (s/form pattern))
+    
+    :else
+    (spec-to-rte pattern)))
