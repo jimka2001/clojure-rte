@@ -293,7 +293,10 @@
                    ((:type functions) pattern functions)
                    (let [expanded (doall (rte-expand pattern functions))]
                      (traverse-pattern (inc depth) expanded functions))))))]
-     (let [pattern (convert-type-designator-to-rte given-pattern)]
+                 ((:type functions) pattern functions))))]
+     (let [pattern (fixed-point (convert-type-designator-to-rte given-pattern)
+                                (fn [p] (rte-expand p functions))
+                                =)]
        (cond (not (seq? pattern))
              (if-atom pattern)
 
