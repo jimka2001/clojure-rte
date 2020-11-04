@@ -34,12 +34,49 @@
 
 (t/deftest t-spec-to-rte
   (t/testing "spec-to-rte"
-    (gs/spec-to-rte (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                :y  (s/cat :c odd? :d pos?))))
-    (gns/canonicalize-type `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                 :y  (s/cat :c odd? :d pos?)))))
-    (gns/canonicalize-type '(spec ::test-1))
-    (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                              :y  (s/cat :c odd? :d pos?)))))))
+    (let [rte '(rte
+                (:*
+                 (:or
+                  (:cat (spec clojure.core/neg?) (spec clojure.core/even?))
+                  (:cat (spec clojure.core/odd?) (spec clojure.core/pos?)))))]
+      (t/is (= (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                                   :y  (s/cat :c odd? :d pos?)))))
+               rte))
+      
+
+      (t/is (= (gs/spec-to-rte `(s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                            :y  (s/cat :c odd? :d pos?))))
+               rte))
+
+      (t/is (= (gs/spec-to-rte (s/form ::test-1))
+               rte))
+      )))
+
+(t/deftest t-canonicalize-type
+  (t/testing "spec canonicalize-type"
+    (let [rte '(rte
+                (:*
+                 (:or
+                  (:cat
+                   (satisfies clojure.core/neg?)
+                   (satisfies clojure.core/even?))
+                  (:cat
+                   (satisfies clojure.core/odd?)
+                   (satisfies clojure.core/pos?)))))]
+
+      (t/is (= (gns/canonicalize-type `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                                            :y  (s/cat :c odd? :d pos?)))))
+               rte))
+
+      (t/is (= (gns/canonicalize-type '(spec ::test-1))
+               rte))
+
+      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                                         :y  (s/cat :c odd? :d pos?)))))
+               '(rte
+                 (:*
+                  (:or
+                   (:cat (satisfies neg?) (satisfies even?))
+                   (:cat (satisfies odd?) (satisfies pos?))))))))))
 
     
