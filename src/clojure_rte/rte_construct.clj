@@ -84,7 +84,13 @@
    })
 
 (defmulti rte-expand
-  "macro-like facility for rte" (fn [pattern _functions] (first pattern)))
+  "macro-like facility for rte"
+  (fn [pattern _functions]
+    (cond
+      (not (sequential? pattern))
+      :default
+      :else
+      (first pattern))))
 
 (defn invalid-pattern [pattern functions culprit]
   (throw (ex-info (format "[134] invalid pattern %s" pattern)
@@ -96,7 +102,7 @@
                    })))
 
 (defmethod rte-expand :default [pattern functions]
-  (invalid-pattern pattern functions :default))
+  pattern)
 
 (defmethod rte-expand :? [pattern functions]
   (apply (fn
