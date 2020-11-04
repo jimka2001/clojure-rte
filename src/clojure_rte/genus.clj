@@ -1105,26 +1105,32 @@
     clojure.lang.Ratio BigDecimal)
   if possible.  Otherwise expand the given type-designator simply to itself."
   [type-designator]
-  (cl/cl-cond
-   ((not (sequential? type-designator))
-    type-designator)
+  (cond
+   (not (sequential? type-designator))
+   type-designator
 
-   ((empty? type-designator)
-    type-designator)
+   (empty? type-designator)
+   type-designator
 
-   ((not= 'satisfies (first type-designator))
-    type-designator)
+   (not= 'satisfies (first type-designator))
+   type-designator
 
-   ((empty? (rest type-designator))
-    type-designator)
+   (empty? (rest type-designator))
+   type-designator
 
-   ((not (empty? (rest (rest type-designator))))
-    type-designator)
+   (not-empty (rest (rest type-designator)))
+   type-designator
 
-   ((type-predicate-to-type-designator (second type-designator)))
-
-   (:else
-    type-designator)))
+   :else
+   (let [[_satisfies pred] type-designator]
+     (cl/cl-cond
+      ((fn? pred)
+       ;; If we are looking at (satisfies #function[clojure-rte.rte-core/eval16169/fn--16170])
+       ;;   then just leave it as it is.
+       type-designator)
+      ((type-predicate-to-type-designator (second type-designator)))
+      (:else
+       type-designator)))))
 
 (defmethod -canonicalize-type 'not
   [type-designator]
