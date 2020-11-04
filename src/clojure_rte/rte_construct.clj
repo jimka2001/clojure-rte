@@ -256,11 +256,6 @@
                  (:not :*)
                  ((functions token) operand functions)
 
-                 (satisfies)
-                 (if (not= pattern (gns/expand-satisfies pattern))
-                   (traverse-pattern (inc depth) (gns/expand-satisfies pattern) functions)
-                   ((:type functions) pattern functions))
-                 
                  ;;case-else
                  ((:type functions) pattern functions))))
            (if-multiple-operands [pattern]
