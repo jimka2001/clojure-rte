@@ -291,8 +291,8 @@
     (is (= (gns/expand-satisfies 'x)
            'x) "test 1")
 
-    (is (= (gns/expand-satisfies '(satisfies))
-           '(satisfies)) "test 2")
+    (is (thrown? Exception (gns/expand-satisfies '(satisfies))) "test 2a")
+    (is (thrown? Exception (gns/expand-satisfies '(satisfies f1 f2))) "test 2b")
 
     (is (= (gns/expand-satisfies '(satisfies no-such-function))
            '(satisfies no-such-function)) "test 3")
