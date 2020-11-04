@@ -1116,10 +1116,12 @@
    type-designator
 
    (empty? (rest type-designator))
-   type-designator
+   (throw (ex-info "invalid type designator"
+                   {:type-designator type-designator}))
 
    (not-empty (rest (rest type-designator)))
-   type-designator
+   (throw (ex-info "invalid type designator"
+                   {:type-designator type-designator}))
 
    :else
    (let [[_satisfies pred] type-designator]
