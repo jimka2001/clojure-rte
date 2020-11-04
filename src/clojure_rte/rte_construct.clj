@@ -83,15 +83,6 @@
               ((:client functions) pattern functions))
    })
 
-
-(defn supported-nontrivial-types
-  "Which types are currently supported?  This list denotes the
-  type names which appear as (something maybe-args), which are
-  supported by RTE.  The goal is to support all those supported
-  by typep, but that may not yet be the case."
-  []
-  (difference (set (keys (methods registered-type?)))  #{:default}))
-
 (defmulti rte-expand
   "macro-like facility for rte" (fn [pattern _functions] (first pattern)))
 
