@@ -246,13 +246,7 @@
                                        :cause :unary-keyword
                                        }))
                  ;; case-else
-                 (cond
-                   (and (sequential? keyword)
-                        (registered-type? (first keyword)))
-                   ((:type functions) pattern functions)
-
-                   :else
-                   (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
+                 ((:type functions) pattern functions))))
            (if-exactly-one-operand [pattern] ;; (:or Long) (:* Long)
              (let [[token operand] pattern]
                (case token
@@ -268,9 +262,7 @@
                    ((:type functions) pattern functions))
                  
                  ;;case-else
-                 (if (registered-type? (first pattern))
-                   ((:type functions) pattern functions)
-                   (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
+                 ((:type functions) pattern functions))))
            (if-multiple-operands [pattern]
              (let [[token & operands] pattern]
                (case token
@@ -289,10 +281,6 @@
                                   }))
 
                  ;;case-else
-                 (if (registered-type? token)
-                   ((:type functions) pattern functions)
-                   (let [expanded (doall (rte-expand pattern functions))]
-                     (traverse-pattern (inc depth) expanded functions))))))]
                  ((:type functions) pattern functions))))]
      (let [pattern (fixed-point (convert-type-designator-to-rte given-pattern)
                                 (fn [p] (rte-expand p functions))
