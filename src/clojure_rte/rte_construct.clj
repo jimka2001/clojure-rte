@@ -83,20 +83,6 @@
               ((:client functions) pattern functions))
    })
 
-(defmulti registered-type? identity)
-(defmethod registered-type? :default
-  [type-designator]
-  (cond
-    (not (sequential? type-designator))
-    false
-    (empty? type-designator)
-    false
-    :else
-    (registered-type? (first type-designator))))
-(defmethod registered-type? '= [_] true)
-(defmethod registered-type? 'rte [_] true)
-(defmethod registered-type? 'member [_] true)
-(defmethod registered-type? 'satisfies [_] true)
 
 (defn supported-nontrivial-types
   "Which types are currently supported?  This list denotes the

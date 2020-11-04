@@ -67,10 +67,6 @@
               (vector? (second expr)))]}
   (eval expr))
 
-;; TODO eliminate when resolving issue
-;;  https://gitlab.lrde.epita.fr/jnewton/clojure-rte/-/issues/59
-(defmethod clojure-rte.rte-core/registered-type? 'spec [_] true)
-
 (defn spec-to-rte 
   [pattern]
   (cond (and (symbol? pattern)
