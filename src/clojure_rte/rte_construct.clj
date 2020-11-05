@@ -63,6 +63,7 @@
 (defn call-with-compile-env [thunk]
   (binding [rte-compile (memoize rte-to-dfa)
             canonicalize-pattern-once (memoize -canonicalize-pattern-once)
+            gns/check-disjoint (memoize gns/-check-disjoint)
             ]
     (thunk)))
 

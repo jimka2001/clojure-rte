@@ -299,6 +299,20 @@
                      :t1 t1
                      :t2 t2}))))
 
+(defn-memoized [check-disjoint -check-disjoint]
+  "Internal function used in top level disjoint? implementation."
+  [t1' t2' default]
+  (loop [[k & ks] (sort-method-keys -disjoint?)]
+    (case ((k (methods -disjoint?)) t1' t2')
+      (true) true
+      (false) false
+      (case ((k (methods -disjoint?)) t2' t1')
+        (true) true
+        (false) false
+        (if ks
+          (recur ks)
+          default)))))
+
 (defn disjoint?
   "Predicate to determine whether the two types overlap.
   If it cannot be determined whether the two designated types
@@ -306,34 +320,23 @@
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
-  (letfn [(check-disjoint [t1' t2' default]
-            (loop [[k & ks] (sort-method-keys -disjoint?)]
-              (case ((k (methods -disjoint?)) t1' t2')
-                (true) true
-                (false) false
-                (case ((k (methods -disjoint?)) t2' t1')
-                  (true) true
-                  (false) false
-                  (if ks
-                    (recur ks)
-                    default)))))]
-    (cond
-      (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-      true
+  (cond
+    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+    true
 
-      (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-      true
+    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+    true
 
-      :else
-      (let [try1 (check-disjoint t1 t2 :dont-know)]
-        (if (not= :dont-know try1)
-          try1
-          (let [t1-simple (-canonicalize-type t1)
-                t2-simple (-canonicalize-type t2)]
-            (if (and (= t1-simple t1)
-                     (= t2-simple t2))
-              default
-              (check-disjoint t1-simple t2-simple default))))))))
+    :else
+    (let [try1 (check-disjoint t1 t2 :dont-know)]
+      (if (not= :dont-know try1)
+        try1
+        (let [t1-simple (-canonicalize-type t1)
+              t2-simple (-canonicalize-type t2)]
+          (if (and (= t1-simple t1)
+                   (= t2-simple t2))
+            default
+            (check-disjoint t1-simple t2-simple default)))))))
 
 (defmethod -disjoint? :primary [t1 t2]
   (cond
