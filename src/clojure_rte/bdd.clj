@@ -127,11 +127,12 @@
          (letfn [(walk [node parents]
                    (let [my-label (:label node)
                          ;; two lazy sequences created by filter.  the filter loops are
-                         ;; never called unless (empty? ...) is called below.
                          disjoints (filter (fn [x] (if my-label (gns/disjoint? x my-label false))) parents)
                          subtypes  (filter (fn [x] (if my-label (gns/subtype?  x my-label false))) parents)]
+                         ;; never called unless node is differrent from true or false, i.e.
+                         ;; the 3rd case of the cond.
                      (cond
-                       (= true node)
+                       (= true node) ; case #1
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B
                        ;;   we need to remove the supertypes
                        ;;   E.g., (Long java.io.Comparable java.io.Serializable) -> (Long)
@@ -152,18 +153,38 @@
                                                (cons (first tail) done)))))]
                          (collect (pretty-and term)))
                        
-                       (= false node)
+                       (= false node) ; case #2
                        nil ;; do not collect, and prune recursion
                        
-                       (non-empty? disjoints)
+                       (non-empty? @disjoints) ; case #3
+                       ;; this means that the type-designators returned by (:label node)
+                       ;;    is disjoint with something in the parents list.
+                       ;;    E.g., (:label node)=String, and parents= ( ... Number ...).
+                       ;;    So we can  prune the positive branch, and omit this node from the
+                       ;;    parents list in the recursive call.  Why, because any object
+                       ;;    which has type of everything in the parents list is
+                       ;;    guaranteed to NOT have the type of node.   We could
+                       ;;    add `(not ~(label :node)) to the parents list, but it
+                       ;;    would be redundant---we would have (and (not String) ... Number ...),
+                       ;;    so we'll keep just (and ... Number ...).
                        (walk (:negative node)
                              parents)
                        
-                       (non-empty? subtypes)
+                       (non-empty? @subtypes) ; case #4
+                       ;; this means that the type-designators returned by (:label node)
+                       ;;    is a supertype of something in the parents list.  E.g.,
+                       ;;    (:label node) = Number and parents= (... Long ...).
+                       ;;    Wo we can prune the negative branch, and omit this node from the
+                       ;;    parents list in the recursive call.  Why, because any object
+                       ;;    which has type of everything in the parents list is
+                       ;;    guaranteed to have the type of node.   We could
+                       ;;    add (label :node) to the parents list, but it
+                       ;;    would be redundant---we would have (and Number ... Long ...)
+                       ;;    so we'll keep just (and ... Long ...).
                        (walk (:positive node)
                              parents)
                        
-                       :else
+                       :else ; case #5
                        (do (walk (:positive node)
                                  (cons (:label node) parents))
                            (walk (:negative node)
