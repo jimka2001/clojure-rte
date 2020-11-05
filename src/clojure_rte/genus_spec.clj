@@ -33,7 +33,7 @@
 (defmethod gns/valid-type? 'spec [[_ pattern]]
   (boolean (s/get-spec pattern)))
 
-(defmethod gns/-inhabited? :spec [t1]
+(defmethod gns/-inhabited? :spec [_t1]
   :dont-know)
 
 (defmethod gns/-disjoint? :rte [t1 t2]

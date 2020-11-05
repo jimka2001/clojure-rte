@@ -127,10 +127,10 @@
          (letfn [(walk [node parents]
                    (let [my-label (:label node)
                          ;; two lazy sequences created by filter.  the filter loops are
-                         disjoints (filter (fn [x] (if my-label (gns/disjoint? x my-label false))) parents)
-                         subtypes  (filter (fn [x] (if my-label (gns/subtype?  x my-label false))) parents)]
                          ;; never called unless node is differrent from true or false, i.e.
                          ;; the 3rd case of the cond.
+                         disjoints (delay (filter (fn [x] (gns/disjoint? x my-label false)) parents))
+                         subtypes  (delay (filter (fn [x] (gns/subtype?  x my-label false)) parents))]
                      (cond
                        (= true node) ; case #1
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B

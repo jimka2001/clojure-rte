@@ -24,7 +24,7 @@
             [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [call-with-collector member]]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
@@ -80,7 +80,7 @@
       )))
 
 (deftest t-disjoint-2-14
-  (if (and (resolve 'java.lang.Comparable)
+  (when (and (resolve 'java.lang.Comparable)
            (resolve 'clojure.lang.IMeta))   
     (testing "disjoint 2 14"
       ;; interface vs interface - never disjoint
@@ -361,8 +361,8 @@
   (testing "disjoint interfaces"
     (is (gns/find-class 'javax.security.auth.spi.LoginModule))
     (is (gns/find-class 'java.net.http.WebSocket))
-    (is (not (empty? (gns/find-incompatible-members javax.security.auth.spi.LoginModule
-                                                    java.net.http.WebSocket))))
+    (is (not-empty (gns/find-incompatible-members javax.security.auth.spi.LoginModule
+                                                    java.net.http.WebSocket)))
     (is (gns/disjoint? 'javax.security.auth.spi.LoginModule
                        'java.net.http.WebSocket
                        false))))

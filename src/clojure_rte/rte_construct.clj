@@ -21,10 +21,15 @@
 
 (ns clojure-rte.rte-construct
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer :all]
+            [clojure-rte.util :refer [member exists setof exists-pair
+                                      call-with-collector defn-memoized
+                                      visit-permutations fixed-point
+                                      sort-operands with-first-match
+                                      partition-by-pred
+                                      rte-identity rte-constantly]]
             [clojure-rte.xymbolyco :as xym]
-            [clojure.pprint :refer [cl-format pprint]]
-            [clojure.set :refer [union subset? difference]]
+            [clojure.pprint :refer [cl-format]]
+            [clojure.set :refer [union subset?]]
             [clojure-rte.cl-compat :as cl]
 ))
 
@@ -275,10 +280,10 @@
                    :functions functions
                    })))
 
-(defmethod rte-expand :default [pattern functions]
+(defmethod rte-expand :default [pattern _functions]
   pattern)
 
-(defmethod rte-expand 'satisfies [pattern functions]
+(defmethod rte-expand 'satisfies [pattern _functions]
   (gns/expand-satisfies pattern))
 
 (defmethod rte-expand :? [pattern functions]
@@ -367,7 +372,7 @@
    (traverse-pattern 0 given-pattern functions))
   (
    [depth given-pattern functions]
-   (if (= depth traversal-depth-max)
+   (when (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
                 depth given-pattern))
    (assert (<= depth traversal-depth-max)
@@ -578,14 +583,14 @@
                  (cons (first seq) head)))))
 
 (defn reduce-redundant-or [operands]
-  (let [ands (doall (filter and? operands))
-        xyz (doall (setof [x ands] (exists [y operands] (member y (rest x)))))
-        abc (doall (setof [and1 ands]
-                          (let [and1-operands (set (rest and1)) ]
-                            (exists [and2 ands]
-                                    (let [and2-operands (set (rest and2))]
-                                      (and (not (subset? and1-operands and2-operands))
-                                           (subset? and2-operands and1-operands)))))))
+  (let [ands (filter and? operands)
+        xyz (setof [x ands] (exists [y operands] (member y (rest x))))
+        abc (setof [and1 ands]
+                   (let [and1-operands (set (rest and1)) ]
+                     (exists [and2 ands]
+                             (let [and2-operands (set (rest and2))]
+                               (and (not (subset? and1-operands and2-operands))
+                                    (subset? and2-operands and1-operands))))))
         superfluous-ands (concat xyz abc)]
     (if (empty? superfluous-ands)
       operands
@@ -596,7 +601,7 @@
   ;; don't complain about rte nor satisfies
   (letfn [(dont-complain [t]
             (and (sequential? t)
-                 (not (empty? t))
+                 (not-empty t)
                  (member (first t) '(satisfies rte))))]
     (let [types-disjoint (gns/disjoint? t1 t2 :dont-know)]
       (cond (member types-disjoint '(true false))

@@ -21,8 +21,8 @@
 
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.util :refer :all]
-            [clojure-rte.rte-construct :refer :all]
+            [clojure-rte.util :refer [defn-memoized]]
+            [clojure-rte.rte-construct :refer [rte-to-dfa canonicalize-pattern sigma-*]]
             [clojure.pprint :refer [cl-format]]
             )
   )
@@ -88,12 +88,11 @@
                          (cons rte used-rtes)
                          (conj acc-int-rte-pairs [index (canonicalize-pattern `(:and ~rte (:not (:or ~@used-rtes))))])
                          (conj acc-fns `(fn [] ~consequent)))))))]
-    (if (odd? (count clauses))
+    (when (odd? (count clauses))
       (throw (IllegalArgumentException. (str "rte-case, odd number of clauses is not supported. No matching clause: " (last clauses)))))
     
     (let [[fns int-rte-pairs] (compile-clauses clauses)
-          num-fns (count fns)
-          var (gensym "index")]
+          num-fns (count fns)]
       `((~fns (ensure-fns-index (rte-match (memoized-rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
                                            :promise-disjoint true)
                                 ~num-fns))))))
@@ -123,7 +122,7 @@
               `(:cat ~@prefix-rte)
               `(:cat ~@prefix-rte (:* ~@suffix-rte)))
 
-            (and (not (empty? required))
+            (and (not-empty required)
                  (= '& (first required)))
             ;; found & in the correct place
             (recur nil ; required
@@ -132,7 +131,7 @@
                    suffix-rte ; suffix-rte
                    (conj parsed '&))
 
-            (not (empty? required))
+            (not-empty required)
             (let [var (first required)]
               (recur (rest required)
                      others
@@ -156,8 +155,8 @@
                      suffix-rte
                      (conj parsed var)))
 
-            (and (not (empty? others))
-                 (not (empty? suffix-rte)))
+            (and (not-empty others)
+                 (not-empty suffix-rte))
             (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
                                        lambda-list others)
                             {:error-type "cannot parse suffix"
@@ -165,7 +164,7 @@
                              :parsed parsed
                              :unparsed others}))
 
-            (and (not (empty? others))
+            (and (not-empty others)
                  (symbol? (first others)))
             (let [var (first others)]
               (recur required
@@ -176,7 +175,7 @@
                                        (get types-map var :sigma)))
                      (conj parsed var)))
 
-            (not (empty? others))
+            (not-empty others)
             (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
                                        lambda-list others)
                             {:error-type "cannot parse suffix"
@@ -191,7 +190,8 @@
   [expr & pairs]
   (cond
     (not= 0 (mod (count pairs) 2))
-    (throw (ex-info (cl-format false "destructuring-case expects multiple of 2 number of arguments after the first: not ~A, ~A"
+    (throw (ex-info (cl-format false
+                               "destructuring-case expects multiple of 2 number of arguments after the first: not ~A, ~A"
                                (count pairs) (apply list 'destructuring-case expr pairs))
                     {:error-type :invalid-destructuring-case-call-site
                      :expr expr
@@ -279,7 +279,7 @@
 
     (every? (fn [clause]
               (and (list? clause)
-                   (not (empty? clause))
+                   (not-empty clause)
                    (vector? (first clause))))
             (rest args))
     (let [[name & clauses] args]

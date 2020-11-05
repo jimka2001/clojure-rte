@@ -24,7 +24,7 @@
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-by-mapped print-vals defn-memoized]]
+            [clojure-rte.util :refer [fixed-point member group-by-mapped defn-memoized]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
@@ -196,7 +196,7 @@
             
             ;; local function gen-function
             (gen-function []
-              (let [state-id->pseudo-type (into {} (for [[type state-id] transitions
+              (let [state-id->pseudo-type (into {} (for [[_type state-id] transitions
                                                          :let [tag (gensym "pseudo-")]]
                                                      [state-id `(~'satisfies ~tag)]))
                     pseudos (for [[_ tag] state-id->pseudo-type]
@@ -273,7 +273,7 @@
           (empty? duplicate-types)
           (gen-function)
           
-          (not (empty? (intersection duplicate-types inhabited-types)))
+          (not-empty (intersection duplicate-types inhabited-types))
           ;; if some duplicate types are inhbited
           (throw (ex-info (cl-format false "transitions ~A has a duplication of types: ~A"
                                      transitions (find-duplicates types))
@@ -287,7 +287,7 @@
 (defn delta
   "Given a state and target-label, find the destination state (object of type State)"
   [dfa source-state target-label]
-  (let [[_ index] (first (filter (fn [[label dst-index]] (= label target-label))
+  (let [[_ index] (first (filter (fn [[label _dst-index]] (= label target-label))
                                  (:transitions source-state)))]
     (state-by-index dfa index)))
 
@@ -360,7 +360,7 @@
   (filter (fn [q]
             (and (not (:accepting q))
                  (not (= 0 (:index q)))
-                 (every? (fn [[label dst]]
+                 (every? (fn [[_label dst]]
                            (= dst (:index q)))
                          (:transitions q))))
           (states-as-seq dfa)))
@@ -368,7 +368,7 @@
 (defn complete-state?
   [state]
   (let [labels (map first (:transitions state))]
-    (and (not (empty? labels))
+    (and (not-empty labels)
          (or (member :sigma labels)
              (bdd/type-subtype? :sigma (cons 'or labels))))))
 
@@ -532,39 +532,32 @@
                                          (new-id (state-by-index dfa dst-id))]))
             
             grouped (group-by (fn [[new-src-id _ _]] new-src-id) new-proto-delta)
-            new-exit-map (into {}
-                               (mapcat (fn [id eqv-class]
-                                         (if (some :accepting eqv-class)
-                                           (list [id
-                                                  ((:exit-map dfa) (:index (first eqv-class)))])
-                                           nil))
-                                       ids pi-minimized))
+            new-state-ids (for [id ids
+                                :let [transitions (grouped id)]
+                                :when (or transitions
+                                          (member id new-fids)
+                                          (= 0 id))
+                                ]
+                            id)
+            new-states (for [id new-state-ids
+                             :let [transitions (merge-parallel (grouped id))
+                                   new-transitions (filter (fn [[_ dst-id]]
+                                                             (member dst-id new-state-ids))
+                                                           (map rest transitions))]
+                             ]
+                         
+                         [id (map->State
+                              {:index id
+                               :initial (= 0 id)
+                               :pattern (pretty-or-rte (map :pattern (partitions-map id)))
+                               :accepting (member id new-fids)
+                               :transitions new-transitions})])
             ]
-        (let [new-state-ids (for [id ids
-                                  :let [transitions (grouped id)]
-                                  :when (or transitions
-                                            (member id new-fids)
-                                            (= 0 id))
-                                  ]
-                              id)
-              new-states (for [id new-state-ids
-                               :let [transitions (merge-parallel (grouped id))
-                                     new-transitions (filter (fn [[_ dst-id]]
-                                                               (member dst-id new-state-ids))
-                                                             (map rest transitions))]
-                               ]
-                           
-                           [id (map->State
-                                {:index id
-                                 :initial (= 0 id)
-                                 :pattern (pretty-or-rte (map :pattern (partitions-map id)))
-                                 :accepting (member id new-fids)
-                                 :transitions new-transitions})])]
-          (make-dfa dfa { :exit-map (into {} (map (fn [id]
-                                                    [id (exit-value dfa id)])
-                                                  new-fids))
-                         :states
-                         (into {} new-states)}))))))
+        (make-dfa dfa { :exit-map (into {} (map (fn [id]
+                                                  [id (exit-value dfa id)])
+                                                new-fids))
+                       :states
+                       (into {} new-states)})))))
 
 (defn trim
   "Creates a new Dfa from the given Dfa containing only accessible and co-accessible
@@ -628,7 +621,7 @@
                                                  :index id
                                                  :accepting (member id new-fids)
                                                  :initial (= id 0)
-                                                 :transitions (filter (fn [[label dst-id]]
+                                                 :transitions (filter (fn [[_label dst-id]]
                                                                         (member dst-id useful))
                                                                       (:transitions state))))]))
                                  useful))})
@@ -644,7 +637,7 @@
   (let [dfa-complete (complete dfa)]
     (trim
      (make-dfa dfa
-               {:states (into {} (map (fn [[index state]]
+               {:states (into {} (map (fn [[_index state]]
                                         [(:index state)
                                          (map->State {:index (:index state)
                                                       :initial (:initial state)
@@ -740,7 +733,7 @@
               (let [[x-to-q q-to-q q-to-x others]
                     ;; #6
                     (reduce (fn [[x-to-q q-to-q q-to-x others]
-                                 [src-id label dst-id :as triple]]
+                                 [src-id _label dst-id :as triple]]
                               (cond
                                 (and (= src-id q-id)
                                      (= dst-id q-id))
@@ -809,7 +802,6 @@
     (intersect-labels label-1 label-2)))
 
 (defn synchronized-product
-  [dfa-1 dfa-2 f-arbitrate-accepting f-arbitrate-exit-value]
   "Assuming that the given Dfas are complete, we compute the syncronized cross product SXP
     of the two Dfas.
   f-arbitrate-accepting - binary function which accepts two Boolean values, [a1,a2]
@@ -824,6 +816,7 @@
       when neither is an accepting state.   In the case that only q1 or only q2
       is an accepting state, this accepting state's exit value is used in the SXP.
       f-arbitrate-exit-value should return the exit value for the state in the SXP."
+  [dfa-1 dfa-2 f-arbitrate-accepting f-arbitrate-exit-value]
   (letfn [(compute-state-transitions [state-1 state-2 state-ident-map]
             (for [[label-1 dst-1] (:transitions state-1)
                   [label-2 dst-2] (:transitions state-2)
@@ -944,10 +937,11 @@
                           ((:exit-map dfa-1)
                            (:index q1)))))
 
-(defn synchronized-intersection [dfa-1 dfa-2]
+(defn synchronized-intersection
   "Compute the intersection of two Dfas. I.e., compute the Dfa which
   will recognized any sequence which is recognized by dfa-1 and also
   by dfa-2."
+  [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (and a b))
@@ -955,10 +949,11 @@
                           ((:exit-map dfa-1)
                            (:index q1)))))
 
-(defn synchronized-xor [dfa-1 dfa-2]
+(defn synchronized-xor
   "Compute the xor of two Dfas. I.e., compute the Dfa which
   will recognized any sequence which is recognized by dfa-1 or
   by dfa-2 but not by both."
+  [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (or (and a (not b))

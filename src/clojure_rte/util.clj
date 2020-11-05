@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.util
-  (:require [clojure.pprint :refer [cl-format pprint]]))
+  (:require [clojure.pprint :refer [cl-format]]))
 
 (defn with-first-match 
   "Find the first element in the given sequence, items,
@@ -180,7 +180,7 @@
              (empty? items) false
              (nil? target) (some nil? items)
              (false? target) (some false? items)
-             :else (reduce (fn [acc item]
+             :else (reduce (fn [_acc item]
                              (if (= item target)
                                (reduced true)
                                false)) false items))))
@@ -316,18 +316,21 @@
   [& dedupe-args]
   (doall (apply dedupe dedupe-args)))
 
-(defmacro exists [[var seq] & body]
+(defmacro exists
   "Test whether there exists an element of a sequence which matches a condition."
+  [[var seq] & body]
   `(some (fn [~var]
            ~@body) ~seq))
 
-(defmacro setof [[var seq] & body]
+(defmacro setof
   "Return a sequence of lazy elements of a given sequence which match a given condition"
+  [[var seq] & body]
   `(filter (fn [~var]
              ~@body) ~seq))
 
-(defmacro forall [[var seq] & body]
+(defmacro forall
   "Return true if the given body evaluates to logical true for every element of the given sequence"
+   [[var seq] & body]
   `(every? (fn [~var]
              ~@body) ~seq))
 

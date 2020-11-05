@@ -23,7 +23,6 @@
   (:refer-clojure :exclude [satisfies?])
   (:require [clojure.set :refer [subset?]]
             [clojure.repl :refer [source-fn]]
-            [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       partition-by-pred
                                       member find-simplifier defn-memoized
@@ -214,7 +213,7 @@
 
 (defmethod valid-type? 'not [[_not & type-designators]]
   (and (sequential? type-designators)
-       (not (empty? type-designators))
+       (not-empty type-designators)
        (empty? (rest type-designators))
        (valid-type? (first type-designators))))
 
@@ -436,13 +435,12 @@
           false
 
           ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
-          ;;                       A    (not B)                     C
+          ;;                       A     (not B)                      C
           ;;  since A and B are disjoint
           ;;  we may ask (disjoint? A C)
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
-               (let [[_ A [_ B]] t1
-                     C t2]
+               (not? (nth t1 2))  ;; t1 of the form (and x (not y))
+               (let [[_ A [_ B]] t1]
                  (disjoint? A B false)))
           (disjoint? (second t1) t2 :dont-know)
 

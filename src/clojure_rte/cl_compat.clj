@@ -80,9 +80,10 @@
 (defmacro with-escape [ret & body]
   `(call-with-escape (fn [~ret] ~@body)))
 
-(defn ldiff [l-left l-mid]
+(defn ldiff
   "Returns a copy of the first prefix of l-left whose
    tail is = (but perhaps not pointer-identical) to l-mid."
+  [l-left l-mid]
   ;; we can't check pointer identity here because
   ;;  the sequence might be lazy.
   (loop [acc ()
