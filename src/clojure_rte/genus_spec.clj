@@ -36,7 +36,7 @@
 (defmethod gns/-inhabited? :spec [_t1]
   :dont-know)
 
-(defmethod gns/-disjoint? :rte [t1 t2]
+(defmethod gns/-disjoint? :spec [t1 t2]
   (cond (not (spec? t1))
         :dont-know
 

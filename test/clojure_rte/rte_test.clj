@@ -39,9 +39,9 @@
 
 (defmacro testing
   [string & body]
-  `(do (println [:testing ~string :starting (java.util.Date.)])
+  `(do (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
        (clojure.test/testing ~string ~@body)
-       (println [:finished  (java.util.Date.)])
+       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
        ))
 
 (deftest t-nullable

@@ -23,10 +23,17 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [call-with-collector]]
-            [clojure.test :refer [deftest is testing]]))
+            [clojure.test :refer [deftest is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.cl-compat-test))
+
+(defmacro testing
+  [string & body]
+  `(do (println [:testing ~string :starting (java.util.Date.)])
+       (clojure.test/testing ~string ~@body)
+       (println [:finished  (java.util.Date.)])
+       ))
 
 
 (deftest t-cl-prog1

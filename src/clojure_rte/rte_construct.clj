@@ -142,6 +142,7 @@
   (cond (not (rte? t1))
         :dont-know
 
+        ;; (disjoint? (rte ...) (rte ...))
         (rte? t2)
         (let [[_ pat1] t1
               [_ pat2] t2]
@@ -612,7 +613,8 @@
             
             :else
             (do
-              (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%" t1 t2)
+              (cl-format true "(ns=~A) disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%"
+                         *ns* t1 t2)
               false)))))
 
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]

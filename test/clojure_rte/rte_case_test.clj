@@ -21,8 +21,9 @@
 
 (ns clojure-rte.rte-case-test
   (:require [clojure-rte.rte-core]
+            [clojure-rte.genus :as gns]
             [clojure-rte.rte-construct :refer [rte-match with-compile-env]]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is]]
             [clojure-rte.rte-case :refer [rte-case destructuring-case
                                           memoized-rte-case-clauses-to-dfa
                                           -destructuring-fn-many destructuring-fn]]
@@ -30,6 +31,15 @@
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.rte-case-test))
+
+(defmacro testing
+  [string & body]
+  `(do
+     (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)]))
+  )
+
 
 (deftest t-rte-case
   (testing "rte-case"
@@ -442,6 +452,10 @@
 
 (deftest t-rte-match-376
   (testing "special case which was failing 376"
+    (is (= true (gns/disjoint? '(rte (:cat String :sigma)) 'Boolean :dont-know))
+        "test 461")
+    (is (= false (gns/inhabited? '(and Boolean (rte (:cat String :sigma))) :dont-know))
+        "test 459")
     (is (= 1
            (with-compile-env ()
              (rte-match
@@ -470,7 +484,9 @@
                      (:cat
                       Boolean
                       (or String Boolean)))))]])
-              '(true ["hello" 3] true)))))))
+              '(true ["hello" 3] true))))
+        "test 489"
+)))
 
 (deftest t-destructuring-case-402
   (testing "special case which was failing 402"
