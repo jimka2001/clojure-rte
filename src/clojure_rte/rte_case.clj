@@ -22,7 +22,8 @@
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
             [clojure-rte.util :refer [defn-memoized]]
-            [clojure-rte.rte-construct :refer [rte-to-dfa canonicalize-pattern sigma-*]]
+            [clojure-rte.rte-construct :refer [rte-to-dfa canonicalize-pattern sigma-*
+                                               rte-match]]
             [clojure.pprint :refer [cl-format]]
             )
   )
