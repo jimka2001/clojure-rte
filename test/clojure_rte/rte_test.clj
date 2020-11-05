@@ -30,7 +30,7 @@
                                                mdtd with-rte reduce-redundant-or]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [member]]
-            [clojure-rte.genus :refer [disjoint? typep]]
+            [clojure-rte.genus :as gns]
             [clojure-rte.rte-tester :refer []]
             [clojure-rte.xymbolyco :as xym]))
 
@@ -364,6 +364,7 @@
 (deftest t-rte-to-dfa
 
   (testing "rte-to-dfa"
+    (is (:rte (methods gns/-disjoint?)) "test 367")
     (with-compile-env ()
       (is (rte-to-dfa '(:cat :epsilon (:+ (:* :epsilon)) :sigma)) "dfa 1")
       ;; (is (thrown? clojure.lang.ExceptionInfo
@@ -521,7 +522,7 @@
 (deftest t-typep-rte
   (testing "typep rte"
     (with-compile-env ()
-      (is (typep [3 3.0 "hello" "world" 3 3.0]
+      (is (gns/typep [3 3.0 "hello" "world" 3 3.0]
                  '(rte (:cat (:+ (:cat Long Double String))
                              (:+ (:cat String Long Double)))))))))
 
@@ -581,6 +582,7 @@
 
 (deftest t-rte-inhabited
   (testing "rte inhabited?"
+    (is (:rte (methods gns/-disjoint?)) "test 585")
     (with-compile-env ()
 
       (is (rte-inhabited? (rte-to-dfa '(:and (:* Long) (:* Double)))))
@@ -591,20 +593,47 @@
 
 (deftest t-rte-with-rte
   (testing "recursive rte"
+    (is (:rte (methods gns/-disjoint?)) "test 596")
     (with-compile-env ()
 
-      (is (not (disjoint? '(rte (:* Number))
+      (is (not (gns/disjoint? '(rte (:* Number))
                           '(rte (:* Double))
                           true)))
-      (is (not (disjoint? '(rte (:* Number))
+      (is (not (gns/disjoint? '(rte (:* Number))
                           '(rte (:* String))
                           true)))
-      (is (disjoint? '(rte (:+ Number)) 
+      (is (gns/disjoint? '(rte (:+ Number)) 
                      '(rte (:+ String))
                      false))
       (is (rte-to-dfa '(:or (rte (:* Number)) 
                             (rte (:cat Double Number))
                             (rte (:* Double))))))))
+
+(deftest t-issue-60
+  (testing "testing issue 60"
+    ;; https://gitlab.lrde.epita.fr/jnewton/clojure-rte/-/issues/60
+
+    ;; assert the :rte methods exist for
+    ;;   gns/-disjoint? :rte
+    (is (:rte (methods gns/-disjoint?)) "test 615")
+    (is (:not-rte (methods gns/-disjoint?)) "test 616")
+
+    ;;   gns/-subtype? :rte
+    (is (:rte (methods gns/-subtype?)) "test 619")
+    
+    ;;   gns/-inhabited? :rte
+    (is (:rte (methods gns/-inhabited?)) "test 622")
+    
+    ;;   gns/typep 'rte
+    (is (get (methods gns/typep) 'rte) "test 625")
+    
+    (is (= true (boolean (rte-inhabited? '(:cat String :sigma)))) "test 630")
+    (is (= true (gns/inhabited? '(rte (:cat String :sigma)) :dont-know)) "test 631")
+    (is (= true (gns/disjoint? '(rte (:cat String :sigma)) '(rte (:cat Character)) :dont-know)) "test 632")
+    (is (= true (gns/disjoint? '(rte (:cat String :sigma)) 'String :dont-know)) "test 633")
+    (is (= false (gns/inhabited? '(and (rte (:cat String :sigma)) String) :dont-know)) "test 634")
+    (is (= true (gns/disjoint? '(and (rte (:cat String :sigma)) String) 'String :dont-know)) "test 635")
+    ))
 
 (deftest t-pattern-with-=-and-class
   (testing "pattern with ="
@@ -691,6 +720,7 @@
 
 (deftest t-dfa-to-rte
   (testing "dfa-to-rte"
+    (is (:rte (methods gns/-disjoint?)) "test x14")
     (is (= '{13 (:* Integer)}
            (dfa-to-rte (rte-to-dfa '(:* Integer) 13))) "(:* Integer)")
 

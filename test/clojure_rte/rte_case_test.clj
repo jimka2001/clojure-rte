@@ -24,6 +24,7 @@
             [clojure-rte.rte-construct :refer [rte-match with-compile-env]]
             [clojure.test :refer [deftest is testing]]
             [clojure-rte.rte-case :refer [rte-case destructuring-case
+                                          memoized-rte-case-clauses-to-dfa
                                           -destructuring-fn-many destructuring-fn]]
 ))
 

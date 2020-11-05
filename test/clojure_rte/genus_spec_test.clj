@@ -40,15 +40,20 @@
                   (:cat (spec clojure.core/odd?) (spec clojure.core/pos?)))))]
       (t/is (= (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                                    :y  (s/cat :c odd? :d pos?)))))
-               rte))
+               rte) "test x43")
       
+      (t/is (= (binding [*ns* (find-ns 'user)]
+                 (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                                     :y  (s/cat :c odd? :d pos?))))))
+               rte) "test x43")
+
 
       (t/is (= (gs/spec-to-rte `(s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                             :y  (s/cat :c odd? :d pos?))))
-               rte))
+               rte) "test x48")
 
       (t/is (= (gs/spec-to-rte (s/form ::test-1))
-               rte))
+               rte) "test x51")
       )))
 
 (t/deftest t-canonicalize-type
@@ -65,10 +70,10 @@
 
       (t/is (= (gns/canonicalize-type `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                                             :y  (s/cat :c odd? :d pos?)))))
-               rte))
+               rte) "test x68")
 
       (t/is (= (gns/canonicalize-type '(spec ::test-1))
-               rte))
+               rte) "test x71")
 
       (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                                          :y  (s/cat :c odd? :d pos?)))))
@@ -76,6 +81,7 @@
                  (:*
                   (:or
                    (:cat (satisfies neg?) (satisfies even?))
-                   (:cat (satisfies odd?) (satisfies pos?))))))))))
+                   (:cat (satisfies odd?) (satisfies pos?))))))
+            "test x80"))))
 
     
