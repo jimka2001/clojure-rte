@@ -777,6 +777,11 @@
                                                         (member? (second t)))) (rest t1))))
                 :dont-know)
 
+    ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
+    (exists-pair [[ta tb] (rest t1)]
+                 (disjoint? ta tb false))
+    false
+
     :else
     :dont-know))
 
