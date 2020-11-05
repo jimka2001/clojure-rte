@@ -263,7 +263,19 @@
    })
 
 (defmulti rte-expand
-  "macro-like facility for rte"
+  "macro-like facility for rte.
+  Methods take two arguments [pattern functions]
+  pattern is the entire rte pattern being expanded, which might be sequence or otherwise.
+    E.g., pattern = (:and A B C)
+    or    pather = :empty-set
+  A method may return either a transformed version of the pattern,
+  or may return the pattern itself.   This function is called within
+  a call to fixed-point which will keep calling the function until it
+  eventually _expands_ into itself.
+  The :default method returns the given pattern, so as fixed-point
+  continues to expand the pattern, eventually there'll be no other
+  applicable method and the :default method will be called, triggering
+  fixed-point to terminate."
   (fn [pattern _functions]
     (cond
       (not (sequential? pattern))
@@ -358,6 +370,30 @@
               (invalid-pattern pattern functions '[:exp [_ _ _ & _]])))
            (rest pattern))))
 
+
+(defn verify-type [pattern functions]
+  (if (gns/valid-type? pattern)
+    pattern
+    (throw (ex-info (cl-format false "[219] invalid type designator ~A" pattern)
+                    {:error-type :invalid-type-designator
+                     :pattern pattern
+                     :functions functions}))))
+
+(defmethod rte-expand 'and [pattern functions]
+  ;; convert (and a b c) => (:and a b c)
+  ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
+  (cons :and (rest (verify-type pattern functions))))
+
+(defmethod rte-expand 'or [pattern functions]
+  ;; convert (or a b c) => (:or a b c)
+  ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
+  (cons :or (rest (verify-type pattern functions))))
+
+(defmethod rte-expand 'not [pattern functions]
+  ;;             (not a) => (:and :sigma (:not a))
+  `(:and (:not ~@(rest (verify-type pattern functions)))
+         :sigma))
+
 (def traversal-depth-max 10)
 (defn traverse-pattern
   "Workhorse function for walking an rte pattern.
@@ -370,8 +406,7 @@
    function needs to understand how to walk an rte pattern."
   ([given-pattern functions]
    (traverse-pattern 0 given-pattern functions))
-  (
-   [depth given-pattern functions]
+  ([depth given-pattern functions]
    (when (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
                 depth given-pattern))
@@ -390,26 +425,6 @@
                ((:type functions) pattern functions)))
            (if-nil [_]
              ((:type functions) () functions))
-           (verify-type [obj]
-             (if (gns/valid-type? obj)
-               obj
-               (throw (ex-info (cl-format false "[219] invalid type designator ~A" obj)
-                               {:error-type :invalid-type-designator
-                                :obj obj
-                                :given-pattern given-pattern}))))
-           (convert-type-designator-to-rte [obj]
-             ;; e.g convert (and a b c) => (:and a b c)
-             ;;             (or a b c) => (:or a b c)
-             ;;             (not a) => (:and :sigma (:not a))
-             ;; We also verify that it is a valid.
-             ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
-             (if (not (sequential? obj))
-               obj
-               (case (first obj)
-                 (or) (cons :or (rest (verify-type obj)))
-                 (and) (cons :and (rest (verify-type obj)))
-                 (not) `(:and (:not ~@(rest (verify-type obj))) :sigma)
-                 obj)))
            (if-singleton-list [pattern] ;; (:or)  (:and)
              (let [[keyword] pattern]
                (case keyword
@@ -456,7 +471,7 @@
 
                  ;;case-else
                  ((:type functions) pattern functions))))]
-     (let [pattern (fixed-point (convert-type-designator-to-rte given-pattern)
+     (let [pattern (fixed-point given-pattern
                                 (fn [p] (rte-expand p functions))
                                 =)]
        (cond (not (seq? pattern))
