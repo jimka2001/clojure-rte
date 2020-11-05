@@ -549,12 +549,16 @@
                 (if ks
                   (recur ks)
                   default))))]
-    (let [i (calc-inhabited type-designator :dont-know)]
-      (cond (= :dont-know i)
-            (calc-inhabited (-canonicalize-type type-designator) default)
+    (let [i (calc-inhabited type-designator :dont-know)
+          td-canon (delay (-canonicalize-type type-designator))]
+      (cond (member i '(true false))
+            i
+
+            (= @td-canon type-designator)
+            default
             
             :else
-            i))))
+            (calc-inhabited @td-canon default)))))
 
 (defmethod -inhabited? :primary [type-designator]
   (if (class-designator? type-designator)
