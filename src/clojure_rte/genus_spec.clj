@@ -51,8 +51,9 @@
   :dont-know)
 
 (defn symbol= [x y]
-  (= (resolve x)
-     (resolve y)))
+  (let [ns (find-ns 'clojure-rte.genus-spec)]
+    (= (ns-resolve ns x)
+       (ns-resolve ns y))))
 
 (defn recuperate-closure
   "Takes an expression something like:
