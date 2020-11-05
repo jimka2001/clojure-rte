@@ -21,10 +21,14 @@
 
 (ns clojure-rte.rte-tester-test
   (:require [clojure-rte.rte-core ]
-            [clojure-rte.rte-construct :refer [rte-match with-compile-env
-                                               canonicalize-pattern canonicalize-pattern-once]]
-            [clojure-rte.rte-tester :refer :all]
-            [clojure.test :refer :all :exclude [testing]]))
+            [clojure-rte.rte-construct :refer [canonicalize-pattern]]
+            [clojure-rte.rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
+                                            test-canonicalize-pattern
+                                            test-rte-canonicalize-nullable
+                                            test-rte-not
+                                            rte-components gen-rte
+                                            *test-types* *rte-keywords*]]
+            [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.rte-tester-test))

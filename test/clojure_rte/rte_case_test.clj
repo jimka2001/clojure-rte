@@ -21,10 +21,10 @@
 
 (ns clojure-rte.rte-case-test
   (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :refer [rte-match with-compile-env
-                                               canonicalize-pattern canonicalize-pattern-once]]
-            [clojure.test :refer :all]
-            [clojure-rte.rte-case :refer :all]
+            [clojure-rte.rte-construct :refer [rte-match with-compile-env]]
+            [clojure.test :refer [deftest is testing]]
+            [clojure-rte.rte-case :refer [rte-case destructuring-case
+                                          -destructuring-fn-many destructuring-fn]]
 ))
 
 (defn -main []
@@ -212,7 +212,7 @@
   (testing "destructuring-fn-many"
     (is (= 1
            (let [f
-                 (destructuring-fn-many
+                 (-destructuring-fn-many
                   ([[a b]          {a Boolean b (or String Boolean)}]
                    2)
                   ([[a [b c] & d]  {a Boolean b String d Boolean}]
@@ -226,7 +226,7 @@
   ;; we run them here to assure that we don't get index invalid.
   (let [f
 
-        (destructuring-fn-many
+        (-destructuring-fn-many
          ([[a b]          {a Boolean b (or String Boolean)}]
           2)
          ([[a [b c] & d]  {a Boolean b String d Boolean}]

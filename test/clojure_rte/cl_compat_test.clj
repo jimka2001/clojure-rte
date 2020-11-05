@@ -20,10 +20,10 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.cl-compat-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+  (:require [clojure-rte.rte-core]
             [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [call-with-collector]]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.cl-compat-test))
@@ -67,7 +67,7 @@
                                             (collect 4))))))))
 (deftest t-cl-cond
   (testing "cl-cond"
-    (let [a 100 b 200]
+    (let [a 100]
       (is (= 42 (cl/cl-cond
                  (a 42))) "cond 1")
       (is (= 42 (cl/cl-cond
@@ -98,19 +98,19 @@
   (testing "call-with-escape"
     (is (= 42 (cl/call-with-escape (fn [ret]
                                   (ret 42)))))
-    (is (= 43 (cl/call-with-escape (fn [ret]
+    (is (= 43 (cl/call-with-escape (fn [_ret]
                                   43))))
     (is (= 44 (cl/call-with-escape (fn [ret]
                                   (ret 44)
                                   45))))
     (is (= 47 (cl/call-with-escape (fn [ret1]
                                   (cl/call-with-escape (fn [ret2]
-                                                      (ret2 46)))
+                                                         (ret2 46)))
                                   (ret1 47)))))
     (is (= 48 (cl/call-with-escape (fn [ret1]
-                                  (cl/call-with-escape (fn [ret2]
-                                                      (ret1 48)))
-                                  (ret1 49)))))))
+                                     (cl/call-with-escape (fn [_ret2]
+                                                         (ret1 48)))
+                                     (ret1 49)))))))
 
 (deftest t-with-escape
   (testing "with-escape"

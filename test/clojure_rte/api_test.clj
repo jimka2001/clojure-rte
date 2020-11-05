@@ -20,14 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.api-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
-            [clojure-rte.rte-construct :refer :all]
-            [clojure.test :refer :all]
-            [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [sort-operands remove-once call-with-collector visit-permutations]]
-            [clojure-rte.genus :refer [disjoint? typep inhabited?]]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure-rte.rte-tester :refer :all]))
+  (:require [clojure-rte.rte-core]
+            [clojure-rte.rte-construct :refer [rte-compile rte-match with-compile-env]]
+            [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.api-test))

@@ -28,11 +28,10 @@
                                                rte-inhabited? rte-vacuous? rte-to-dfa
                                                rte-combine-labels dfa-to-rte
                                                mdtd with-rte reduce-redundant-or]]
-            [clojure.test :refer :all :exclude [testing]]
-            [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [sort-operands remove-once call-with-collector visit-permutations member]]
-            [clojure-rte.genus :refer [disjoint? typep inhabited?]]
-            [clojure-rte.rte-tester :refer :all]
+            [clojure.test :refer [deftest is] :exclude [testing]]
+            [clojure-rte.util :refer [member]]
+            [clojure-rte.genus :refer [disjoint? typep]]
+            [clojure-rte.rte-tester :refer []]
             [clojure-rte.xymbolyco :as xym]))
 
 (defn -main []

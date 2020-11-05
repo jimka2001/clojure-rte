@@ -221,15 +221,15 @@
           `(let [~var ~expr]
              (rte-case ~var ~@cases ~sigma-* nil)))))))
 
-(defmacro destructuring-fn-many
-  "Internal macro used in the exapansion of destructuring-fn"
+(defmacro -destructuring-fn-many
+  "Internal macro used in the expansion of destructuring-fn"
   [& args]
   (cond (empty? args)
         nil
 
         (and (not (symbol? (first args)))
              (not (= nil (first args))))
-        `(destructuring-fn-many nil ~@args)
+        `(-destructuring-fn-many nil ~@args)
 
         :else
         (let [var (gensym "fn-var-")
@@ -272,7 +272,7 @@
 
     (vector? (second args)) ; if lambda-list is a vector
     (let [[name lambda-list & others] args]
-      `(destructuring-fn-many
+      `(-destructuring-fn-many
         ~name
         (~lambda-list
          ~@others)))
@@ -283,7 +283,7 @@
                    (vector? (first clause))))
             (rest args))
     (let [[name & clauses] args]
-      `(destructuring-fn-many
+      `(-destructuring-fn-many
         ~name
         ~@clauses))
     

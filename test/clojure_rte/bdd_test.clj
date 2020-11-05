@@ -21,14 +21,15 @@
 
 
 (ns clojure-rte.bdd-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+  (:require [clojure-rte.rte-core]
             [clojure-rte.bdd :as bdd]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [print-vals member]]
-            [clojure.test :refer :all])
+            [clojure-rte.util :refer [member]]
+            [clojure.test :refer [deftest is testing]])
   ;; this imports the name of the Bdd record, which is otherwise not imported by :require
-  (:import [clojure_rte.bdd Bdd]))
+  ;;(:import [clojure_rte.bdd Bdd])
+  )
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.bdd-test))
@@ -61,8 +62,7 @@
       (is (= true (bdd/node 'Long true true)))
       (is (bdd/node 'Long true false))
       (is (bdd/node 'Long false true))
-      (let [long (bdd/node 'Long true false)
-            string (bdd/node 'String true false)
+      (let [string (bdd/node 'String true false)
             double (bdd/node 'Double true false)]
         (is (= string (bdd/node 'Long string string)))
         (is (bdd/node 'Long string double))
@@ -71,7 +71,7 @@
 (deftest t-commutativity
   (testing "testing Boolean operations commutativity"
     (bdd/with-hash []
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd1 (bdd/gen-random)
                     bdd2 (bdd/gen-random)]]
         (is (= (bdd/or bdd1 bdd2)
@@ -82,7 +82,7 @@
 (deftest t-associativity
   (testing "testing Boolean operations associativity"
     (bdd/with-hash []
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd1 (bdd/gen-random)
                     bdd2 (bdd/gen-random)
                     bdd3 (bdd/gen-random)]]
@@ -121,7 +121,7 @@
 (deftest t-idempotence
   (testing "testing Boolean idempotence"
     (bdd/with-hash []
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd (bdd/gen-random)]]
 
         (is (= bdd (bdd/and bdd bdd)))
@@ -142,7 +142,7 @@
 (deftest t-de-morgan
   (testing "bdd de morgan's theorem"
     (bdd/with-hash []
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd1 (bdd/gen-random)
                     bdd2 (bdd/gen-random)]]
         (is (= (bdd/not (bdd/or bdd1 bdd2))
@@ -172,7 +172,7 @@
       (for [a [true false]]
         (is (= (not a)
                (bdd/not a))))
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd (bdd/gen-random)]]
         (is (= bdd (bdd/not (bdd/not bdd)))
     )))))
@@ -184,7 +184,7 @@
             b [true false]]
         (is (= (not (and a b))
                (bdd/and a b))))
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd1 (bdd/gen-random)
                     bdd2 (bdd/gen-random)]]
         (is (= (bdd/and-not bdd1 bdd2)
@@ -236,7 +236,7 @@
         (is (member '(not Long) (bdd/dnf bdd)))
         (is (member '(not Boolean) (bdd/dnf bdd))))
       
-      (doseq [n (range num-random-samples)
+      (doseq [_n (range num-random-samples)
               :let [bdd1 (bdd/gen-random)
                     serialized-1 (bdd/dnf bdd1)
                     bdd2 (bdd/bdd serialized-1)

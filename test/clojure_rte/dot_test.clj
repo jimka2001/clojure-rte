@@ -21,11 +21,10 @@
 
 
 (ns clojure-rte.dot-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+  (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :refer [rte-compile with-compile-env]]
             [clojure-rte.dot :as sut]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.dot-test))

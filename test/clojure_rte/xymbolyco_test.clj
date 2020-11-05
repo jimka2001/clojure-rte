@@ -22,12 +22,16 @@
 (ns clojure-rte.xymbolyco-test
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.rte-core ]
-            [clojure-rte.rte-construct :refer [rte-to-dfa rte-match with-compile-env]]
-            [clojure-rte.xymbolyco :refer :all]
+            [clojure-rte.rte-construct :refer [rte-to-dfa rte-match]]
+            [clojure-rte.xymbolyco :refer [find-eqv-class split-eqv-class
+                                           states-as-seq find-incomplete-states
+                                           extend-with-sink-state synchronized-product synchronized-union
+                                           cross-intersection
+                                           trim complete minimize]]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
-            [clojure.test :refer :all :exclude [testing]]))
+            [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.xymbolyco-test))
@@ -194,23 +198,23 @@
           :let [seq-long (reduce concat (repeat reps seq-root))
                 match? (rte-match dfa seq-long)]
           ]
-    (do
-      (is (= match?
-             (rte-match dfa-trim seq-long))
-          (format "case 1: rte=%s seq=%s got %s from dfa, got %s from dfa-trim"
-                  rte (pr-str seq-long) match? (rte-match dfa-trim seq-long)))
-      (is (= match?
-             (rte-match dfa-min seq-long))
-          (format "case 2: rte=%s seq=%s got %s from dfa, got %s from dfa-min"
-                  rte (pr-str seq-long) match? (rte-match dfa-min seq-long)))
-      (is (= match?
-             (rte-match dfa-min-trim seq-long))
-          (format "case 3: rte=%s seq=%s got %s from dfa, got %s from dfa-min-trim"
-                  rte (pr-str seq-long) match? (rte-match dfa-min-trim seq-long)))
-      (is (= match?
-             (rte-match dfa-trim-min seq-long))
-          (format "case 4: rte=%s seq=%s got %s from dfa, got %s from dfa-trim-min"
-                  rte (pr-str seq-long) match? (rte-match dfa-trim-min seq-long))))))
+    
+    (is (= match?
+           (rte-match dfa-trim seq-long))
+        (format "case 1: rte=%s seq=%s got %s from dfa, got %s from dfa-trim"
+                rte (pr-str seq-long) match? (rte-match dfa-trim seq-long)))
+    (is (= match?
+           (rte-match dfa-min seq-long))
+        (format "case 2: rte=%s seq=%s got %s from dfa, got %s from dfa-min"
+                rte (pr-str seq-long) match? (rte-match dfa-min seq-long)))
+    (is (= match?
+           (rte-match dfa-min-trim seq-long))
+        (format "case 3: rte=%s seq=%s got %s from dfa, got %s from dfa-min-trim"
+                rte (pr-str seq-long) match? (rte-match dfa-min-trim seq-long)))
+    (is (= match?
+           (rte-match dfa-trim-min seq-long))
+        (format "case 4: rte=%s seq=%s got %s from dfa, got %s from dfa-trim-min"
+                rte (pr-str seq-long) match? (rte-match dfa-trim-min seq-long)))))
   
 (deftest t-acceptance
   (testing "acceptance:  testing whether rte-match works same on dfa when trimmed and minimized."
@@ -236,12 +240,12 @@
           dfa-sxp (synchronized-product dfa-1 dfa-2 
                                         (fn [a b]
                                           (and a b))
-                                        (fn [q1 q2]
+                                        (fn [q1 _q2]
                                           ((:exit-map dfa-1) (:index q1))))
           dfa-sxp-trim (trim dfa-sxp)
           dfa-sxp-min (minimize dfa-sxp)
-          dfa-sxp-trim-min (minimize dfa-sxp-trim)
-          dfa-sxp-min-trim (trim dfa-sxp-min)
+          _dfa-sxp-trim-min (minimize dfa-sxp-trim)
+          _dfa-sxp-min-trim (trim dfa-sxp-min)
           seqs [[]
                 [1]
                 [1 2 3]
@@ -307,7 +311,7 @@
     (let [dfa (rte-to-dfa '(:and (:cat :sigma (:* :sigma))
                                  (:not (:or (:cat :sigma))))
                           12)]
-      (is (not (empty? (filter (comp boolean :accepting) (states-as-seq dfa))))
+      (is (not-empty (filter (comp boolean :accepting) (states-as-seq dfa)))
           "missing final 1"))))
 
 (deftest t-missing-final-2
@@ -316,5 +320,5 @@
                                  (:not (:or (:cat Boolean :sigma (:* :sigma))
                                             (:cat Boolean :sigma))))
                           13)]
-      (is (not (empty? (filter (comp boolean :accepting) (states-as-seq dfa))))
+      (is (not-empty (filter (comp boolean :accepting) (states-as-seq dfa)))
           "missing final 2"))))

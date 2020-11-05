@@ -296,7 +296,7 @@
 
 (defn split-eqv-class
   "Given a set of objects, return a set of subsets thereof which is a partition of
-  the given set.   Every element in any some set has the same value under f, and
+  the given set.   Every element in any set has the same value under f, and
   the value under f is different for any distinct subsets.  f is not called
   if the size of the given set is 1."
   [objects f]

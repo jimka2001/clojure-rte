@@ -20,9 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.util-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
-            [clojure-rte.util :refer :all]
-            [clojure.test :refer :all]))
+  (:require [clojure-rte.rte-core]
+            [clojure-rte.util :refer [sort-operands partition-by-pred
+                                      call-with-collector
+                                      visit-permutations
+                                      remove-once fixed-point member]]
+            [clojure.test :refer [deftest testing is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.util-test))
@@ -262,7 +265,7 @@
                                   (collect 3)
                                   (collect 2)))
            '(2 3 1)))
-    (is (= (call-with-collector (fn [collect]
+    (is (= (call-with-collector (fn [_collect]
                                   ))
            ()))))
 

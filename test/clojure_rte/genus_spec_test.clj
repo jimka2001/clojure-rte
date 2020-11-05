@@ -18,9 +18,8 @@
 
 
 (ns clojure-rte.genus-spec-test
-  (:require [clojure-rte.rte-core :refer :all :exclude [-main and? or? satisfies? member? not? =?]]
+  (:require [clojure-rte.rte-core]
             [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [call-with-collector member]]
             [clojure.spec.alpha :as s]
             [clojure-rte.genus-spec :as gs]
             [clojure.test :as t]))
