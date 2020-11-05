@@ -102,8 +102,6 @@
   [bindings & body]
   `(call-with-rte '~bindings (fn [] ~@body)))
 
-
-
 (defn rte? [t]
   (and (sequential? t)
        (= 'rte (first t))))

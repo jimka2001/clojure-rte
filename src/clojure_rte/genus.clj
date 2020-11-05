@@ -113,7 +113,7 @@
   "Test whether two type designators represent the same type."
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (if (= t1 t2)
     true
     ;; two types are equivalent if each is a subtype of the other.
@@ -305,7 +305,7 @@
   are disjoint, then the default value is returned."
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (letfn [(check-disjoint [t1' t2' default]
             (loop [[k & ks] (sort-method-keys -disjoint?)]
               (case ((k (methods -disjoint?)) t1' t2')
@@ -509,7 +509,7 @@
   of default is one of: true, false, :dont-know or :error."
   [sub-designator super-designator default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (loop [[k & ks] (sort-method-keys -subtype?)]
     (let [s ((k (methods -subtype?)) sub-designator super-designator)]
       (case s
@@ -540,7 +540,7 @@
   empty type."
   [type-designator default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (letfn [(calc-inhabited [type-designator default]
             (loop [[k & ks] (sort-method-keys -inhabited?)]
               (case ((k (methods -inhabited?)) type-designator)
