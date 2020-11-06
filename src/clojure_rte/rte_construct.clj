@@ -473,7 +473,13 @@
                  ((:type functions) pattern functions))))]
      (let [pattern (fixed-point given-pattern
                                 (fn [p] (rte-expand p functions))
-                                =)]
+                                (fn [a b] 
+                                  (if (= a b)
+                                    (do (println [:fixed-point-found a]) true)
+                                    (do 
+                                      (println [:expanded :from a :to b])
+                                      false)
+                                  )))]
        (cond (not (seq? pattern))
              (if-atom pattern)
 
