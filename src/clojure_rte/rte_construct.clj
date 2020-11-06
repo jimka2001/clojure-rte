@@ -398,17 +398,27 @@
   `(:and (:not ~@(rest (verify-type pattern functions)))
          :sigma))
 
-(defn expand
+(defn expand ; rte/expand
   "Repeat calls to expand-1 until a fixed point is found."
-  [given-pattern functions]
-  (fixed-point given-pattern
-               (fn [p] (expand-1 p functions))
-               (fn [a b] 
-                 (if (= a b)
-                   (do (println [:fixed-point-found a]) true)
-                   (do 
-                     (println [:expanded :from a :to b])
-                     false)))))
+  ([given-pattern functions]
+   (rte/expand given-pattern functions true))
+  ([given-pattern functions verbose]
+   (try (fixed-point given-pattern
+                     (fn [p] (expand-1 p functions))
+                     ;; TODO -- after debugging, replace this (fn ...) with simply =.
+                     (fn [a b] 
+                       (if (= a b)
+                         true ;; (do (println [:fixed-point-found a]) true)
+                         false ;; (do (println [:expanded :from a :to b]) false)
+                         )))
+        (catch clojure.lang.ExceptionInfo ei
+          (if (:unsupported-pattern (ex-data ei))
+            (do ;; if we fail to expand the pattern, then don't even try
+              (when verbose
+                (cl-format true "failed to expand pattern: ~A, at ~A~%" given-pattern (:pattern (ex-data ei))))
+              given-pattern)
+            (throw ei))
+          ))))
 
 (def traversal-depth-max 10)
 (defn traverse-pattern

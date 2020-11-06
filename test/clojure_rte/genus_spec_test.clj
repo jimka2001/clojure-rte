@@ -156,5 +156,7 @@
 
 (t/deftest t-expand-spec
   (t/testing "expanding unsupported form"
-    (t/is (= (rte/expand '(spec ::test-spec-2) nil)
+    (t/is (= (rte/expand '(spec ::test-spec-2) nil
+                         false ; verbose=false
+                         )
              '(spec ::test-spec-2)))))
