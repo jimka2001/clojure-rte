@@ -19,9 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-core
-  (:require [clojure-rte.rte-construct]
-            [clojure-rte.rte-case]
-            [clojure-rte.genus-spec]
-            [clojure-rte.rte-spec]
-            ))
+(ns clojure-rte.rte-spec
+  (:require [clojure-rte.rte-construct :as rte]
+            [clojure-rte.genus-spec :as gs]))
+
+(defmethod rte/rte-expand 'spec
+  [[_spec & operands] _functions]
+  (if (>= (bounded-count 2 operands) 2)
+    (throw (ex-info "invalid rte/type, (spec ...) requires exactly one operand"
+                    {:operands operands
+                     :count (count operands)
+                     }))
+    (gs/spec-to-rte (first operands))))
+  
