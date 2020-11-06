@@ -262,8 +262,11 @@
               ((:client functions) pattern functions))
    })
 
-(defmulti rte-expand
+(defmulti expand-1
   "macro-like facility for rte.
+  A call to this function expands an rte pattern (once).
+  Methods are responsible for expanding as a function of the first element
+  of the pattern e.g., (and ...), (spec ...), (:? ...) etc.
   Methods take two arguments [pattern functions]
   pattern is the entire rte pattern being expanded, which might be sequence or otherwise.
     E.g., pattern = (:and A B C)
@@ -285,34 +288,34 @@
 
 (defn invalid-pattern [pattern functions culprit]
   (throw (ex-info (format "[134] invalid pattern %s" pattern)
-                  {:error-type :rte-expand-error
+                  {:error-type :rte-expand-1-error
                    :keyword (first pattern)
                    :culprit culprit
                    :pattern pattern
                    :functions functions
                    })))
 
-(defmethod rte-expand :default [pattern _functions]
+(defmethod expand-1 :default [pattern _functions]
   pattern)
 
-(defmethod rte-expand 'satisfies [pattern _functions]
+(defmethod expand-1 'satisfies [pattern _functions]
   (gns/expand-satisfies pattern))
 
-(defmethod rte-expand :? [pattern functions]
+(defmethod expand-1 :? [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:? []]))
            ([operand] `(:or :epsilon ~operand))
            ([_ & _] (invalid-pattern pattern functions '[:? [_ & _]]))) 
          (rest pattern)))
 
-(defmethod rte-expand :+ [pattern functions]
+(defmethod expand-1 :+ [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:+ []]))
            ([operand] `(:cat ~operand (:* ~operand)))
            ([_ & _] (invalid-pattern pattern functions '[:+ [_ & _]])))
          (rest pattern)))
 
-(defmethod rte-expand :permute [pattern _functions]
+(defmethod expand-1 :permute [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -324,7 +327,7 @@
                                                   (collect (cons :cat perm))) operands)))))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-any [pattern _functions]
+(defmethod expand-1 :contains-any [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -335,7 +338,7 @@
                      ~sigma-*))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-every [pattern _functions]
+(defmethod expand-1 :contains-every [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -345,12 +348,12 @@
               `(:and ~@(doall wrapped)))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-none [pattern _functions]
+(defmethod expand-1 :contains-none [pattern _functions]
   ;; TODO, not sure what (:contains-none) should mean with no arguments.
   ;;    as implemented it is equivalent to (:not :epsilon) which seems wierd.
   `(:not (:contains-any ~@(rest pattern))))
 
-(defmethod rte-expand :exp [pattern functions]
+(defmethod expand-1 :exp [pattern functions]
   (letfn [(expand [n m pattern]
             (assert (>= n 0) (format "pattern %s is limited to n >= 0, not %s" pattern n))
             (assert (<= n m) (format "pattern %s is limited to n <= m, got %s > %s" pattern n m))
@@ -379,20 +382,32 @@
                      :pattern pattern
                      :functions functions}))))
 
-(defmethod rte-expand 'and [pattern functions]
+(defmethod expand-1 'and [pattern functions]
   ;; convert (and a b c) => (:and a b c)
   ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
   (cons :and (rest (verify-type pattern functions))))
 
-(defmethod rte-expand 'or [pattern functions]
+(defmethod expand-1 'or [pattern functions]
   ;; convert (or a b c) => (:or a b c)
   ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
   (cons :or (rest (verify-type pattern functions))))
 
-(defmethod rte-expand 'not [pattern functions]
+(defmethod expand-1 'not [pattern functions]
   ;;             (not a) => (:and :sigma (:not a))
   `(:and (:not ~@(rest (verify-type pattern functions)))
          :sigma))
+
+(defn expand
+  "Repeat calls to expand-1 until a fixed point is found."
+  [given-pattern functions]
+  (fixed-point given-pattern
+               (fn [p] (expand-1 p functions))
+               (fn [a b] 
+                 (if (= a b)
+                   (do (println [:fixed-point-found a]) true)
+                   (do 
+                     (println [:expanded :from a :to b])
+                     false)))))
 
 (def traversal-depth-max 10)
 (defn traverse-pattern
@@ -471,15 +486,7 @@
 
                  ;;case-else
                  ((:type functions) pattern functions))))]
-     (let [pattern (fixed-point given-pattern
-                                (fn [p] (rte-expand p functions))
-                                (fn [a b] 
-                                  (if (= a b)
-                                    (do (println [:fixed-point-found a]) true)
-                                    (do 
-                                      (println [:expanded :from a :to b])
-                                      false)
-                                  )))]
+     (let [pattern (expand given-pattern functions)]
        (cond (not (seq? pattern))
              (if-atom pattern)
 

@@ -151,3 +151,8 @@
                                     ["a" "b"]
                                     ["a" "b" "c"]])) "test 151"))))
       
+
+(t/deftest t-expand-spec
+  (t/testing "expanding unsupported form"
+    (t/is (= (rte/expand '(spec ::test-spec-2) nil)
+             '(spec ::test-spec-2)))))

@@ -23,7 +23,7 @@
   (:require [clojure-rte.rte-construct :as rte]
             [clojure-rte.genus-spec :as gs]))
 
-(defmethod rte/rte-expand 'spec
+(defmethod rte/expand-1 'spec
   [[_spec & operands] _functions]
   (if (>= (bounded-count 2 operands) 2)
     (throw (ex-info "invalid rte/type, (spec ...) requires exactly one operand"
