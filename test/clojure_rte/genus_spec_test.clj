@@ -19,6 +19,8 @@
 
 (ns clojure-rte.genus-spec-test
   (:require [clojure-rte.rte-core]
+            [clojure-rte.rte-construct :refer [rte-match]]
+            [clojure.pprint :refer [cl-format]]
             [clojure-rte.genus :as gns]
             [clojure.spec.alpha :as s]
             [clojure-rte.genus-spec :as gs]
@@ -27,9 +29,8 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-spec-test))
 
-
-(s/def ::test-1 (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                            :y  (s/cat :c odd? :d pos?))))
+(s/def ::test-spec-1 (s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                 :y  (s/cat :c odd? :d pos?))))
 
 (t/deftest t-spec-to-rte
   (t/testing "spec-to-rte"
@@ -52,7 +53,7 @@
                                             :y  (s/cat :c odd? :d pos?))))
                rte) "test x48")
 
-      (t/is (= (gs/spec-to-rte (s/form ::test-1))
+      (t/is (= (gs/spec-to-rte (s/form ::test-spec-1))
                rte) "test x51")
       )))
 
@@ -72,7 +73,7 @@
                                                             :y  (s/cat :c odd? :d pos?)))))
                rte) "test x68")
 
-      (t/is (= (gns/canonicalize-type '(spec ::test-1))
+      (t/is (= (gns/canonicalize-type '(spec ::test-spec-1))
                rte) "test x71")
 
       (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
@@ -82,6 +83,71 @@
                   (:or
                    (:cat (satisfies neg?) (satisfies even?))
                    (:cat (satisfies odd?) (satisfies pos?))))))
-            "test x80"))))
+            "test x80")
+      )))
 
-    
+(t/deftest t-rte-match
+  (t/testing "rte-match with rtes containing specs"
+    (let [rte '(rte
+                (:*
+                 (:or
+                  (:cat
+                   (satisfies clojure.core/neg?)
+                   (satisfies clojure.core/even?))
+                  (:cat
+                   (satisfies clojure.core/odd?)
+                   (satisfies clojure.core/pos?)))))]
+
+      (doseq [seq [[]
+                   [-1 2]
+                   [-1 2 3 1]
+                   [-1 2 3 1 -3 1 -1 4]]]
+        (t/is (= true (rte-match rte [seq])) (cl-format false "test x87: seq=~A pattern=~A" seq rte)))
+      (t/is (= false (rte-match rte [-1 2   3 1   3 -1   -1 4])) "test x91")
+      (t/is (= false (rte-match rte [[-1 2   3 1   3 -1   -1 4]])) "test x92")
+      (doseq [rte2 [rte
+                    `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                          :y  (s/cat :c odd? :d pos?))))
+                    '(spec ::test-spec-1)
+                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                       :y  (s/cat :c odd? :d pos?))))
+                    ]
+              :let [_ (t/is (= false (rte-match rte2 [seq])) "test 100")]
+              seq [[]
+                   [-1 2]
+                   [-1 2 3 1]
+                   [-1 2 3 1 -3 1 -1 4]]
+              ]
+        (t/is (= false (rte-match rte2 seq)) "test 105")
+        (t/is (= true (rte-match rte2 [seq])) "test 106")
+        ))))
+
+;; cat - concatenation of predicates/patterns
+;; alt - choice among alternative predicates/patterns
+;; * - 0 or more of a predicate/pattern
+;; + - 1 or more of a predicate/pattern
+;; ? - 0 or 1 of a predicate/pattern
+(t/deftest t-spec-sequences
+  (t/testing "spec sequence operators"
+    ()))
+
+;; this example comes from https://clojure.org/guides/spec#_sequences
+;; it matches any sequence of strings with even length, 0, 2, 4, ...
+(s/def ::test-spec-2 (s/& (s/* string?)
+                          #(even? (count %))))
+
+(t/deftest t-rte-match-2
+  (t/testing "rte-match with unsupported specs"
+    ;; ::test-spec-2 uses the s/& operator which cannot be converted
+    ;;   to an efficent rte.  the semantics should be maintained by the
+    ;;   rte by leaving it as (spec ....)
+    (let [rte '(:* (spec ::test-spec-2))]
+      (t/is (= true (rte-match rte [])) "test 148")
+      (t/is (= true (rte-match rte [[] [] []])) "test 149")
+      (t/is (= true (rte-match rte [[]
+                                    ["a" "b"]
+                                    ["a" "b" "c" "d"]])) "test 150")
+      (t/is (= false (rte-match rte [[]
+                                    ["a" "b"]
+                                    ["a" "b" "c"]])) "test 151"))))
+      

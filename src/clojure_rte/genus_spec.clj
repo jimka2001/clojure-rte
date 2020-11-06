@@ -70,7 +70,13 @@
 
 (defn spec-to-rte 
   [pattern]
-  (cond (and (symbol? pattern)
+  (cond (s/regex? pattern)
+        (spec-to-rte (s/form pattern))
+
+        (s/get-spec pattern)
+        (spec-to-rte (s/form pattern))
+    
+        (and (symbol? pattern)
              (resolve pattern)
              (fn? (deref (resolve pattern))))
         (list 'satisfies pattern)
@@ -103,8 +109,10 @@
                           (recur (rest (rest operands))
                                  (cons (second operands)  stripped)))))
                 (unsupported [pattern]
-                  (throw (ex-info "unsupported pattern"
-                                  {:pattern pattern})))]
+
+                  (println (ex-info "unsupported pattern" {:pattern pattern}))
+                  (list 'spec pattern)
+                  )]
           (let [[tag & operands] pattern
                 transformed (condp symbol= tag
                               'fn (list 'satisfies (recuperate-closure pattern))
@@ -119,7 +127,6 @@
                               's/& (unsupported pattern)
                               
                               pattern)
-
                 ]
             transformed 
             ))
