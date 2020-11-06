@@ -31,6 +31,9 @@
             [clojure.reflect :as refl]
             ))
 
+;; allow gns/ prefix even in this file.
+(alias 'gns 'clojure-rte.genus)
+
 (declare subtype?)
 (declare disjoint?)
 (declare inhabited?)
@@ -371,7 +374,7 @@
     :dont-know))
 
 (defmethod -disjoint? :or [t1 t2]
-  (and (or? t1)
+  (and (gns/or? t1)
        (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1)))
   true
 
@@ -381,7 +384,7 @@
 (defmethod -disjoint? :and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 false))
         inhabited-t2 (delay (inhabited? t2 false))]
-    (cond (not (and? t1))
+    (cond (not (gns/and? t1))
           :dont-know
 
           (exists [t (rest t1)]
@@ -428,7 +431,7 @@
           ;; If B < A and A !< B    and A < C and C !< A
           ;;   then (and A !B) is NOT disjoint from C
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (gns/not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1
                      C t2]
                  (and (subtype? B A false)
@@ -442,7 +445,7 @@
           ;;  since A and B are disjoint
           ;;  we may ask (disjoint? A C)
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (not? (nth t1 2))  ;; t1 of the form (and x (not y))
+               (gns/not? (nth t1 2))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1]
                  (disjoint? A B false)))
           (disjoint? (second t1) t2 :dont-know)
@@ -456,7 +459,7 @@
         
         ;; (= ...) is finite, types are infinite
         ;; (disjoint? '(not (= 1 2 3)) 'Long)
-        (and (not? t1)
+        (and (gns/not? t1)
              (=? (second t1))
              (class-designator? t2))
         false
@@ -471,13 +474,13 @@
 
         ;; (member ...) is finite, types are infinite
         ;; (disjoint? '(not (member 1 2 3)) 'Long)
-        (and (not? t1)
+        (and (gns/not? t1)
              (member? (second t1))
              (class-designator? t2))
         false
         
-        (and (not? t1)
-             (not? t2)
+        (and (gns/not? t1)
+             (gns/not? t2)
              (member? (second t1))
              (member? (second t2)))
         false
@@ -624,27 +627,27 @@
         :dont-know))
 
 (defmethod -subtype? :not [sub super]
-  (cond (and (not? super)  ; (subtype? 'Long '(not Double))
+  (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
              (disjoint? sub (second super) false))
         true
 
         ;; (subtype? '(not Double) 'Long)
-        (and (not? sub)
+        (and (gns/not? sub)
              (disjoint? super (second sub) false))
         false
 
-        (and (not? sub)
+        (and (gns/not? sub)
              (type-equivalent? (second sub) super false))
         false
 
-        (and (not? super)
+        (and (gns/not? super)
              (type-equivalent? sub (second super) false))
         false
         
-        (not (not? sub))
+        (not (gns/not? sub))
         :dont-know
 
-        (not (not? super))
+        (not (gns/not? super))
         :dont-know
 
         :else
@@ -666,7 +669,7 @@
         ;; (subtype? 'Long '(not (member 1 2 3))) ==> false
         ;; (subtype? 'Long '(not (member 1.1 2 3))) ==> false
         ;; (subtype? 'Long '(not (member 1.1 2.2 3.3))) ==> true
-        (and (not? super)
+        (and (gns/not? super)
              (class-designator? sub)
              (member? (second super)))
         (every? (fn [e2]
@@ -677,7 +680,7 @@
 
 (defmethod -subtype? :and [t1 t2]
   (cond
-    (not (and? t1))
+    (not (gns/and? t1))
     :dont-know
     
     (member t2 (rest t1))
@@ -691,14 +694,14 @@
 
 
     ;; (subtype? '(and A B) '(not A))
-    (and (not? t2)
+    (and (gns/not? t2)
          (exists [t (rest t1)]
                  (= t (second t2)))
          (inhabited? t1 false))
     false
 
     ;; (subtype? (and A B C X Y) (and A B C) )
-    (and (and? t2)
+    (and (gns/and? t2)
          (subset? (set (rest t2)) (set (rest t1))))
     true
     
@@ -746,37 +749,37 @@
 
 (defmethod -inhabited? :and [t1]
   (cond
-    (not (and? t1))
+    (not (gns/and? t1))
     :dont-know
 
     (and (< 2 (count t1))
          (forall-pairs [[a b] (rest t1)]
                        (and (or (class-designator? a)
-                                (not? a)
+                                (gns/not? a)
                                 (class-designator? (second a)))
                             (or (class-designator? b)
-                                (not? b)
+                                (gns/not? b)
                                 (class-designator? (second b)))
                             (not (disjoint? a b true)))))
     true
 
     (exists-pair [[a b] (rest t1)]
                  (and (or (class-designator? a)
-                          (not? a)
+                          (gns/not? a)
                           (class-designator? (second a)))
                       (or (class-designator? b)
-                          (not? b)
+                          (gns/not? b)
                           (class-designator? (second b)))
                       (disjoint? a b false)))
     false
     
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
     (exists [t (rest t1)]
-            (and (not? t)
+            (and (gns/not? t)
                  (member? (second t))))
     (inhabited? (-canonicalize-type (cons 'and
                                          (remove (fn [t]
-                                                   (and (not? t)
+                                                   (and (gns/not? t)
                                                         (member? (second t)))) (rest t1))))
                 :dont-know)
 
@@ -789,7 +792,7 @@
     :dont-know))
 
 (defmethod -inhabited? :not [t1]
-  (cond (not (not? t1))
+  (cond (not (gns/not? t1))
         :dont-know
 
         (class-designator? (second t1))
@@ -815,7 +818,7 @@
 
 (defmethod -disjoint? :not [t1 t2]
   (cond
-    (not (not? t1))
+    (not (gns/not? t1))
     :dont-know
     
     ;; (disjoint? (not Object) X)
@@ -857,7 +860,7 @@
     false
 
     ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
-    (and (not? t2)
+    (and (gns/not? t2)
          (class-designator? (second t1))
          (class-designator? (second t2)))
     false
@@ -883,14 +886,14 @@
     ;; (disjoint? '(not Boolean) '(not Long))
     ;; (disjoint? '(not A) '(not B))
     ;; if disjoint classes A and B
-    (and (not? t2)
+    (and (gns/not? t2)
          ;;(class-designator? (second t1))
          ;;(class-designator? (second t2))
          (disjoint? (second t1) (second t2) false))
     false
 
     ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
-    (and (not? t2)
+    (and (gns/not? t2)
          (not (disjoint? (second t1) (second t2) true)))
     false         
 
@@ -1149,7 +1152,7 @@
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; (not (not x)) --> x
-                      (if (not? (second type-designator))
+                      (if (gns/not? (second type-designator))
                         (second (second type-designator))
                         type-designator))
                     (fn [type-designator]
@@ -1209,13 +1212,13 @@
                       ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
                       ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
                       (if (some (fn [t]
-                                  (and (not? t)
+                                  (and (gns/not? t)
                                        (or (member? (second t))
                                            (=? (second t)))))
                                 (rest type-designator))
                         (cons 'and
                               (map (fn [t]
-                                     (if (and (not? t)
+                                     (if (and (gns/not? t)
                                               (or (member? (second t))
                                                   (=? (second t))))
                                        (let [filtered-td (remove #{t} type-designator)

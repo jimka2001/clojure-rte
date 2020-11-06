@@ -33,6 +33,10 @@
             [clojure-rte.cl-compat :as cl]
 ))
 
+;; allow rte/ prefix even in this file.
+(alias 'rte 'clojure-rte.rte-construct)
+
+
 (declare traverse-pattern)
 (declare canonicalize-pattern)
 (declare rte-match)
@@ -611,7 +615,7 @@
                  (cons (first seq) head)))))
 
 (defn reduce-redundant-or [operands]
-  (let [ands (filter and? operands)
+  (let [ands (filter rte/and? operands)
         xyz (setof [x ands] (exists [y operands] (member y (rest x))))
         abc (setof [and1 ands]
                    (let [and1-operands (set (rest and1)) ]
@@ -709,14 +713,14 @@
                                       (:epsilon) not-epsilon
                                       (:empty-set) sigma-*
                                       (cond
-                                        (not? operand) ;; (:not (:not A)) --> A
+                                        (rte/not? operand) ;; (:not (:not A)) --> A
                                         (second operand)
 
-                                        (and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
+                                        (rte/and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
                                         (cons :or (map (fn [obj]
                                                          (list :not obj)) (rest operand)))
 
-                                        (or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
+                                        (rte/or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
                                         (cons :and (map (fn [obj]
                                                           (list :not obj)) (rest operand)))
 
@@ -749,9 +753,9 @@
                                      ((member :empty-set operands)
                                       :empty-set)
 
-                                     ((some and? operands)
+                                     ((some rte/and? operands)
                                       (cons :and (mapcat (fn [obj]
-                                                           (if (and? obj)
+                                                           (if (rte/and? obj)
                                                              (rest obj)
                                                              (list obj))) operands)))
 
@@ -759,16 +763,16 @@
                                       (cons :and (remove (fn [obj]
                                                            (= sigma-* obj)) operands)))
 
-                                     ((some or? operands)
+                                     ((some rte/or? operands)
                                       ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
-                                      (with-first-match or? operands
+                                      (with-first-match rte/or? operands
                                         (fn [or-item]
                                           (let [others (remove (fn [x] (= or-item x)) operands)]
                                             (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
 
                                      ;; (:and x (:not x)) --> :empty-set
-                                     ((let [nots (filter not? operands)
-                                            others (remove not? operands)]
+                                     ((let [nots (filter rte/not? operands)
+                                            others (remove rte/not? operands)]
                                         (when (some (fn [item]
                                                       (some #{(list :not item)} nots)) others)
                                           :empty-set)))
@@ -828,9 +832,9 @@
                                                                false))))
                                                 operands)))
 
-                                    ((some or? operands)
+                                    ((some rte/or? operands)
                                      (cons :or (mapcat (fn [obj]
-                                                         (if (or? obj)
+                                                         (if (rte/or? obj)
                                                            (rest obj)
                                                            (list obj))) operands)))
 
@@ -841,8 +845,8 @@
                                      (cons :or (remove #{:empty-set} operands)))
 
                                     ;; (:or x (:not x)) --> :sigma
-                                    ((let [nots (filter not? operands)
-                                           others (remove not? operands)]
+                                    ((let [nots (filter rte/not? operands)
+                                           others (remove rte/not? operands)]
                                        (when (some (fn [item]
                                                      (some #{(list :not item)} nots)) others)
                                          sigma-*)))
