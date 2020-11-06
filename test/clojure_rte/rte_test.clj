@@ -25,7 +25,7 @@
              :refer [nullable first-types
                      canonicalize-pattern canonicalize-pattern-once
                      derivative rte-to-dfa
-                     with-compile-env rte-compile rte-trace
+                     with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
                      rte-combine-labels dfa-to-rte
                      mdtd with-rte reduce-redundant-or]]
@@ -377,9 +377,9 @@
 (deftest t-syntax
   (testing "syntax"
     (with-compile-env ()
-      (is (thrown? clojure.lang.ExceptionInfo (rte-compile '(:* :epsilon :epsilon))))
-      (is (thrown? clojure.lang.ExceptionInfo (rte-compile '(:? :epsilon :epsilon))))
-      (is (thrown? clojure.lang.ExceptionInfo (rte-compile '(:+ :epsilon :epsilon)))))))
+      (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:* :epsilon :epsilon))))
+      (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:? :epsilon :epsilon))))
+      (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:+ :epsilon :epsilon)))))))
 
 (deftest t-mdtd
   (testing "mdtd"
@@ -488,7 +488,7 @@
       (map (fn [n] 
              (let [data (repeat 12 n)
                    pattern `(:cat (:exp ~n (:? Long)) (:exp ~n Long))
-                   rte (rte-compile pattern)]
+                   rte (rte/compile pattern)]
 
                (is (rte/match rte data) (format "n=%s" n))))
            (range 10)))))
@@ -530,9 +530,9 @@
 (deftest t-rte-trace
   (testing "rte trace"
     (with-compile-env ()
-      (is (rte-trace (rte-compile '(:* (rte Long))))  "test 2")
-      (is (rte-trace (rte-compile '(:* (rte (:* Long)))))  "test 6")
-      (is (rte-trace (rte-compile '(:cat (:+ (:cat Long Double String))
+      (is (rte-trace (rte/compile '(:* (rte Long))))  "test 2")
+      (is (rte-trace (rte/compile '(:* (rte (:* Long)))))  "test 6")
+      (is (rte-trace (rte/compile '(:cat (:+ (:cat Long Double String))
                                          (:+ (:cat String Long Double)))))  "test 7")
 
       (is (rte-trace  '(:* (rte Long)))  "test 12")
@@ -546,13 +546,13 @@
     (with-rte [::x (:+ Long)
                ::y (:+ Double)]
 
-      (let [pat (rte-compile '(:cat ::x  ::y))]
-        ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
+      (let [pat (rte/compile '(:cat ::x  ::y))]
+        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
         (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
         (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
         ))
 
-    (let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
+    (let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
       (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
       (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 
@@ -561,8 +561,8 @@
     (with-rte [::x (:+ Long)
                ::y (:+ Double)]
 
-      (let [pat (rte-compile '(:cat ::x  ::y))]
-        ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
+      (let [pat (rte/compile '(:cat ::x  ::y))]
+        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
         (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
         (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
         ))
@@ -570,14 +570,14 @@
     (with-rte [::x (:+ String)
                ::y (:+ Double)]
 
-      (let [pat (rte-compile '(:cat ::x  ::y))]
-        ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
+      (let [pat (rte/compile '(:cat ::x  ::y))]
+        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
         (is (rte/match pat ["1" "2" "3" 1.2 3.4 5.6 7.8]))
         (is (not (rte/match pat [["1" "2" "3"] [1.2 3.4 5.6 7.8]])))
         ))
     
 
-    (let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
+    (let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
       (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
       (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 

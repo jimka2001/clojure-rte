@@ -78,7 +78,7 @@ or readability, use the macro `with-rte`.
 (with-rte [::a (:permute Long Long String) ;; not quoted
            ::b (:permute Double Double String) ;; not quoted
            ]
-  (let [rte (rte-compile '(:cat ::a ::a ::b ::b))]
+  (let [rte (rte/compile '(:cat ::a ::a ::b ::b))]
     (rte/match rte [2 2 "hello"
                       2 "hello" 2
                       4.0 4.0 "world"
@@ -106,13 +106,13 @@ matches the pattern *::y*.  E.g.,
 (with-rte [::x (:+ Long)
            ::y (:+ Double)]
 
-  (let [pat (rte-compile '(:cat ::x  ::y))]
-    ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
+  (let [pat (rte/compile '(:cat ::x  ::y))]
+    ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
     (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; true
     (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; false
   ))
 
-(let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
+(let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
   (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; false
   (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; true
 )
@@ -140,7 +140,7 @@ every sequence which matches one also matches the other.
 
 ==> [Byte Byte]
 
-(rte-trace (rte-compile '(:and (:cat :sigma :sigma)
+(rte-trace (rte/compile '(:and (:cat :sigma :sigma)
                                (:* (:and :sigma (:not Byte)))
                                (:* integer?))))
 
@@ -154,7 +154,7 @@ but not the other. For example to find a sequence which contains 1 or more
 ```clojure
 (let [pattern1 '(:+ integer?)
       pattern2 '(:* Number)]
-  (rte-trace (rte-compile `(:and ~pattern1 (:not ~pattern2)))))
+  (rte-trace (rte/compile `(:and ~pattern1 (:not ~pattern2)))))
 
 ==> [Byte]
 ```
@@ -168,7 +168,7 @@ there exist a sequence which matches the first but not the second?
 ```clojure
 (let [pattern1 '(:* (:cat keyword? :sigma))
       pattern2 '(:cat (:* :sigma) keyword? (:* :sigma))]
-  (rte-trace (rte-compile `(:and ~pattern1 (:not ~pattern2)))))
+  (rte-trace (rte/compile `(:and ~pattern1 (:not ~pattern2)))))
 
 ==> []
 ```

@@ -33,7 +33,7 @@ Dfa factory function, which checks consistency.
 1-ary version, `(make-dfa attribute-map)`, takes an attribute map with the keys of the Dfa record.
 2-ary version, `(make-dfa dfa attribute-map)`, creates a new Dfa by copying the given one but overriding
 with any given attributes in the `attribute-map`.
-## `rte-compile`
+## `rte/compile`
 Creates a Dfa from an rte.  See [RTE API](api.md).
 ## `complete `
 Render complete the given Dfa.

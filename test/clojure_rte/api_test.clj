@@ -21,7 +21,7 @@
 
 (ns clojure-rte.api-test
   (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte :refer [rte-compile with-compile-env]]
+            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
@@ -30,24 +30,24 @@
 (deftest t-rte-match
   (testing "rte/match"
     (with-compile-env ()
-      (let [rte (rte-compile '(:cat Double Number))]
+      (let [rte (rte/compile '(:cat Double Number))]
         (is (not (rte/match rte [1.0]))))
-      (let [rte (rte-compile '(:or (:* Number)
+      (let [rte (rte/compile '(:or (:* Number)
                                    (:cat Double Number)
                                    (:* Double)))]
         (is (rte/match rte [1.0])))
-      (let [rte (rte-compile '(:or (:* Number)
+      (let [rte (rte/compile '(:or (:* Number)
                                    (:cat String Number)
                                    (:* Double)))]
         (is (rte/match rte [1.0]))
         (is (not (rte/match rte ["hello"])))
         (is (rte/match rte ["hello" 1.0]))
         (is (not (rte/match rte ["hello" 1.0 2.0]))))
-      (let [rte (rte-compile '(:* (:cat clojure.lang.Keyword java.lang.Long)))]
+      (let [rte (rte/compile '(:* (:cat clojure.lang.Keyword java.lang.Long)))]
         (is (rte/match rte '(:x 1 :y 2 :z 42)))
         (is (rte/match rte '()))
         (is (not (rte/match rte '(x 1 y 2 z 42)))))
-      (let [rte (rte-compile '(:* (:cat clojure.lang.Keyword java.lang.Long)))]
+      (let [rte (rte/compile '(:* (:cat clojure.lang.Keyword java.lang.Long)))]
         (is (rte/match rte '(:x 1 :y 2 :z 42)))
         (is (rte/match rte '()))
         (is (not (rte/match rte '(x 1 y 2 z 42)))))

@@ -59,7 +59,7 @@
 (defn dfa-to-dot 
   "Create (and possibly display) a graphical image rendering the automaton
   represented by the given dfa.  dfa is a value as returned from function
-  rte-compile, or rte-to-dfa.
+  rte/compile, or rte-to-dfa.
   For Mac OS, the :view option may be used to display the image
   interactively."
   [dfa & {:keys [title view abbrev draw-sink verbose state-legend]
