@@ -23,7 +23,7 @@ singleton sequence of String.
 
 If you want to match a sequence like `[:x 100 :y 200 :z 300]` but not
 if any of the values after the keyword is a String, you may use the following.
-`(rte-match '(:* (:cat Keyword (:and :sigma (:not String)))) ...)`,
+`(rte/match '(:* (:cat Keyword (:and :sigma (:not String)))) ...)`,
 because `(:and :sigma (:not String))` will match any singleton
 sequence whose element is NOT a string.
 
@@ -54,7 +54,7 @@ a sequence of sequences each of which contains only strings or only
 Integers, e.g.,
 
 ```clojure
-(rte-match '(:* (:or (rte (:* String)) (rte (:* integer?))))
+(rte/match '(:* (:or (rte (:* String)) (rte (:* integer?))))
   [[1 2 3]
    ["hello" "world"]
    [10 20 30 40 50]])
@@ -62,7 +62,7 @@ Integers, e.g.,
 ```
 but not
 ```clojure
-(rte-match '(:* (:or (rte (:* String)) (rte (:* integer?))))
+(rte/match '(:* (:or (rte (:* String)) (rte (:* integer?))))
   [[1 2 3]
    ["hello" "world"]
    [10 "20" 30 "40" 50]])
@@ -79,7 +79,7 @@ or readability, use the macro `with-rte`.
            ::b (:permute Double Double String) ;; not quoted
            ]
   (let [rte (rte-compile '(:cat ::a ::a ::b ::b))]
-    (rte-match rte [2 2 "hello"
+    (rte/match rte [2 2 "hello"
                       2 "hello" 2
                       4.0 4.0 "world"
                       "world" 4.1 4.2]) ;; true
@@ -97,7 +97,7 @@ another pattern.
 are sequences *a* and *b*, where *a* matches the pattern *x* and *b*
 matches the pattern *y*.
 
-`(with-rte [::x ... ::y ...] (rte-match '(:cat ::x ::y) ...))` matches a 
+`(with-rte [::x ... ::y ...] (rte/match '(:cat ::x ::y) ...))` matches a 
 sequence of two concatenated
 sequence *a* and *b*, where *a* matches the pattern *::x* and *b*
 matches the pattern *::y*.  E.g., 
@@ -108,13 +108,13 @@ matches the pattern *::y*.  E.g.,
 
   (let [pat (rte-compile '(:cat ::x  ::y))]
     ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
-    (rte-match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; true
-    (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; false
+    (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; true
+    (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; false
   ))
 
 (let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
-  (rte-match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; false
-  (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; true
+  (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; false
+  (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; true
 )
 ```
 

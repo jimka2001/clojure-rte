@@ -21,13 +21,14 @@
 
 (ns clojure-rte.rte-test
   (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :refer [nullable first-types
-                                               canonicalize-pattern canonicalize-pattern-once
-                                               derivative rte-to-dfa
-                                               with-compile-env rte-match rte-compile rte-trace
-                                               rte-inhabited? rte-vacuous? rte-to-dfa
-                                               rte-combine-labels dfa-to-rte
-                                               mdtd with-rte reduce-redundant-or]]
+            [clojure-rte.rte-construct :as rte
+             :refer [nullable first-types
+                     canonicalize-pattern canonicalize-pattern-once
+                     derivative rte-to-dfa
+                     with-compile-env rte-compile rte-trace
+                     rte-inhabited? rte-vacuous? rte-to-dfa
+                     rte-combine-labels dfa-to-rte
+                     mdtd with-rte reduce-redundant-or]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [member]]
             [clojure-rte.genus :as gns]
@@ -389,23 +390,23 @@
                'clojure.lang.ExceptionInfo})))))
 
 (deftest t-boolean-types
-  (testing "rte-match with Boolean types"
+  (testing "rte/match with Boolean types"
     (with-compile-env []
-      (is (rte-match '(:cat (or Boolean Long)) [42]) "test 1")
-      (is (rte-match '(:* (or Boolean Long)) [])  "test 2")
-      (is (rte-match '(:* (or Boolean Long)) [42 ])  "test 3")
-      (is (rte-match '(:* (or Boolean Long)) [42 43])  "test 4")
-      (is (rte-match '(:* (or Boolean Long)) [42 43 false])  "test 5")
+      (is (rte/match '(:cat (or Boolean Long)) [42]) "test 1")
+      (is (rte/match '(:* (or Boolean Long)) [])  "test 2")
+      (is (rte/match '(:* (or Boolean Long)) [42 ])  "test 3")
+      (is (rte/match '(:* (or Boolean Long)) [42 43])  "test 4")
+      (is (rte/match '(:* (or Boolean Long)) [42 43 false])  "test 5")
 
-      (is (rte-match '(:* (and Number Long (not (= 0)))) [])  "test 6")
-      (is (rte-match '(:* (and Number Long (not (= 0)))) [42])  "test 7")
-      (is (rte-match '(:* (and Number Long (not (= 0)))) [42 43 ])  "test 8")
-      (is (not (rte-match '(:* (:and Number
+      (is (rte/match '(:* (and Number Long (not (= 0)))) [])  "test 6")
+      (is (rte/match '(:* (and Number Long (not (= 0)))) [42])  "test 7")
+      (is (rte/match '(:* (and Number Long (not (= 0)))) [42 43 ])  "test 8")
+      (is (not (rte/match '(:* (:and Number
                                      Long
                                      (:and :sigma
                                            (:not (= 0)))))
                           [42 43 0 44])) "test 9a")
-      (is (not (rte-match '(:* (:and Number
+      (is (not (rte/match '(:* (:and Number
                                      Long
                                      ;; (:not (:and :sigma (= 0))) is all of (:* :sigma) except 0
                                      ;;   this includes :epsilon
@@ -413,111 +414,111 @@
                                      ;; but ANDed with Long excludes (:cat Long Long)
                                      (:not (:and :sigma (= 0)))))
                           [42 43 0 44])) "test 9b")
-      (is (not (rte-match '(:* (:and Number
+      (is (not (rte/match '(:* (:and Number
                                      Long
                                      ;; (:not (:and :sigma (= 0))) is all of (:* :sigma) except 0
                                      ;;   this includes :epsilon
                                      ;;   and incdes (:cat Long Long)
                                      (:not (:and :sigma (= 0)))))
                           [42 43 0])) "test 9c")
-      (is (not (rte-match '(:* (and Number Long (not (= 0)))) [42 43 0 44]))  "test 9d")
+      (is (not (rte/match '(:* (and Number Long (not (= 0)))) [42 43 0 44]))  "test 9d")
 
-      (is (not (rte-match '(:* (:cat Number Long (not (= 0)))) [42 43 0 44]))  "test 9e")
-      (is (rte-match '(:* (:cat Number Long (:not (= 0)))) [42 43 0 44]))  "test 9f")))
+      (is (not (rte/match '(:* (:cat Number Long (not (= 0)))) [42 43 0 44]))  "test 9e")
+      (is (rte/match '(:* (:cat Number Long (:not (= 0)))) [42 43 0 44]))  "test 9f")))
 
 (deftest t-?
   (testing "rte :?"
     (with-compile-env []
-      (is (rte-match '(:? Long) [42]))
-      (is (rte-match '(:? Long) []))
-      (is (not (rte-match '(:? Long) [42 43])))
-      (is (not (rte-match '(:? Long) ["hello"]))))))
+      (is (rte/match '(:? Long) [42]))
+      (is (rte/match '(:? Long) []))
+      (is (not (rte/match '(:? Long) [42 43])))
+      (is (not (rte/match '(:? Long) ["hello"]))))))
 
 (deftest t-+
   (testing "rte :+"
     (with-compile-env []
-      (is (rte-match '(:+ Long) [42]))
-      (is (rte-match '(:+ Long) [42 43]))
-      (is (rte-match '(:+ Long) [42 43 44]))
-      (is (not (rte-match '(:+ Long) [])))
-      (is (not (rte-match '(:+ Long) ["hello"])))
-      (is (not (rte-match '(:+ Long) ["hello" "hello"])))
-      (is (not (rte-match '(:+ Long) ["hello" 42])))
-      (is (not (rte-match '(:+ Long) [42 "hello"]))))))
+      (is (rte/match '(:+ Long) [42]))
+      (is (rte/match '(:+ Long) [42 43]))
+      (is (rte/match '(:+ Long) [42 43 44]))
+      (is (not (rte/match '(:+ Long) [])))
+      (is (not (rte/match '(:+ Long) ["hello"])))
+      (is (not (rte/match '(:+ Long) ["hello" "hello"])))
+      (is (not (rte/match '(:+ Long) ["hello" 42])))
+      (is (not (rte/match '(:+ Long) [42 "hello"]))))))
 
 (deftest t-permute
   (testing "rte :permute"
     (with-compile-env []
-      (is (rte-match '(:permute) []))
-      (is (not (rte-match '(:permute) [1])))
+      (is (rte/match '(:permute) []))
+      (is (not (rte/match '(:permute) [1])))
 
-      (is (rte-match '(:permute Long) [42]))
-      (is (not (rte-match '(:permute Long) [42 43])))
-      (is (not (rte-match '(:permute Long) [])))
+      (is (rte/match '(:permute Long) [42]))
+      (is (not (rte/match '(:permute Long) [42 43])))
+      (is (not (rte/match '(:permute Long) [])))
 
-      (is (rte-match '(:permute Long String) [42 "hello"]))
-      (is (rte-match '(:permute Long String) ["hello" 42]))
-      (is (not (rte-match '(:permute Long String) [42 "hello" 42])))
-      (is (not (rte-match '(:permute Long String) ["hello" 42 42])))
-      (is (not (rte-match '(:permute Long String) [])))
+      (is (rte/match '(:permute Long String) [42 "hello"]))
+      (is (rte/match '(:permute Long String) ["hello" 42]))
+      (is (not (rte/match '(:permute Long String) [42 "hello" 42])))
+      (is (not (rte/match '(:permute Long String) ["hello" 42 42])))
+      (is (not (rte/match '(:permute Long String) [])))
       
-      (is (rte-match '(:permute Long String Boolean) [42 "hello" false]))
-      (is (rte-match '(:permute Long String Boolean) [42 false "hello"]))
-      (is (rte-match '(:permute Long String Boolean) [false 42 "hello"]))
-      (is (rte-match '(:permute Long String Boolean) [false "hello" 42]))
-      (is (rte-match '(:permute Long String Boolean) ["hello" 42 false]))
-      (is (rte-match '(:permute Long String Boolean) ["hello" false 42]))
-      (is (not (rte-match '(:permute Long String Boolean) [42 "hello"])))
-      (is (not (rte-match '(:permute Long String Boolean) [42 false "hello" 42])))
-      (is (not (rte-match '(:permute Long String Boolean) [])))
-      (is (not (rte-match '(:permute Long String Boolean) [false false "hello"])))
-      (is (not (rte-match '(:permute Long String Boolean) ["hello" "hello" 42])))
-      (is (not (rte-match '(:permute Long String Boolean) [false]))))))
+      (is (rte/match '(:permute Long String Boolean) [42 "hello" false]))
+      (is (rte/match '(:permute Long String Boolean) [42 false "hello"]))
+      (is (rte/match '(:permute Long String Boolean) [false 42 "hello"]))
+      (is (rte/match '(:permute Long String Boolean) [false "hello" 42]))
+      (is (rte/match '(:permute Long String Boolean) ["hello" 42 false]))
+      (is (rte/match '(:permute Long String Boolean) ["hello" false 42]))
+      (is (not (rte/match '(:permute Long String Boolean) [42 "hello"])))
+      (is (not (rte/match '(:permute Long String Boolean) [42 false "hello" 42])))
+      (is (not (rte/match '(:permute Long String Boolean) [])))
+      (is (not (rte/match '(:permute Long String Boolean) [false false "hello"])))
+      (is (not (rte/match '(:permute Long String Boolean) ["hello" "hello" 42])))
+      (is (not (rte/match '(:permute Long String Boolean) [false]))))))
 
 (deftest t-exp
   (testing "exp"
     (with-compile-env ()
-      (is (rte-match '(:exp 3 Long) [42 42 42]))
-      (is (not (rte-match '(:exp 3 Long) [42 42 42 42])))
-      (is (not (rte-match '(:exp 3 5 Long) [42 42])))
-      (is (rte-match '(:exp 3 5 Long) [42 42 42]))
-      (is (rte-match '(:exp 3 5 Long) [42 42 42 42]))
-      (is (rte-match '(:exp 3 5 Long) [42 42 42 42 42]))
-      (is (not (rte-match '(:exp 3 5 Long) [42 42 42 42 42 42])))
+      (is (rte/match '(:exp 3 Long) [42 42 42]))
+      (is (not (rte/match '(:exp 3 Long) [42 42 42 42])))
+      (is (not (rte/match '(:exp 3 5 Long) [42 42])))
+      (is (rte/match '(:exp 3 5 Long) [42 42 42]))
+      (is (rte/match '(:exp 3 5 Long) [42 42 42 42]))
+      (is (rte/match '(:exp 3 5 Long) [42 42 42 42 42]))
+      (is (not (rte/match '(:exp 3 5 Long) [42 42 42 42 42 42])))
       (map (fn [n] 
              (let [data (repeat 12 n)
                    pattern `(:cat (:exp ~n (:? Long)) (:exp ~n Long))
                    rte (rte-compile pattern)]
 
-               (is (rte-match rte data) (format "n=%s" n))))
+               (is (rte/match rte data) (format "n=%s" n))))
            (range 10)))))
 
 (deftest t-contains-every
   (testing ":contains-every"
     (with-compile-env ()
-      (is (rte-match '(:contains-every Long String Boolean) [[] [] [] 42 "hello" true [] [] []]))
-      (is (rte-match '(:contains-every Long String Boolean) [[] "hello" [] 42 [] true []]))
-      (is (rte-match '(:contains-every Long String Boolean) [[] true [] 42 [] "hello" []]))
-      (is (not (rte-match '(:contains-every Long String Boolean) [[] true [] true [] "hello" []]))))))
+      (is (rte/match '(:contains-every Long String Boolean) [[] [] [] 42 "hello" true [] [] []]))
+      (is (rte/match '(:contains-every Long String Boolean) [[] "hello" [] 42 [] true []]))
+      (is (rte/match '(:contains-every Long String Boolean) [[] true [] 42 [] "hello" []]))
+      (is (not (rte/match '(:contains-every Long String Boolean) [[] true [] true [] "hello" []]))))))
 
 (deftest t-contains-any
   (testing ":contains-any"
     (with-compile-env ()
-      (is (rte-match '(:contains-any Long String Boolean) [[] [] [] 42 "hello" true [] [] []]))
-      (is (rte-match '(:contains-any Long String Boolean) [[] [] [] 42 [] [] []]))
-      (is (rte-match '(:contains-any Long String Boolean) [[] "hello" [] 42 []]))
-      (is (rte-match '(:contains-any Long String Boolean) [[] true []]))
-      (is (not (rte-match '(:contains-any Long String) [[] true [] false []]))))))
+      (is (rte/match '(:contains-any Long String Boolean) [[] [] [] 42 "hello" true [] [] []]))
+      (is (rte/match '(:contains-any Long String Boolean) [[] [] [] 42 [] [] []]))
+      (is (rte/match '(:contains-any Long String Boolean) [[] "hello" [] 42 []]))
+      (is (rte/match '(:contains-any Long String Boolean) [[] true []]))
+      (is (not (rte/match '(:contains-any Long String) [[] true [] false []]))))))
 
 
 (deftest t-contains-none
   (testing ":contains-none"
     (with-compile-env ()
-      (is (not (rte-match '(:contains-none Long String Boolean) [[] [] [] 42 "hello" true [] [] []])))
-      (is (not (rte-match '(:contains-none Long String Boolean) [[] [] [] 42 [] [] []])))
-      (is (not (rte-match '(:contains-none Long String Boolean) [[] "hello" [] 42 []])))
-      (is (not (rte-match '(:contains-none Long String Boolean) [[] true []])))
-      (is (rte-match '(:contains-none Long String) [[] true [] false []])))))
+      (is (not (rte/match '(:contains-none Long String Boolean) [[] [] [] 42 "hello" true [] [] []])))
+      (is (not (rte/match '(:contains-none Long String Boolean) [[] [] [] 42 [] [] []])))
+      (is (not (rte/match '(:contains-none Long String Boolean) [[] "hello" [] 42 []])))
+      (is (not (rte/match '(:contains-none Long String Boolean) [[] true []])))
+      (is (rte/match '(:contains-none Long String) [[] true [] false []])))))
 
 (deftest t-typep-rte
   (testing "typep rte"
@@ -547,13 +548,13 @@
 
       (let [pat (rte-compile '(:cat ::x  ::y))]
         ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
-        (is (rte-match pat [1 2 3 1.2 3.4 5.6 7.8]))
-        (is (not (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
+        (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
+        (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
         ))
 
     (let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
-      (is (not (rte-match pat [1 2 3 1.2 3.4 5.6 7.8])))
-      (is (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
+      (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
+      (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 
 (deftest t-with-rte-5
   (testing "with-rte 5"
@@ -562,8 +563,8 @@
 
       (let [pat (rte-compile '(:cat ::x  ::y))]
         ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
-        (is (rte-match pat [1 2 3 1.2 3.4 5.6 7.8]))
-        (is (not (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
+        (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
+        (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
         ))
 
     (with-rte [::x (:+ String)
@@ -571,14 +572,14 @@
 
       (let [pat (rte-compile '(:cat ::x  ::y))]
         ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
-        (is (rte-match pat ["1" "2" "3" 1.2 3.4 5.6 7.8]))
-        (is (not (rte-match pat [["1" "2" "3"] [1.2 3.4 5.6 7.8]])))
+        (is (rte/match pat ["1" "2" "3" 1.2 3.4 5.6 7.8]))
+        (is (not (rte/match pat [["1" "2" "3"] [1.2 3.4 5.6 7.8]])))
         ))
     
 
     (let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
-      (is (not (rte-match pat [1 2 3 1.2 3.4 5.6 7.8])))
-      (is (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
+      (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
+      (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 
 (deftest t-rte-inhabited
   (testing "rte inhabited?"
@@ -639,33 +640,33 @@
   (testing "pattern with ="
     (with-compile-env ()
 
-      (is (rte-match '(:or Long (= 42)) [42]))
-      (is (rte-match '(:or Long (= "42")) [0]))
-      (is (rte-match '(:or Long (= "42")) ["42"])))))
+      (is (rte/match '(:or Long (= 42)) [42]))
+      (is (rte/match '(:or Long (= "42")) [0]))
+      (is (rte/match '(:or Long (= "42")) ["42"])))))
 
 (deftest t-pattern-with-=
   (testing "pattern with ="
     (with-compile-env ()
-      (is (rte-match '(= 42) [42]))
-      (is (not (rte-match '(= 42) [43])))
-      (is (not (rte-match '(= 42) [42 42])))
-      (is (not (rte-match '(= 42) [])))
+      (is (rte/match '(= 42) [42]))
+      (is (not (rte/match '(= 42) [43])))
+      (is (not (rte/match '(= 42) [42 42])))
+      (is (not (rte/match '(= 42) [])))
 
-      (is (rte-match '(:* (= 42)) []))
-      (is (rte-match '(:* (= 42)) [42]))
-      (is (rte-match '(:* (= 42)) [42 42 42 42]))
+      (is (rte/match '(:* (= 42)) []))
+      (is (rte/match '(:* (= 42)) [42]))
+      (is (rte/match '(:* (= 42)) [42 42 42 42]))
 
-      (is (not (rte-match '(:+ (= 42)) [])))
-      (is (rte-match '(:+ (= 42)) [42 ]))
-      (is (rte-match '(:+ (= 42)) [42 42 42]))
-      (is (not (rte-match '(:+ (= 42)) [42 42 42 43])))
+      (is (not (rte/match '(:+ (= 42)) [])))
+      (is (rte/match '(:+ (= 42)) [42 ]))
+      (is (rte/match '(:+ (= 42)) [42 42 42]))
+      (is (not (rte/match '(:+ (= 42)) [42 42 42 43])))
 
-      (is (rte-match '(:or (= 43 ) (= 42)) [42]))
-      (is (rte-match '(:or (= 43 ) (= 42)) [43]))
-      (is (not (rte-match '(:or (= 43 ) (= 42)) [0])))
-      (is (rte-match '(:* (:or (= 43 )(= 42))) []))
-      (is (rte-match '(:* (:or (= 43 )(= 42))) [42 42 42 43 42 43]))
-      (is (not (rte-match '(:* (:or (= 43 ) (= 42))) [42 42 42 43 42 0 43])))
+      (is (rte/match '(:or (= 43 ) (= 42)) [42]))
+      (is (rte/match '(:or (= 43 ) (= 42)) [43]))
+      (is (not (rte/match '(:or (= 43 ) (= 42)) [0])))
+      (is (rte/match '(:* (:or (= 43 )(= 42))) []))
+      (is (rte/match '(:* (:or (= 43 )(= 42))) [42 42 42 43 42 43]))
+      (is (not (rte/match '(:* (:or (= 43 ) (= 42))) [42 42 42 43 42 0 43])))
 
       )))
 
@@ -690,12 +691,12 @@
     (with-compile-env ()
       (is (not= '(:not (= 0))
                 (canonicalize-pattern '(not (= 0)))) "test 0")
-      (is (not (rte-match '(:* (and Number Long (not (= 0)))) [0])) "test 1")
-      (is (rte-match '(:* (and Number Long (not (= 0)))) [1]) "test 2")
-      (is (not (rte-match '(:* (and  Long (not (= 0)))) [0])) "test 3")
-      (is (rte-match '(:* (and Long (not (= 0)))) [1]) "test 4")
-      (is (not (rte-match '(:* (and  Number (not (= 0)))) [0])) "test 5")
-      (is (rte-match '(:* (and  Number (not (= 0)))) [1]) "test 6"))))
+      (is (not (rte/match '(:* (and Number Long (not (= 0)))) [0])) "test 1")
+      (is (rte/match '(:* (and Number Long (not (= 0)))) [1]) "test 2")
+      (is (not (rte/match '(:* (and  Long (not (= 0)))) [0])) "test 3")
+      (is (rte/match '(:* (and Long (not (= 0)))) [1]) "test 4")
+      (is (not (rte/match '(:* (and  Number (not (= 0)))) [0])) "test 5")
+      (is (rte/match '(:* (and  Number (not (= 0)))) [1]) "test 6"))))
 
 (deftest t-invalid-type
   (testing "for invalid type within rte"

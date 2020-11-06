@@ -11,7 +11,7 @@ The return value of this function is memoized.  Thus if the same rte
 pattern is encountered again the previously compiled Dfa is returned
 as an `O(1)` operation.
 
-The return value of `rte-compile` may be used as first argument of `rte-match`.
+The return value of `rte-compile` may be used as first argument of `rte/match`.
 
 Note about performance.  You may force an rte to be compiled at
 program load/compile time by defining at top level using `def`.
@@ -27,13 +27,13 @@ time the code is evaluated.
 (defn foo [args ...]
   (let [rte (rte-compile '(:cat (:* Long) (:* Double) (:* String)))]
     ...
-    ... (rte-match rte ...)
+    ... (rte/match rte ...)
     ...
     ))
 ```
 
 
-## (`rte-match` rte items)
+## (`rte/match` rte items)
 
 Returns Boolean value.
 
@@ -41,15 +41,15 @@ Match a given sequence against a pre-compiled RTE pattern.
 
 ```clojure
 (let [rte (rte-compile '(:cat (:* String) (:* Long) (:* Double)))]
-  (rte-match rte ["hello" "world" 1 2 3]) ;; true
-  (rte-match rte ["hello" "world" 1.0 2.0 3.0]) ;; true
-  (rte-match rte ["hello" "world" 1.0 2.0 3]) ;; false
+  (rte/match rte ["hello" "world" 1 2 3]) ;; true
+  (rte/match rte ["hello" "world" 1.0 2.0 3.0]) ;; true
+  (rte/match rte ["hello" "world" 1.0 2.0 3]) ;; false
   )
 ==> true
 ```
 
 ```clojure
-(rte-match '(:cat (:* String) (:* Double)) ["hello" "world" 1 2 3])
+(rte/match '(:cat (:* String) (:* Double)) ["hello" "world" 1 2 3])
 ==> true
 ```
 

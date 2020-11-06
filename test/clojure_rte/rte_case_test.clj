@@ -22,7 +22,7 @@
 (ns clojure-rte.rte-case-test
   (:require [clojure-rte.rte-core]
             [clojure-rte.genus :as gns]
-            [clojure-rte.rte-construct :refer [rte-match with-compile-env]]
+            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [clojure-rte.rte-case :refer [rte-case destructuring-case
                                           memoized-rte-case-clauses-to-dfa
@@ -65,7 +65,7 @@
 
 (deftest t-rte-case-clauses-to-dfa
   (testing "rte-case-clauses-to-dfa"
-    (is (= 0 (rte-match
+    (is (= 0 (rte/match
               ;; I don't know why it is necessary to prefix clojure-rte.rte-core/rte-case-clauses-to-dfa
               ;; otherwise the loader complains:
               ;; java.lang.RuntimeException: Unable to resolve symbol: rte-case-clauses-to-dfa in this context
@@ -81,7 +81,7 @@
               [1 2 3]))
         "case-0")
 
-    (is (= 1 (rte-match
+    (is (= 1 (rte/match
               (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
@@ -93,7 +93,7 @@
               [true false]))
         "case-1")
 
-    (is (= 2 (rte-match
+    (is (= 2 (rte/match
               (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
@@ -105,7 +105,7 @@
               ["hello" "world"]))
         "case-2")
 
-    (is (= 3 (rte-match
+    (is (= 3 (rte/match
               (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
@@ -298,7 +298,7 @@
                                (:cat
                                 (and :sigma Boolean)
                                 (and :sigma (or String Boolean))))))]])]
-                (rte-match
+                (rte/match
                  dfa
                  v41977))))))]
     (apply f  '(true ["hello" 3] true)))
@@ -458,7 +458,7 @@
         "test 459")
     (is (= 1
            (with-compile-env ()
-             (rte-match
+             (rte/match
               (memoized-rte-case-clauses-to-dfa
                '[[0
                   (:and (:cat Boolean (or String Boolean))

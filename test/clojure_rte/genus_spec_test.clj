@@ -19,7 +19,7 @@
 
 (ns clojure-rte.genus-spec-test
   (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :refer [rte-match]]
+            [clojure-rte.rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.genus :as gns]
             [clojure.spec.alpha :as s]
@@ -87,7 +87,7 @@
       )))
 
 (t/deftest t-rte-match
-  (t/testing "rte-match with rtes containing specs"
+  (t/testing "rte/match with rtes containing specs"
     (let [rte '(rte
                 (:*
                  (:or
@@ -102,9 +102,9 @@
                    [-1 2]
                    [-1 2 3 1]
                    [-1 2 3 1 -3 1 -1 4]]]
-        (t/is (= true (rte-match rte [seq])) (cl-format false "test x87: seq=~A pattern=~A" seq rte)))
-      (t/is (= false (rte-match rte [-1 2   3 1   3 -1   -1 4])) "test x91")
-      (t/is (= false (rte-match rte [[-1 2   3 1   3 -1   -1 4]])) "test x92")
+        (t/is (= true (rte/match rte [seq])) (cl-format false "test x87: seq=~A pattern=~A" seq rte)))
+      (t/is (= false (rte/match rte [-1 2   3 1   3 -1   -1 4])) "test x91")
+      (t/is (= false (rte/match rte [[-1 2   3 1   3 -1   -1 4]])) "test x92")
       (doseq [rte2 [rte
                     `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                           :y  (s/cat :c odd? :d pos?))))
@@ -112,14 +112,14 @@
                     '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                        :y  (s/cat :c odd? :d pos?))))
                     ]
-              :let [_ (t/is (= false (rte-match rte2 [seq])) "test 100")]
+              :let [_ (t/is (= false (rte/match rte2 [seq])) "test 100")]
               seq [[]
                    [-1 2]
                    [-1 2 3 1]
                    [-1 2 3 1 -3 1 -1 4]]
               ]
-        (t/is (= false (rte-match rte2 seq)) "test 105")
-        (t/is (= true (rte-match rte2 [seq])) "test 106")
+        (t/is (= false (rte/match rte2 seq)) "test 105")
+        (t/is (= true (rte/match rte2 [seq])) "test 106")
         ))))
 
 ;; cat - concatenation of predicates/patterns
@@ -137,17 +137,17 @@
                           #(even? (count %))))
 
 (t/deftest t-rte-match-2
-  (t/testing "rte-match with unsupported specs"
+  (t/testing "rte/match with unsupported specs"
     ;; ::test-spec-2 uses the s/& operator which cannot be converted
     ;;   to an efficent rte.  the semantics should be maintained by the
     ;;   rte by leaving it as (spec ....)
     (let [rte '(:* (spec ::test-spec-2))]
-      (t/is (= true (rte-match rte [])) "test 148")
-      (t/is (= true (rte-match rte [[] [] []])) "test 149")
-      (t/is (= true (rte-match rte [[]
+      (t/is (= true (rte/match rte [])) "test 148")
+      (t/is (= true (rte/match rte [[] [] []])) "test 149")
+      (t/is (= true (rte/match rte [[]
                                     ["a" "b"]
                                     ["a" "b" "c" "d"]])) "test 150")
-      (t/is (= false (rte-match rte [[]
+      (t/is (= false (rte/match rte [[]
                                     ["a" "b"]
                                     ["a" "b" "c"]])) "test 151"))))
       

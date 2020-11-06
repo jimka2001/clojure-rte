@@ -22,8 +22,8 @@
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
             [clojure-rte.util :refer [defn-memoized]]
-            [clojure-rte.rte-construct :refer [rte-to-dfa canonicalize-pattern sigma-*
-                                               rte-match]]
+            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
+                                               ]]
             [clojure.pprint :refer [cl-format]]
             )
   )
@@ -43,14 +43,14 @@
   or print a reasonable error message."
   [index num-fns]
   (cond (not (integer? index))
-        (throw (ex-info (cl-format false "rte-match returned non-integer ~A" index)
+        (throw (ex-info (cl-format false "rte/match returned non-integer ~A" index)
                         {}))
         (< index 0)
-        (throw (ex-info (cl-format false "rte-match returned negative integer ~A" index)
+        (throw (ex-info (cl-format false "rte/match returned negative integer ~A" index)
                         {}))
 
         (<= num-fns index)
-        (throw (ex-info (cl-format false "rte-match returned index out of range ~A <= ~A"
+        (throw (ex-info (cl-format false "rte/match returned index out of range ~A <= ~A"
                                    num-fns index)
                         {}))
         :else
@@ -70,7 +70,7 @@
   causes the corresponding consequent to be evaluated.
   However, the sequence is traverse only once, so the matching process
   is more efficient than a sequence of consecutive calls to
-  rte-match."
+  rte/match."
   [sequence & clauses]
   (letfn [(compile-clauses [clauses]
             (loop [remaining-clauses clauses
@@ -94,7 +94,7 @@
     
     (let [[fns int-rte-pairs] (compile-clauses clauses)
           num-fns (count fns)]
-      `((~fns (ensure-fns-index (rte-match (memoized-rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
+      `((~fns (ensure-fns-index (rte/match (memoized-rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
                                            :promise-disjoint true)
                                 ~num-fns))))))
 

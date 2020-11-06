@@ -18,7 +18,7 @@ alt="Symbolic Finite Automaton" width="300"/>
 
 
 This means that after the pattern has been compiled, the time complexity of 
-matching a sequence, `rte-match`, against a pattern has linear time complexity `O(n)` where `n` is the 
+matching a sequence, `rte/match`, against a pattern has linear time complexity `O(n)` where `n` is the 
 length of the sequence.  I.e., the time to perform the match is not a function 
 of the complexity of the pattern; it is only a function of the sequence
 length.  On the contrary, the time to compile the pattern depends on
@@ -100,10 +100,10 @@ Example
 
 ```clojure
 (let [rte (rte-compile '(:cat (satisfies integer?) String))]
-  (rte-match rte [1 "hello"]) ;; true
-  (rte-match rte [1.0 "hello"]) ;; false
-  (rte-match rte [1 2]) ;; false
-  (rte-match rte [1 2 "hello"]) ;; false
+  (rte/match rte [1 "hello"]) ;; true
+  (rte/match rte [1.0 "hello"]) ;; false
+  (rte/match rte [1 2]) ;; false
+  (rte/match rte [1 2 "hello"]) ;; false
   )
 ```
 
@@ -113,10 +113,10 @@ Example
 
 ```clojure
 (let [rte (rte-compile '(:+ integer?))]
-  (rte-match rte [1 2 3 4 5]) ;; true
-  (rte-match rte [1]) ;; true
-  (rte-match rte []) ;; false
-  (rte-match rte [1.0 2 3.0 4 5]) ;; false
+  (rte/match rte [1 2 3 4 5]) ;; true
+  (rte/match rte [1]) ;; true
+  (rte/match rte []) ;; false
+  (rte/match rte [1.0 2 3.0 4 5]) ;; false
   )
 ```
 
@@ -126,10 +126,10 @@ Example
 
 ```clojure
 (let [rte (rte-compile '(:* integer?))]
-  (rte-match rte [1 2 3 4 5]) ;; true
-  (rte-match rte [1]) ;; true
-  (rte-match rte []) ;; true
-  (rte-match rte [1.0 2 3.0 4 5]) ;; false
+  (rte/match rte [1 2 3 4 5]) ;; true
+  (rte/match rte [1]) ;; true
+  (rte/match rte []) ;; true
+  (rte/match rte [1.0 2 3.0 4 5]) ;; false
   )
 ```
 
@@ -139,15 +139,15 @@ Example
 
 ```clojure
 (let [rte (rte-compile '(:? (satisfies integer?)))]
-  (rte-match rte [1]) ;; true
-  (rte-match rte []) ;; true
-  (rte-match rte [1 2]) ;; false
+  (rte/match rte [1]) ;; true
+  (rte/match rte []) ;; true
+  (rte/match rte [1 2]) ;; false
   )
 
 (let [rte (rte-compile '(:cat (satisfies integer?) (:? String)))]
-  (rte-match rte [1 2 3 4 5]) ;; true
-  (rte-match rte [1 2 3 4 5 "hello"]) ;; true
-  (rte-match rte [1 2 3 4 5 "hello" "world"]) ;; false
+  (rte/match rte [1 2 3 4 5]) ;; true
+  (rte/match rte [1 2 3 4 5 "hello"]) ;; true
+  (rte/match rte [1 2 3 4 5 "hello" "world"]) ;; false
   )
 ```
 
@@ -157,9 +157,9 @@ Example --- to match a sequence 0 to 5 Integers,
 
 ```clojure
 (let [rte (rte-compile '(:exp 5 (:? (satisfies integer?))))]
-   (rte-match rte []) ;; true
-   (rte-match rte [1 2 3]) ;; true
-   (rte-match rte [1 2 3 3 4 5 6]) ;; false
+   (rte/match rte []) ;; true
+   (rte/match rte [1 2 3]) ;; true
+   (rte/match rte [1 2 3 3 4 5 6]) ;; false
    )
 ```
 
@@ -171,9 +171,9 @@ times which is a multiple of 3 total items.
 ```clojure
 (let [rte (rte-compile '(:and (:* (:cat Keyword (satisfies integer?) (:? (satisfies integer?))))
                               (:+ (:sigma :sigma :sigma))))]
-  (rte-match rte [:x 1 :x 2 :x 3]) ;; true
-  (rte-match rte [:x 1 2 :y 2 3]) ;; true
-  (rte-match rte [:x 1 :y 3]) ;; false
+  (rte/match rte [:x 1 :x 2 :x 3]) ;; true
+  (rte/match rte [:x 1 2 :y 2 3]) ;; true
+  (rte/match rte [:x 1 :y 3]) ;; false
   )
 ```
 
@@ -185,9 +185,9 @@ more strings.
 
 ```clojure
 (let [rte (rte-compile '(:or (:* (satisfies integer?)) (:+ String)))]
-  (rte-match rte []) ;; true, 0 integers
-  (rte-match rte [1 2 3]) ;; true
-  (rte-match rte ["hello" "world"]) ;; true one or more strings
+  (rte/match rte []) ;; true, 0 integers
+  (rte/match rte [1 2 3]) ;; true
+  (rte/match rte ["hello" "world"]) ;; true one or more strings
   )
 ```
 
@@ -202,11 +202,11 @@ slow, and perhaps exhaust virtual memory.
 
 ```clojure
 (let [rte (rte-compile '(:permute (satisfies integer?) (satisfies integer?) String))]
-  (rte-match rte [1 2 "hello"]) ;; true
-  (rte-match rte [1 "hello" 2]) ;; true
-  (rte-match rte ["hello" 1 2]) ;; true
-  (rte-match rte ["hello" 2]) ;; false
-  (rte-match rte [1 2]) ;; false
+  (rte/match rte [1 2 "hello"]) ;; true
+  (rte/match rte [1 "hello" 2]) ;; true
+  (rte/match rte ["hello" 1 2]) ;; true
+  (rte/match rte ["hello" 2]) ;; false
+  (rte/match rte [1 2]) ;; false
   )
 ```
 
@@ -216,21 +216,21 @@ but `[2 4]` is not a factor.
 
 ```clojure
 (let [rte (rte-compile '(:contains-any (satisfies integer?)))]
-  (rte-match rte [1 2 "hello"]) ;; true
-  (rte-match rte ["hello" 2 "world"]) ;; true
+  (rte/match rte [1 2 "hello"]) ;; true
+  (rte/match rte ["hello" 2 "world"]) ;; true
   )
 
 (let [rte (rte-compile '(:contains-any (satisfies integer?) String))]
-  (rte-match rte [1 2 "hello"]) ;; true
-  (rte-match rte ["hello" 2 "world"]) ;; true
-  (rte-match rte [1 2 false]) ;; true
-  (rte-match rte [true "hello" false]) ;; true
+  (rte/match rte [1 2 "hello"]) ;; true
+  (rte/match rte ["hello" 2 "world"]) ;; true
+  (rte/match rte [1 2 false]) ;; true
+  (rte/match rte [true "hello" false]) ;; true
   )
 
 (let [rte (rte-compile '(:contains-any (:cat Long Long) (:cat Double Double)))]
-  (rte-match rte [1 2 "hello"]) ;; true because it contains (:cat Long Long)
-  (rte-match rte ["hello" 2.0 3.0 "world"]) ;; true (:cat Double Double)
-  (rte-match rte [1 false 2 false 1.0 false 2.0]) ;; false
+  (rte/match rte [1 2 "hello"]) ;; true because it contains (:cat Long Long)
+  (rte/match rte ["hello" 2.0 3.0 "world"]) ;; true (:cat Double Double)
+  (rte/match rte [1 false 2 false 1.0 false 2.0]) ;; false
   )
 ```
 
@@ -239,21 +239,21 @@ the sequence contains a factor which matches the pattern.
 
 ```clojure
 (let [rte (rte-compile '(:contains-every (satisfies integer?)))]
-  (rte-match rte [1 2 "hello"]) ;; true
-  (rte-match rte ["hello" 2 "world"]) ;; true
+  (rte/match rte [1 2 "hello"]) ;; true
+  (rte/match rte ["hello" 2 "world"]) ;; true
   )
 
 (let [rte (rte-compile '(:contains-every (satisfies integer?) String))]
-  (rte-match rte [1 2 "hello"]) ;; true
-  (rte-match rte ["hello" 2 "world"]) ;; true
-  (rte-match rte [1 2 false]) ;; false because it does not contains String
-  (rte-match rte [true "hello" false]) ;; false because it does not contain (satisfies integer?)
+  (rte/match rte [1 2 "hello"]) ;; true
+  (rte/match rte ["hello" 2 "world"]) ;; true
+  (rte/match rte [1 2 false]) ;; false because it does not contains String
+  (rte/match rte [true "hello" false]) ;; false because it does not contain (satisfies integer?)
   )
 
 (let [rte (rte-compile '(:contains-any (:cat Long Long) (:cat Double Double)))]
-  (rte-match rte [false 1 2 "hello" 1.0 2.0]) ;; true because it contains (:cat Long Long) and also (:cat Double Double)
-  (rte-match rte [1 2 "hello"]) ;; false because it does not contain (:cat Double Double)
-  (rte-match rte ["hello" 2.0 3.0 "world"]) ;; false because it does not contain (:cat Long Long)
+  (rte/match rte [false 1 2 "hello" 1.0 2.0]) ;; true because it contains (:cat Long Long) and also (:cat Double Double)
+  (rte/match rte [1 2 "hello"]) ;; false because it does not contain (:cat Double Double)
+  (rte/match rte ["hello" 2.0 3.0 "world"]) ;; false because it does not contain (:cat Long Long)
   )
 ```
 
@@ -267,9 +267,9 @@ Example any number of integers or strings in any order.
 
 ```clojure
 (let [rte (rte-compile '(:* (:or (satisfies integer?) String)))]
-  (rte-match rte [1]) ;; true
-  (rte-match rte [1 "hello"]) ;; true
-  (rte-match rte ["hello" "world" 1 2 "hello" 3 "world"]) ;; true
+  (rte/match rte [1]) ;; true
+  (rte/match rte [1 "hello"]) ;; true
+  (rte/match rte ["hello" "world" 1 2 "hello" 3 "world"]) ;; true
 ```
 
 * `:sigma` --- matches anything once, identity for `:and`.
@@ -278,11 +278,11 @@ Example -- any number of repetitions of integer anything String.
 
 ```clojure
 (let [rte (rte-compile '(:* (:cat (satisfies integer?) :sigma String)))]
-  (rte-match rte []) ;; true
-  (rte-match rte [1]) ;; false
-  (rte-match rte [1 2]) ;; false
-  (rte-match rte [1 "hello" 2]) ;; true
-  (rte-match rte [1 "hello" 2 3 "world" 4 1 "hello" 2 3 "world" 4]) ;; true
+  (rte/match rte []) ;; true
+  (rte/match rte [1]) ;; false
+  (rte/match rte [1 2]) ;; false
+  (rte/match rte [1 "hello" 2]) ;; true
+  (rte/match rte [1 "hello" 2 3 "world" 4 1 "hello" 2 3 "world" 4]) ;; true
   )
 ```
 
@@ -299,23 +299,23 @@ So `(:not String)` matches any sequence except one of length 1 consisting of a
 string, including matching the empty sequence.
 
 ```clojure
-(rte-match '(:not String) []) ;; true
-(rte-match '(:not String) ["hello"]) ;; false
-(rte-match '(:not String)["hello" "world"]) ;; true
+(rte/match '(:not String) []) ;; true
+(rte/match '(:not String) ["hello"]) ;; false
+(rte/match '(:not String)["hello" "world"]) ;; true
 ```
 
 ## Examples
 
 ```clojure
-(rte-match '(:cat (:* (:cat clojure.lang.Keyword java.lang.Long))
+(rte/match '(:cat (:* (:cat clojure.lang.Keyword java.lang.Long))
                   (:? String))
            '(:x 1 :y 2 :z 42)) ;; --> true
 
 (let [rte (rte-compile '(:cat (:* (:cat clojure.lang.Keyword java.lang.Long))
                               (:? String)))]
-  (rte-match rte '(:x 1 :y 2 :z 42)) ;; --> true
-  (rte-match rte '(:x 1 :y 2 :z 42 "Hello")) ;; --> true
-  (rte-match rte '(:x 1 :y 2 :z 42 "Hello" "World")) ;; --> false
+  (rte/match rte '(:x 1 :y 2 :z 42)) ;; --> true
+  (rte/match rte '(:x 1 :y 2 :z 42 "Hello")) ;; --> true
+  (rte/match rte '(:x 1 :y 2 :z 42 "Hello" "World")) ;; --> false
 )
 ```
 
