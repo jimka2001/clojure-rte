@@ -406,11 +406,14 @@
    (try (fixed-point given-pattern
                      (fn [p] (expand-1 p functions))
                      ;; TODO -- after debugging, replace this (fn ...) with simply =.
-                     (fn [a b] 
-                       (if (= a b)
-                         true ;; (do (println [:fixed-point-found a]) true)
-                         false ;; (do (println [:expanded :from a :to b]) false)
-                         )))
+                     =
+                     ;; (fn [a b] 
+                     ;;   (if (= a b)
+                     ;;     (do (println [:fixed-point-found a]) true)
+                     ;;     (do (println [:expanded :from a :to b]) false)
+                     ;;     ))
+
+                     )
         (catch clojure.lang.ExceptionInfo ei
           (if (:unsupported-pattern (ex-data ei))
             (do ;; if we fail to expand the pattern, then don't even try
