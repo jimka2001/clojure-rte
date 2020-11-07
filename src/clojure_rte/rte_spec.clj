@@ -31,4 +31,3 @@
                      :count (count operands)
                      }))
     (gs/spec-to-rte (first operands))))
-  

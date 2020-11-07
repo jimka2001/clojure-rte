@@ -31,8 +31,8 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-spec-test))
 
-(s/def ::test-spec-1 (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                 :y  (s/cat :c odd? :d pos?))))
+(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even?)  
+                                 :2  (s/cat :5 odd? :6 pos?))))
 
 (t/deftest t-spec-to-rte
   (t/testing "spec-to-rte"
@@ -59,8 +59,8 @@
                rte) "test x51")
       )))
 
-(t/deftest t-canonicalize-type
-  (t/testing "spec canonicalize-type"
+(t/deftest t-canonicalize-rte-type
+  (t/testing "spec canonicalize rte type"
     (let [rte '(rte
                 (:*
                  (:or
@@ -153,10 +153,40 @@
                                     ["a" "b"]
                                     ["a" "b" "c"]])) "test 151"))))
       
-
 (t/deftest t-expand-spec
   (t/testing "expanding unsupported form"
     (t/is (= (rte/expand '(spec ::test-spec-2) nil
                          false ; verbose=false
                          )
              '(spec ::test-spec-2)))))
+
+(s/def ::test-spec-3 (s/or :1 string?
+                           :2 (s/and int? #(even? %))))
+(s/def ::test-spec-4 (s/or :1 (s/and string? #(even? (count %)))
+                           :2 (s/and int? #(even? %))))
+
+(t/deftest t-canonicalize-type
+  (t/testing "canonicalize spec non-sequence types"
+    (doseq [t1 '((spec (s/or :1 int? :2 number?))
+                 (spec (s/and int? number?))
+                 (spec (s/or :1 int? :2 double?))
+                 (spec ::test-spec-3)
+                 (spec (s/or :1 int? :2 ::test-spec-3))
+                 (spec (s/and int? ::test-spec-3))
+                 (spec (s/or :1 (s/and int? odd?)
+                             :2 string?))
+                 (spec (s/or :1 (s/and int? odd?)
+                             :2 string?)))
+            :let [_ (println [:t1 t1])
+                  t2 (gns/canonicalize-type t1)]
+            v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5
+                "hello" "" "a" "ab" "abc" "abcd"]]
+      (println [:testing :t1 t1 :v1 v1 :t2 t2])
+      (t/is (= (gns/typep v1 t1)
+               (gns/typep v1 t2))
+            (cl-format false "line 132: type-designator=~A and canonicalized=~A disagree (~A != ~A) on v1=~A"
+                       t1 t2
+                       (gns/typep v1 t1)
+                       (gns/typep v1 t2)
+                       v1)))))
+
