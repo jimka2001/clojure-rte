@@ -218,12 +218,9 @@
                
           :else :dont-know)))
 
-
 (def sigma-* '(:* :sigma))
 (def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
 (def not-epsilon `(:cat :sigma ~sigma-*))
-
-
 
 (def ^:dynamic *traversal-functions*
   "Default callbacks for walking an rte tree.
@@ -419,6 +416,7 @@
             (do ;; if we fail to expand the pattern, then don't even try
               (when verbose
                 (cl-format true "failed to expand pattern: ~A, at ~A~%" given-pattern (:pattern (ex-data ei))))
+              
               given-pattern)
             (throw ei))
           ))))
@@ -676,7 +674,8 @@
                            :cat (fn [operands _functions]
                                   (let [operands (map canonicalize-pattern operands)]
                                     (assert (< 1 (count operands))
-                                            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
+                                            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
+                                                    re (count operands) operands))
                                     (cl/cl-cond
                                      ;; (:cat A (:* X) (:* X) B)
                                      ;;  --> (:cat A (:* X) B)

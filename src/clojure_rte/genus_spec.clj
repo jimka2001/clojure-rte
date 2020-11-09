@@ -22,6 +22,7 @@
 (ns clojure-rte.genus-spec
   (:require [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [defn-memoized exists seq-matcher]]
+            [clojure.pprint :refer [cl-format]]
             [clojure.spec.alpha :as s]))
 
 ;; allow gns/ prefix even in this file.
@@ -32,8 +33,12 @@
   (seq-matcher 'spec))
 
 (defmethod gns/typep 'spec [a-value [_a-type pattern]]
-  (s/valid? pattern a-value))
   (assert (not= nil pattern) "gns/typep: nil is not a supported spec")
+  (try (boolean (s/valid? pattern a-value))
+       (catch Exception e
+         (cl-format true "s/valid? failed on a-value=~A pattern=~A"
+                    a-value pattern)
+         (throw e))))
 
 (defmethod gns/valid-type? 'spec [[_ pattern]]
   (boolean (s/get-spec pattern)))
@@ -52,7 +57,7 @@
         :else ;; for the moment assume that spec is always disjoint with anything
         false))
 
-(defmethod gns/-subtype? :spec [sub-designator super-designator]
+(defmethod gns/-subtype? :spec [_sub-designator _super-designator]
   :dont-know)
 
 (defn symbol= [x y]
@@ -73,7 +78,23 @@
               (vector? (second expr)))]}
   (eval expr))
 
-(defn spec-to-rte 
+(defn wrap-spec 
+  [pattern]
+  (cond (not (sequential? pattern))
+        pattern
+
+        (empty? pattern)
+        pattern
+        
+        (exists [k1 '(s/cat s/alt s/* s/? s/+)]
+                (symbol= k1 (first pattern)))
+        (list 'spec pattern)
+
+        :else
+        pattern))
+
+(defn-memoized [spec-to-rte -spec-to-rte]
+  "Convert spec to rte"
   [pattern]
   (cond (s/regex? pattern)
         (spec-to-rte (s/form pattern))
@@ -89,7 +110,7 @@
         (sequential? pattern)
         (letfn [(specify [operands]
                   (for [operand operands]
-                    (list 'spec (strip-keys operand))))
+                    (list 'spec operand)))
                 (transform-sequence-pattern [pattern]
                   (if (sequential? pattern)
                     (let [[tag & operands] pattern]
@@ -105,25 +126,26 @@
                 (transform-sequence-patterns [patterns]
                   (map transform-sequence-pattern patterns))
                 (strip-keys [operands]
-                  (loop [operands operands
-                  (assert (sequential? operands) (cl-format false "expecting a sequence, not ~A" operands))
-                         stripped ()]
-                    (cond (empty? operands)
-                          (reverse stripped)
+                  (assert (sequential? operands)
+                          (cl-format false "expecting a sequence, not ~A" operands))
+                  (let [stripped
+                        (loop [operands (doall operands)
+                               stripped ()]
+                          (cond (empty? operands)
+                                (reverse stripped)
 
-                          :else
-                          (do
-                            (when (not (keyword? (first operands)))
-                              (cl-format true "WARNING: expecting keyword, not ~A in ~A"
-                                         (first operands) operands))
-                            (recur (rest (rest operands))
-                                   (cons (second operands)  stripped)))))]
+                                :else
+                                (do
+                                  (when (not (keyword? (first operands)))
+                                    (cl-format true "WARNING: expecting keyword, not ~A in ~A"
+                                               (first operands) operands))
+                                  (recur (rest (rest operands))
+                                         (cons (second operands)  stripped)))))]
                     stripped))
                 (unsupported [pattern]
-
-                  (println (ex-info "unsupported pattern" {:pattern pattern}))
-                  (list 'spec pattern)
-                  )]
+                  (throw (ex-info "unsupported pattern" {:unsupported-pattern true
+                                                         :pattern pattern
+                                                         :thrown-by 'spec-to-rte})))]
           (let [[tag & operands] pattern
                 transformed (condp symbol= tag
                               'fn (list 'satisfies (recuperate-closure pattern))
@@ -148,12 +170,11 @@
 
 (defmethod gns/-canonicalize-type 'spec
   [[_spec pattern]]
-  (cond
-    (s/regex? pattern)
-    (spec-to-rte (s/form pattern))
-
-    (s/get-spec pattern)
-    (spec-to-rte (s/form pattern))
-    
-    :else
-    (spec-to-rte pattern)))
+  (try (wrap-spec (spec-to-rte pattern))
+       (catch clojure.lang.ExceptionInfo ei
+         (if (:unsupported-pattern (ex-data ei))
+           (do ;; if we fail to expand the pattern, then don't even try
+             (cl-format true "failed to canonicalize type: ~A, at ~A~%"
+                        pattern (:pattern (ex-data ei)))
+             (list 'spec pattern))
+           (throw ei)))))

@@ -24,10 +24,10 @@
             [clojure-rte.genus-spec :as gs]))
 
 (defmethod rte/expand-1 'spec
-  [[_spec & operands] _functions]
-  (if (>= (bounded-count 2 operands) 2)
-    (throw (ex-info "invalid rte/type, (spec ...) requires exactly one operand"
-                    {:operands operands
-                     :count (count operands)
-                     }))
-    (gs/spec-to-rte (first operands))))
+  [[_spec & operands :as whole] _functions]
+  ;; This method is here for future optimization
+  ;;  Currently the given (spec ..operands) is epanded by gns/canonicalize-type
+  ;;  perhaps there is no need for this expand-1 method at all.
+  ;;  this this file can be completely eliminated.
+  whole
+  )
