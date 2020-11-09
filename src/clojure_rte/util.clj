@@ -298,7 +298,7 @@
   `(let []
      (declare ~public-name) ;; so that the internal function can call the public function if necessary
      (defn ~internal-name ~@body)
-     (def ~(with-meta  public-name {:dynamic true}) ~docstring (memoize ~internal-name))
+     (def ~(with-meta public-name {:dynamic true}) ~docstring (memoize ~internal-name))
      ))
 
 (defn map-eagerly 
