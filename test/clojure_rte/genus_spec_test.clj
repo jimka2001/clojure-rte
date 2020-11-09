@@ -191,6 +191,7 @@
                        (gns/typep v1 t1)
                        (gns/typep v1 t2)
                        v1)))))
+
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.genus-spec-test))

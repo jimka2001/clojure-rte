@@ -99,6 +99,9 @@
   (cond (s/regex? pattern)
         (spec-to-rte (s/form pattern))
 
+        (s/spec? pattern)
+        (spec-to-rte (s/form pattern))
+
         (s/get-spec pattern)
         (spec-to-rte (s/form pattern))
     
