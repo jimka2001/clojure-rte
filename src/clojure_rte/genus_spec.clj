@@ -33,6 +33,7 @@
 
 (defmethod gns/typep 'spec [a-value [_a-type pattern]]
   (s/valid? pattern a-value))
+  (assert (not= nil pattern) "gns/typep: nil is not a supported spec")
 
 (defmethod gns/valid-type? 'spec [[_ pattern]]
   (boolean (s/get-spec pattern)))
@@ -105,13 +106,19 @@
                   (map transform-sequence-pattern patterns))
                 (strip-keys [operands]
                   (loop [operands operands
+                  (assert (sequential? operands) (cl-format false "expecting a sequence, not ~A" operands))
                          stripped ()]
                     (cond (empty? operands)
                           (reverse stripped)
 
                           :else
-                          (recur (rest (rest operands))
-                                 (cons (second operands)  stripped)))))
+                          (do
+                            (when (not (keyword? (first operands)))
+                              (cl-format true "WARNING: expecting keyword, not ~A in ~A"
+                                         (first operands) operands))
+                            (recur (rest (rest operands))
+                                   (cons (second operands)  stripped)))))]
+                    stripped))
                 (unsupported [pattern]
 
                   (println (ex-info "unsupported pattern" {:pattern pattern}))

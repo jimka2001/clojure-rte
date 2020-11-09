@@ -1336,7 +1336,8 @@
     (not (valid-type? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :unknown-type
-                     :type type-designator }))
+                     :type (type type-designator)
+                     :type-designator type-designator }))
 
     :else
     type-designator
