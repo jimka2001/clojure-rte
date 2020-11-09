@@ -296,6 +296,7 @@
   [[public-name internal-name] docstring & body]
   (assert (string? docstring))
   `(let []
+     (declare ~public-name) ;; so that the internal function can call the public function if necessary
      (defn ~internal-name ~@body)
      (def ~(with-meta  public-name {:dynamic true}) ~docstring (memoize ~internal-name))
      ))
