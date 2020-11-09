@@ -1195,6 +1195,9 @@
                         type-designator))
                     
                     (fn [type-designator]
+                      (cons 'and (distinct (rest type-designator))))
+                    
+                    (fn [type-designator]
                       (cond (empty? (rest type-designator))
                             :sigma
 
@@ -1252,6 +1255,16 @@
                         type-designator))
 
                     (fn [type-designator]
+                      (if (exists [x (rest type-designator)]
+                                  (gns/and? x))
+                        (cons 'and
+                              (mapcat (fn [x]
+                                        (if (gns/and? x)
+                                          (rest x)
+                                          (list x))) (rest type-designator)))
+                        type-designator))
+
+                    (fn [type-designator]
                       (cons 'and (map -canonicalize-type (rest type-designator))))]))
 
 (defmethod -canonicalize-type 'member
@@ -1274,6 +1287,9 @@
                         (cons 'or (map -canonicalize-type
                                        (remove #{:empty-set} (rest type-designator))))
                         type-designator))
+
+                    (fn [type-designator]
+                      (cons 'or (distinct (rest type-designator))))
 
                     (fn [type-designator]
                       (cond (empty? (rest type-designator))
@@ -1313,6 +1329,17 @@
                                               t))
                                           (rest type-designator))]
                           (cons 'or mapped))
+                        type-designator))
+
+                    
+                    (fn [type-designator]
+                      (if (exists [x (rest type-designator)]
+                                  (gns/or? x))
+                        (cons 'or
+                              (mapcat (fn [x]
+                                        (if (gns/or? x)
+                                          (rest x)
+                                          (list x))) (rest type-designator)))
                         type-designator))
 
                     (fn [type-designator]
