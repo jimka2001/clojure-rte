@@ -227,16 +227,16 @@
   (every? valid-type? others))
 
 (defmethod typep 'or [a-value [_a-type & others]]
-  (some (fn [t1]
-          (typep a-value t1)) others))
+  (boolean (some (fn [t1]
+                   (typep a-value t1)) others)))
 
 (defmethod valid-type? 'or [[_or & others]]
   (every? valid-type? others))
 
 (defmethod typep 'satisfies [a-value [_a-type f]]
-  (if (fn? f)
-    (f a-value)
-    ((resolve f) a-value)))
+  (boolean (if (fn? f)
+             (f a-value)
+             ((resolve f) a-value))))
 
 (defn callable-designator? [f]
   (and (symbol? f)
