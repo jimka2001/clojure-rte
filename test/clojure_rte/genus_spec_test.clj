@@ -32,8 +32,16 @@
 (s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even?)  
                                  :2  (s/cat :5 odd? :6 pos?))))
 
+(defmacro testing
+  [string & body]
+  `(rte/with-compile-env []
+     (println [:testing ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished  (java.util.Date.)])
+     ))
+
 (t/deftest t-spec-to-rte
-  (t/testing "spec-to-rte"
+  (testing "spec-to-rte"
     (let [rte '(rte
                 (:*
                  (:or
@@ -58,7 +66,7 @@
       )))
 
 (t/deftest t-canonicalize-rte-type
-  (t/testing "spec canonicalize rte type"
+  (testing "spec canonicalize rte type"
     (let [rte '(rte
                 (:*
                  (:or
@@ -87,7 +95,7 @@
       )))
 
 (t/deftest t-rte-match
-  (t/testing "rte/match with rtes containing specs"
+  (testing "rte/match with rtes containing specs"
     (let [rte '(rte
                 (:*
                  (:or
@@ -128,7 +136,7 @@
 ;; + - 1 or more of a predicate/pattern
 ;; ? - 0 or 1 of a predicate/pattern
 (t/deftest t-spec-sequences
-  (t/testing "spec sequence operators"
+  (testing "spec sequence operators"
     ()))
 
 ;; this example comes from https://clojure.org/guides/spec#_sequences
@@ -138,7 +146,7 @@
                           #(even? (count %))))
 
 (t/deftest t-rte-match-2
-  (t/testing "rte/match with unsupported specs"
+  (testing "rte/match with unsupported specs"
     ;; ::test-spec-2 uses the s/& operator which cannot be converted
     ;;   to an efficent rte.  the semantics should be maintained by the
     ;;   rte by leaving it as (spec ....)
@@ -158,7 +166,7 @@
                                        ["a" "b" "c"]])) "test 151")))))
       
 (t/deftest t-expand-spec
-  (t/testing "expanding unsupported form"
+  (testing "expanding unsupported form"
     (t/is (= (rte/expand '(spec ::test-spec-2) nil
                          false ; verbose=false
                          )
@@ -170,7 +178,7 @@
                            :2 (s/and int? #(even? %))))
 
 (t/deftest t-canonicalize-spec-type
-  (t/testing "canonicalize spec non-sequence types"
+  (testing "canonicalize spec non-sequence types"
     (doseq [t1 (template ((spec ~(s/or :1 int? :2 number?))
                           (spec ~(s/and int? number?))
                           (spec ~(s/or :1 int? :2 double?))
@@ -192,6 +200,50 @@
                        (gns/typep v1 t2)
                        v1)))))
 
+(t/deftest t-canonicalize-spec-regex-type
+  (testing "canonicalize spec sequence types"
+    (doseq [t1 (template ((spec ~(s/* (s/or :1 int? :2 number?)))
+                          (spec ~(s/+ (s/and int? number?)))
+                          (spec ~(s/cat :1 (s/? int?)
+                                        :2 string?))
+                          (spec ~(s/alt :1 int?
+                                        :2 (s/* string?)))
+                          (spec ~(s/cat :3 (s/alt :1 int?
+                                               :2 (s/* string?))
+                                        :4 int?))
+                          (spec ~(s/+ (s/or :1 int?
+                                            :2 string?)))))
+            :let [t2 (gns/canonicalize-type t1)]
+            v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5
+                "hello" "" "a" "ab" "abc" "abcd"
+                [0 1.0 2 2.0]
+                [1 2 3 -1 -2 -3]
+                []
+                [3]
+                [3 3]
+                [3 3 3 3]
+                ["hello"]
+                [3 "hello"]
+                ["hello" 3]
+                ["hello" 3 3 3]
+                ["hello" 3 "hello" 3 3 "hello" 3]
+                ["hello" 3 "hello" 3 "hello" "world" 3]
+                [3 "hello" "world"]
+                [3 "hello" "world" 3]
+                ["hello" "world" 3]
+                ["hello" "world" 3 3]
+                ["hello" "world"]
+                
+
+
+                ]]
+      (t/is (= (gns/typep v1 t1)
+               (gns/typep v1 t2))
+            (cl-format false "line 132: type-designator=~A and canonicalized=~A disagree (~A != ~A) on v1=~A"
+                       t1 t2
+                       (gns/typep v1 t1)
+                       (gns/typep v1 t2)
+                       v1)))))
+
 (defn -main []
-  (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.genus-spec-test))
