@@ -199,7 +199,21 @@
           [[] []]
           items))
 
-(defn find-simplifier [obj simplifiers]
+(defn find-simplifier
+  "Iterate through a sequence of so-called simplifies.  Each simplifier
+  is a unary function which accepts the given obj as arguments.  Each
+  simplifier is expected to either _simplify_ the object or leave it as-is.
+  If the simplifier returns an object which is = obj, then we assume the
+  simplifier chose NOT to simplify, in which case find-simplifier proceeds
+  to the next simplifier in the sequence.
+  If, however, the simplifier returns an object which is not = to obj, 
+  then we assume that the simplifier HAS simplified the object.
+  WARNING, find-simplifier does not in any way verify that the object
+  is more simple than before; it only checks whether it is different.
+  Once a simplifier has _simplified_ an object, find-simplifier returns
+  the newly generated object, and the remaining simplifiers are silently
+  ignored."
+  [obj simplifiers]
   (if (empty? simplifiers)
     obj
     (loop [[f & fs] simplifiers]
