@@ -25,7 +25,7 @@
                                       call-with-collector defn-memoized
                                       visit-permutations fixed-point
                                       sort-operands with-first-match
-                                      partition-by-pred
+                                      partition-by-pred seq-matcher
                                       rte-identity rte-constantly]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
@@ -567,33 +567,23 @@
                              :* (fn [operand _functions]
                                   (first-types operand))))))
 
-(defn seq-matcher
-  "Return a function, a closure, which can be used to determine whether
-  its argument is a sequence whose first element is identically the
-  given obj."
-  [target]
-  (fn [obj]
-    (and (seq? obj)
-         (not-empty obj)
-         (= target (first obj)))))
-
-(def cat? 
+(def rte/cat?
   "Predicate determining whether its object is of the form (:cat ...)"
   (seq-matcher :cat))
 
-(def *?
+(def rte/*?
   "Predicate determining whether its object is of the form (:* ...)"
   (seq-matcher :*))
 
-(def not? 
+(def rte/not?
   "Predicate determining whether its object is of the form (:not ...)"
   (seq-matcher :not))
 
-(def and?
+(def rte/and?
   "Predicate determining whether its object is of the form (:and ...)"
   (seq-matcher :and))
 
-(def or? 
+(def rte/or?
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 

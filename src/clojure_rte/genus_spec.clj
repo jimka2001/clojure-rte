@@ -21,11 +21,15 @@
 
 (ns clojure-rte.genus-spec
   (:require [clojure-rte.genus :as gns]
+            [clojure-rte.util :refer [defn-memoized exists seq-matcher]]
             [clojure.spec.alpha :as s]))
 
-(defn spec? [t]
-  (and (sequential? t)
-       (= 'spec (first t))))
+;; allow gns/ prefix even in this file.
+(alias 'gs 'clojure-rte.genus-spec)
+
+(def gs/spec?
+  "Detect sequence starting with the simple symbol spec"
+  (seq-matcher 'spec))
 
 (defmethod gns/typep 'spec [a-value [_a-type pattern]]
   (s/valid? pattern a-value))
@@ -37,7 +41,7 @@
   :dont-know)
 
 (defmethod gns/-disjoint? :spec [t1 t2]
-  (cond (not (spec? t1))
+  (cond (not (gs/spec? t1))
         :dont-know
 
         (and (= t1 t2)

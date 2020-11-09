@@ -25,7 +25,7 @@
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       partition-by-pred
-                                      member find-simplifier defn-memoized
+                                      seq-matcher member find-simplifier defn-memoized
                                       ]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -39,30 +39,29 @@
 (declare inhabited?)
 (declare type-equivalent?)
 
-(defn and? [t]
-  (and (sequential? t)
-       (= 'and (first t))))
+(def gns/and?
+  "Detect sequence starting with the simple symbol and"
+  (seq-matcher 'and))
 
-(defn or? [t]
-  (and (sequential? t)
-       (= 'or (first t))))
+(def gns/or? 
+  "Detect sequence starting with the simple symbol or"
+  (seq-matcher 'or))
 
-(defn =? [t]
-  (and (sequential? t)
-       (= '= (first t))
-       (= (count t) 2)))
+(def gns/=?
+  "Detect sequence starting with the simple symbol ="
+  (seq-matcher '=))
 
-(defn not? [t]
-  (and (sequential? t)
-       (= 'not (first t))))
+(def gns/not?
+  "Detect sequence starting with the simple symbol not"
+  (seq-matcher 'not))
 
-(defn member? [t]
-  (and (sequential? t)
-       (= 'member (first t))))
+(def gns/member?
+  "Detect sequence starting with the simple symbol member"
+  (seq-matcher 'member))
 
-(defn satisfies? [t]
-  (and (sequential? t)
-       (= 'satisfies (first t))))
+(def gns/satisfies?
+  "Detect sequence starting with the simple symbol satisfies"
+  (seq-matcher 'satisfies))
 
 (defn class-designator?
   "Predicate to determine whether the given symbol designates a java class."

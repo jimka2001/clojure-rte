@@ -375,3 +375,14 @@
   "like not-empty, but returns boolean rather than nil, or the collection"
   [coll]
   (boolean (not-empty coll)))
+
+(defn seq-matcher
+  "Return a function, a closure, which can be used to determine whether
+  its argument is a sequence whose first element is identically the
+  given obj."
+  [target]
+  (fn [obj]
+    (and (seq? obj)
+         (not-empty obj)
+         (= target (first obj)))))
+
