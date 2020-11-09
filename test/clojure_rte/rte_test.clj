@@ -35,9 +35,6 @@
             [clojure-rte.rte-tester :refer []]
             [clojure-rte.xymbolyco :as xym]))
 
-(defn -main []
-  (clojure.test/run-tests 'clojure-rte.rte-test))
-
 (defmacro testing
   [string & body]
   `(do (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
@@ -823,6 +820,9 @@
            '((:and A B C) (:and X Y Z))))
     (is (= (reduce-redundant-or '((:and A X C) (:and A Y C)))
            '((:and A X C) (:and A Y C))))))
-    
-    
-    
+
+
+
+(defn -main []
+  (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
+  (clojure.test/run-tests 'clojure-rte.rte-test))

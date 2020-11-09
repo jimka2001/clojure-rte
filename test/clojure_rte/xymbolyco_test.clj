@@ -228,7 +228,7 @@
                                                               rte [`(:and ~rte-1 (:not ~rte-2))
                                                                    `(:or  ~rte-1 (:not ~rte-2))]]
                                                           rte))))]
-        (println [:inx inx :rte rte])
+        ;; (println [:inx inx :rte rte])
         (t-acceptance-test-rte rte)))))
 
 (deftest t-test-1

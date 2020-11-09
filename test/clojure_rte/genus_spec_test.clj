@@ -29,9 +29,6 @@
             [backtick :refer [template]]
             [clojure.test :as t]))
 
-(defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-spec-test))
-
 (s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even?)  
                                  :2  (s/cat :5 odd? :6 pos?))))
 
@@ -136,6 +133,7 @@
 
 ;; this example comes from https://clojure.org/guides/spec#_sequences
 ;; it matches any sequence of strings with even length, 0, 2, 4, ...
+;; This cannot be converted to RTE because the s/& is not supported by RTE.
 (s/def ::test-spec-2 (s/& (s/* string?)
                           #(even? (count %))))
 
@@ -144,15 +142,20 @@
     ;; ::test-spec-2 uses the s/& operator which cannot be converted
     ;;   to an efficent rte.  the semantics should be maintained by the
     ;;   rte by leaving it as (spec ....)
-    (let [rte '(:* (spec ::test-spec-2))]
-      (t/is (= true (rte/match rte [])) "test 148")
-      (t/is (= true (rte/match rte [[] [] []])) "test 149")
-      (t/is (= true (rte/match rte [[]
-                                    ["a" "b"]
-                                    ["a" "b" "c" "d"]])) "test 150")
-      (t/is (= false (rte/match rte [[]
-                                    ["a" "b"]
-                                    ["a" "b" "c"]])) "test 151"))))
+    (rte/with-compile-env []
+      (let [rte '(:* (spec ::test-spec-2))
+            rte-canonicalized (rte/canonicalize-pattern rte)]
+
+        (t/is (not= '(:* (spec nil))
+                    rte-canonicalized) "test 146")
+        (t/is (= true (rte/match rte [])) "test 148")
+        (t/is (= true (rte/match rte [[] [] []])) "test 149")
+        (t/is (= true (rte/match rte [[]
+                                      ["a" "b"]
+                                      ["a" "b" "c" "d"]])) "test 150")
+        (t/is (= false (rte/match rte [[]
+                                       ["a" "b"]
+                                       ["a" "b" "c"]])) "test 151")))))
       
 (t/deftest t-expand-spec
   (t/testing "expanding unsupported form"
@@ -166,7 +169,7 @@
 (s/def ::test-spec-4 (s/or :1 (s/and string? #(even? (count %)))
                            :2 (s/and int? #(even? %))))
 
-(t/deftest t-canonicalize-type
+(t/deftest t-canonicalize-spec-type
   (t/testing "canonicalize spec non-sequence types"
     (doseq [t1 (template ((spec ~(s/or :1 int? :2 number?))
                           (spec ~(s/and int? number?))
@@ -181,7 +184,6 @@
             :let [t2 (gns/canonicalize-type t1)]
             v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5
                 "hello" "" "a" "ab" "abc" "abcd"]]
-      (println [:testing :t1 t1 :v1 v1 :t2 t2])
       (t/is (= (gns/typep v1 t1)
                (gns/typep v1 t2))
             (cl-format false "line 132: type-designator=~A and canonicalized=~A disagree (~A != ~A) on v1=~A"
@@ -189,4 +191,6 @@
                        (gns/typep v1 t1)
                        (gns/typep v1 t2)
                        v1)))))
-
+(defn -main []
+  (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
+  (clojure.test/run-tests 'clojure-rte.genus-spec-test))
