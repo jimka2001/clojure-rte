@@ -26,6 +26,7 @@
             [clojure-rte.genus :as gns]
             [clojure.spec.alpha :as s]
             [clojure-rte.genus-spec :as gs]
+            [backtick :refer [template]]
             [clojure.test :as t]))
 
 (defn -main []
@@ -71,14 +72,14 @@
                    (satisfies clojure.core/odd?)
                    (satisfies clojure.core/pos?)))))]
 
-      (t/is (= (gns/canonicalize-type `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                            :y  (s/cat :c odd? :d pos?)))))
+      (t/is (= (gns/canonicalize-type (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                                                   :y  (s/cat :c odd? :d pos?))))))
                rte) "test x68")
 
       (t/is (= (gns/canonicalize-type '(spec ::test-spec-1))
                rte) "test x71")
 
-      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
+      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)
                                                          :y  (s/cat :c odd? :d pos?)))))
                '(rte
                  (:*
@@ -108,8 +109,8 @@
       (t/is (= false (rte/match rte [-1 2   3 1   3 -1   -1 4])) "test x91")
       (t/is (= false (rte/match rte [[-1 2   3 1   3 -1   -1 4]])) "test x92")
       (doseq [rte2 [rte
-                    `(~'spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                          :y  (s/cat :c odd? :d pos?))))
+                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
+                                                 :y  (s/cat :c odd? :d pos?)))))
                     '(spec ::test-spec-1)
                     '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                        :y  (s/cat :c odd? :d pos?))))
@@ -167,18 +168,17 @@
 
 (t/deftest t-canonicalize-type
   (t/testing "canonicalize spec non-sequence types"
-    (doseq [t1 '((spec (s/or :1 int? :2 number?))
-                 (spec (s/and int? number?))
-                 (spec (s/or :1 int? :2 double?))
-                 (spec ::test-spec-3)
-                 (spec (s/or :1 int? :2 ::test-spec-3))
-                 (spec (s/and int? ::test-spec-3))
-                 (spec (s/or :1 (s/and int? odd?)
-                             :2 string?))
-                 (spec (s/or :1 (s/and int? odd?)
-                             :2 string?)))
-            :let [_ (println [:t1 t1])
-                  t2 (gns/canonicalize-type t1)]
+    (doseq [t1 (template ((spec ~(s/or :1 int? :2 number?))
+                          (spec ~(s/and int? number?))
+                          (spec ~(s/or :1 int? :2 double?))
+                          (spec ::test-spec-3)
+                          (spec ~(s/or :1 int? :2 ::test-spec-3))
+                          (spec ~(s/and int? ::test-spec-3))
+                          (spec ~(s/or :1 (s/and int? odd?)
+                                       :2 string?))
+                          (spec ~(s/or :1 (s/and int? odd?)
+                                       :2 string?))))
+            :let [t2 (gns/canonicalize-type t1)]
             v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5
                 "hello" "" "a" "ab" "abc" "abcd"]]
       (println [:testing :t1 t1 :v1 v1 :t2 t2])
