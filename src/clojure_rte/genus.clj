@@ -1165,6 +1165,26 @@
                     (fn [type-designator]
                       (list 'not (-canonicalize-type (second type-designator))))]))
 
+(defmethod -canonicalize-type 'fn*
+  [type-designator]
+  (find-simplifier type-designator
+                   [(fn [type-designator]
+                      ;; convert (fn* [p1__19751#] (clojure.core/even? p1__19751#))}
+                      ;;     to (satisfies clojure.core/even?)
+                      (cond
+                        (not (and (= 3 (count type-designator))
+                                  (vector (nth type-designator 1))
+                                  (sequential? (nth type-designator 2))
+                                  (= 2 (count (nth type-designator 2)))))
+                        type-designator
+                        :else
+                        (let [[_fn [v1] [f1 v2]] type-designator]
+                          (cond (= v1 v2)
+                                (list 'satisfies f1)
+
+                                :else
+                                type-designator))))]))
+
 (defmethod -canonicalize-type 'and
   [type-designator]
   
