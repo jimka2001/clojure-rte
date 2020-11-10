@@ -1130,21 +1130,17 @@
   (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
                    obj)
         :Dfa
-        (sequential? obj)
-        :sequential
 
         :else
-        (throw (ex-info (format "invalid argument for %s, expecting, sequential? or Dfa, not %s"
-                                caller obj)
-                        {:obj obj
-                         }))))
+        :pattern
+))
 
 (defmulti rte-trace
   "Given a compiled rte, find a sequence of types which satisfy the corresponding pattern."
   (fn [rte]
     (dispatch rte 'rte-trace)))
 
-(defmethod rte-trace :sequential
+(defmethod rte-trace :pattern
   [pattern]
   (rte-trace (rte/compile pattern)))
 
@@ -1165,7 +1161,7 @@
   (fn [rte]
     (dispatch rte 'rte-inhabited?)))
 
-(defmethod rte-inhabited? :sequential [pattern]
+(defmethod rte-inhabited? :pattern [pattern]
   (rte-inhabited? (rte/compile pattern)))
 
 (defmethod rte-inhabited? :Dfa [dfa]
@@ -1189,7 +1185,7 @@
                             hot-spot]}]
     (dispatch rte 'rte/match)))
 
-(defmethod rte/match :sequential
+(defmethod rte/match :pattern
   [pattern items & {:keys [promise-disjoint
                            hot-spot]}]
   (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
