@@ -401,3 +401,33 @@
          (not-empty obj)
          (= target (first obj)))))
 
+(defn -condp-helper [test value default-f & pairs]
+  (loop [pair pairs]
+    (cond (empty? pairs)
+          (default-f)
+
+          :else
+          (let [[keys f] (first pairs)]
+            (if (exists [x keys] (test value x))
+              (f)
+              (recur (rest pairs)))))))
+
+(defmacro -condp [test obj & pairs]
+  (loop [pairs pairs
+         default (fn [] nil)
+         acc ()]
+    (cond (empty? pairs)
+          `(-condp-helper ~test ~obj ~default ~@(reverse acc))
+
+          (empty? (rest pairs))
+          (recur ()
+                 `(fn [] ~(first pairs))
+                 acc)
+
+          :else
+          (let [key (first pairs)
+                value (second pairs)]
+            (recur (rest (rest pairs))
+                   default
+                   (cons `['~key (fn [] ~value)] acc)
+                 )))))
