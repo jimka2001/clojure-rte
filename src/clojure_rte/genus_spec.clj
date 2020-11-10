@@ -21,9 +21,11 @@
 
 (ns clojure-rte.genus-spec
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [defn-memoized exists seq-matcher]]
+            [clojure-rte.util :refer [-condp defn-memoized exists seq-matcher]]
             [clojure.pprint :refer [cl-format]]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [backtick :refer [template]]
+))
 
 ;; allow gns/ prefix even in this file.
 (alias 'gs 'clojure-rte.genus-spec)
@@ -120,9 +122,9 @@
                       (condp symbol= tag
                         's/cat (cons :cat (transform-sequence-patterns (strip-keys operands)))
                         's/alt (cons :or (transform-sequence-patterns (strip-keys operands)))
-                        's/* (cons :* (transform-sequence-patterns operands))
-                        's/? (cons :? (transform-sequence-patterns operands))
-                        's/+ (cons :+ (transform-sequence-patterns operands))
+                        's/*   (cons :* (transform-sequence-patterns operands))
+                        's/?   (cons :? (transform-sequence-patterns operands))
+                        's/+   (cons :+ (transform-sequence-patterns operands))
                         's/& (unsupported pattern)
                         (list 'spec pattern)))
                     (list 'spec pattern)))
@@ -150,19 +152,23 @@
                                                          :pattern pattern
                                                          :thrown-by 'spec-to-rte})))]
           (let [[tag & operands] pattern
-                transformed (condp symbol= tag
-                              'fn (list 'satisfies (recuperate-closure pattern))
-                              's/and (cons 'and (specify operands))
-                              's/or (cons 'or (specify (strip-keys operands)))
-
-                              's/cat (list 'rte (transform-sequence-pattern pattern))
-                              's/alt (list 'rte (transform-sequence-pattern pattern))
-                              's/* (list 'rte (transform-sequence-pattern pattern))
-                              's/? (list 'rte (transform-sequence-pattern pattern))
-                              's/+ (list 'rte (transform-sequence-pattern pattern))
-                              's/& (unsupported pattern)
+                transformed (-condp symbol= tag
+                                    (fn) (template (satisfies ~(recuperate-closure pattern)))
+                                    (s/and) (template (and ~@(specify operands)))
+                                    (s/or) (template (or ~@(specify (strip-keys operands))))
+                                    (s/nilable) (template (or (satisfies nil?) ~@(specify operands)))
+                                    (s/keys
+                                     s/keys*
+                                     s/coll-of) (template (spec ~(eval pattern)))
                               
-                              pattern)
+                                    (s/cat
+                                     s/alt
+                                     s/*
+                                     s/?
+                                     s/+)   (template (rte ~(transform-sequence-pattern pattern)))
+                                    (s/&) (unsupported pattern)
+                              
+                                    pattern)
                 ]
             transformed 
             ))

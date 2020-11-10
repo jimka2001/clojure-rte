@@ -402,5 +402,42 @@
               (cl-format false "line 403: failed t=~A" t))
         ))))
 
+(def email-regex #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$")
+(s/def ::email-type (s/and string? #(re-matches email-regex %)))
+(t/deftest t-email-address
+  (testing "email address"
+    (t/is (s/valid? ::email-type "jimka.issy@gmail.com"))
+    (t/is (not (s/valid? ::email-type "jimka.issy")))
+
+    (t/is (gns/typep "jimka.issy@gmail.com" (template (spec ~::email-type))))
+    (t/is (not (gns/typep "jimka.issy" (template (spec ~::email-type)))))
+
+    (t/is (gns/typep "jimka.issy@gmail.com" (gns/canonicalize-type (template (spec ~::email-type)))))
+    (t/is (not (gns/typep "jimka.issy" (gns/canonicalize-type (template (spec ~::email-type))))))
+    ))
+
+(s/def ::acctid int?)
+(s/def ::first-name string?)
+(s/def ::last-name string?)
+(s/def ::email ::email-type)
+
+(s/def ::person (s/keys :req [::first-name ::last-name ::email]
+                        :opt [::phone]))
+
+(t/deftest t-person
+  (testing "person example from spec guide. https://clojure.org/guides/spec#_sequences"
+    (t/is (s/valid? ::person
+                    {::first-name "Bugs"
+                     ::last-name "Bunny"
+                     ::email "bugs@example.com"}) "test 432")
+    (t/is (gns/typep {::first-name "Bugs"
+                      ::last-name "Bunny"
+                      ::email "bugs@example.com"}
+                     (template (spec ~::person))) "test 436")
+     (t/is (gns/typep {::first-name "Bugs"
+                      ::last-name "Bunny"
+                      ::email "bugs@example.com"}
+                      (gns/canonicalize-type (template (spec ~::person)))) "test 440")))
+
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-spec-test))
