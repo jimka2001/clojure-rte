@@ -878,7 +878,7 @@
   (assert (= 'and (first wrt)))
   (let [[_ & and-args] wrt]
     (cond
-      (some #{`(~'not ~expr)} and-args)
+      (member (template (not ~expr)) and-args)
       :empty-set
 
       (some #{expr} and-args)
@@ -934,8 +934,8 @@
                                                           {:error-type :derivative-undefined
                                                            :wrt wrt
                                                            :expr expr
-                                                           :sub-types [{:type `(~'and ~wrt ~expr)}
-                                                                       {:type `(~'and ~wrt (~'not ~expr))}]
+                                                           :sub-types [{:type (template (and ~wrt ~expr))}
+                                                                       {:type (template (and ~wrt (not ~expr)))}]
                                                            }))
                                           ))
                                 :or (fn [operands _functions]
@@ -1017,7 +1017,7 @@
               :else
               (let [right (map (fn [x]
                                  (list 'not x)) right)]
-                (collect `(~'and ~@left ~@right)))))]
+                (collect (template (and ~@left ~@right))))))]
 
     (let [independent (filter independent? type-set)
           dependent (remove (set independent) type-set)]

@@ -29,6 +29,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
+            [backtick :refer [template]]
             ))
 
 (defrecord State 
@@ -198,7 +199,7 @@
             (gen-function []
               (let [state-id->pseudo-type (into {} (for [[_type state-id] transitions
                                                          :let [tag (gensym "pseudo-")]]
-                                                     [state-id `(~'satisfies ~tag)]))
+                                                     [state-id (template (satisfies ~tag))]))
                     pseudos (for [[_ tag] state-id->pseudo-type]
                               tag)
                     pseudo-type->state-id (into {} (for [[state-id tag] state-id->pseudo-type]
@@ -453,7 +454,7 @@
                                    new-label (if (empty? existing-labels)
                                                :sigma
                                                (bdd/canonicalize-type
-                                                `(~'and :sigma (~'not (~'or ~@existing-labels)))))]
+                                                (template (and :sigma (not (or ~@existing-labels))))))]
                                (if (= :empty-set new-label)
                                  q
                                  (assoc q
