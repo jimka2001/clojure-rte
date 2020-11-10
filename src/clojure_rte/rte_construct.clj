@@ -31,6 +31,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union subset?]]
             [clojure-rte.cl-compat :as cl]
+            [backtick :refer [template]]
             )
   (:refer-clojure :exclude [compile])
 )

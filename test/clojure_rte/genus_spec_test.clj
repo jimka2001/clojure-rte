@@ -23,6 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
+            [clojure-rte.util :refer [forall]]
             [clojure-rte.genus :as gns]
             [clojure.spec.alpha :as s]
             [clojure-rte.genus-spec :as gs]
@@ -34,11 +35,14 @@
 
 (defmacro testing
   [string & body]
-  `(rte/with-compile-env []
-     (println [:testing ~string :starting (java.util.Date.)])
-     (clojure.test/testing ~string ~@body)
-     (println [:finished  (java.util.Date.)])
-     ))
+  (let [verbose false]
+    `(rte/with-compile-env []
+       (when ~verbose
+         (println [:testing ~string :starting (java.util.Date.)]))
+       (clojure.test/testing ~string ~@body)
+       (when ~verbose
+         (println [:finished  (java.util.Date.)]))
+     )))
 
 (t/deftest t-spec-to-rte
   (testing "spec-to-rte"
@@ -209,10 +213,16 @@
                           (spec ~(s/alt :1 int?
                                         :2 (s/* string?)))
                           (spec ~(s/cat :3 (s/alt :1 int?
-                                               :2 (s/* string?))
+                                                  :2 (s/* string?))
                                         :4 int?))
                           (spec ~(s/+ (s/or :1 int?
-                                            :2 string?)))))
+                                            :2 string?)))
+                          (spec ~(s/cat :1 (s/or :3 (s/* number?)
+                                                 :4 boolean?)
+                                        :2 (s/* string?)))
+                          (spec ~(s/cat :1 (s/alt :3 (s/* number?)
+                                                  :4 boolean?)
+                                        :2 (s/* string?)))))
             :let [t2 (gns/canonicalize-type t1)]
             v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5
                 "hello" "" "a" "ab" "abc" "abcd"
@@ -233,6 +243,16 @@
                 ["hello" "world" 3]
                 ["hello" "world" 3 3]
                 ["hello" "world"]
+                [true     "a" "b" "c"]
+                [false     "a" "b" "c"]
+                [[true]     "a" "b" "c"]
+                [[false]     "a" "b" "c"]
+                [()     "a" "b" "c"]
+                [[]     "a" "b" "c"]
+                [[1 2 3]     "a" "b" "c"]
+                [1 2 3     "a" "b" "c"]
+                [true true false     "a" "b" "c"]
+                [[true true false]     "a" "b" "c"]
                 
 
 
@@ -244,6 +264,143 @@
                        (gns/typep v1 t1)
                        (gns/typep v1 t2)
                        v1)))))
+
+(t/deftest t-canonicalize-spec
+  (testing "type vs pattern"
+    (t/is (= (gns/canonicalize-type (template (spec ~(s/cat :1 number?
+                                                            :2 (s/* string?)))))
+             '(rte (:cat Number (:* String))))
+          "line 254")
+
+    ;; a type at the top level of an rte pattern means a sequence
+    ;; for which every element matches the type.
+    ;; so the rte (spec x) is not a sequence matching x
+    ;; but rather a sequence of object, each of which matches (spec x)
+    (t/is (= (rte/canonicalize-pattern (template (spec ~(s/cat :1 number?
+                                                               :2 (s/* string?)))))
+             '(rte (:cat Number (:* String))))
+          "line 258")
+
+    ;; a type at the top level of an rte pattern means a sequence
+    ;; for which every element matches the type.
+    ;; so the rte (spec x) is not a sequence matching x
+    ;; but rather a sequence of object, each of which matches (spec x)
+    (t/is (= (rte/canonicalize-pattern (template (spec ~(s/cat :1 (s/or :3 number?
+                                                                        :4 boolean?)
+                                                               :2 (s/* string?)))))
+             '(rte (:cat (:or Boolean Number) (:* String))))
+          "line 263")
+
+    ;; match an object such as
+    ;;   [true     "a" "b" "c"]
+    ;;   [false     "a" "b" "c"]
+    ;;   [()     "a" "b" "c"]
+    ;;   [[]     "a" "b" "c"]
+    ;;   [[1 2 3]     "a" "b" "c"]
+    ;; not   [1 2 3     "a" "b" "c"]
+    ;; not   [true true false     "a" "b" "c"]
+    (t/is (= (gns/canonicalize-type (template (spec ~(s/cat :1 (s/or :3 (s/* number?)
+                                                                     :4 boolean?)
+                                                            :2 (s/* string?)))))
+             '(rte (:cat (:or (rte (:* Number))
+                              Boolean)
+                         (:* String))))
+          "line 305")
+
+    (t/is (= (rte/canonicalize-pattern (template (spec ~(s/cat :1 (s/or :3 (s/* number?)
+                                                                        :4 boolean?)
+                                                               :2 (s/* string?)))))
+             '(rte (:cat (:or (rte (:* Number))
+                              Boolean)
+                         (:* String))))
+          "line 313")
+
+    (t/is (= (rte/canonicalize-pattern (template (spec ~(s/cat :1 (s/alt :3 (s/* number?)
+                                                                         :4 boolean?)
+                                                               :2 (s/* string?)))))
+             '(rte (:cat (:or (:* Number) Boolean) (:* String))))
+          "line 319")
+
+    (t/is (= (gns/canonicalize-type (template (spec ~(s/alt :1 number? :2 (s/* string?)))))
+             '(rte (:or (:* String) Number)))
+          "line 323")
+    (t/is (= (rte/canonicalize-pattern (template (spec ~(s/alt :1 number? :2 (s/* string?)))))
+             '(rte (:or (:* String) Number)))
+          "line 326")))
+
+(t/deftest t-canonicalize-spec-2
+  (testing "canonicalize spec 2"
+    (let [spec1 (s/alt :1 number? :2 (s/* string?))
+          rte1  '(:or (rte Number) (:* String))
+          spec2 (s/or :1 number? :2 (s/* string?))
+          rte2  '(:or Number (:* String))
+          t1 (template (spec ~spec1))
+          t2 (template (spec ~spec2))]
+      (doseq [q [[]
+                 [3]
+                 [3 3 3]
+                 [[3] [3] [3]]
+                 ["hello"]
+                 ["hello" "hello"]
+                 [[] [] []]
+                 [["hello"]]
+                 [["hello"] ["hello"] ["hello"]]
+                 [["hello" "world"] ["hello" "world"] ["hello" "world"]]
+                 [3 ["hello" "world"] 3 ["hello" "world"] 3 ["hello" "world"]]
+                 ]]
+        (t/is (forall [item q]
+                      (= (gns/typep item t1)
+                         (s/valid? spec1 item))) "line 278")
+        (t/is (forall [item q]
+                      (= (gns/typep item t2)
+                         (s/valid? spec2 item))) "line 281")
+        (t/is (= (gns/typep q t1)
+                 (s/valid? spec1 q)) "line 283")
+        (t/is (= (gns/typep q t2)
+                 (s/valid? spec2 q)) "line 285")))))
+
+(t/deftest t-canonicalize-spec-regex-type-2
+  (testing "canonicalize spec sequence types"
+    (let [rte1 (template (rte (:or Number (:* String))))
+          rte2 (template (spec ~(s/alt :1 number? :2 (s/* string?))))]
+      (doseq [rte [rte1 rte2]]
+        (t/is (rte/match rte [[2]])
+              (cl-format false "line 255: failed rte=~A" rte))
+        (t/is (rte/match rte [[]])
+              (cl-format false "line 256: failed rte=~A" rte))
+        (t/is (rte/match rte [["hello"]])
+              (cl-format false "line 257: failed rte=~A" rte))
+        (t/is (rte/match rte [["world"]])
+              (cl-format false "line 258: failed rte=~A" rte))
+        (t/is (not (rte/match rte [[2 "world"]]))
+              (cl-format false "line 259: failed rte=~A" rte))
+        (t/is (not (rte/match rte [["world" 3]]))
+              (cl-format false "line 260: failed rte=~A" rte))))
+
+    (let [t1 (template (or Number (rte (:* String))))
+          t2 (template (spec ~(s/or :1 number? :2 (s/* string?))))]
+      (doseq [t [t1 t2]]
+        (t/is (gns/typep 2 t)
+              (cl-format false "line 265: failed t=~A" t))
+        (t/is (gns/typep [] t)
+              (cl-format false "line 266: failed t=~A" t))
+        (t/is (gns/typep ["hello"] t)
+              (cl-format false "line 267: failed t=~A" t))
+
+        (t/is (gns/typep ["hello" "world" ] t)
+              (cl-format false "line 268: failed t=~A" t))
+
+        (t/is (not (gns/typep [2 "world"] t))
+              (cl-format false "line 395: failed t=~A" t))
+        (t/is (not (gns/typep [["hello" "world"]] t))
+              (cl-format false "line 397: failed t=~A" t))
+        (t/is (not (gns/typep [[2 "hello" "world"]] t))
+              (cl-format false "line 399: failed t=~A" t))
+        (t/is (not (gns/typep [["world" 3]] t))
+              (cl-format false "line 401: failed t=~A" t))
+        (t/is (not (gns/typep [3] t))
+              (cl-format false "line 403: failed t=~A" t))
+        ))))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-spec-test))
