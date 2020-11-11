@@ -21,7 +21,7 @@
 
 (ns clojure-rte.genus-spec
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [-condp defn-memoized exists seq-matcher]]
+            [clojure-rte.util :refer [casep defn-memoized exists seq-matcher]]
             [clojure.pprint :refer [cl-format]]
             [clojure.spec.alpha :as s]
             [backtick :refer [template]]
@@ -119,13 +119,13 @@
                 (transform-sequence-pattern [pattern]
                   (if (sequential? pattern)
                     (let [[tag & operands] pattern]
-                      (condp symbol= tag
-                        's/cat (cons :cat (transform-sequence-patterns (strip-keys operands)))
-                        's/alt (cons :or (transform-sequence-patterns (strip-keys operands)))
-                        's/*   (cons :* (transform-sequence-patterns operands))
-                        's/?   (cons :? (transform-sequence-patterns operands))
-                        's/+   (cons :+ (transform-sequence-patterns operands))
-                        's/& (unsupported pattern)
+                      (casep symbol= tag
+                        (s/cat) (cons :cat (transform-sequence-patterns (strip-keys operands)))
+                        (s/alt) (cons :or (transform-sequence-patterns (strip-keys operands)))
+                        (s/*)   (cons :* (transform-sequence-patterns operands))
+                        (s/?)   (cons :? (transform-sequence-patterns operands))
+                        (s/+)   (cons :+ (transform-sequence-patterns operands))
+                        (s/&) (unsupported pattern)
                         (list 'spec pattern)))
                     (list 'spec pattern)))
                 (transform-sequence-patterns [patterns]
@@ -152,23 +152,23 @@
                                                          :pattern pattern
                                                          :thrown-by 'spec-to-rte})))]
           (let [[tag & operands] pattern
-                transformed (-condp symbol= tag
-                                    (fn) (template (satisfies ~(recuperate-closure pattern)))
-                                    (s/and) (template (and ~@(specify operands)))
-                                    (s/or) (template (or ~@(specify (strip-keys operands))))
-                                    (s/nilable) (template (or (satisfies nil?) ~@(specify operands)))
-                                    (s/keys
-                                     s/keys*
-                                     s/coll-of) (template (spec ~(eval pattern)))
-                              
-                                    (s/cat
-                                     s/alt
-                                     s/*
-                                     s/?
-                                     s/+)   (template (rte ~(transform-sequence-pattern pattern)))
-                                    (s/&) (unsupported pattern)
-                              
-                                    pattern)
+                transformed (casep symbol= tag
+                                   (fn) (template (satisfies ~(recuperate-closure pattern)))
+                                   (s/and) (template (and ~@(specify operands)))
+                                   (s/or) (template (or ~@(specify (strip-keys operands))))
+                                   (s/nilable) (template (or (satisfies nil?) ~@(specify operands)))
+                                   (s/keys
+                                    s/keys*
+                                    s/coll-of) (template (spec ~(eval pattern)))
+                                   
+                                   (s/cat
+                                    s/alt
+                                    s/*
+                                    s/?
+                                    s/+)   (template (rte ~(transform-sequence-pattern pattern)))
+                                   (s/&) (unsupported pattern)
+                                   
+                                   pattern)
                 ]
             transformed 
             ))

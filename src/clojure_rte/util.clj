@@ -401,7 +401,7 @@
          (not-empty obj)
          (= target (first obj)))))
 
-(defn -condp-helper [test value default-f & pairs]
+(defn -casep-helper [test value default-f & pairs]
   (loop [pairs pairs]
     (cond (empty? pairs)
           (default-f)
@@ -412,12 +412,12 @@
               (f)
               (recur (rest pairs)))))))
 
-(defmacro -condp [test obj & pairs]
+(defmacro casep [test obj & pairs]
   (loop [pairs pairs
          default (fn [] nil)
          acc ()]
     (cond (empty? pairs)
-          `(-condp-helper ~test ~obj ~default ~@(reverse acc))
+          `(-casep-helper ~test ~obj ~default ~@(reverse acc))
 
           (empty? (rest pairs))
           (recur ()
