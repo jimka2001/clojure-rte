@@ -402,7 +402,7 @@
          (= target (first obj)))))
 
 (defn -condp-helper [test value default-f & pairs]
-  (loop [pair pairs]
+  (loop [pairs pairs]
     (cond (empty? pairs)
           (default-f)
 

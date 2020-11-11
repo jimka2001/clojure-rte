@@ -98,8 +98,8 @@
             "test x80")
       )))
 
-(t/deftest t-rte-match
-  (testing "rte/match with rtes containing specs"
+(t/deftest t-rte-match-1
+  (testing "1st rte/match with rtes containing specs"
     (let [rte '(rte
                 (:*
                  (:or
@@ -115,8 +115,36 @@
                    [-1 2 3 1]
                    [-1 2 3 1 -3 1 -1 4]]]
         (t/is (= true (rte/match rte [seq])) (cl-format false "test x87: seq=~A pattern=~A" seq rte)))
+      )))
+
+(t/deftest t-rte-match-2
+  (testing "2nd rte/match with rtes containing specs"
+    (let [rte '(rte
+                (:*
+                 (:or
+                  (:cat
+                   (satisfies clojure.core/neg?)
+                   (satisfies clojure.core/even?))
+                  (:cat
+                   (satisfies clojure.core/odd?)
+                   (satisfies clojure.core/pos?)))))]
+
       (t/is (= false (rte/match rte [-1 2   3 1   3 -1   -1 4])) "test x91")
       (t/is (= false (rte/match rte [[-1 2   3 1   3 -1   -1 4]])) "test x92")
+)))
+
+(t/deftest t-rte-match-3
+  (testing "3nd rte/match with rtes containing specs"
+    (let [rte '(rte
+                (:*
+                 (:or
+                  (:cat
+                   (satisfies clojure.core/neg?)
+                   (satisfies clojure.core/even?))
+                  (:cat
+                   (satisfies clojure.core/odd?)
+                   (satisfies clojure.core/pos?)))))]
+
       (doseq [rte2 [rte
                     (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                                  :y  (s/cat :c odd? :d pos?)))))
@@ -124,7 +152,6 @@
                     '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
                                        :y  (s/cat :c odd? :d pos?))))
                     ]
-              :let [_ (t/is (= false (rte/match rte2 [seq])) "test 100")]
               seq [[]
                    [-1 2]
                    [-1 2 3 1]
