@@ -98,3 +98,6 @@
           (recur (cons (first l-iter) acc)
                  (rest l-iter)))))
 
+(defn funcall [f & args]
+  (apply f args))
+
