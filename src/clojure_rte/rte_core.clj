@@ -23,5 +23,4 @@
   (:require [clojure-rte.rte-construct]
             [clojure-rte.rte-case]
             [clojure-rte.genus-spec]
-            [clojure-rte.rte-spec]
             ))
