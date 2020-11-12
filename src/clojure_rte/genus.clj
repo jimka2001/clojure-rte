@@ -809,7 +809,7 @@
   (cond
     (not (gns/or? t1))
     :dont-know
-
+    
     :else
     (let [values (map (fn [t] (inhabited? t :dont-know))
                       (unchunk (rest t1)))]
