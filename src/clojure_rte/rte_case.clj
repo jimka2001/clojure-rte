@@ -20,15 +20,18 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-case
-  (:require [clojure-rte.genus-rte])
+  (:require [clojure-rte.xymbolyco :as xym]
+            [clojure-rte.util :refer [defn-memoized]]
+            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
+                                               ]]
+            [clojure.pprint :refer [cl-format]]
+            )
   )
-
-(in-ns 'clojure-rte.rte-core)
 
 (defn-memoized [memoized-rte-case-clauses-to-dfa
                 rte-case-clauses-to-dfa]
-  "Helper function for macro-expanding rte-case.
-  Returns a complete Dfa which is the union of the input clauses."
+  "helper function for macro-expanding rte-case.
+  returns a complete dfa which is the union of the input clauses."
   [pairs]
   (reduce xym/synchronized-union
           (map (fn [[index rte]]
@@ -40,14 +43,14 @@
   or print a reasonable error message."
   [index num-fns]
   (cond (not (integer? index))
-        (throw (ex-info (cl-format false "rte-match returned non-integer ~A" index)
+        (throw (ex-info (cl-format false "rte/match returned non-integer ~A" index)
                         {}))
         (< index 0)
-        (throw (ex-info (cl-format false "rte-match returned negative integer ~A" index)
+        (throw (ex-info (cl-format false "rte/match returned negative integer ~A" index)
                         {}))
 
         (<= num-fns index)
-        (throw (ex-info (cl-format false "rte-match returned index out of range ~A <= ~A"
+        (throw (ex-info (cl-format false "rte/match returned index out of range ~A <= ~A"
                                    num-fns index)
                         {}))
         :else
@@ -67,7 +70,7 @@
   causes the corresponding consequent to be evaluated.
   However, the sequence is traverse only once, so the matching process
   is more efficient than a sequence of consecutive calls to
-  rte-match."
+  rte/match."
   [sequence & clauses]
   (letfn [(compile-clauses [clauses]
             (loop [remaining-clauses clauses
@@ -86,13 +89,12 @@
                          (cons rte used-rtes)
                          (conj acc-int-rte-pairs [index (canonicalize-pattern `(:and ~rte (:not (:or ~@used-rtes))))])
                          (conj acc-fns `(fn [] ~consequent)))))))]
-    (if (odd? (count clauses))
+    (when (odd? (count clauses))
       (throw (IllegalArgumentException. (str "rte-case, odd number of clauses is not supported. No matching clause: " (last clauses)))))
     
     (let [[fns int-rte-pairs] (compile-clauses clauses)
-          num-fns (count fns)
-          var (gensym "index")]
-      `((~fns (ensure-fns-index (rte-match (memoized-rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
+          num-fns (count fns)]
+      `((~fns (ensure-fns-index (rte/match (memoized-rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
                                            :promise-disjoint true)
                                 ~num-fns))))))
 
@@ -121,7 +123,7 @@
               `(:cat ~@prefix-rte)
               `(:cat ~@prefix-rte (:* ~@suffix-rte)))
 
-            (and (not (empty? required))
+            (and (not-empty required)
                  (= '& (first required)))
             ;; found & in the correct place
             (recur nil ; required
@@ -130,7 +132,7 @@
                    suffix-rte ; suffix-rte
                    (conj parsed '&))
 
-            (not (empty? required))
+            (not-empty required)
             (let [var (first required)]
               (recur (rest required)
                      others
@@ -154,8 +156,8 @@
                      suffix-rte
                      (conj parsed var)))
 
-            (and (not (empty? others))
-                 (not (empty? suffix-rte)))
+            (and (not-empty others)
+                 (not-empty suffix-rte))
             (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
                                        lambda-list others)
                             {:error-type "cannot parse suffix"
@@ -163,7 +165,7 @@
                              :parsed parsed
                              :unparsed others}))
 
-            (and (not (empty? others))
+            (and (not-empty others)
                  (symbol? (first others)))
             (let [var (first others)]
               (recur required
@@ -174,15 +176,13 @@
                                        (get types-map var :sigma)))
                      (conj parsed var)))
 
-            (not (empty? others))
+            (not-empty others)
             (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
                                        lambda-list others)
                             {:error-type "cannot parse suffix"
                              :lambda-list lambda-list
                              :parsed parsed
                              :unparsed others}))))))
-
-
 
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return value
@@ -191,7 +191,8 @@
   [expr & pairs]
   (cond
     (not= 0 (mod (count pairs) 2))
-    (throw (ex-info (cl-format false "destructuring-case expects multiple of 2 number of arguments after the first: not ~A, ~A"
+    (throw (ex-info (cl-format false
+                               "destructuring-case expects multiple of 2 number of arguments after the first: not ~A, ~A"
                                (count pairs) (apply list 'destructuring-case expr pairs))
                     {:error-type :invalid-destructuring-case-call-site
                      :expr expr
@@ -221,15 +222,15 @@
           `(let [~var ~expr]
              (rte-case ~var ~@cases ~sigma-* nil)))))))
 
-(defmacro destructuring-fn-many
-  "Internal macro used in the exapansion of destructuring-fn"
+(defmacro -destructuring-fn-many
+  "Internal macro used in the expansion of destructuring-fn"
   [& args]
   (cond (empty? args)
         nil
 
         (and (not (symbol? (first args)))
              (not (= nil (first args))))
-        `(destructuring-fn-many nil ~@args)
+        `(-destructuring-fn-many nil ~@args)
 
         :else
         (let [var (gensym "fn-var-")
@@ -272,18 +273,18 @@
 
     (vector? (second args)) ; if lambda-list is a vector
     (let [[name lambda-list & others] args]
-      `(destructuring-fn-many
+      `(-destructuring-fn-many
         ~name
         (~lambda-list
          ~@others)))
 
     (every? (fn [clause]
               (and (list? clause)
-                   (not (empty? clause))
+                   (not-empty clause)
                    (vector? (first clause))))
             (rest args))
     (let [[name & clauses] args]
-      `(destructuring-fn-many
+      `(-destructuring-fn-many
         ~name
         ~@clauses))
     

@@ -25,10 +25,8 @@
             [clojure.string :as str]
             [clojure.set]
             [clojure-rte.cl-compat :as cl]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
             [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.bdd :as bdd]
-            [clojure-rte.util :refer [member print-vals mapc]]
+            [clojure-rte.util :refer [member]]
             [clojure.java.shell :refer [sh]]))
 
 (def ^:dynamic *dot-path*
@@ -52,17 +50,16 @@
 (defn delete-tmp-files 
   "Delete the temporary files created by dfa-to-dot and bdd-to-dot."
   []  
-  (doseq [fname @tmp-files]
-    (doseq [fn @tmp-files]
-      (when (.exists (io/file fn))
-        (io/delete-file fn)))
-    (swap! tmp-files (fn [files] (filter (fn [fn] (not (.exists (io/file fn))))
-                                         files)))))
+  (doseq [fn @tmp-files]
+    (when (.exists (io/file fn))
+      (io/delete-file fn)))
+  (swap! tmp-files (fn [files] (filter (fn [fn] (not (.exists (io/file fn))))
+                                       files))))
 
 (defn dfa-to-dot 
   "Create (and possibly display) a graphical image rendering the automaton
   represented by the given dfa.  dfa is a value as returned from function
-  rte-compile, or rte-to-dfa.
+  rte/compile, or rte-to-dfa.
   For Mac OS, the :view option may be used to display the image
   interactively."
   [dfa & {:keys [title view abbrev draw-sink verbose state-legend]
@@ -76,7 +73,7 @@
     view (let [png-file-name (str *dot-tmp-dir* "/" title ".png")
                dot-string (dfa-to-dot dfa :draw-sink draw-sink :title title :view false :abbrev abbrev
                                       :state-legend state-legend)]
-           (if verbose
+           (when verbose
              (println [:title title :dfa dfa :draw-sink draw-sink
                        :dot-string dot-string :state-legend state-legend]))
            (sh *dot-path* "-Tpng" "-o" png-file-name
@@ -85,7 +82,7 @@
              (swap! tmp-files conj png-file-name)
              ;; -g => don't bring Preview to forground, and thus don't steal focus
              (let [stat (sh "open" "-g" "-a" "Preview" png-file-name)]
-               (if (not (= 0 (:exit stat)))
+               (when (not= 0 (:exit stat))
                  (println dot-string))
                stat)))
     :else
@@ -171,13 +168,13 @@
                        :pen-width pen-width :draw-false-leaf draw-false-leaf]))
            (let [stat (sh *dot-path* "-Tpng" "-o" png-file-name
                           :in dot-string)]
-             (if (not (= 0 (:exit stat)))
+             (when (not= 0 (:exit stat))
                (println stat)))
            (when (= "Mac OS X" (System/getProperty "os.name"))
              (swap! tmp-files conj png-file-name)
              ;; -g => don't bring Preview to forground, and thus don't steal focus
              (let [stat (sh "open" "-g" "-a" "Preview" png-file-name)]
-               (if (not (= 0 (:exit stat)))
+               (when (not= 0 (:exit stat))
                  (println dot-string))
                stat)))
     :else

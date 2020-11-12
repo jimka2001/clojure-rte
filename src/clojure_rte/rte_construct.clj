@@ -19,19 +19,36 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-construct)
+(ns clojure-rte.rte-construct
+  (:require [clojure-rte.genus :as gns]
+            [clojure-rte.util :refer [member exists setof exists-pair
+                                      call-with-collector defn-memoized
+                                      visit-permutations fixed-point
+                                      sort-operands with-first-match
+                                      partition-by-pred seq-matcher
+                                      rte-identity rte-constantly]]
+            [clojure-rte.xymbolyco :as xym]
+            [clojure.pprint :refer [cl-format]]
+            [clojure.set :refer [union subset?]]
+            [clojure-rte.cl-compat :as cl]
+            [backtick :refer [template]]
+            )
+  (:refer-clojure :exclude [compile])
+)
 
-(in-ns 'clojure-rte.genus)
-(declare rte?)
+;; allow rte/ prefix even in this file.
+(alias 'rte 'clojure-rte.rte-construct)
 
-(in-ns 'clojure-rte.rte-core)
 
 (declare traverse-pattern)
 (declare canonicalize-pattern)
-
-(def sigma-* '(:* :sigma))
-(def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
-(def not-epsilon `(:cat :sigma ~sigma-*))
+(declare match)
+(declare compile)
+(declare rte-inhabited?)
+(declare rte-vacuous?)
+(declare rte-to-dfa)
+(declare canonicalize-pattern-once)
+(declare -canonicalize-pattern-once)
 
 (def ^:dynamic *rte-known*
   "Dynamic variable whose value is a map.
@@ -44,6 +61,167 @@
   {
    'real? 'Number
    })
+
+(defn call-with-compile-env [thunk]
+  (binding [rte/compile (memoize rte-to-dfa)
+            canonicalize-pattern-once (memoize -canonicalize-pattern-once)
+            gns/check-disjoint (memoize gns/-check-disjoint)
+            ]
+    (thunk)))
+
+(defmacro with-compile-env [[] & body]
+  `(call-with-compile-env (fn [] ~@body)))
+
+(defn call-with-rte
+  "Call the given 0-ary function with 0 or more rte keys bound to rte patterns.
+   with-rte is a macro API to this function.
+   E.g.,
+   (call-with-rte [::a '(:permute Long Long String)
+                   ::b '(:permute Double Double String)]
+     (fn []
+      (rte/match '(:cat ::a ::b) [1 \"hello\" 2
+                                  \"world\" 1.0 2.0])))"
+  [bindings thunk]
+  ;; TODO need to detect if every a local key is defined differently,
+  ;; and if so purge the memoize cache of rte/compile.
+  (with-compile-env ()
+    (binding [*rte-known* (apply assoc *rte-known* bindings)]
+      (thunk))))
+
+(defmacro with-rte
+  "Evaluate the given body in a dynamic extend where 0 or more keys bound to
+   un-quoted rte patterns.
+   E.g.,
+   (with-rte [::a (:permute Long Long String)
+              ::b (:permute Double Double String)]
+     (rte/match '(:cat ::a ::b) [1 \"hello\" 2
+                                \"world\" 1.0 2.0])))
+   Warning, any rte patterns which are compiled during the dynamic extent
+   of with-rte, survive the dynamic extend.  I.e., they are not compiled
+   twice, rather they are memoized.   
+   Any patterns which were compiled before the dynamic extend are ignored.
+   Any patterns compiled within the dynamic extend are abandoned when
+   the dynamic extend ends."
+  [bindings & body]
+  `(call-with-rte '~bindings (fn [] ~@body)))
+
+(defn rte? [t]
+  (and (sequential? t)
+       (= 'rte (first t))))
+
+(defmethod gns/typep 'rte [a-value [_a-type pattern]]
+  (and (sequential? a-value)
+       (rte/match pattern a-value)))
+
+(defmethod gns/valid-type? 'rte [[_ pattern]]
+  (boolean (rte/compile pattern)))
+
+(defmethod gns/-inhabited? :rte [t1]
+  (if (rte? t1)
+    (boolean (rte-inhabited? (rte/compile (second t1))))
+    :dont-know))
+
+(defmethod gns/-disjoint? :not-rte [t1 t2]
+  ;; (disjoint? (not (rte ...)) clojure.lang.IPersistentVector )
+
+  (cond (not (and (gns/not? t1)
+                  (rte? (second t1))))
+        :dont-know
+
+        (and (gns/class-designator? t2)
+             (or (isa? (gns/find-class t2) clojure.lang.Seqable)
+                 (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        true
+
+        (and (gns/class-designator? t2)
+             (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        false
+
+        :else
+        :dont-know))
+
+(defmethod gns/-disjoint? :rte [t1 t2]
+  (cond (not (rte? t1))
+        :dont-know
+
+        ;; (disjoint? (rte ...) (rte ...))
+        (rte? t2)
+        (let [[_ pat1] t1
+              [_ pat2] t2]
+          (rte-vacuous? (rte/compile `(:and ~pat1 ~pat2))))
+
+        ;; (disjoint? (rte ...) clojure.lang.IPersistentVector )
+        (and (gns/class-designator? t2)
+             (or (isa? (gns/find-class t2) clojure.lang.Seqable)
+                 (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        false
+        
+        (and (gns/not? t2)
+             (rte? (second t2)))
+        (let [[_ pat1] t1
+              [_ [_ pat2]] t2]
+          (rte-vacuous? (rte/compile `(:and ~pat1 (:not ~pat2)))))
+        
+        (and (gns/class-designator? t2)
+             (isa? (gns/find-class t2) java.lang.CharSequence))
+        (let [[_ pat1] t1]
+          (rte-vacuous? (rte/compile `(:and ~pat1 (:* java.lang.Character)))))
+        
+        (and (gns/class-designator? t2)
+             (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
+        true
+        
+        (and (gns/not? t2)
+             (gns/class-designator? (second t2))
+             (not (isa? (gns/find-class (second t2)) clojure.lang.Sequential)))
+        false
+        
+        :else :dont-know))
+
+(defmethod gns/-subtype? :rte [sub-designator super-designator]
+  (let [s1 (delay (gns/subtype? '(rte (:* java.lang.Character)) super-designator :dont-know))
+        s2 (delay (gns/subtype? sub-designator '(rte (:* java.lang.Character)) :dont-know))]
+    (cond (and (rte? sub-designator)
+               (rte? super-designator))
+          (let [[_ pat-sub] sub-designator
+                [_ pat-super] super-designator]
+            (rte-vacuous? (rte/compile `(:and ~pat-sub (:not ~pat-super)))))
+          
+          (and (rte? super-designator)
+               (gns/class-designator? sub-designator)
+               (isa? (gns/find-class sub-designator) java.lang.CharSequence)
+               (member @s1 '(true false)))
+          @s1
+          
+          (and (rte? sub-designator)
+               (gns/class-designator? super-designator)
+               (isa? (gns/find-class super-designator) java.lang.CharSequence)
+               (member @s2 '(true false)))
+          @s2
+          
+          (and (rte? super-designator)
+               (gns/class-designator? sub-designator)
+               (not (isa? (gns/find-class sub-designator) clojure.lang.Sequential)))
+          false
+          
+          (and (rte? sub-designator)
+               (gns/class-designator? super-designator)
+               (not (isa? (gns/find-class super-designator) clojure.lang.Sequential)))
+          false
+          
+          (and (rte? super-designator)
+               (gns/and? sub-designator)
+               (exists [and-operand (rest sub-designator)]
+                       (and (rte? and-operand)
+                            (gns/subtype? and-operand super-designator
+                                          false))))
+          true
+               
+          :else :dont-know)))
+
+(def sigma-* '(:* :sigma))
+(def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
+(def not-epsilon `(:cat :sigma ~sigma-*))
 
 (def ^:dynamic *traversal-functions*
   "Default callbacks for walking an rte tree.
@@ -83,59 +261,60 @@
               ((:client functions) pattern functions))
    })
 
-(defmulti registered-type? identity)
-(defmethod registered-type? :default
-  [type-designator]
-  (cond
-    (not (sequential? type-designator))
-    false
-    (empty? type-designator)
-    false
-    :else
-    (registered-type? (first type-designator))))
-(defmethod registered-type? '= [_] true)
-(defmethod registered-type? 'rte [_] true)
-(defmethod registered-type? 'member [_] true)
-(defmethod registered-type? 'satisfies [_] true)
-
-(defn supported-nontrivial-types
-  "Which types are currently supported?  This list denotes the
-  type names which appear as (something maybe-args), which are
-  supported by RTE.  The goal is to support all those supported
-  by typep, but that may not yet be the case."
-  []
-  (difference (set (keys (methods registered-type?)))  #{:default}))
-
-(defmulti rte-expand
-  "macro-like facility for rte" (fn [pattern _functions] (first pattern)))
+(defmulti expand-1
+  "macro-like facility for rte.
+  A call to this function expands an rte pattern (once).
+  Methods are responsible for expanding as a function of the first element
+  of the pattern e.g., (and ...), (spec ...), (:? ...) etc.
+  Methods take two arguments [pattern functions]
+  pattern is the entire rte pattern being expanded, which might be sequence or otherwise.
+    E.g., pattern = (:and A B C)
+    or    pather = :empty-set
+  A method may return either a transformed version of the pattern,
+  or may return the pattern itself.   This function is called within
+  a call to fixed-point which will keep calling the function until it
+  eventually _expands_ into itself.
+  The :default method returns the given pattern, so as fixed-point
+  continues to expand the pattern, eventually there'll be no other
+  applicable method and the :default method will be called, triggering
+  fixed-point to terminate."
+  (fn [pattern _functions]
+    (cond
+      (not (sequential? pattern))
+      :default
+      :else
+      (first pattern))))
 
 (defn invalid-pattern [pattern functions culprit]
   (throw (ex-info (format "[134] invalid pattern %s" pattern)
-                  {:error-type :rte-expand-error
+                  {:error-type :rte-expand-1-error
                    :keyword (first pattern)
                    :culprit culprit
                    :pattern pattern
                    :functions functions
                    })))
 
-(defmethod rte-expand :default [pattern functions]
-  (invalid-pattern pattern functions :default))
+(defmethod expand-1 :default [pattern _functions]
+  pattern)
 
-(defmethod rte-expand :? [pattern functions]
+(defmethod expand-1 'satisfies [pattern _functions]
+  (gns/expand-satisfies pattern))
+
+(defmethod expand-1 :? [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:? []]))
            ([operand] `(:or :epsilon ~operand))
            ([_ & _] (invalid-pattern pattern functions '[:? [_ & _]]))) 
          (rest pattern)))
 
-(defmethod rte-expand :+ [pattern functions]
+(defmethod expand-1 :+ [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:+ []]))
            ([operand] `(:cat ~operand (:* ~operand)))
            ([_ & _] (invalid-pattern pattern functions '[:+ [_ & _]])))
          (rest pattern)))
 
-(defmethod rte-expand :permute [pattern _functions]
+(defmethod expand-1 :permute [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -147,7 +326,7 @@
                                                   (collect (cons :cat perm))) operands)))))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-any [pattern _functions]
+(defmethod expand-1 :contains-any [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -158,7 +337,7 @@
                      ~sigma-*))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-every [pattern _functions]
+(defmethod expand-1 :contains-every [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -168,12 +347,12 @@
               `(:and ~@(doall wrapped)))))
          (rest pattern)))
 
-(defmethod rte-expand :contains-none [pattern _functions]
+(defmethod expand-1 :contains-none [pattern _functions]
   ;; TODO, not sure what (:contains-none) should mean with no arguments.
   ;;    as implemented it is equivalent to (:not :epsilon) which seems wierd.
   `(:not (:contains-any ~@(rest pattern))))
 
-(defmethod rte-expand :exp [pattern functions]
+(defmethod expand-1 :exp [pattern functions]
   (letfn [(expand [n m pattern]
             (assert (>= n 0) (format "pattern %s is limited to n >= 0, not %s" pattern n))
             (assert (<= n m) (format "pattern %s is limited to n <= m, got %s > %s" pattern n m))
@@ -193,6 +372,56 @@
               (invalid-pattern pattern functions '[:exp [_ _ _ & _]])))
            (rest pattern))))
 
+
+(defn verify-type [pattern functions]
+  (if (gns/valid-type? pattern)
+    pattern
+    (throw (ex-info (cl-format false "[219] invalid type designator ~A" pattern)
+                    {:error-type :invalid-type-designator
+                     :pattern pattern
+                     :functions functions}))))
+
+(defmethod expand-1 'and [pattern functions]
+  ;; convert (and a b c) => (:and a b c)
+  ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
+  (cons :and (rest (verify-type pattern functions))))
+
+(defmethod expand-1 'or [pattern functions]
+  ;; convert (or a b c) => (:or a b c)
+  ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
+  (cons :or (rest (verify-type pattern functions))))
+
+(defmethod expand-1 'not [pattern functions]
+  ;;             (not a) => (:and :sigma (:not a))
+  `(:and (:not ~@(rest (verify-type pattern functions)))
+         :sigma))
+
+(defn expand ; rte/expand
+  "Repeat calls to expand-1 until a fixed point is found."
+  ([given-pattern functions]
+   (rte/expand given-pattern functions true))
+  ([given-pattern functions verbose]
+   (try (fixed-point given-pattern
+                     (fn [p] (expand-1 p functions))
+                     ;; TODO -- after debugging, replace this (fn ...) with simply =.
+                     =
+                     ;; (fn [a b] 
+                     ;;   (if (= a b)
+                     ;;     (do (println [:fixed-point-found a]) true)
+                     ;;     (do (println [:expanded :from a :to b]) false)
+                     ;;     ))
+
+                     )
+        (catch clojure.lang.ExceptionInfo ei
+          (if (:unsupported-pattern (ex-data ei))
+            (do ;; if we fail to expand the pattern, then don't even try
+              (when verbose
+                (cl-format true "failed to expand pattern: ~A, at ~A~%" given-pattern (:pattern (ex-data ei))))
+              
+              given-pattern)
+            (throw ei))
+          ))))
+
 (def traversal-depth-max 10)
 (defn traverse-pattern
   "Workhorse function for walking an rte pattern.
@@ -205,9 +434,8 @@
    function needs to understand how to walk an rte pattern."
   ([given-pattern functions]
    (traverse-pattern 0 given-pattern functions))
-  (
-   [depth given-pattern functions]
-   (if (= depth traversal-depth-max)
+  ([depth given-pattern functions]
+   (when (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
                 depth given-pattern))
    (assert (<= depth traversal-depth-max)
@@ -225,26 +453,6 @@
                ((:type functions) pattern functions)))
            (if-nil [_]
              ((:type functions) () functions))
-           (verify-type [obj]
-             (if (gns/valid-type? obj)
-               obj
-               (throw (ex-info (cl-format false "[219] invalid type designator ~A" obj)
-                               {:error-type :invalid-type-designator
-                                :obj obj
-                                :given-pattern given-pattern}))))
-           (convert-type-designator-to-rte [obj]
-             ;; e.g convert (and a b c) => (:and a b c)
-             ;;             (or a b c) => (:or a b c)
-             ;;             (not a) => (:and :sigma (:not a))
-             ;; We also verify that it is a valid.
-             ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
-             (if (not (sequential? obj))
-               obj
-               (case (first obj)
-                 (or) (cons :or (rest (verify-type obj)))
-                 (and) (cons :and (rest (verify-type obj)))
-                 (not) `(:and (:not ~@(rest (verify-type obj))) :sigma)
-                 obj)))
            (if-singleton-list [pattern] ;; (:or)  (:and)
              (let [[keyword] pattern]
                (case keyword
@@ -260,13 +468,7 @@
                                        :cause :unary-keyword
                                        }))
                  ;; case-else
-                 (cond
-                   (and (sequential? keyword)
-                        (registered-type? (first keyword)))
-                   ((:type functions) pattern functions)
-
-                   :else
-                   (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
+                 ((:type functions) pattern functions))))
            (if-exactly-one-operand [pattern] ;; (:or Long) (:* Long)
              (let [[token operand] pattern]
                (case token
@@ -276,15 +478,8 @@
                  (:not :*)
                  ((functions token) operand functions)
 
-                 (satisfies)
-                 (if (not= pattern (gns/expand-satisfies pattern))
-                   (traverse-pattern (inc depth) (gns/expand-satisfies pattern) functions)
-                   ((:type functions) pattern functions))
-                 
                  ;;case-else
-                 (if (registered-type? (first pattern))
-                   ((:type functions) pattern functions)
-                   (traverse-pattern (inc depth) (rte-expand pattern functions) functions)))))
+                 ((:type functions) pattern functions))))
            (if-multiple-operands [pattern]
              (let [[token & operands] pattern]
                (case token
@@ -303,11 +498,8 @@
                                   }))
 
                  ;;case-else
-                 (if (registered-type? token)
-                   ((:type functions) pattern functions)
-                   (let [expanded (doall (rte-expand pattern functions))]
-                     (traverse-pattern (inc depth) expanded functions))))))]
-     (let [pattern (convert-type-designator-to-rte given-pattern)]
+                 ((:type functions) pattern functions))))]
+     (let [pattern (expand given-pattern functions)]
        (cond (not (seq? pattern))
              (if-atom pattern)
 
@@ -374,33 +566,23 @@
                              :* (fn [operand _functions]
                                   (first-types operand))))))
 
-(defn seq-matcher
-  "Return a function, a closure, which can be used to determine whether
-  its argument is a sequence whose first element is identically the
-  given obj."
-  [target]
-  (fn [obj]
-    (and (seq? obj)
-         (not-empty obj)
-         (= target (first obj)))))
-
-(def cat? 
+(def rte/cat?
   "Predicate determining whether its object is of the form (:cat ...)"
   (seq-matcher :cat))
 
-(def *?
+(def rte/*?
   "Predicate determining whether its object is of the form (:* ...)"
   (seq-matcher :*))
 
-(def not? 
+(def rte/not?
   "Predicate determining whether its object is of the form (:not ...)"
   (seq-matcher :not))
 
-(def and?
+(def rte/and?
   "Predicate determining whether its object is of the form (:and ...)"
   (seq-matcher :and))
 
-(def or? 
+(def rte/or?
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
@@ -432,14 +614,14 @@
                  (cons (first seq) head)))))
 
 (defn reduce-redundant-or [operands]
-  (let [ands (doall (filter and? operands))
-        xyz (doall (setof [x ands] (exists [y operands] (member y (rest x)))))
-        abc (doall (setof [and1 ands]
-                          (let [and1-operands (set (rest and1)) ]
-                            (exists [and2 ands]
-                                    (let [and2-operands (set (rest and2))]
-                                      (and (not (subset? and1-operands and2-operands))
-                                           (subset? and2-operands and1-operands)))))))
+  (let [ands (filter rte/and? operands)
+        xyz (setof [x ands] (exists [y operands] (member y (rest x))))
+        abc (setof [and1 ands]
+                   (let [and1-operands (set (rest and1)) ]
+                     (exists [and2 ands]
+                             (let [and2-operands (set (rest and2))]
+                               (and (not (subset? and1-operands and2-operands))
+                                    (subset? and2-operands and1-operands))))))
         superfluous-ands (concat xyz abc)]
     (if (empty? superfluous-ands)
       operands
@@ -450,7 +632,7 @@
   ;; don't complain about rte nor satisfies
   (letfn [(dont-complain [t]
             (and (sequential? t)
-                 (not (empty? t))
+                 (not-empty t)
                  (member (first t) '(satisfies rte))))]
     (let [types-disjoint (gns/disjoint? t1 t2 :dont-know)]
       (cond (member types-disjoint '(true false))
@@ -462,7 +644,8 @@
             
             :else
             (do
-              (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%" t1 t2)
+              (cl-format true "(ns=~A) disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%"
+                         *ns* t1 t2)
               false)))))
 
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
@@ -477,7 +660,7 @@
   (traverse-pattern re
                     (assoc *traversal-functions*
                            :type (fn [tag _functions]
-                                   (gns/-canonicalize-type tag))
+                                   (gns/canonicalize-type tag))
                            :empty-set rte-identity
                            :epsilon rte-identity
                            :sigma rte-identity
@@ -492,7 +675,8 @@
                            :cat (fn [operands _functions]
                                   (let [operands (map canonicalize-pattern operands)]
                                     (assert (< 1 (count operands))
-                                            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
+                                            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
+                                                    re (count operands) operands))
                                     (cl/cl-cond
                                      ;; (:cat A (:* X) (:* X) B)
                                      ;;  --> (:cat A (:* X) B)
@@ -529,14 +713,14 @@
                                       (:epsilon) not-epsilon
                                       (:empty-set) sigma-*
                                       (cond
-                                        (not? operand) ;; (:not (:not A)) --> A
+                                        (rte/not? operand) ;; (:not (:not A)) --> A
                                         (second operand)
 
-                                        (and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
+                                        (rte/and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
                                         (cons :or (map (fn [obj]
                                                          (list :not obj)) (rest operand)))
 
-                                        (or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
+                                        (rte/or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
                                         (cons :and (map (fn [obj]
                                                           (list :not obj)) (rest operand)))
 
@@ -569,9 +753,9 @@
                                      ((member :empty-set operands)
                                       :empty-set)
 
-                                     ((some and? operands)
+                                     ((some rte/and? operands)
                                       (cons :and (mapcat (fn [obj]
-                                                           (if (and? obj)
+                                                           (if (rte/and? obj)
                                                              (rest obj)
                                                              (list obj))) operands)))
 
@@ -579,16 +763,16 @@
                                       (cons :and (remove (fn [obj]
                                                            (= sigma-* obj)) operands)))
 
-                                     ((some or? operands)
+                                     ((some rte/or? operands)
                                       ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
-                                      (with-first-match or? operands
+                                      (with-first-match rte/or? operands
                                         (fn [or-item]
                                           (let [others (remove (fn [x] (= or-item x)) operands)]
                                             (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
 
                                      ;; (:and x (:not x)) --> :empty-set
-                                     ((let [nots (filter not? operands)
-                                            others (remove not? operands)]
+                                     ((let [nots (filter rte/not? operands)
+                                            others (remove rte/not? operands)]
                                         (when (some (fn [item]
                                                       (some #{(list :not item)} nots)) others)
                                           :empty-set)))
@@ -648,9 +832,9 @@
                                                                false))))
                                                 operands)))
 
-                                    ((some or? operands)
+                                    ((some rte/or? operands)
                                      (cons :or (mapcat (fn [obj]
-                                                         (if (or? obj)
+                                                         (if (rte/or? obj)
                                                            (rest obj)
                                                            (list obj))) operands)))
 
@@ -661,8 +845,8 @@
                                      (cons :or (remove #{:empty-set} operands)))
 
                                     ;; (:or x (:not x)) --> :sigma
-                                    ((let [nots (filter not? operands)
-                                           others (remove not? operands)]
+                                    ((let [nots (filter rte/not? operands)
+                                           others (remove rte/not? operands)]
                                        (when (some (fn [item]
                                                      (some #{(list :not item)} nots)) others)
                                          sigma-*)))
@@ -694,7 +878,7 @@
   (assert (= 'and (first wrt)))
   (let [[_ & and-args] wrt]
     (cond
-      (some #{`(~'not ~expr)} and-args)
+      (member (template (not ~expr)) and-args)
       :empty-set
 
       (some #{expr} and-args)
@@ -750,8 +934,8 @@
                                                           {:error-type :derivative-undefined
                                                            :wrt wrt
                                                            :expr expr
-                                                           :sub-types [{:type `(~'and ~wrt ~expr)}
-                                                                       {:type `(~'and ~wrt (~'not ~expr))}]
+                                                           :sub-types [{:type (template (and ~wrt ~expr))}
+                                                                       {:type (template (and ~wrt (not ~expr)))}]
                                                            }))
                                           ))
                                 :or (fn [operands _functions]
@@ -804,10 +988,10 @@
                    (empty? left))
               :sigma
 
-              (> (+ (count-if gns/rte? left)
-                    (count-if gns/rte? right)) 1)
-              (let [[left-rtes left] (partition-by-pred gns/rte? left)
-                    [right-rtes right] (partition-by-pred gns/rte? right)
+              (> (+ (count-if rte? left)
+                    (count-if rte? right)) 1)
+              (let [[left-rtes left] (partition-by-pred rte? left)
+                    [right-rtes right] (partition-by-pred rte? right)
                     left-patterns (map second left-rtes)
                     right-patterns (map second right-rtes)]
                 (cond (empty? left-rtes)
@@ -833,7 +1017,7 @@
               :else
               (let [right (map (fn [x]
                                  (list 'not x)) right)]
-                (collect `(~'and ~@left ~@right)))))]
+                (collect (template (and ~@left ~@right))))))]
 
     (let [independent (filter independent? type-set)
           dependent (remove (set independent) type-set)]
@@ -888,7 +1072,7 @@
          (gns/or? label2)) `(~(first label2) ~label1 ~@(rest label2))
     :else `(~'or ~label1 ~label2)))
 
-(defn-memoized [rte-compile rte-to-dfa]
+(defn-memoized [rte/compile rte-to-dfa]
   "Use the Brzozowski derivative aproach to compute a finite automaton
   representing the given rte patten.  The finite automaton is in the
   form of an array of States.  The n'th State is array[n]."
@@ -940,3 +1124,153 @@
   (assert (instance? (xym/record-name) dfa)
           (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
   (xym/extract-rte dfa canonicalize-pattern))
+
+
+(defn dispatch [obj caller]
+  (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
+                   obj)
+        :Dfa
+
+        :else
+        :pattern
+))
+
+(defmulti rte-trace
+  "Given a compiled rte, find a sequence of types which satisfy the corresponding pattern."
+  (fn [rte]
+    (dispatch rte 'rte-trace)))
+
+(defmethod rte-trace :pattern
+  [pattern]
+  (rte-trace (rte/compile pattern)))
+
+(defmethod rte-trace :Dfa
+  [dfa]
+  (let [state-vec (:states dfa)]
+    (letfn [(recurring [state path lineage]
+              (cond
+                (:accepting (state-vec state)) path
+                (some #{state} lineage) false
+                :else (some (fn [[type dst-state]]
+                              (recurring dst-state (conj path type) (conj lineage state)))
+                            (:transitions (state-vec state))))
+              )]
+      (recurring 0 [] ()))))
+
+(defmulti rte-inhabited?
+  (fn [rte]
+    (dispatch rte 'rte-inhabited?)))
+
+(defmethod rte-inhabited? :pattern [pattern]
+  (rte-inhabited? (rte/compile pattern)))
+
+(defmethod rte-inhabited? :Dfa [dfa]
+  (some :accepting (xym/states-as-seq dfa)))
+
+(defn rte-vacuous? [dfa]
+  (not (rte-inhabited? dfa)))
+
+(defmulti rte/match
+  "(rte/match rte sequence :promise-disjoint true|false)
+   Given an rte pattern or finite automaton generated by rte-to-dfa (or rte/compile), 
+   determine whether the given sequence, items, matches the regular type expression.
+
+   If the caller wishes to check more than one sequence against the same
+   pattern, it is probably better to call rte/compile, to get an automaton, and
+   use that same automaton in several calls to rte/match to avoid
+   multiple conversions/look-ups, as the correspondence of pattern
+   to compiled Dfa is maintained via the memoize function."
+
+  (fn [rte _items & {:keys [promise-disjoint
+                            hot-spot]}]
+    (dispatch rte 'rte/match)))
+
+(defmethod rte/match :pattern
+  [pattern items & {:keys [promise-disjoint
+                           hot-spot]}]
+  (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
+
+(defmethod rte/match :Dfa
+  [dfa items & {:keys [
+                       ;; if the caller promises that never are two transitions in
+                       ;;   the Dfa labeled with intersecting types, the use
+                       ;;   :promise-disjoint true, in this case rte/match
+                       ;;   can be more efficient and can assume that the
+                       ;;   clauses can be tested in any order.  If the transitions
+                       ;;   are not guaranteed disjoint, then rte/match must
+                       ;;   build new type designators each one containing an and-not
+                       ;;   of the previously seen types. 
+                       promise-disjoint
+                       ;; hot-spot = true -- lazily compile the type checks into Bdds
+                       ;;    which is slow-going but becomes faster the more often you
+                       ;;    re-use the same pattern, either because of loops in the
+                       ;;    Dfa, or when the same Dfa is used to match different
+                       ;;    input sequences.
+                       ;; TODO -- the value of promise-disjoint should really come from
+                       ;;    a slot in the dfa.  when the dfa is created, it should me
+                       ;;    *marked* as being disjoint.  I believe it already is always
+                       ;;    disjoint.
+                       ;;    
+                       ;; hot-spot = false -- always interpret the type checks rather
+                       ;;    than converting them to Bdd.  This option is probably faster
+                       ;;    if there are few loops in the Dfa, or if you only use the
+                       ;;    pattern once to check a single input sequence.
+                       hot-spot
+                       ]}]
+  (let [state-vec (:states dfa)
+        sink-states (set (xym/find-sink-states dfa))]
+    (if (empty? sink-states)
+      (rte/match (xym/extend-with-sink-state dfa) items
+                 :promise-disjoint promise-disjoint
+                 :not-spot hot-spot)
+      (let [sink-state-id (:index (first sink-states))]
+        ;; There are two possible transition functions
+        ;;   slow-transition-function -- this is faster if the caller intends to match
+        ;;       the pattern only once.   The pattern is matched by an interpreter,
+        ;;       and it is possible that the same type predicate will be tested multiple
+        ;;       times on the same candidate objects.  If one of the type predicates
+        ;;       is (satisfies slow-predicate) then that slow-predicate may be called
+        ;;       multiple times, resulting in poor performance, especially if the
+        ;;       pattern is used to test multiple sequences.
+        ;;   fast-transition-function -- this is faster if the caller intends to match
+        ;;       the pattern multiple times with different input sequences.  The
+        ;;       pattern is *compiled* into a form where type-designators are converted
+        ;;       to Bdds thus each type check guarantees to never check the same
+        ;;       type predicate multiple times, and sometimes not at all.
+        (letfn [(slow-transition-function [transitions]
+                  (fn [candidate sink-state-id]
+                    (some (fn [[type next-state-index]]
+                            (if (gns/typep candidate type)
+                              next-state-index
+                              ;; TODO I'm not sure this is correct, do we need to return false
+                              ;;   indicating no-match, or return the sink-stat-id.
+                              ;;   false makes the tests pass, but sink-state-id seems more
+                              ;;   logical.  need to investigate whether something more fundamental
+                              ;;   is wrong.
+                              false))
+                          transitions)))
+                (fast-transition-function [transitions]
+                  (xym/optimized-transition-function transitions promise-disjoint sink-state-id))
+                (transition-function [transitions]
+                  (if hot-spot
+                    (fast-transition-function transitions)
+                    (slow-transition-function transitions)))
+                (consume [state-index item]
+                  (let [state-obj (state-vec state-index)]
+                    (cl/cl-cond
+                     ((member state-obj sink-states)
+                      (reduced false))
+                     (((transition-function (:transitions state-obj)) item sink-state-id))
+                     (:else (reduced false)))))]
+          (let [final-state (reduce consume 0 items)]
+            ;; final-state may be integer desgnating the state which was
+            ;;  reached on iterating successfully through the input
+            ;;  sequence, items.  Or final-state may false, if the
+            ;;  iteration finished without iterating through the entire
+            ;;  sequence, either because we found ourselves in a
+            ;;  sink-state, or we encountered a item for which no transition
+            ;;  was possible.
+            (cond
+              (= false final-state) false
+              (:accepting (state-vec final-state)) ((:exit-map dfa) final-state)
+              :else false)))))))

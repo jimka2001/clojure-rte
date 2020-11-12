@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.util
-  (:require [clojure.pprint :refer [cl-format pprint]]))
+  (:require [clojure.pprint :refer [cl-format]]))
 
 (defn with-first-match 
   "Find the first element in the given sequence, items,
@@ -180,7 +180,7 @@
              (empty? items) false
              (nil? target) (some nil? items)
              (false? target) (some false? items)
-             :else (reduce (fn [acc item]
+             :else (reduce (fn [_acc item]
                              (if (= item target)
                                (reduced true)
                                false)) false items))))
@@ -199,7 +199,21 @@
           [[] []]
           items))
 
-(defn find-simplifier [obj simplifiers]
+(defn find-simplifier
+  "Iterate through a sequence of so-called simplifies.  Each simplifier
+  is a unary function which accepts the given obj as arguments.  Each
+  simplifier is expected to either _simplify_ the object or leave it as-is.
+  If the simplifier returns an object which is = obj, then we assume the
+  simplifier chose NOT to simplify, in which case find-simplifier proceeds
+  to the next simplifier in the sequence.
+  If, however, the simplifier returns an object which is not = to obj, 
+  then we assume that the simplifier HAS simplified the object.
+  WARNING, find-simplifier does not in any way verify that the object
+  is more simple than before; it only checks whether it is different.
+  Once a simplifier has _simplified_ an object, find-simplifier returns
+  the newly generated object, and the remaining simplifiers are silently
+  ignored."
+  [obj simplifiers]
   (if (empty? simplifiers)
     obj
     (loop [[f & fs] simplifiers]
@@ -282,8 +296,9 @@
   [[public-name internal-name] docstring & body]
   (assert (string? docstring))
   `(let []
+     (declare ~public-name) ;; so that the internal function can call the public function if necessary
      (defn ~internal-name ~@body)
-     (def ~(with-meta  public-name {:dynamic true}) ~docstring (memoize ~internal-name))
+     (def ~(with-meta public-name {:dynamic true}) ~docstring (memoize ~internal-name))
      ))
 
 (defn map-eagerly 
@@ -316,18 +331,21 @@
   [& dedupe-args]
   (doall (apply dedupe dedupe-args)))
 
-(defmacro exists [[var seq] & body]
+(defmacro exists
   "Test whether there exists an element of a sequence which matches a condition."
+  [[var seq] & body]
   `(some (fn [~var]
            ~@body) ~seq))
 
-(defmacro setof [[var seq] & body]
+(defmacro setof
   "Return a sequence of lazy elements of a given sequence which match a given condition"
+  [[var seq] & body]
   `(filter (fn [~var]
              ~@body) ~seq))
 
-(defmacro forall [[var seq] & body]
+(defmacro forall
   "Return true if the given body evaluates to logical true for every element of the given sequence"
+   [[var seq] & body]
   `(every? (fn [~var]
              ~@body) ~seq))
 
@@ -372,3 +390,44 @@
   "like not-empty, but returns boolean rather than nil, or the collection"
   [coll]
   (boolean (not-empty coll)))
+
+(defn seq-matcher
+  "Return a function, a closure, which can be used to determine whether
+  its argument is a sequence whose first element is identically the
+  given obj."
+  [target]
+  (fn [obj]
+    (and (seq? obj)
+         (not-empty obj)
+         (= target (first obj)))))
+
+(defn -casep-helper [test value default-f & pairs]
+  (loop [pairs pairs]
+    (cond (empty? pairs)
+          (default-f)
+
+          :else
+          (let [[keys f] (first pairs)]
+            (if (exists [x keys] (test value x))
+              (f)
+              (recur (rest pairs)))))))
+
+(defmacro casep [test obj & pairs]
+  (loop [pairs pairs
+         default (fn [] nil)
+         acc ()]
+    (cond (empty? pairs)
+          `(-casep-helper ~test ~obj ~default ~@(reverse acc))
+
+          (empty? (rest pairs))
+          (recur ()
+                 `(fn [] ~(first pairs))
+                 acc)
+
+          :else
+          (let [key (first pairs)
+                value (second pairs)]
+            (recur (rest (rest pairs))
+                   default
+                   (cons `['~key (fn [] ~value)] acc)
+                 )))))

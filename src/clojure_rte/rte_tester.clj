@@ -25,7 +25,8 @@
             [clojure.pprint :refer [cl-format]]
             [clj-async-profiler.core :as prof] ;; this requirement is only temporary while trying to debug the out-of-memory error
             ;; [clojure-rte.dot :as dot]
-            [clojure-rte.rte-core :refer [dfa-to-rte rte-to-dfa canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once nullable with-compile-env]]
+            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable
+                                               canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
             ))
 
 (defn rte-components [pattern]
@@ -63,7 +64,7 @@
      (:sigma :empty-set :epsilon) key
      ;;(:permute) (gen-rte :cat size types)
      (:and :or :cat :contains-any
-           :contains-every :contains-none) (cons key (map (fn [k] (gen-rte (dec size) types))
+           :contains-every :contains-none) (cons key (map (fn [_k] (gen-rte (dec size) types))
                                                           (range size)))
      (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
 

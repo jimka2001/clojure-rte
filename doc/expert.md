@@ -1,3 +1,26 @@
+<!--
+ Copyright (c) 2020 EPITA Research and Development Laboratory
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software,
+ and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
 # Expert details w.r.t. RTE
 
 ## Confusion with negative semantics
@@ -23,7 +46,7 @@ singleton sequence of String.
 
 If you want to match a sequence like `[:x 100 :y 200 :z 300]` but not
 if any of the values after the keyword is a String, you may use the following.
-`(rte-match '(:* (:cat Keyword (:and :sigma (:not String)))) ...)`,
+`(rte/match '(:* (:cat Keyword (:and :sigma (:not String)))) ...)`,
 because `(:and :sigma (:not String))` will match any singleton
 sequence whose element is NOT a string.
 
@@ -54,7 +77,7 @@ a sequence of sequences each of which contains only strings or only
 Integers, e.g.,
 
 ```clojure
-(rte-match '(:* (:or (rte (:* String)) (rte (:* integer?))))
+(rte/match '(:* (:or (rte (:* String)) (rte (:* integer?))))
   [[1 2 3]
    ["hello" "world"]
    [10 20 30 40 50]])
@@ -62,7 +85,7 @@ Integers, e.g.,
 ```
 but not
 ```clojure
-(rte-match '(:* (:or (rte (:* String)) (rte (:* integer?))))
+(rte/match '(:* (:or (rte (:* String)) (rte (:* integer?))))
   [[1 2 3]
    ["hello" "world"]
    [10 "20" 30 "40" 50]])
@@ -78,8 +101,8 @@ or readability, use the macro `with-rte`.
 (with-rte [::a (:permute Long Long String) ;; not quoted
            ::b (:permute Double Double String) ;; not quoted
            ]
-  (let [rte (rte-compile '(:cat ::a ::a ::b ::b))]
-    (rte-match rte [2 2 "hello"
+  (let [rte (rte/compile '(:cat ::a ::a ::b ::b))]
+    (rte/match rte [2 2 "hello"
                       2 "hello" 2
                       4.0 4.0 "world"
                       "world" 4.1 4.2]) ;; true
@@ -97,7 +120,7 @@ another pattern.
 are sequences *a* and *b*, where *a* matches the pattern *x* and *b*
 matches the pattern *y*.
 
-`(with-rte [::x ... ::y ...] (rte-match '(:cat ::x ::y) ...))` matches a 
+`(with-rte [::x ... ::y ...] (rte/match '(:cat ::x ::y) ...))` matches a 
 sequence of two concatenated
 sequence *a* and *b*, where *a* matches the pattern *::x* and *b*
 matches the pattern *::y*.  E.g., 
@@ -106,15 +129,15 @@ matches the pattern *::y*.  E.g.,
 (with-rte [::x (:+ Long)
            ::y (:+ Double)]
 
-  (let [pat (rte-compile '(:cat ::x  ::y))]
-    ;; the same as (rte-compile '(:cat (:+ Long) (:+ Double)))
-    (rte-match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; true
-    (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; false
+  (let [pat (rte/compile '(:cat ::x  ::y))]
+    ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
+    (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; true
+    (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; false
   ))
 
-(let [pat (rte-compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
-  (rte-match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; false
-  (rte-match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; true
+(let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
+  (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]) ;; false
+  (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]]) ;; true
 )
 ```
 
@@ -140,7 +163,7 @@ every sequence which matches one also matches the other.
 
 ==> [Byte Byte]
 
-(rte-trace (rte-compile '(:and (:cat :sigma :sigma)
+(rte-trace (rte/compile '(:and (:cat :sigma :sigma)
                                (:* (:and :sigma (:not Byte)))
                                (:* integer?))))
 
@@ -154,7 +177,7 @@ but not the other. For example to find a sequence which contains 1 or more
 ```clojure
 (let [pattern1 '(:+ integer?)
       pattern2 '(:* Number)]
-  (rte-trace (rte-compile `(:and ~pattern1 (:not ~pattern2)))))
+  (rte-trace (rte/compile `(:and ~pattern1 (:not ~pattern2)))))
 
 ==> [Byte]
 ```
@@ -168,7 +191,7 @@ there exist a sequence which matches the first but not the second?
 ```clojure
 (let [pattern1 '(:* (:cat keyword? :sigma))
       pattern2 '(:cat (:* :sigma) keyword? (:* :sigma))]
-  (rte-trace (rte-compile `(:and ~pattern1 (:not ~pattern2)))))
+  (rte-trace (rte/compile `(:and ~pattern1 (:not ~pattern2)))))
 
 ==> []
 ```

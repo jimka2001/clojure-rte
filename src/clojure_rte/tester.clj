@@ -26,14 +26,14 @@
 
 
 (defn simplify [unary error-case gen-components]
-  (try (do (unary error-case)
-           error-case)
+  (try (unary error-case)
+       error-case
+       
        (catch Exception e
-         (do
-           (cl-format true "e=~A~%" e)
-           (or (some (fn [component]
-                       (simplify unary component gen-components)) (gen-components error-case))
-               error-case)))))
+         (cl-format true "e=~A~%" e)
+         (or (some (fn [component]
+                     (simplify unary component gen-components)) (gen-components error-case))
+             error-case))))
 
 (defn de-lazify [obj]
   (cond (not (sequential? obj))
@@ -56,7 +56,7 @@
   gen-components is currently unused, but in the future will be used to simply expression
       to attempt to generate a simpler test case, if test fails.
   verbose indicates whether to print verbose information about progression of tests."
-  [num-tries unary-test-fun arg-generator gen-components verbose]
+  [num-tries unary-test-fun arg-generator _gen-components verbose]
   (doseq [n (doall (range num-tries))
           :let [data (de-lazify (arg-generator))]]
     (when verbose

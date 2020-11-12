@@ -23,44 +23,45 @@
   (:refer-clojure :exclude [satisfies?])
   (:require [clojure.set :refer [subset?]]
             [clojure.repl :refer [source-fn]]
-            [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       partition-by-pred
-                                      member find-simplifier defn-memoized
+                                      seq-matcher member find-simplifier defn-memoized
                                       ]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
             ))
+
+;; allow gns/ prefix even in this file.
+(alias 'gns 'clojure-rte.genus)
 
 (declare subtype?)
 (declare disjoint?)
 (declare inhabited?)
 (declare type-equivalent?)
 
-(defn and? [t]
-  (and (sequential? t)
-       (= 'and (first t))))
+(def gns/and?
+  "Detect sequence starting with the simple symbol and"
+  (seq-matcher 'and))
 
-(defn or? [t]
-  (and (sequential? t)
-       (= 'or (first t))))
+(def gns/or? 
+  "Detect sequence starting with the simple symbol or"
+  (seq-matcher 'or))
 
-(defn =? [t]
-  (and (sequential? t)
-       (= '= (first t))
-       (= (count t) 2)))
+(def gns/=?
+  "Detect sequence starting with the simple symbol ="
+  (seq-matcher '=))
 
-(defn not? [t]
-  (and (sequential? t)
-       (= 'not (first t))))
+(def gns/not?
+  "Detect sequence starting with the simple symbol not"
+  (seq-matcher 'not))
 
-(defn member? [t]
-  (and (sequential? t)
-       (= 'member (first t))))
+(def gns/member?
+  "Detect sequence starting with the simple symbol member"
+  (seq-matcher 'member))
 
-(defn satisfies? [t]
-  (and (sequential? t)
-       (= 'satisfies (first t))))
+(def gns/satisfies?
+  "Detect sequence starting with the simple symbol satisfies"
+  (seq-matcher 'satisfies))
 
 (defn class-designator?
   "Predicate to determine whether the given symbol designates a java class."
@@ -114,7 +115,7 @@
   "Test whether two type designators represent the same type."
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (if (= t1 t2)
     true
     ;; two types are equivalent if each is a subtype of the other.
@@ -214,7 +215,7 @@
 
 (defmethod valid-type? 'not [[_not & type-designators]]
   (and (sequential? type-designators)
-       (not (empty? type-designators))
+       (not-empty type-designators)
        (empty? (rest type-designators))
        (valid-type? (first type-designators))))
 
@@ -226,16 +227,16 @@
   (every? valid-type? others))
 
 (defmethod typep 'or [a-value [_a-type & others]]
-  (some (fn [t1]
-          (typep a-value t1)) others))
+  (boolean (some (fn [t1]
+                   (typep a-value t1)) others)))
 
 (defmethod valid-type? 'or [[_or & others]]
   (every? valid-type? others))
 
 (defmethod typep 'satisfies [a-value [_a-type f]]
-  (if (fn? f)
-    (f a-value)
-    ((resolve f) a-value)))
+  (boolean (if (fn? f)
+             (f a-value)
+             ((resolve f) a-value))))
 
 (defn callable-designator? [f]
   (and (symbol? f)
@@ -300,41 +301,44 @@
                      :t1 t1
                      :t2 t2}))))
 
+(defn-memoized [check-disjoint -check-disjoint]
+  "Internal function used in top level disjoint? implementation."
+  [t1' t2' default]
+  (loop [[k & ks] (sort-method-keys -disjoint?)]
+    (case ((k (methods -disjoint?)) t1' t2')
+      (true) true
+      (false) false
+      (case ((k (methods -disjoint?)) t2' t1')
+        (true) true
+        (false) false
+        (if ks
+          (recur ks)
+          default)))))
+
 (defn disjoint?
   "Predicate to determine whether the two types overlap.
   If it cannot be determined whether the two designated types
   are disjoint, then the default value is returned."
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
-  (letfn [(check-disjoint [t1' t2' default]
-            (loop [[k & ks] (sort-method-keys -disjoint?)]
-              (case ((k (methods -disjoint?)) t1' t2')
-                (true) true
-                (false) false
-                (case ((k (methods -disjoint?)) t2' t1')
-                  (true) true
-                  (false) false
-                  (if ks
-                    (recur ks)
-                    default)))))]
-    (cond
-      (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-      true
+   :post [(member % '(true false :dont-know))]}
+  (cond
+    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+    true
 
-      (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-      true
+    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+    true
 
-      :else
-      (let [try1 (check-disjoint t1 t2 :dont-know)]
-        (if (not= :dont-know try1)
-          try1
-          (let [t1-simple (-canonicalize-type t1)
-                t2-simple (-canonicalize-type t2)]
-            (if (and (= t1-simple t1)
-                     (= t2-simple t2))
-              default
-              (check-disjoint t1-simple t2-simple default))))))))
+    :else
+    (let [try1 (check-disjoint t1 t2 :dont-know)]
+      (if (not= :dont-know try1)
+        try1
+        (let [t1-simple (-canonicalize-type t1)
+              t2-simple (-canonicalize-type t2)]
+          (if (and (= t1-simple t1)
+                   (= t2-simple t2))
+            default
+            (check-disjoint t1-simple t2-simple default)))))))
 
 (defmethod -disjoint? :primary [t1 t2]
   (cond
@@ -369,7 +373,7 @@
     :dont-know))
 
 (defmethod -disjoint? :or [t1 t2]
-  (and (or? t1)
+  (and (gns/or? t1)
        (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1)))
   true
 
@@ -379,7 +383,7 @@
 (defmethod -disjoint? :and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 false))
         inhabited-t2 (delay (inhabited? t2 false))]
-    (cond (not (and? t1))
+    (cond (not (gns/and? t1))
           :dont-know
 
           (exists [t (rest t1)]
@@ -426,7 +430,7 @@
           ;; If B < A and A !< B    and A < C and C !< A
           ;;   then (and A !B) is NOT disjoint from C
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (gns/not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1
                      C t2]
                  (and (subtype? B A false)
@@ -436,13 +440,12 @@
           false
 
           ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
-          ;;                       A    (not B)                     C
+          ;;                       A     (not B)                      C
           ;;  since A and B are disjoint
           ;;  we may ask (disjoint? A C)
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
-               (let [[_ A [_ B]] t1
-                     C t2]
+               (gns/not? (nth t1 2))  ;; t1 of the form (and x (not y))
+               (let [[_ A [_ B]] t1]
                  (disjoint? A B false)))
           (disjoint? (second t1) t2 :dont-know)
 
@@ -455,7 +458,7 @@
         
         ;; (= ...) is finite, types are infinite
         ;; (disjoint? '(not (= 1 2 3)) 'Long)
-        (and (not? t1)
+        (and (gns/not? t1)
              (=? (second t1))
              (class-designator? t2))
         false
@@ -470,13 +473,13 @@
 
         ;; (member ...) is finite, types are infinite
         ;; (disjoint? '(not (member 1 2 3)) 'Long)
-        (and (not? t1)
+        (and (gns/not? t1)
              (member? (second t1))
              (class-designator? t2))
         false
         
-        (and (not? t1)
-             (not? t2)
+        (and (gns/not? t1)
+             (gns/not? t2)
              (member? (second t1))
              (member? (second t2)))
         false
@@ -511,7 +514,7 @@
   of default is one of: true, false, :dont-know or :error."
   [sub-designator super-designator default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (loop [[k & ks] (sort-method-keys -subtype?)]
     (let [s ((k (methods -subtype?)) sub-designator super-designator)]
       (case s
@@ -542,7 +545,7 @@
   empty type."
   [type-designator default]
   {:pre [(member default '(true false :dont-know))]
-   :post [(fn [v] (member v '(true false :dont-know)))]}
+   :post [(member % '(true false :dont-know))]}
   (letfn [(calc-inhabited [type-designator default]
             (loop [[k & ks] (sort-method-keys -inhabited?)]
               (case ((k (methods -inhabited?)) type-designator)
@@ -551,12 +554,16 @@
                 (if ks
                   (recur ks)
                   default))))]
-    (let [i (calc-inhabited type-designator :dont-know)]
-      (cond (= :dont-know i)
-            (calc-inhabited (-canonicalize-type type-designator) default)
+    (let [i (calc-inhabited type-designator :dont-know)
+          td-canon (delay (-canonicalize-type type-designator))]
+      (cond (member i '(true false))
+            i
+
+            (= @td-canon type-designator)
+            default
             
             :else
-            i))))
+            (calc-inhabited @td-canon default)))))
 
 (defmethod -inhabited? :primary [type-designator]
   (if (class-designator? type-designator)
@@ -619,27 +626,27 @@
         :dont-know))
 
 (defmethod -subtype? :not [sub super]
-  (cond (and (not? super)  ; (subtype? 'Long '(not Double))
+  (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
              (disjoint? sub (second super) false))
         true
 
         ;; (subtype? '(not Double) 'Long)
-        (and (not? sub)
+        (and (gns/not? sub)
              (disjoint? super (second sub) false))
         false
 
-        (and (not? sub)
+        (and (gns/not? sub)
              (type-equivalent? (second sub) super false))
         false
 
-        (and (not? super)
+        (and (gns/not? super)
              (type-equivalent? sub (second super) false))
         false
         
-        (not (not? sub))
+        (not (gns/not? sub))
         :dont-know
 
-        (not (not? super))
+        (not (gns/not? super))
         :dont-know
 
         :else
@@ -661,7 +668,7 @@
         ;; (subtype? 'Long '(not (member 1 2 3))) ==> false
         ;; (subtype? 'Long '(not (member 1.1 2 3))) ==> false
         ;; (subtype? 'Long '(not (member 1.1 2.2 3.3))) ==> true
-        (and (not? super)
+        (and (gns/not? super)
              (class-designator? sub)
              (member? (second super)))
         (every? (fn [e2]
@@ -672,7 +679,7 @@
 
 (defmethod -subtype? :and [t1 t2]
   (cond
-    (not (and? t1))
+    (not (gns/and? t1))
     :dont-know
     
     (member t2 (rest t1))
@@ -686,14 +693,14 @@
 
 
     ;; (subtype? '(and A B) '(not A))
-    (and (not? t2)
+    (and (gns/not? t2)
          (exists [t (rest t1)]
                  (= t (second t2)))
          (inhabited? t1 false))
     false
 
     ;; (subtype? (and A B C X Y) (and A B C) )
-    (and (and? t2)
+    (and (gns/and? t2)
          (subset? (set (rest t2)) (set (rest t1))))
     true
     
@@ -741,45 +748,50 @@
 
 (defmethod -inhabited? :and [t1]
   (cond
-    (not (and? t1))
+    (not (gns/and? t1))
     :dont-know
 
     (and (< 2 (count t1))
          (forall-pairs [[a b] (rest t1)]
                        (and (or (class-designator? a)
-                                (not? a)
+                                (gns/not? a)
                                 (class-designator? (second a)))
                             (or (class-designator? b)
-                                (not? b)
+                                (gns/not? b)
                                 (class-designator? (second b)))
                             (not (disjoint? a b true)))))
     true
 
     (exists-pair [[a b] (rest t1)]
                  (and (or (class-designator? a)
-                          (not? a)
+                          (gns/not? a)
                           (class-designator? (second a)))
                       (or (class-designator? b)
-                          (not? b)
+                          (gns/not? b)
                           (class-designator? (second b)))
                       (disjoint? a b false)))
     false
     
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
     (exists [t (rest t1)]
-            (and (not? t)
+            (and (gns/not? t)
                  (member? (second t))))
     (inhabited? (-canonicalize-type (cons 'and
                                          (remove (fn [t]
-                                                   (and (not? t)
+                                                   (and (gns/not? t)
                                                         (member? (second t)))) (rest t1))))
                 :dont-know)
+
+    ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
+    (exists-pair [[ta tb] (rest t1)]
+                 (disjoint? ta tb false))
+    false
 
     :else
     :dont-know))
 
 (defmethod -inhabited? :not [t1]
-  (cond (not (not? t1))
+  (cond (not (gns/not? t1))
         :dont-know
 
         (class-designator? (second t1))
@@ -805,7 +817,7 @@
 
 (defmethod -disjoint? :not [t1 t2]
   (cond
-    (not (not? t1))
+    (not (gns/not? t1))
     :dont-know
     
     ;; (disjoint? (not Object) X)
@@ -847,7 +859,7 @@
     false
 
     ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
-    (and (not? t2)
+    (and (gns/not? t2)
          (class-designator? (second t1))
          (class-designator? (second t2)))
     false
@@ -873,14 +885,14 @@
     ;; (disjoint? '(not Boolean) '(not Long))
     ;; (disjoint? '(not A) '(not B))
     ;; if disjoint classes A and B
-    (and (not? t2)
+    (and (gns/not? t2)
          ;;(class-designator? (second t1))
          ;;(class-designator? (second t2))
          (disjoint? (second t1) (second t2) false))
     false
 
     ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
-    (and (not? t2)
+    (and (gns/not? t2)
          (not (disjoint? (second t1) (second t2) true)))
     false         
 
@@ -1105,33 +1117,41 @@
     clojure.lang.Ratio BigDecimal)
   if possible.  Otherwise expand the given type-designator simply to itself."
   [type-designator]
-  (cl/cl-cond
-   ((not (sequential? type-designator))
-    type-designator)
+  (cond
+   (not (sequential? type-designator))
+   type-designator
 
-   ((empty? type-designator)
-    type-designator)
+   (empty? type-designator)
+   type-designator
 
-   ((not= 'satisfies (first type-designator))
-    type-designator)
+   (not= 'satisfies (first type-designator))
+   type-designator
 
-   ((empty? (rest type-designator))
-    type-designator)
+   (empty? (rest type-designator))
+   (throw (ex-info "invalid type designator"
+                   {:type-designator type-designator}))
 
-   ((not (empty? (rest (rest type-designator))))
-    type-designator)
+   (not-empty (rest (rest type-designator)))
+   (throw (ex-info "invalid type designator"
+                   {:type-designator type-designator}))
 
-   ((type-predicate-to-type-designator (second type-designator)))
-
-   (:else
-    type-designator)))
+   :else
+   (let [[_satisfies pred] type-designator]
+     (cl/cl-cond
+      ((fn? pred)
+       ;; If we are looking at (satisfies #function[clojure-rte.rte-core/eval16169/fn--16170])
+       ;;   then just leave it as it is.
+       type-designator)
+      ((type-predicate-to-type-designator (second type-designator)))
+      (:else
+       type-designator)))))
 
 (defmethod -canonicalize-type 'not
   [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; (not (not x)) --> x
-                      (if (not? (second type-designator))
+                      (if (gns/not? (second type-designator))
                         (second (second type-designator))
                         type-designator))
                     (fn [type-designator]
@@ -1145,6 +1165,26 @@
                     (fn [type-designator]
                       (list 'not (-canonicalize-type (second type-designator))))]))
 
+(defmethod -canonicalize-type 'fn*
+  [type-designator]
+  (find-simplifier type-designator
+                   [(fn [type-designator]
+                      ;; convert (fn* [p1__19751#] (clojure.core/even? p1__19751#))}
+                      ;;     to (satisfies clojure.core/even?)
+                      (cond
+                        (not (and (= 3 (count type-designator))
+                                  (vector (nth type-designator 1))
+                                  (sequential? (nth type-designator 2))
+                                  (= 2 (count (nth type-designator 2)))))
+                        type-designator
+                        :else
+                        (let [[_fn [v1] [f1 v2]] type-designator]
+                          (cond (= v1 v2)
+                                (list 'satisfies f1)
+
+                                :else
+                                type-designator))))]))
+
 (defmethod -canonicalize-type 'and
   [type-designator]
   
@@ -1153,6 +1193,9 @@
                       (if (member :empty-set (rest type-designator))
                         :empty-set
                         type-designator))
+                    
+                    (fn [type-designator]
+                      (cons 'and (distinct (rest type-designator))))
                     
                     (fn [type-designator]
                       (cond (empty? (rest type-designator))
@@ -1191,13 +1234,13 @@
                       ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
                       ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
                       (if (some (fn [t]
-                                  (and (not? t)
+                                  (and (gns/not? t)
                                        (or (member? (second t))
                                            (=? (second t)))))
                                 (rest type-designator))
                         (cons 'and
                               (map (fn [t]
-                                     (if (and (not? t)
+                                     (if (and (gns/not? t)
                                               (or (member? (second t))
                                                   (=? (second t))))
                                        (let [filtered-td (remove #{t} type-designator)
@@ -1209,6 +1252,16 @@
                                        t
                                        ))
                                    (rest type-designator)))
+                        type-designator))
+
+                    (fn [type-designator]
+                      (if (exists [x (rest type-designator)]
+                                  (gns/and? x))
+                        (cons 'and
+                              (mapcat (fn [x]
+                                        (if (gns/and? x)
+                                          (rest x)
+                                          (list x))) (rest type-designator)))
                         type-designator))
 
                     (fn [type-designator]
@@ -1234,6 +1287,9 @@
                         (cons 'or (map -canonicalize-type
                                        (remove #{:empty-set} (rest type-designator))))
                         type-designator))
+
+                    (fn [type-designator]
+                      (cons 'or (distinct (rest type-designator))))
 
                     (fn [type-designator]
                       (cond (empty? (rest type-designator))
@@ -1275,6 +1331,17 @@
                           (cons 'or mapped))
                         type-designator))
 
+                    
+                    (fn [type-designator]
+                      (if (exists [x (rest type-designator)]
+                                  (gns/or? x))
+                        (cons 'or
+                              (mapcat (fn [x]
+                                        (if (gns/or? x)
+                                          (rest x)
+                                          (list x))) (rest type-designator)))
+                        type-designator))
+
                     (fn [type-designator]
                       (cons 'or (map -canonicalize-type (rest type-designator))))
                     ]))
@@ -1296,7 +1363,8 @@
     (not (valid-type? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :unknown-type
-                     :type type-designator }))
+                     :type (type type-designator)
+                     :type-designator type-designator }))
 
     :else
     type-designator

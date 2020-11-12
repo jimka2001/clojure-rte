@@ -21,9 +21,10 @@
 
 
 (ns clojure-rte.dot-test
-  (:require [clojure-rte.dot :as sut]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure.test :refer :all]))
+  (:require [clojure-rte.rte-core]
+            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
+            [clojure-rte.dot :as sut]
+            [clojure.test :refer [deftest testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.dot-test))
@@ -32,6 +33,6 @@
   (testing "dfa-to-dot"
     (with-compile-env ()
       (sut/dfa-to-dot
-       (rte-compile '(:and (:cat :sigma :sigma) (:cat (:not String) Long)))
+       (rte/compile '(:and (:cat :sigma :sigma) (:cat (:not String) Long)))
        :title "Example"
        :view false))))

@@ -21,18 +21,20 @@
 
 (ns clojure-rte.xymbolyco-test
   (:refer-clojure :exclude [complement])
-  (:require ;; [clojure-rte.core :refer :all]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure-rte.xymbolyco :refer :all]
+  (:require [clojure-rte.rte-core ]
+            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa]]
+            [clojure-rte.xymbolyco :refer [find-eqv-class split-eqv-class
+                                           states-as-seq find-incomplete-states
+                                           extend-with-sink-state synchronized-product synchronized-union
+                                           cross-intersection
+                                           trim complete minimize]]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
-            [clojure.test :refer :all :exclude [testing]]))
+            [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.xymbolyco-test))
-
-
 
 (defmacro testing
   [string & body]
@@ -108,8 +110,8 @@
           dfa (rte-to-dfa rte)
           dfa-min (minimize dfa)
           seq [4.0]]
-      (is (= (rte-match dfa seq)
-             (rte-match dfa-min seq))))))
+      (is (= (rte/match dfa seq)
+             (rte/match dfa-min seq))))))
 
 (def test-seqs '([]
                  [1]
@@ -194,28 +196,28 @@
                 dfa-trim-min (extend-with-sink-state (minimize dfa-trim))]
           reps (range 5)
           :let [seq-long (reduce concat (repeat reps seq-root))
-                match? (rte-match dfa seq-long)]
+                match? (rte/match dfa seq-long)]
           ]
-    (do
-      (is (= match?
-             (rte-match dfa-trim seq-long))
-          (format "case 1: rte=%s seq=%s got %s from dfa, got %s from dfa-trim"
-                  rte (pr-str seq-long) match? (rte-match dfa-trim seq-long)))
-      (is (= match?
-             (rte-match dfa-min seq-long))
-          (format "case 2: rte=%s seq=%s got %s from dfa, got %s from dfa-min"
-                  rte (pr-str seq-long) match? (rte-match dfa-min seq-long)))
-      (is (= match?
-             (rte-match dfa-min-trim seq-long))
-          (format "case 3: rte=%s seq=%s got %s from dfa, got %s from dfa-min-trim"
-                  rte (pr-str seq-long) match? (rte-match dfa-min-trim seq-long)))
-      (is (= match?
-             (rte-match dfa-trim-min seq-long))
-          (format "case 4: rte=%s seq=%s got %s from dfa, got %s from dfa-trim-min"
-                  rte (pr-str seq-long) match? (rte-match dfa-trim-min seq-long))))))
+    
+    (is (= match?
+           (rte/match dfa-trim seq-long))
+        (format "case 1: rte=%s seq=%s got %s from dfa, got %s from dfa-trim"
+                rte (pr-str seq-long) match? (rte/match dfa-trim seq-long)))
+    (is (= match?
+           (rte/match dfa-min seq-long))
+        (format "case 2: rte=%s seq=%s got %s from dfa, got %s from dfa-min"
+                rte (pr-str seq-long) match? (rte/match dfa-min seq-long)))
+    (is (= match?
+           (rte/match dfa-min-trim seq-long))
+        (format "case 3: rte=%s seq=%s got %s from dfa, got %s from dfa-min-trim"
+                rte (pr-str seq-long) match? (rte/match dfa-min-trim seq-long)))
+    (is (= match?
+           (rte/match dfa-trim-min seq-long))
+        (format "case 4: rte=%s seq=%s got %s from dfa, got %s from dfa-trim-min"
+                rte (pr-str seq-long) match? (rte/match dfa-trim-min seq-long)))))
   
 (deftest t-acceptance
-  (testing "acceptance:  testing whether rte-match works same on dfa when trimmed and minimized."
+  (testing "acceptance:  testing whether rte/match works same on dfa when trimmed and minimized."
 
     (t-acceptance-test-rte  '(:and (:* Long) (:not (:* Short)))) ;; this was an explicit failing test
     (let [[left-rtes right-rtes] (split-at (unchecked-divide-int (count test-rtes) 2)
@@ -226,7 +228,7 @@
                                                               rte [`(:and ~rte-1 (:not ~rte-2))
                                                                    `(:or  ~rte-1 (:not ~rte-2))]]
                                                           rte))))]
-        (println [:inx inx :rte rte])
+        ;; (println [:inx inx :rte rte])
         (t-acceptance-test-rte rte)))))
 
 (deftest t-test-1
@@ -238,12 +240,12 @@
           dfa-sxp (synchronized-product dfa-1 dfa-2 
                                         (fn [a b]
                                           (and a b))
-                                        (fn [q1 q2]
+                                        (fn [q1 _q2]
                                           ((:exit-map dfa-1) (:index q1))))
           dfa-sxp-trim (trim dfa-sxp)
           dfa-sxp-min (minimize dfa-sxp)
-          dfa-sxp-trim-min (minimize dfa-sxp-trim)
-          dfa-sxp-min-trim (trim dfa-sxp-min)
+          _dfa-sxp-trim-min (minimize dfa-sxp-trim)
+          _dfa-sxp-min-trim (trim dfa-sxp-min)
           seqs [[]
                 [1]
                 [1 2 3]
@@ -258,9 +260,9 @@
                 ]
           ]
       (doseq [s seqs
-              :let [m-1 (rte-match dfa-1 s)
-                    m-2 (rte-match dfa-2 s)
-                    m-dfa-sxp (rte-match dfa-sxp s)]]
+              :let [m-1 (rte/match dfa-1 s)
+                    m-2 (rte/match dfa-2 s)
+                    m-dfa-sxp (rte/match dfa-sxp s)]]
         (assert (= (boolean (and m-1 m-2))
                    (boolean m-dfa-sxp))
                 (format "dfa-1 => %s and dfa-2 => %s but dfa-sxp => %s, on sequence %s"
@@ -275,8 +277,8 @@
          test-seq '("hello" 1 "world" 2)
          dfa-min (minimize dfa-1)
          ]
-     (is (= (rte-match dfa-1 test-seq)
-            (rte-match dfa-min test-seq))))))
+     (is (= (rte/match dfa-1 test-seq)
+            (rte/match dfa-min test-seq))))))
 
 (deftest t-sxp
   (testing "sxp"
@@ -288,7 +290,7 @@
                            2)
           dfa-01 (synchronized-union dfa-0 dfa-1)
           dfa-012 (synchronized-union dfa-01 dfa-2)]
-      (is (= 2 (rte-match dfa-012 ["hello" "world"]))))))
+      (is (= 2 (rte/match dfa-012 ["hello" "world"]))))))
 
 (deftest t-cross-intersection
   (testing "cross-intersection"
@@ -309,7 +311,7 @@
     (let [dfa (rte-to-dfa '(:and (:cat :sigma (:* :sigma))
                                  (:not (:or (:cat :sigma))))
                           12)]
-      (is (not (empty? (filter (comp boolean :accepting) (states-as-seq dfa))))
+      (is (not-empty (filter (comp boolean :accepting) (states-as-seq dfa)))
           "missing final 1"))))
 
 (deftest t-missing-final-2
@@ -318,5 +320,5 @@
                                  (:not (:or (:cat Boolean :sigma (:* :sigma))
                                             (:cat Boolean :sigma))))
                           13)]
-      (is (not (empty? (filter (comp boolean :accepting) (states-as-seq dfa))))
+      (is (not-empty (filter (comp boolean :accepting) (states-as-seq dfa)))
           "missing final 2"))))

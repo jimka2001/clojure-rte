@@ -28,6 +28,7 @@
             ))
 
 (alias 'c 'clojure.core)
+(alias 'bdd 'clojure-rte.bdd)
 
 (defrecord Bdd
     [label positive negative])
@@ -127,11 +128,12 @@
          (letfn [(walk [node parents]
                    (let [my-label (:label node)
                          ;; two lazy sequences created by filter.  the filter loops are
-                         ;; never called unless (empty? ...) is called below.
-                         disjoints (filter (fn [x] (if my-label (gns/disjoint? x my-label false))) parents)
-                         subtypes  (filter (fn [x] (if my-label (gns/subtype?  x my-label false))) parents)]
+                         ;; never called unless node is differrent from true or false, i.e.
+                         ;; the 3rd case of the cond.
+                         disjoints (delay (filter (fn [x] (gns/disjoint? x my-label false)) parents))
+                         subtypes  (delay (filter (fn [x] (gns/subtype?  x my-label false)) parents))]
                      (cond
-                       (= true node)
+                       (= true node) ; case #1
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B
                        ;;   we need to remove the supertypes
                        ;;   E.g., (Long java.io.Comparable java.io.Serializable) -> (Long)
@@ -152,18 +154,38 @@
                                                (cons (first tail) done)))))]
                          (collect (pretty-and term)))
                        
-                       (= false node)
+                       (= false node) ; case #2
                        nil ;; do not collect, and prune recursion
                        
-                       (non-empty? disjoints)
+                       (non-empty? @disjoints) ; case #3
+                       ;; this means that the type-designators returned by (:label node)
+                       ;;    is disjoint with something in the parents list.
+                       ;;    E.g., (:label node)=String, and parents= ( ... Number ...).
+                       ;;    So we can  prune the positive branch, and omit this node from the
+                       ;;    parents list in the recursive call.  Why, because any object
+                       ;;    which has type of everything in the parents list is
+                       ;;    guaranteed to NOT have the type of node.   We could
+                       ;;    add `(not ~(label :node)) to the parents list, but it
+                       ;;    would be redundant---we would have (and (not String) ... Number ...),
+                       ;;    so we'll keep just (and ... Number ...).
                        (walk (:negative node)
                              parents)
                        
-                       (non-empty? subtypes)
+                       (non-empty? @subtypes) ; case #4
+                       ;; this means that the type-designators returned by (:label node)
+                       ;;    is a supertype of something in the parents list.  E.g.,
+                       ;;    (:label node) = Number and parents= (... Long ...).
+                       ;;    Wo we can prune the negative branch, and omit this node from the
+                       ;;    parents list in the recursive call.  Why, because any object
+                       ;;    which has type of everything in the parents list is
+                       ;;    guaranteed to have the type of node.   We could
+                       ;;    add (label :node) to the parents list, but it
+                       ;;    would be redundant---we would have (and Number ... Long ...)
+                       ;;    so we'll keep just (and ... Long ...).
                        (walk (:positive node)
                              parents)
                        
-                       :else
+                       :else ; case #5
                        (do (walk (:positive node)
                                  (cons (:label node) parents))
                            (walk (:negative node)
@@ -214,9 +236,9 @@
         (do (swap! *label-to-index* assoc type-designator (count @*label-to-index*))
             (@*label-to-index* type-designator))))
 
-(declare and) ;; bdd/and
-(declare or)  ;; bdd/or
-(declare not) ;; bdd/not
+(declare bdd/and) ;; bdd/and
+(declare bdd/or)  ;; bdd/or
+(declare bdd/not) ;; bdd/not
 (declare node)
 
 (defn bdd
@@ -225,9 +247,9 @@
   (cond
     (sequential? type-designator)
     (case (first type-designator)
-      (and) (reduce and (map bdd (rest type-designator)))
-      (or)  (reduce or (map bdd (rest type-designator)))
-      (not) (apply not (map bdd (rest type-designator)))
+      (and) (reduce bdd/and (map bdd (rest type-designator)))
+      (or)  (reduce bdd/or (map bdd (rest type-designator)))
+      (not) (apply bdd/not (map bdd (rest type-designator)))
       (node type-designator true false))
 
     (= :sigma type-designator)
@@ -252,7 +274,7 @@
         label-index-2 (type-index t2)]
     (assert (integer? label-index-1) (format "expecting integer got %s" (type label-index-1)))
     (assert (integer? label-index-2) (format "expecting integer got %s" (type label-index-2)))
-    (cond (and (gns/satisfies? t1)
+    (cond (c/and (gns/satisfies? t1)
                (gns/satisfies? t2))
           (< label-index-1 label-index-2)
 
@@ -325,56 +347,60 @@
             (op bdd1 (:positive bdd2))
             (op bdd1 (:negative bdd2))))))
 
-(defn and ;; bdd/and
+(def bdd/and
   "Perform a Boolean AND on 0 or more Bdds."
-  ([] true)
-  ([bdd] bdd)
-  ([bdd1 bdd2]
-   (cond
-     (= false bdd1) false
-     (= false bdd2) false
-     (= true bdd1) bdd2
-     (= true bdd2) bdd1
-     (identical? bdd1 bdd2) bdd1
-     :else (binary-op and bdd1 bdd2)))
-  ([bdd1 bdd2 & bdds]
-   (reduce and (apply cons bdd1 bdd2 bdds))))
+  (fn
+    ([] true)
+    ([bdd] bdd)
+    ([bdd1 bdd2]
+     (cond
+       (= false bdd1) false
+       (= false bdd2) false
+       (= true bdd1) bdd2
+       (= true bdd2) bdd1
+       (identical? bdd1 bdd2) bdd1
+       :else (binary-op bdd/and bdd1 bdd2)))
+    ([bdd1 bdd2 & bdds]
+     (reduce bdd/and (apply cons bdd1 bdd2 bdds)))))
 
-(defn or ;; bdd/or
+(def bdd/or
   "Perform a Boolean OR on 0 or more Bdds."
-  ([] false)
-  ([bdd] bdd)
-  ([bdd1 bdd2]
-   (cond
-     (= false bdd1) bdd2
-     (= false bdd2) bdd1
-     (= true bdd1) true
-     (= true bdd2) true
-     (identical? bdd1 bdd2) bdd1
-     :else (binary-op or bdd1 bdd2)))
-  ([bdd1 bdd2 & bdds]
-   (reduce or (apply cons bdd1 bdd2 bdds))))
+  (fn
+    ([] false)
+    ([bdd] bdd)
+    ([bdd1 bdd2]
+     (cond
+       (= false bdd1) bdd2
+       (= false bdd2) bdd1
+       (= true bdd1) true
+       (= true bdd2) true
+       (identical? bdd1 bdd2) bdd1
+       :else (binary-op bdd/or bdd1 bdd2)))
+    ([bdd1 bdd2 & bdds]
+     (reduce bdd/or (apply cons bdd1 bdd2 bdds)))))
 
-(defn and-not ;; bdd/and-not
+(def bdd/and-not
   "Perform a relative complement operation on two (or more) Bdds.
   This is not implemented for the 0-ary nor 1-ary case."
-  ([bdd1 bdd2]
-   (cond
-     (identical? bdd1 bdd2) false
-     (= bdd1 false) false
-     (= bdd2 true) false
-     (= bdd2 false) bdd1
-     (= bdd1 true) (node (:label bdd2)
-                         (and-not true (:positive bdd2))
-                         (and-not true (:negative bdd2)))
-     :else (binary-op and-not bdd1 bdd2)))
-  ([bdd1 bdd2 & bdds]
-   (reduce and (apply cons bdd1 bdd2 bdds))))
+  (fn
+    ([bdd1 bdd2]
+     (cond
+       (identical? bdd1 bdd2) false
+       (= bdd1 false) false
+       (= bdd2 true) false
+       (= bdd2 false) bdd1
+       (= bdd1 true) (node (:label bdd2)
+                           (bdd/and-not true (:positive bdd2))
+                           (bdd/and-not true (:negative bdd2)))
+       :else (binary-op bdd/and-not bdd1 bdd2)))
 
-(defn not ;; bdd/not
+    ([bdd1 bdd2 & bdds]
+     (reduce bdd/and (apply cons bdd1 bdd2 bdds)))))
+
+(def bdd/not
   "Perform a Boolean not of a given Bdd"
-  [bdd1]
-  (and-not true bdd1))
+  (fn [bdd1]
+    (bdd/and-not true bdd1)))
 
 (def sample-types '(Long Double String
                          (= "") (member "hello" "world")
@@ -401,7 +427,7 @@
          (bdd (rand-nth sample-types))
          
          (= r 2) ;; 20% chance
-         (not (bdd (rand-nth sample-types)))
+         (bdd/not (bdd (rand-nth sample-types)))
          
          :else ;; 40% chance
          (let [bdd-1 (gen-random (dec max-depth))
@@ -409,11 +435,11 @@
                r (rand-int 4)]
            (cond
              (= r 0) ;; 40% * 25% chance
-             (and bdd-1 bdd-2)
+             (bdd/and bdd-1 bdd-2)
              (= r 1) ;; 40% * 25% chance
-             (and-not bdd-1 bdd-2)
+             (bdd/and-not bdd-1 bdd-2)
              :else   ;; 40% * 50% chance
-             (or bdd-1 bdd-2))))))))
+             (bdd/or bdd-1 bdd-2))))))))
 
 (defn typep
   "Given a value in question, and a Bdd representing a type designator,
@@ -460,4 +486,4 @@
     (let [bdd-sub (bdd subtype-designator)
           bdd-sup (bdd supertype-designator)]
       (= :empty-set
-         (dnf (and-not bdd-sub bdd-sup))))))
+         (dnf (bdd/and-not bdd-sub bdd-sup))))))

@@ -20,13 +20,26 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-case-test
-  (:require [clojure.test :refer :all]
-            [clojure-rte.rte-core :refer :all :exclude [-main]]
-            [clojure-rte.rte-case :refer :all]
+  (:require [clojure-rte.rte-core]
+            [clojure-rte.genus :as gns]
+            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
+            [clojure.test :refer [deftest is]]
+            [clojure-rte.rte-case :refer [rte-case destructuring-case
+                                          memoized-rte-case-clauses-to-dfa
+                                          -destructuring-fn-many destructuring-fn]]
 ))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.rte-case-test))
+
+(defmacro testing
+  [string & body]
+  `(do
+     (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)]))
+  )
+
 
 (deftest t-rte-case
   (testing "rte-case"
@@ -52,11 +65,11 @@
 
 (deftest t-rte-case-clauses-to-dfa
   (testing "rte-case-clauses-to-dfa"
-    (is (= 0 (rte-match
+    (is (= 0 (rte/match
               ;; I don't know why it is necessary to prefix clojure-rte.rte-core/rte-case-clauses-to-dfa
               ;; otherwise the loader complains:
               ;; java.lang.RuntimeException: Unable to resolve symbol: rte-case-clauses-to-dfa in this context
-              (#'clojure-rte.rte-core/rte-case-clauses-to-dfa
+              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
 
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
@@ -68,8 +81,8 @@
               [1 2 3]))
         "case-0")
 
-    (is (= 1 (rte-match
-              (#'clojure-rte.rte-core/rte-case-clauses-to-dfa
+    (is (= 1 (rte/match
+              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -80,8 +93,8 @@
               [true false]))
         "case-1")
 
-    (is (= 2 (rte-match
-              (#'clojure-rte.rte-core/rte-case-clauses-to-dfa
+    (is (= 2 (rte/match
+              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -92,8 +105,8 @@
               ["hello" "world"]))
         "case-2")
 
-    (is (= 3 (rte-match
-              (#'clojure-rte.rte-core/rte-case-clauses-to-dfa
+    (is (= 3 (rte/match
+              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -210,7 +223,7 @@
   (testing "destructuring-fn-many"
     (is (= 1
            (let [f
-                 (destructuring-fn-many
+                 (-destructuring-fn-many
                   ([[a b]          {a Boolean b (or String Boolean)}]
                    2)
                   ([[a [b c] & d]  {a Boolean b String d Boolean}]
@@ -224,7 +237,7 @@
   ;; we run them here to assure that we don't get index invalid.
   (let [f
 
-        (destructuring-fn-many
+        (-destructuring-fn-many
          ([[a b]          {a Boolean b (or String Boolean)}]
           2)
          ([[a [b c] & d]  {a Boolean b String d Boolean}]
@@ -285,7 +298,7 @@
                                (:cat
                                 (and :sigma Boolean)
                                 (and :sigma (or String Boolean))))))]])]
-                (rte-match
+                (rte/match
                  dfa
                  v41977))))))]
     (apply f  '(true ["hello" 3] true)))
@@ -439,9 +452,13 @@
 
 (deftest t-rte-match-376
   (testing "special case which was failing 376"
+    (is (= true (gns/disjoint? '(rte (:cat String :sigma)) 'Boolean :dont-know))
+        "test 461")
+    (is (= false (gns/inhabited? '(and Boolean (rte (:cat String :sigma))) :dont-know))
+        "test 459")
     (is (= 1
            (with-compile-env ()
-             (rte-match
+             (rte/match
               (memoized-rte-case-clauses-to-dfa
                '[[0
                   (:and (:cat Boolean (or String Boolean))
@@ -467,7 +484,9 @@
                      (:cat
                       Boolean
                       (or String Boolean)))))]])
-              '(true ["hello" 3] true)))))))
+              '(true ["hello" 3] true))))
+        "test 489"
+)))
 
 (deftest t-destructuring-case-402
   (testing "special case which was failing 402"

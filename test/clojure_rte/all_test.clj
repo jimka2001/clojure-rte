@@ -20,18 +20,20 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.all-test
-   (:require  clojure.test
-              clojure-rte.api-test
-              clojure-rte.bdd-test
-              clojure-rte.cl-compat-test
-              clojure-rte.xymbolyco-test
-              clojure-rte.dot-test
-              clojure-rte.rte-test
-              clojure-rte.rte-case-test
-              clojure-rte.rte-tester-test
-              clojure-rte.genus-test
-              clojure-rte.util-test             
-              )
+  (:require  [clojure-rte.rte-core]
+             clojure.test
+             clojure-rte.api-test
+             clojure-rte.bdd-test
+             clojure-rte.cl-compat-test
+             clojure-rte.xymbolyco-test
+             clojure-rte.dot-test
+             clojure-rte.rte-test
+             clojure-rte.rte-case-test
+             clojure-rte.rte-tester-test
+             clojure-rte.genus-test
+             clojure-rte.util-test             
+             clojure-rte.genus-spec-test
+             )
   (:gen-class))
 
 (defn rte-run-all-test
@@ -47,6 +49,7 @@
                           'clojure-rte.rte-tester-test
                           'clojure-rte.genus-test
                           'clojure-rte.util-test
+                          'clojure-rte.genus-spec-test
                           ))
 
 (defn -main []

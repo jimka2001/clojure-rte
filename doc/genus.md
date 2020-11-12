@@ -1,3 +1,26 @@
+<!--
+ Copyright (c) 2020 EPITA Research and Development Laboratory
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software,
+ and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
 # Genus - A Simple Extensible Type System
 
 <img src="../img/Double_torus_illustration.png" 
@@ -78,15 +101,6 @@ Example
 An application may extend the type system by adding a new type
 designator syntax.  To do so, several steps must be followed.
 
-### Registering the existence of the new type
-
-To declare a new type as existing and supported by rte, you must register
-by added a method via `defmethod registered-type?` returning `true`.
-
-```clojure
-(defmethod registered-type? 'my-type [_] true)
-```
-
 ### Determine whether a given element is a member of the new type
 
 Additional several methods must be added to allow
@@ -117,11 +131,11 @@ element of the designated type.
 ### Determine various characteristics of the new type
 
 The system reasons about types via an interface defined by the
-functions: `canonicalize-type`, `registered-type?`, `typep`, `inhabited?`, `disjoint?`, and 
-`subtype?`.  While you are expected to add a method `registered-type?` and 
-`typep` for your new type, you must not add methods to `inhabited?`, 
+functions: `canonicalize-type`, `typep`, `inhabited?`, `disjoint?`, and 
+`subtype?`.  While you are expected to add a method `typep`
+for your new type, you must not add methods to `inhabited?`, 
 `disjoint?`, or `subtype?`. To fully implement a new type, you must provide 
-several methods which extend some built-in multimethods:  `-canonicalize-type`, `-inhabited?`, 
+several methods which extend some built-in multimethods:  `valid-type?`, `-canonicalize-type`, `-inhabited?`, 
 `-disjoint?`, and `-subtype?`.
 
 The methods `-inhabited?`, `-disjoint?`, and `-subtype?`,
