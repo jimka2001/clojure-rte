@@ -131,6 +131,11 @@
             true
             default))))))
 
+(defn type-dispatch [type-designator]
+  (if (sequential? type-designator)
+    (first type-designator)
+    type-designator))
+
 (defmulti typep 
   "(typep value type-descriptor)
   Like clojure.core/instance? except that the arguments are reversed, and the
@@ -144,15 +149,10 @@
   (= obj)
   (member a b c)"
   (fn [_value type-designator]
-    (if (sequential? type-designator)
-      (first type-designator)
-      type-designator)))
+    (type-dispatch type-designator)))
 
 (defmulti -canonicalize-type
-  (fn [type-designator]
-    (if (sequential? type-designator)
-      (first type-designator)
-      type-designator)))
+  type-dispatch)
 
 (defn canonicalize-type
   "Simplify the given type-designator to a stable form"
@@ -161,10 +161,7 @@
 
 (defmulti valid-type?
   "Look at a type-designator and determine whether it is syntactically correct"
-  (fn [type-designator]
-    (if (sequential? type-designator)
-      (first type-designator)
-      type-designator)))
+  type-dispatch)
 
 (defmethod typep :sigma [_ _]
   true)
