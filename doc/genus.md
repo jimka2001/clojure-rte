@@ -101,15 +101,6 @@ Example
 An application may extend the type system by adding a new type
 designator syntax.  To do so, several steps must be followed.
 
-### Registering the existence of the new type
-
-To declare a new type as existing and supported by rte, you must register
-by added a method via `defmethod registered-type?` returning `true`.
-
-```clojure
-(defmethod registered-type? 'my-type [_] true)
-```
-
 ### Determine whether a given element is a member of the new type
 
 Additional several methods must be added to allow
@@ -140,9 +131,9 @@ element of the designated type.
 ### Determine various characteristics of the new type
 
 The system reasons about types via an interface defined by the
-functions: `canonicalize-type`, `registered-type?`, `typep`, `inhabited?`, `disjoint?`, and 
-`subtype?`.  While you are expected to add a method `registered-type?` and 
-`typep` for your new type, you must not add methods to `inhabited?`, 
+functions: `canonicalize-type`, `typep`, `inhabited?`, `disjoint?`, and 
+`subtype?`.  While you are expected to add a method `typep`
+for your new type, you must not add methods to `inhabited?`, 
 `disjoint?`, or `subtype?`. To fully implement a new type, you must provide 
 several methods which extend some built-in multimethods:  `-canonicalize-type`, `-inhabited?`, 
 `-disjoint?`, and `-subtype?`.
