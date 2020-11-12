@@ -274,8 +274,8 @@
 (defmethod typep '= [a-value [_type value]]
   (= value a-value))
 
-(defmethod valid-type? '= [[_ _]]
-  true)
+(defmethod valid-type? '= [[_ & args]]
+  (boolean (= 1 (count args))))
 
 (defmethod typep 'member [a-value [_type & others]]
   (member a-value others))
@@ -401,12 +401,14 @@
     :dont-know))
 
 (defmethod -disjoint? 'or [t1 t2]
-  (and (gns/or? t1)
-       (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1)))
-  true
+  (cond (not (gns/or? t1))
+        :dont-know
+        
+        (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1))
+        true
 
-  :else
-  :dont-know)
+        :else
+        :dont-know))
 
 (defmethod -disjoint? 'and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 false))
