@@ -362,7 +362,7 @@
 (deftest t-rte-to-dfa
 
   (testing "rte-to-dfa"
-    (is (:rte (methods gns/-disjoint?)) "test 367")
+    (is (get (methods gns/-disjoint?) 'rte) "test 367")
     (with-compile-env ()
       (is (rte-to-dfa '(:cat :epsilon (:+ (:* :epsilon)) :sigma)) "dfa 1")
       ;; (is (thrown? clojure.lang.ExceptionInfo
@@ -580,7 +580,7 @@
 
 (deftest t-rte-inhabited
   (testing "rte inhabited?"
-    (is (:rte (methods gns/-disjoint?)) "test 585")
+    (is (get (methods gns/-disjoint?) 'rte) "test 585")
     (with-compile-env ()
 
       (is (rte-inhabited? (rte-to-dfa '(:and (:* Long) (:* Double)))))
@@ -591,7 +591,7 @@
 
 (deftest t-rte-with-rte
   (testing "recursive rte"
-    (is (:rte (methods gns/-disjoint?)) "test 596")
+    (is (get (methods gns/-disjoint?) 'rte) "test 596")
     (with-compile-env ()
 
       (is (not (gns/disjoint? '(rte (:* Number))
@@ -613,14 +613,14 @@
 
     ;; assert the :rte methods exist for
     ;;   gns/-disjoint? :rte
-    (is (:rte (methods gns/-disjoint?)) "test 615")
+    (is (get (methods gns/-disjoint?) 'rte) "test 615")
     (is (:not-rte (methods gns/-disjoint?)) "test 616")
 
     ;;   gns/-subtype? :rte
-    (is (:rte (methods gns/-subtype?)) "test 619")
+    (is (get (methods gns/-subtype?) 'rte) "test 619")
     
     ;;   gns/-inhabited? :rte
-    (is (:rte (methods gns/-inhabited?)) "test 622")
+    (is (get (methods gns/-inhabited?) 'rte) "test 622")
     
     ;;   gns/typep 'rte
     (is (get (methods gns/typep) 'rte) "test 625")
@@ -718,7 +718,7 @@
 
 (deftest t-dfa-to-rte
   (testing "dfa-to-rte"
-    (is (:rte (methods gns/-disjoint?)) "test x14")
+    (is (get (methods gns/-disjoint?) 'rte) "test x14")
     (is (= '{13 (:* Integer)}
            (dfa-to-rte (rte-to-dfa '(:* Integer) 13))) "(:* Integer)")
 
