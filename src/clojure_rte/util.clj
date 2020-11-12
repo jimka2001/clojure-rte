@@ -431,3 +431,10 @@
                    default
                    (cons `['~key (fn [] ~value)] acc)
                  )))))
+
+;; code thanks to https://clojurians.slack.com/archives/C053AK3F9/p1605188036049500
+(defn unchunk [s]
+  (when (seq s)
+    (lazy-seq
+      (cons (first s)
+            (unchunk (next s))))))

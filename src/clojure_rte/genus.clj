@@ -26,7 +26,7 @@
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       partition-by-pred
                                       seq-matcher member find-simplifier defn-memoized
-                                      ]]
+                                      unchunk]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
             ))
@@ -743,9 +743,25 @@
     
     :dont-know))
 
-;; TODO implement this method
-;; (defmethod -inhabited? 'or [t1]
-;;   :dont-know)
+(defmethod -inhabited? 'or [t1]
+  (cond
+    (not (gns/or? t1))
+    :dont-know
+
+    :else
+    (let [values (map inhabited? (unchunk (rest t1)))]
+      ;; we are depending on the fact that map is lazy here.
+      ;; i.e. if true appears in the values list, then we
+      ;; dont call inhabited? on any elements of (rest t1)
+      ;; that come to the right of that element.
+      (cond (some true? values)
+            true
+
+            (every? false? values)
+            false
+
+            :else
+            :dont-know))))
 
 (defmethod -inhabited? 'and [t1]
   (cond
