@@ -45,10 +45,10 @@
 (defmethod gns/valid-type? 'spec [[_ pattern]]
   (boolean (s/get-spec pattern)))
 
-(defmethod gns/-inhabited? :spec [_t1]
+(defmethod gns/-inhabited? 'spec [_t1]
   :dont-know)
 
-(defmethod gns/-disjoint? :spec [t1 t2]
+(defmethod gns/-disjoint? 'spec [t1 t2]
   (cond (not (gs/spec? t1))
         :dont-know
 
@@ -59,7 +59,7 @@
         :else ;; for the moment assume that spec is always disjoint with anything
         false))
 
-(defmethod gns/-subtype? :spec [_sub-designator _super-designator]
+(defmethod gns/-subtype? 'spec [_sub-designator _super-designator]
   :dont-know)
 
 (defn symbol= [x y]
