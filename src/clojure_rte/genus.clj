@@ -1340,13 +1340,14 @@
                                              filtered-candidates (filter (fn [t2] (typep t2 filtered-td))
                                                                          candidates)
                                              ]
-                                         (cons 'member filtered-candidates))
+                                         (template (not (member ~@filtered-candidates))))
                                        t
                                        ))
                                    (rest type-designator)))
                         type-designator))
 
                     (fn [type-designator]
+                      ;; (and A (and B C) D) --> (and A B C D)
                       (if (exists [x (rest type-designator)]
                                   (gns/and? x))
                         (cons 'and
