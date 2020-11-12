@@ -869,14 +869,19 @@
     false
     
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
-    (exists [t (rest t1)]
-            (and (gns/not? t)
-                 (member? (second t))))
-    (inhabited? (-canonicalize-type (cons 'and
-                                         (remove (fn [t]
-                                                   (and (gns/not? t)
-                                                        (member? (second t)))) (rest t1))))
-                :dont-know)
+    
+    (and (not-empty (filter class-designator? (rest t1)))
+         (= 1 (count (filter (fn [t]
+                               (and (gns/not? t)
+                                    (member? (second t))))
+                             (rest t1))))
+         (let [t2 (canonicalize-type (cons 'and
+                                           (remove (fn [t]
+                                                     (and (gns/not? t)
+                                                          (member? (second t))))
+                                                   (rest t1))))]
+           (inhabited? t2 false)))
+    true
 
     ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
     (exists-pair [[ta tb] (rest t1)]
@@ -1287,7 +1292,6 @@
 
 (defmethod -canonicalize-type 'and
   [type-designator]
-  
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (member :empty-set (rest type-designator))
@@ -1346,8 +1350,9 @@
                                              [_not [_member & candidates]] t
                                              filtered-candidates (filter (fn [t2] (typep t2 filtered-td))
                                                                          candidates)
+                                             m (gns/canonicalize-type (template (member ~@filtered-candidates)))
                                              ]
-                                         (template (not (member ~@filtered-candidates))))
+                                         (template (not ~m)))
                                        t
                                        ))
                                    (rest type-designator)))
