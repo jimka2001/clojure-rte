@@ -622,7 +622,7 @@
         :else
         :dont-know))
 
-(defmethod -subtype? :not [sub super]
+(defmethod -subtype? 'not [sub super]
   (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
              (disjoint? sub (second super) false))
         true
@@ -652,7 +652,7 @@
             :dont-know
             x))))
 
-(defmethod -subtype? :member [sub super]
+(defmethod -subtype? 'member [sub super]
   (cond (member? sub)
         (every? (fn [e1]
                   (typep e1 super)) (rest sub))
@@ -674,7 +674,7 @@
         :else
         :dont-know))
 
-(defmethod -subtype? :and [t1 t2]
+(defmethod -subtype? 'and [t1 t2]
   (cond
     (not (gns/and? t1))
     :dont-know
