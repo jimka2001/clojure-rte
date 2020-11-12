@@ -1462,3 +1462,53 @@
     :else
     type-designator
     ))
+
+
+(def ^:dynamic *test-types*
+  "Some type designators used for testing"
+  '((satisfies integer?)
+    (satisfies int?)
+    (satisfies rational?)
+    (satisfies ratio?)
+    (satisfies string?)
+    (satisfies keyword?)
+    (satisfies symbol?)
+    (satisfies decimal?)
+    (satisfies float?)
+    (satisfies seq?)
+    java.io.Serializable
+    java.lang.CharSequence
+    java.lang.Comparable
+    java.lang.Number
+    java.lang.Object
+    clojure.lang.IMeta
+    (= 1)
+    (= 0)
+    (= a)
+    (= [1 2 3])
+    (= [])
+    (member [1 2 3] [1 2] [1] [])
+    (member [1 2 3] [2 1 3])
+    (member a b c "a" "b" "c")
+    (member a b)
+    (member 1 2 3)
+    (member 2 3 4)
+    (member "a" "b" "c")
+    (member "a" "b" "c" 1 2 3)
+    (member 1 "a")
+    ))
+
+(defn gen-type
+  "Generate a type designator for testing."
+  ([size]
+   (gen-type size *test-types*))
+  ([size types]
+   (if (< 0 size)
+     (case (rand-nth '(or and not :else))
+       (or) (template (or ~(gen-type (dec size) types)
+                          ~(gen-type (dec size) types)))
+       (and) (template (and ~(gen-type (dec size) types)
+                            ~(gen-type (dec size) types)))
+       (not) (template (not ~(gen-type (dec size) types)))
+       (rand-nth types))
+     (rand-nth types))))

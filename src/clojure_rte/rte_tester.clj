@@ -23,6 +23,7 @@
   (:require [clojure-rte.tester  :as tester]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
+            [clojure-rte.genus :as gns]
             [clj-async-profiler.core :as prof] ;; this requirement is only temporary while trying to debug the out-of-memory error
             ;; [clojure-rte.dot :as dot]
             [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable
@@ -68,50 +69,17 @@
                                                           (range size)))
      (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
 
-(def ^:dynamic *test-types*
-  '((satisfies integer?)
-    (satisfies int?)
-    (satisfies rational?)
-    (satisfies ratio?)
-    (satisfies string?)
-    (satisfies keyword?)
-    (satisfies symbol?)
-    (satisfies decimal?)
-    (satisfies float?)
-    (satisfies seq?)
-    java.io.Serializable
-    java.lang.CharSequence
-    java.lang.Comparable
-    java.lang.Number
-    java.lang.Object
-    clojure.lang.IMeta
-    (= 1)
-    (= 0)
-    (= a)
-    (= [1 2 3])
-    (= [])
-    (member [1 2 3] [1 2] [1] [])
-    (member [1 2 3] [2 1 3])
-    (member a b c "a" "b" "c")
-    (member a b)
-    (member 1 2 3)
-    (member 2 3 4)
-    (member "a" "b" "c")
-    (member "a" "b" "c" 1 2 3)
-    (member 1 "a")
-    ))
-
 (defn test-rte-to-dfa [num-tries size verbose]
   (tester/random-test num-tries (fn [rte]
                                   (with-compile-env []
                                     (rte-to-dfa rte)))
-                      (fn [] (gen-rte size *test-types*))
+                      (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))
 
 (defn test-canonicalize-pattern [num-tries size verbose]
   (tester/random-test num-tries canonicalize-pattern
-                      (fn [] (gen-rte size *test-types*))
+                      (fn [] (gen-rte size gns/*test-types*))
                       rte-components verbose))
 
 
@@ -130,7 +98,7 @@
                                   (cl-format false
                                              "rte ~A is not nullable but its complement (:not ...) is nullable"
                                              rte))))                          
-                      (fn [] (gen-rte size *test-types*))
+                      (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))
 
@@ -180,7 +148,7 @@
   [num-tries size verbose]
   (tester/random-test num-tries
                       test-rte-canonicalize-nullable-1
-                      (fn [] (gen-rte size *test-types*))
+                      (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))
 
@@ -228,7 +196,7 @@
   [num-tries size verbose]
   (tester/random-test num-tries
                       test-rte-not-1
-                      (fn [] (gen-rte size *test-types*))
+                      (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))
 
