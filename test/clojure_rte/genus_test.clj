@@ -24,6 +24,8 @@
             [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [call-with-collector member]]
+            [backtick :refer [template]]
+            [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
@@ -405,3 +407,18 @@
     clojure.lang.Ratio
     
     ))
+
+(deftest t-inhabited-random
+  (testing "checking some randomly generated types for inhabited?"
+    (with-compile-env []
+      (dotimes [_ 1000]
+        (let [type-designator (gns/gen-type 4)
+              inh (gns/inhabited? type-designator :dont-know)
+              t2 (gns/canonicalize-type type-designator)
+              inh-2 (gns/inhabited? t2 :dont-know)]
+          (cond
+            (= true inh)
+            (is (= true inh-2)
+                (cl-format false "~A is inhabited but its canonicalized form is not ~A"
+                           type-designator
+                           t2))))))))
