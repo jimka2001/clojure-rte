@@ -135,7 +135,7 @@ functions: `canonicalize-type`, `typep`, `inhabited?`, `disjoint?`, and
 `subtype?`.  While you are expected to add a method `typep`
 for your new type, you must not add methods to `inhabited?`, 
 `disjoint?`, or `subtype?`. To fully implement a new type, you must provide 
-several methods which extend some built-in multimethods:  `-canonicalize-type`, `-inhabited?`, 
+several methods which extend some built-in multimethods:  `valid-type?`, `-canonicalize-type`, `-inhabited?`, 
 `-disjoint?`, and `-subtype?`.
 
 The methods `-inhabited?`, `-disjoint?`, and `-subtype?`,
