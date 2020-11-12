@@ -892,11 +892,14 @@
         :dont-know))
 
 (defmethod -inhabited? 'member [t1]
-  (cond (member? t1)
-        (boolean (rest t1))
+  (cond (not (gns/member? t1))
+        :dont-know
 
+        (empty? (rest t1))
+        false
+        
         :else    
-        :dont-know))
+        true))
 
 (defmethod -inhabited? '= [t1]
   (if (=? t1)
