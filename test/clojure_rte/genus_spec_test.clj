@@ -280,9 +280,6 @@
                 [1 2 3     "a" "b" "c"]
                 [true true false     "a" "b" "c"]
                 [[true true false]     "a" "b" "c"]
-                
-
-
                 ]]
       (t/is (= (gns/typep v1 t1)
                (gns/typep v1 t2))
