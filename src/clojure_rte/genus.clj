@@ -498,21 +498,25 @@
         :dont-know))
 
 (defmethod -disjoint? 'member [t1 t2]
-  (cond (member? t1)
+  (cond (or (member? t1)
+            (=? t1))
         (every? (fn [e1]
                   (not (typep e1 t2))) (rest t1))
 
         ;; (member ...) is finite, types are infinite
         ;; (disjoint? '(not (member 1 2 3)) 'Long)
         (and (gns/not? t1)
-             (member? (second t1))
+             (or (member? (second t1))
+                 (=? (second t1)))
              (class-designator? t2))
         false
         
         (and (gns/not? t1)
              (gns/not? t2)
-             (member? (second t1))
-             (member? (second t2)))
+             (or (member? (second t1))
+                 (=? (second t1)))
+             (or (member? (second t2))
+                 (=? (second t2))))
         false
 
         :else
@@ -619,15 +623,18 @@
             (calc-inhabited @td-canon default)))))
 
 (defmethod -inhabited? :primary [type-designator]
-  (if (class-designator? type-designator)
+  (cond
+    (class-designator? type-designator)
     true
+
+    (= :sigma type-designator)
+    true
+    
+    (= :empty-set type-designator)
+    false
+
+    :else    
     :dont-know))
-
-(defmethod -inhabited? :sigma [_]
-  true)
-
-(defmethod -inhabited? :empty-set [_]
-  false)
 
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
@@ -834,21 +841,21 @@
     (and (< 2 (count t1))
          (forall-pairs [[a b] (rest t1)]
                        (and (or (class-designator? a)
-                                (gns/not? a)
-                                (class-designator? (second a)))
+                                (and (gns/not? a)
+                                     (class-designator? (second a))))
                             (or (class-designator? b)
-                                (gns/not? b)
-                                (class-designator? (second b)))
+                                (and (gns/not? b)
+                                     (class-designator? (second b))))
                             (not (disjoint? a b true)))))
     true
 
     (exists-pair [[a b] (rest t1)]
                  (and (or (class-designator? a)
-                          (gns/not? a)
-                          (class-designator? (second a)))
+                          (and (gns/not? a)
+                               (class-designator? (second a))))
                       (or (class-designator? b)
-                          (gns/not? b)
-                          (class-designator? (second b)))
+                          (and (gns/not? b)
+                               (class-designator? (second b))))
                       (disjoint? a b false)))
     false
     
@@ -860,7 +867,7 @@
     (some false? (map (fn [t] (inhabited? t :dont-know))
                       (unchunk (rest t1))))
     false
-
+    
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
     (exists [t (rest t1)]
             (and (gns/not? t)
@@ -886,7 +893,8 @@
         (class-designator? (second t1))
         (not= Object (find-class (second t1))) ;; (not Object) is empty, (not any-other-class) is inhabited
 
-        (member? (second t1))
+        (or (member? (second t1))
+            (=? (second t1)))
         true
 
         :else
@@ -1357,7 +1365,7 @@
                         type-designator))
 
                     (fn [type-designator]
-                      (cons 'and (map -canonicalize-type (rest type-designator))))]))
+                      (cons 'and (map canonicalize-type (rest type-designator))))]))
 
 (defmethod -canonicalize-type 'member
   [type-designator]
