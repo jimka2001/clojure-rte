@@ -140,18 +140,29 @@
   "(typep value type-descriptor)
   Like clojure.core/instance? except that the arguments are reversed, and the
   given type designator need not be a class.  The given type 
-  designator may be a (1) class, (2) a symbol resolving to a class, or
-  (3) a CL style type designator such as
-  (not A)
-  (and A B)
-  (or A B)
-  (satisfies A)
-  (= obj)
-  (member a b c)"
+  designator may be a 1: class, 2: a symbol resolving to a class, or
+  3: a CL style type designator such as
+   (not A)
+   (and A B)
+   (or A B)
+   (satisfies A)
+   (= obj)
+   (member a b c)
+  Methods of typep should specify the symbol which distinguishes the type.
+  For example, the method whose dispatch value is 'member handles the decision
+  of (typep 3 '(member 1 2 3 4 5)), and the method whose dispatch value is
+  :empty-set handles the decision of (typep 3 :empty-set)."
   (fn [_value type-designator]
     (type-dispatch type-designator)))
 
 (defmulti -canonicalize-type
+  "Methods of -canonicalize-type implement the behavior of canonicalize-type.
+  The method of -canonicalize-type whose dispatch value is 'X handles
+  the canonicalization of the type designator (X ...).
+  Such a method may return the given value to indicate no further 
+  canonicalization is possible, or should return a value which will be
+  considered a simpler form.  For example, converting 
+  (member 1 1 2 2 3) to (member 1 2 3)"
   type-dispatch)
 
 (defn canonicalize-type
@@ -160,7 +171,12 @@
   (fixed-point type-designator -canonicalize-type =))
 
 (defmulti valid-type?
-  "Look at a type-designator and determine whether it is syntactically correct"
+  "Look at a type-desnignator and determine whether it is syntactically correct.
+  Methods of valid-type? implement the behavior of valid-type?.
+  The method of valid-type? whose dispatch value is 'X handles
+  the validation the type designator (X ...).
+  Such a method must return either true or false, depending on whether
+  the operands are syntactically correct."
   type-dispatch)
 
 (defmethod typep :sigma [_ _]
@@ -291,7 +307,22 @@
   (:primary first) until one method returns true or false,
   in which case disjoint? returns that value.
   If no method returns true or false, then disjoint?
-  the function returns the given default value."
+  the function returns the given default value.
+
+  The methods of 'disjoint? must specify a dispatch value.
+  It is conventional that the method responsible for
+  checking the disjointness of (X ...) vs Y, specify
+  a dispatch value of 'X.  However, this is not enforced.
+  For example, the implementator may wish to also check
+  the disjointness of (not (X ...)), and there is already a method
+  whose dispatch value is 'not.  For this reason the implementor
+  might wish to add two methods, one with dispatch value 'X
+  and one with dispatch value :not-X.  Any symbol or keyword
+  is allowed but dispatch values must be unique.
+  It is also conventional that the first thing checked
+  in the method (defmethod -disjoint? 'X [t1 t2] ...)
+  should be to detect whether t1 is a sequence whose
+  first element is (= 'X)."
   (fn [t1 t2]
     (throw (ex-info "-disjoint? should not be called directly"
                     {:error-type :should-not-be-called-directly
@@ -496,7 +527,18 @@
   (:primary first) until one method returns true or false,
   in which case subtype? returns that value.
   If no method returns true or false, then the default is
-  returned."
+  returned.
+
+  The methods of 'subtype? must specify a dispatch value.
+  It is conventional that the method responsible for
+  checking the subtypeness of (X ...) vs Y, or
+  Y vs (X ...) specify a dispatch value of 'X.
+  However, this is not enforced.
+  For example, the implementator may wish to also check
+  the subtypeness of (not (X ...)), and there is already a method
+  whose dispatch value is 'not.  For this reason the implementor
+  might wish to add two (or more) methods, one with dispatch value 'X
+  and others whith dispatch values such as :not-X, :X-case-2."
   (fn [sub super]
     (throw (ex-info "-subtype? should not be called directly"
                     {:error-type :should-not-be-called-directly
@@ -530,7 +572,18 @@
   When inhabited? (the public calling interface) is called,
   the methods of -inhabited? are called in some order
   (:primary first) until one method returns true or false,
-  in which case inhabited? returns that value."
+  in which case inhabited? returns that value.
+
+  Each method of -inhabited? must specify a dispatch value.
+  Conventionally a dispatch value of 'X indicates the code
+  to determine whether the type designator (X ...) is inhabited.
+  However, this is not enforced.  Such code may also check, for
+  example, the habitation of (not (X ...)), or the implementor
+  might elect to implement a different method for this purpose.
+  For this reason the code within the must must both determine
+  applicability, (is the type designator one we are interested),
+  and if applicable, then logic to determine habitation.
+  "
   (fn [type-designator]
     (throw (ex-info "-inhabited? should not be called directly"
                     {:type-designator type-designator
@@ -1302,7 +1355,7 @@
                         :empty-set
                         type-designator))
                     (fn [type-designator]
-                      (if  (empty? (rest (rest type-designator)))
+                      (if (empty? (rest (rest type-designator)))
                         (list '= (second type-designator))
                         type-designator))]))
 
