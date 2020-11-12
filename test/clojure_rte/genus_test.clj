@@ -276,14 +276,14 @@
 (deftest t-inhabited
   (testing "inhabited?"
     (with-compile-env ()
-      (is (gns/inhabited? '(and Number (not (member 1 2 3))) false))
-      (is (gns/inhabited? 'Long false))
-      (is (gns/inhabited? '(not Long) false))
-      (is (gns/inhabited? 'Object false))
-      (is (not (gns/inhabited? '(not Object) true)))
-      (is (gns/inhabited? '(rte (:+ Number)) false))
-      (is (not (gns/inhabited? '(rte (:and (:+ Number)
-                                       (:+ String))) false))))))
+      (is (= true (gns/inhabited? '(and Number (not (member 1 2 3))) :dont-know)))
+      (is (= true (gns/inhabited? 'Long :dont-know)))
+      (is (= true (gns/inhabited? '(not Long) :dont-know)))
+      (is (= true (gns/inhabited? 'Object :dont-know)))
+      (is (= false (gns/inhabited? '(not Object) :dont-know)))
+      (is (= true (gns/inhabited? '(rte (:+ Number)) :dont-know)))
+      (is (= false (gns/inhabited? '(rte (:and (:+ Number)
+                                               (:+ String))) :dont-know))))))
 
 (deftest t-expand-satisfies
   (testing "expand-satisfies"
