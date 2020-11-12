@@ -1359,7 +1359,12 @@
                     (fn [type-designator]
                       (if (empty? (rest (rest type-designator)))
                         (list '= (second type-designator))
-                        type-designator))]))
+                        type-designator))
+                    (fn [type-designator]
+                      (let [items (distinct (rest type-designator))]
+                        (if (= items (rest type-designator))
+                          type-designator
+                          (cons 'member items))))]))
 
 (defmethod -canonicalize-type 'or
   [type-designator]
