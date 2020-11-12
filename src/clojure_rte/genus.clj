@@ -622,6 +622,12 @@
     true
     :dont-know))
 
+(defmethod -inhabited? :sigma [_]
+  true)
+
+(defmethod -inhabited? :empty-set [_]
+  false)
+
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
   [type-designator]
