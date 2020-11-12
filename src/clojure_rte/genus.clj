@@ -369,7 +369,7 @@
     :else
     :dont-know))
 
-(defmethod -disjoint? :or [t1 t2]
+(defmethod -disjoint? 'or [t1 t2]
   (and (gns/or? t1)
        (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1)))
   true
@@ -377,7 +377,7 @@
   :else
   :dont-know)
 
-(defmethod -disjoint? :and [t1 t2]
+(defmethod -disjoint? 'and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 false))
         inhabited-t2 (delay (inhabited? t2 false))]
     (cond (not (gns/and? t1))
@@ -449,7 +449,7 @@
           :else
           :dont-know)))
 
-(defmethod -disjoint? := [t1 t2]
+(defmethod -disjoint? '= [t1 t2]
   (cond (=? t1)
         (not (typep (second t1) t2))
         
@@ -463,7 +463,7 @@
         :else
         :dont-know))
 
-(defmethod -disjoint? :member [t1 t2]
+(defmethod -disjoint? 'member [t1 t2]
   (cond (member? t1)
         (every? (fn [e1]
                   (not (typep e1 t2))) (rest t1))
@@ -612,7 +612,7 @@
                        :a-type t
                        :flags flags})))))
 
-(defmethod -subtype? := [sub super]
+(defmethod -subtype? '= [sub super]
   (cond (=? sub)
         (subtype? (cons 'member (rest sub)) super :dont-know)
 
@@ -812,7 +812,7 @@
     true
     :dont-know))
 
-(defmethod -disjoint? :not [t1 t2]
+(defmethod -disjoint? 'not [t1 t2]
   (cond
     (not (gns/not? t1))
     :dont-know
