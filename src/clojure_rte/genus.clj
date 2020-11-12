@@ -1325,11 +1325,10 @@
                     (fn [type-designator]
                       ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
                       ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
-                      (if (some (fn [t]
+                      (if (exists [t (rest type-designator)]
                                   (and (gns/not? t)
                                        (or (member? (second t))
                                            (=? (second t)))))
-                                (rest type-designator))
                         (cons 'and
                               (map (fn [t]
                                      (if (and (gns/not? t)
