@@ -29,6 +29,7 @@
                                       unchunk]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
+            [backtick :refer [template]]
             ))
 
 ;; allow gns/ prefix even in this file.
