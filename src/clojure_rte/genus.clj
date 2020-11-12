@@ -743,7 +743,11 @@
     
     :dont-know))
 
-(defmethod -inhabited? :and [t1]
+;; TODO implement this method
+;; (defmethod -inhabited? 'or [t1]
+;;   :dont-know)
+
+(defmethod -inhabited? 'and [t1]
   (cond
     (not (gns/and? t1))
     :dont-know
@@ -787,7 +791,7 @@
     :else
     :dont-know))
 
-(defmethod -inhabited? :not [t1]
+(defmethod -inhabited? 'not [t1]
   (cond (not (gns/not? t1))
         :dont-know
 
@@ -800,14 +804,14 @@
         :else
         :dont-know))
 
-(defmethod -inhabited? :member [t1]
+(defmethod -inhabited? 'member [t1]
   (cond (member? t1)
         (boolean (rest t1))
 
         :else    
         :dont-know))
 
-(defmethod -inhabited? := [t1]
+(defmethod -inhabited? '= [t1]
   (if (=? t1)
     true
     :dont-know))
