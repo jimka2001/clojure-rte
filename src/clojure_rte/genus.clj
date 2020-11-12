@@ -749,7 +749,8 @@
     :dont-know
 
     :else
-    (let [values (map inhabited? (unchunk (rest t1)))]
+    (let [values (map (fn [t] (inhabited? t :dont-know))
+                      (unchunk (rest t1)))]
       ;; we are depending on the fact that map is lazy here.
       ;; i.e. if true appears in the values list, then we
       ;; dont call inhabited? on any elements of (rest t1)
@@ -789,6 +790,15 @@
                       (disjoint? a b false)))
     false
     
+    ;; if any of the types are empty, the intersection is empty,
+    ;;   even if others are unknown.  (or A B empty D E).
+    ;;   Careful, the computation here depends on laziness of map.
+    ;;   Once a false is found, we don't call inhabited? on the remaining
+    ;;   part of (rest t1).
+    (some false? (map (fn [t] (inhabited? t :dont-know))
+                      (unchunk (rest t1))))
+    false
+
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
     (exists [t (rest t1)]
             (and (gns/not? t)
