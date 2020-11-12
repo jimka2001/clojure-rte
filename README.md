@@ -84,6 +84,7 @@ git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 * [API](doc/api.md)
 * [destructuring-fn](doc/dsc.md)
 * [destructuring-case](doc/dsc.md/#destructuring-case)
+* [spec integration](doc/spec.md)
 ## Usage
 
 RTE allows the Clojure programmer to specify regular patterns of types
