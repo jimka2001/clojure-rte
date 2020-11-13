@@ -27,7 +27,8 @@
                                             test-rte-canonicalize-nullable
                                             test-rte-not
                                             rte-components gen-rte
-                                            *test-types* *rte-keywords*]]
+                                            *rte-keywords*]]
+            [clojure-rte.genus :as gns]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
@@ -49,12 +50,12 @@
 (deftest t-rte-keywords
   (testing "rte-keywords"
     (for [k *rte-keywords*]
-      (gen-rte k 4 *test-types*))))
+      (gen-rte k 4 gns/*test-types*))))
 
 (deftest t-rte-components
   (testing "rte-components"
     (for [k *rte-keywords*]
-      (rte-components (gen-rte k 4 *test-types*)))))
+      (rte-components (gen-rte k 4 gns/*test-types*)))))
 
 (deftest t-rte-to-dfa-random
   (testing "rte-to-dfa random"

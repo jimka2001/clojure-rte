@@ -24,6 +24,8 @@
             [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [call-with-collector member]]
+            [backtick :refer [template]]
+            [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
@@ -276,14 +278,14 @@
 (deftest t-inhabited
   (testing "inhabited?"
     (with-compile-env ()
-      (is (gns/inhabited? '(and Number (not (member 1 2 3))) false))
-      (is (gns/inhabited? 'Long false))
-      (is (gns/inhabited? '(not Long) false))
-      (is (gns/inhabited? 'Object false))
-      (is (not (gns/inhabited? '(not Object) true)))
-      (is (gns/inhabited? '(rte (:+ Number)) false))
-      (is (not (gns/inhabited? '(rte (:and (:+ Number)
-                                       (:+ String))) false))))))
+      (is (= true (gns/inhabited? '(and Number (not (member 1 2 3))) :dont-know)))
+      (is (= true (gns/inhabited? 'Long :dont-know)))
+      (is (= true (gns/inhabited? '(not Long) :dont-know)))
+      (is (= true (gns/inhabited? 'Object :dont-know)))
+      (is (= false (gns/inhabited? '(not Object) :dont-know)))
+      (is (= true (gns/inhabited? '(rte (:+ Number)) :dont-know)))
+      (is (= false (gns/inhabited? '(rte (:and (:+ Number)
+                                               (:+ String))) :dont-know))))))
 
 (deftest t-expand-satisfies
   (testing "expand-satisfies"
@@ -404,4 +406,40 @@
     BigDecimal
     clojure.lang.Ratio
     
+    ))
+
+(deftest t-inhabited-random
+  (testing "checking some randomly generated types for inhabited?"
+    (with-compile-env []
+      (dotimes [_ 1000]
+        (let [type-designator (gns/gen-type 4)
+              inh (gns/inhabited? type-designator :dont-know)
+              t2 (gns/canonicalize-type type-designator)
+              inh-2 (gns/inhabited? t2 :dont-know)]
+          (cond
+            (= true inh)
+            (is (not= false inh-2)
+                (cl-format false "~A is inhabited but its canonicalized form is not ~A"
+                           type-designator
+                           t2))
+
+            (= false inh)
+            (is (not= true inh-2)
+                (cl-format false "~A is not inhabited but its canonicalized form is ~A"
+                           type-designator
+                           t2))
+            ))))))
+
+(deftest t-canonicalize-not-member
+  (testing "canonicalize (and (not (member ...)))"
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2)) (not (= 12)) (not (= 13)) (not (member 3 4))))
+           '(and Long (not (member 1 2 12 13 3 4)))) "line 436")
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2)) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           '(and Long (not (member 1 2 13 3 4)))) "line 438")
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           '(and Long (not (member 1 2 13 3 4)))) "line 440")
+    (is (= (gns/canonicalize-type '(and String (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           '(and String (not (member "world" "hello")))) "line 442")
+    (is (= (gns/canonicalize-type '(and Boolean (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           'Boolean) "line 444")
     ))

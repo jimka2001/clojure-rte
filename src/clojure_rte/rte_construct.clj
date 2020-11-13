@@ -116,7 +116,7 @@
 (defmethod gns/valid-type? 'rte [[_ pattern]]
   (boolean (rte/compile pattern)))
 
-(defmethod gns/-inhabited? :rte [t1]
+(defmethod gns/-inhabited? 'rte [t1]
   (if (rte? t1)
     (boolean (rte-inhabited? (rte/compile (second t1))))
     :dont-know))
@@ -140,7 +140,7 @@
         :else
         :dont-know))
 
-(defmethod gns/-disjoint? :rte [t1 t2]
+(defmethod gns/-disjoint? 'rte [t1 t2]
   (cond (not (rte? t1))
         :dont-know
 
@@ -178,7 +178,7 @@
         
         :else :dont-know))
 
-(defmethod gns/-subtype? :rte [sub-designator super-designator]
+(defmethod gns/-subtype? 'rte [sub-designator super-designator]
   (let [s1 (delay (gns/subtype? '(rte (:* java.lang.Character)) super-designator :dont-know))
         s2 (delay (gns/subtype? sub-designator '(rte (:* java.lang.Character)) :dont-know))]
     (cond (and (rte? sub-designator)
@@ -644,8 +644,8 @@
             
             :else
             (do
-              (cl-format true "(ns=~A) disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%"
-                         *ns* t1 t2)
+              (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%"
+                         t1 t2)
               false)))))
 
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
