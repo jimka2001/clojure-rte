@@ -644,8 +644,8 @@
             
             :else
             (do
-              (cl-format true "(ns=~A) disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%"
-                         *ns* t1 t2)
+              (cl-format true "disjoint? cannot decide ~A vs ~A -- assuming not disjoint~%"
+                         t1 t2)
               false)))))
 
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
