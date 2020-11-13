@@ -418,10 +418,17 @@
               inh-2 (gns/inhabited? t2 :dont-know)]
           (cond
             (= true inh)
-            (is (= true inh-2)
+            (is (not= false inh-2)
                 (cl-format false "~A is inhabited but its canonicalized form is not ~A"
                            type-designator
-                           t2))))))))
+                           t2))
+
+            (= false inh)
+            (is (not= true inh-2)
+                (cl-format false "~A is not inhabited but its canonicalized form is ~A"
+                           type-designator
+                           t2))
+            ))))))
 
 (deftest t-canonicalize-not-member
   (testing "canonicalize (and (not (member ...)))"
