@@ -422,3 +422,17 @@
                 (cl-format false "~A is inhabited but its canonicalized form is not ~A"
                            type-designator
                            t2))))))))
+
+(deftest t-canonicalize-not-member
+  (testing "canonicalize (and (not (member ...)))"
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2)) (not (= 12)) (not (= 13)) (not (member 3 4))))
+           '(and Long (not (member 1 2 12 13 3 4)))) "line 436")
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2)) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           '(and Long (not (member 1 2 13 3 4)))) "line 438")
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           '(and Long (not (member 1 2 13 3 4)))) "line 440")
+    (is (= (gns/canonicalize-type '(and String (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           '(and String (not (member "world" "hello")))) "line 442")
+    (is (= (gns/canonicalize-type '(and Boolean (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+           'Boolean) "line 444")
+    ))
