@@ -1268,6 +1268,12 @@
                         :empty-set
                         type-designator))
                     (fn [type-designator]
+                      (if (and (class-designator? (second type-designator))
+                               (= Object (find-class (second type-designator))))
+                        ;; (not Object) --> :empty-set
+                        :empty-set
+                        type-designator))
+                    (fn [type-designator]
                       (if (= :empty-set (second type-designator))
                         :sigma
                         type-designator))
