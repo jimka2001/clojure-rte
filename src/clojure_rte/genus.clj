@@ -1344,6 +1344,19 @@
                         (cons 'and (map -canonicalize-type (remove #{:sigma} (rest type-designator))))
                         type-designator))
 
+                    ;; (and Long (not (member 1 2)) (not (member 3 4)))
+                    ;;  --> (and Long (not (member 1 2 3 4)))
+                    (fn [type-designator]
+                      (let [not-member (filter gns/not-member-or-=? (rest type-designator))
+                            remaining (remove (fn [t]
+                                                (member t not-member)) (rest type-designator))
+                            merged-member (mapcat (fn [[_not [_member & items]]]
+                                                    items) not-member)]
+                        (if (< (count not-member) 2)
+                          type-designator
+                          (template (and ~@remaining
+                                         (not (member ~@merged-member)))))))
+
                     (fn [type-designator]
                       ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
                       ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
