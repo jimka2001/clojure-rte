@@ -60,6 +60,20 @@
   "Detect sequence starting with the simple symbol member"
   (seq-matcher 'member))
 
+(def gns/not-member-or-=?
+  "Detect sequence (not (member ...)) or (not (= ...))"
+  (fn [type-designator]
+    (and (sequential? type-designator)
+         (gns/not? type-designator)
+         (or (gns/member? (second type-designator))
+             (gns/=? (second type-designator))))))
+
+(def gns/member-or-=?
+  "Detect sequence (member ...) or (= ...)"
+  (fn [type-designator]
+    (or (gns/member? type-designator)
+        (gns/=? type-designator))))
+
 (def gns/satisfies?
   "Detect sequence starting with the simple symbol satisfies"
   (seq-matcher 'satisfies))
@@ -484,13 +498,13 @@
           :dont-know)))
 
 (defmethod -disjoint? '= [t1 t2]
-  (cond (=? t1)
+  (cond (gns/=? t1)
         (not (typep (second t1) t2))
         
         ;; (= ...) is finite, types are infinite
-        ;; (disjoint? '(not (= 1 2 3)) 'Long)
+        ;; (disjoint? '(not (= 1)) 'Long)
         (and (gns/not? t1)
-             (=? (second t1))
+             (gns/=? (second t1))
              (class-designator? t2))
         false
         
@@ -498,25 +512,19 @@
         :dont-know))
 
 (defmethod -disjoint? 'member [t1 t2]
-  (cond (or (member? t1)
-            (=? t1))
+  (cond (or (gns/member? t1)
+            (gns/=? t1))
         (every? (fn [e1]
                   (not (typep e1 t2))) (rest t1))
 
         ;; (member ...) is finite, types are infinite
         ;; (disjoint? '(not (member 1 2 3)) 'Long)
-        (and (gns/not? t1)
-             (or (member? (second t1))
-                 (=? (second t1)))
+        (and (gns/not-member-or-=? t1)
              (class-designator? t2))
         false
         
-        (and (gns/not? t1)
-             (gns/not? t2)
-             (or (member? (second t1))
-                 (=? (second t1)))
-             (or (member? (second t2))
-                 (=? (second t2))))
+        (and (gns/not-member-or-=? t1)
+             (gns/not-member-or-=? t2))
         false
 
         :else
@@ -682,10 +690,10 @@
                        :flags flags})))))
 
 (defmethod -subtype? '= [sub super]
-  (cond (=? sub)
+  (cond (gns/=? sub)
         (subtype? (cons 'member (rest sub)) super :dont-know)
 
-        (=? super)
+        (gns/=? super)
         (subtype? sub (cons 'member (rest super)) :dont-know)
 
         :else
@@ -722,12 +730,12 @@
             x))))
 
 (defmethod -subtype? 'member [sub super]
-  (cond (member? sub)
+  (cond (gns/member? sub)
         (every? (fn [e1]
                   (typep e1 super)) (rest sub))
 
         ;; (subtype? 'Long '(member 1 2 3))
-        (and (member? super)
+        (and (gns/member? super)
              (class-designator? sub)) ;; assuming a class is infinite
         false
 
@@ -736,7 +744,7 @@
         ;; (subtype? 'Long '(not (member 1.1 2.2 3.3))) ==> true
         (and (gns/not? super)
              (class-designator? sub)
-             (member? (second super)))
+             (gns/member? (second super)))
         (every? (fn [e2]
                   (not (typep e2 sub))) (rest (second super)))
 
@@ -869,16 +877,12 @@
     false
     
     ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
-    
+
     (and (not-empty (filter class-designator? (rest t1)))
-         (= 1 (count (filter (fn [t]
-                               (and (gns/not? t)
-                                    (member? (second t))))
+         (= 1 (count (filter gns/not-member-or-=?
                              (rest t1))))
          (let [t2 (canonicalize-type (cons 'and
-                                           (remove (fn [t]
-                                                     (and (gns/not? t)
-                                                          (member? (second t))))
+                                           (remove gns/not-member-or-=?
                                                    (rest t1))))]
            (inhabited? t2 false)))
     true
@@ -898,8 +902,8 @@
         (class-designator? (second t1))
         (not= Object (find-class (second t1))) ;; (not Object) is empty, (not any-other-class) is inhabited
 
-        (or (member? (second t1))
-            (=? (second t1)))
+        (or (gns/member? (second t1))
+            (gns/=? (second t1)))
         true
 
         :else
@@ -916,7 +920,7 @@
         true))
 
 (defmethod -inhabited? '= [t1]
-  (if (=? t1)
+  (if (gns/=? t1)
     true
     :dont-know))
 
@@ -1312,18 +1316,18 @@
                             type-designator))
                     
                     (fn [type-designator]
-                      (if (some =? (rest type-designator))
+                      (if (some gns/=? (rest type-designator))
                         ;; (and Double (= "a")) --> (member)
                         ;; (and String (= "a")) --> (member "a")
-                        (let [=-candidates (filter =? (rest type-designator))
+                        (let [=-candidates (filter gns/=? (rest type-designator))
                               candidates (rest (first =-candidates))]
                           (cons 'member (filter (fn [x] (typep x type-designator)) candidates)))
                         type-designator))
                     
                     (fn [type-designator]
                       ;; (and Double (member 1.0 2.0 "a" "b")) --> (member 1.0 2.0)
-                      (if (some member? (rest type-designator))
-                        (let [member-candidates (filter member? (rest type-designator))
+                      (if (some gns/member? (rest type-designator))
+                        (let [member-candidates (filter gns/member? (rest type-designator))
                               candidates (rest (first member-candidates))]
                           (cons 'member (filter (fn [x]
                                                   (typep x type-designator)) candidates)))
@@ -1416,21 +1420,20 @@
                         :sigma
                         type-designator))
 
-                    
                     (fn [type-designator]
                       ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
-                      (if (<= 2 (bounded-count 2 (filter member? (rest type-designator))))
-                        (let [[members others] (partition-by-pred member? (rest type-designator))]
-                          (cons 'or (cons (cons 'member (distinct (mapcat rest members)))
-                                          others)))
+                      (if (<= 2 (bounded-count 2 (filter gns/member-or-=? (rest type-designator))))
+                        (let [[members others] (partition-by-pred gns/member-or-=? (rest type-designator))
+                              repaired (gns/canonicalize-type (template (member ~@(distinct (mapcat rest members)))))]
+                          (template (or ~repaired ~@others)))
                         type-designator))
 
                     (fn [type-designator]
                       ;; (or Double (member 1.0 2.0 "a" "b")) --> (or Double (member "a" "b"))
-                      (if (some member? (rest type-designator))
+                      (if (some gns/member? (rest type-designator))
                         (let [mapped (map (fn [t]
                                             (cond
-                                              (member? t)
+                                              (gns/member? t)
                                               (let [td2 (cons 'or (remove #{t} (rest type-designator)))]
                                                 (cons 'member (filter (fn [candidate]
                                                                         (not (typep candidate td2)))
@@ -1440,7 +1443,6 @@
                                           (rest type-designator))]
                           (cons 'or mapped))
                         type-designator))
-
                     
                     (fn [type-designator]
                       (if (exists [x (rest type-designator)]
