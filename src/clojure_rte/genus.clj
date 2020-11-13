@@ -1360,25 +1360,17 @@
                     (fn [type-designator]
                       ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
                       ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
-                      (if (exists [t (rest type-designator)]
-                                  (and (gns/not? t)
-                                       (or (member? (second t))
-                                           (=? (second t)))))
-                        (cons 'and
-                              (map (fn [t]
-                                     (if (and (gns/not? t)
-                                              (or (member? (second t))
-                                                  (=? (second t))))
-                                       (let [filtered-td (remove #{t} type-designator)
-                                             [_not [_member & candidates]] t
-                                             filtered-candidates (filter (fn [t2] (typep t2 filtered-td))
-                                                                         candidates)
-                                             m (gns/canonicalize-type (template (member ~@filtered-candidates)))
-                                             ]
-                                         (template (not ~m)))
-                                       t
-                                       ))
-                                   (rest type-designator)))
+                      (if (some gns/not-member-or-=? (rest type-designator))
+                        (let [not-member (first (filter gns/not-member-or-=? (rest type-designator)))
+                              [_not [_member & candidates]] not-member
+                              remaining (remove (fn [t]
+                                                  (= t not-member)) (rest type-designator))
+                              filtered-td (template (and ~@remaining))
+                              filtered-candidates (filter (fn [t2] (typep t2 filtered-td))
+                                                          candidates)
+                              repaired (gns/canonicalize-type (template (not (member ~@filtered-candidates))))
+                              ]
+                          (template (and ~@remaining ~repaired)))
                         type-designator))
 
                     (fn [type-designator]
