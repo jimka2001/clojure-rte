@@ -751,6 +751,23 @@
         :else
         :dont-know))
 
+(defmethod -subtype? 'or [t1 t2]
+  (cond
+    (not (gns/or? t1))
+    :dont-know
+
+    :else
+    (let [values (map (fn [t] (subtype? t t2))
+                      (unchunk (rest t1)))]
+      (cond (some true? values)
+            true
+
+            (every? false? values)
+            false
+
+            :else
+            :dont-know))))
+
 (defmethod -subtype? 'and [t1 t2]
   (cond
     (not (gns/and? t1))
