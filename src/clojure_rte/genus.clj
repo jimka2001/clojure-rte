@@ -35,10 +35,21 @@
 ;; allow gns/ prefix even in this file.
 (alias 'gns 'clojure-rte.genus)
 
-(declare subtype?)
+(declare canonicalize-type)
+(declare -canonicalize-type)
+(declare check-disjoint)
 (declare disjoint?)
+(declare -disjoint?)
+(declare expand-satisfies)
 (declare inhabited?)
+(declare -inhabited?)
+(declare subtype?)
+(declare -subtype?)
 (declare type-equivalent?)
+(declare type-predicate-to-type-designator)
+(declare typep)
+(declare valid-type?)
+
 
 (def gns/and?
   "Detect sequence starting with the simple symbol and"
@@ -147,124 +158,11 @@
             default))))))
 
 (defn type-dispatch [type-designator]
+  "Dispatch function for several defmulti's.  If the type-designator is a sequence,
+  return its first element, else return the scaler itself."
   (if (sequential? type-designator)
     (first type-designator)
     type-designator))
-
-(defmulti typep 
-  "(typep value type-descriptor)
-  Like clojure.core/instance? except that the arguments are reversed, and the
-  given type designator need not be a class.  The given type 
-  designator may be a 1: class, 2: a symbol resolving to a class, or
-  3: a CL style type designator such as
-   (not A)
-   (and A B)
-   (or A B)
-   (satisfies A)
-   (= obj)
-   (member a b c)
-  Methods of typep should specify the symbol which distinguishes the type.
-  For example, the method whose dispatch value is 'member handles the decision
-  of (typep 3 '(member 1 2 3 4 5)), and the method whose dispatch value is
-  :empty-set handles the decision of (typep 3 :empty-set)."
-  (fn [_value type-designator]
-    (type-dispatch type-designator)))
-
-(defmulti -canonicalize-type
-  "Methods of -canonicalize-type implement the behavior of canonicalize-type.
-  The method of -canonicalize-type whose dispatch value is 'X handles
-  the canonicalization of the type designator (X ...).
-  Such a method may return the given value to indicate no further 
-  canonicalization is possible, or should return a value which will be
-  considered a simpler form.  For example, converting 
-  (member 1 1 2 2 3) to (member 1 2 3)"
-  type-dispatch)
-
-(defn canonicalize-type
-  "Simplify the given type-designator to a stable form"
-  [type-designator]
-  (fixed-point type-designator -canonicalize-type =))
-
-(defmulti valid-type?
-  "Look at a type-desnignator and determine whether it is syntactically correct.
-  Methods of valid-type? implement the behavior of valid-type?.
-  The method of valid-type? whose dispatch value is 'X handles
-  the validation the type designator (X ...).
-  Such a method must return either true or false, depending on whether
-  the operands are syntactically correct."
-  type-dispatch)
-
-(defmethod typep :sigma [_ _]
-  true)
-
-(defmethod valid-type? :sigma [_]
-  true)
-
-(defmethod typep :empty-set [_ _]
-  false)
-
-(defmethod valid-type? :empty-set [_]
-  true)
-
-(defmethod typep :default [a-value a-type]
-  (cond
-    (class? a-type)
-    (instance? a-type a-value)
-    
-    (not (symbol? a-type))
-    (throw (ex-info (format "typep: [178] invalid type of %s, expecting a symbol or class , got %s" a-type (type a-type))
-                    {:error-type :invalid-type-designator
-                     :a-type a-type
-                     :a-value a-value
-                     }))
-
-    (not (resolve a-type))
-    (throw (ex-info (format "typep: [179] invalid type %s, no resolvable value" a-type)
-                    {:error-type :invalid-type-designator
-                     :a-type a-type
-                     :a-value a-value
-                     }))
-
-    (not (class? (resolve a-type)))
-    (throw (ex-info (format "typep: [180] invalid type of %s, does not resolve to a class, got %s of type %s"
-                            a-type (resolve a-type) (type (resolve a-type)))
-                    {:error-type :invalid-type-designator
-                     :a-type a-type
-                     :a-value a-value
-                     }))
-    :else
-    (isa? (type a-value) (resolve a-type))))
-
-(defmethod valid-type? :default [type-designator]
-  (boolean (find-class type-designator)))
-
-(defmethod typep 'not [a-value [_a-type t]]
-  (not (typep a-value t)))
-
-(defmethod valid-type? 'not [[_not & type-designators]]
-  (and (sequential? type-designators)
-       (not-empty type-designators)
-       (empty? (rest type-designators))
-       (valid-type? (first type-designators))))
-
-(defmethod typep 'and [a-value [_a-type & others]]
-  (every? (fn [t1]
-            (typep a-value t1)) others))
-
-(defmethod valid-type? 'and [[_and & others]]
-  (every? valid-type? others))
-
-(defmethod typep 'or [a-value [_a-type & others]]
-  (boolean (some (fn [t1]
-                   (typep a-value t1)) others)))
-
-(defmethod valid-type? 'or [[_or & others]]
-  (every? valid-type? others))
-
-(defmethod typep 'satisfies [a-value [_a-type f]]
-  (boolean (if (fn? f)
-             (f a-value)
-             ((resolve f) a-value))))
 
 (defn callable-designator? [f]
   (and (symbol? f)
@@ -276,393 +174,12 @@
   for the purse of valid-type?"
   ())
 
-(defmethod valid-type? 'satisfies [[_ f]]
-  (or (member f *pseudo-type-functions*)
-      (callable-designator? f)))
-
-(declare expand-satisfies)
-
-(defmethod -canonicalize-type 'satisfies
-  [type-designator]
-  (expand-satisfies type-designator))
-
-(defmethod typep '= [a-value [_type value]]
-  (= value a-value))
-
-(defmethod valid-type? '= [[_ & args]]
-  (boolean (= 1 (count args))))
-
-(defmethod typep 'member [a-value [_type & others]]
-  (member a-value others))
-
-(defmethod valid-type? 'member [[_ & _]]
-  true)
-
 (defn-memoized [sort-method-keys -sort-method-keys]
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
   method has been filtered away."
   [f]
   (cons :primary (remove #{:primary :default} (keys (methods f)))))
-
-(defmulti -disjoint?
-  "This function should never be called.
-  Applications may install methods via (defmethod -disjoint? ...).
-  The method accepts two arguments which are type-designators,
-  [t1 t2],  pontentially application specific.
-  The method should examine the designated types to determine whether
-  the designated types are disjoint, i.e., whether they have no
-  element in common, i.e., whether their intersection is empty.
-  The method must return true, false, or :dont-know.
-  The function, disjoint?, will call (-disjoint? t1 t2)
-  and also (-disjoint? t2 t1) if necessary, therefore
-  the methods need only check one or the other.
-  When disjoint? (the public calling interface) is called,
-  the methods of -disjoint? are called in some order
-  (:primary first) until one method returns true or false,
-  in which case disjoint? returns that value.
-  If no method returns true or false, then disjoint?
-  the function returns the given default value.
-
-  The methods of 'disjoint? must specify a dispatch value.
-  It is conventional that the method responsible for
-  checking the disjointness of (X ...) vs Y, specify
-  a dispatch value of 'X.  However, this is not enforced.
-  For example, the implementator may wish to also check
-  the disjointness of (not (X ...)), and there is already a method
-  whose dispatch value is 'not.  For this reason the implementor
-  might wish to add two methods, one with dispatch value 'X
-  and one with dispatch value :not-X.  Any symbol or keyword
-  is allowed but dispatch values must be unique.
-  It is also conventional that the first thing checked
-  in the method (defmethod -disjoint? 'X [t1 t2] ...)
-  should be to detect whether t1 is a sequence whose
-  first element is (= 'X)."
-  (fn [t1 t2]
-    (throw (ex-info "-disjoint? should not be called directly"
-                    {:error-type :should-not-be-called-directly
-                     :t1 t1
-                     :t2 t2}))))
-
-(defn-memoized [check-disjoint -check-disjoint]
-  "Internal function used in top level disjoint? implementation."
-  [t1' t2' default]
-  (loop [[k & ks] (sort-method-keys -disjoint?)]
-    (case ((k (methods -disjoint?)) t1' t2')
-      (true) true
-      (false) false
-      (case ((k (methods -disjoint?)) t2' t1')
-        (true) true
-        (false) false
-        (if ks
-          (recur ks)
-          default)))))
-
-(defn disjoint?
-  "Predicate to determine whether the two types overlap.
-  If it cannot be determined whether the two designated types
-  are disjoint, then the default value is returned."
-  [t1 t2 default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (cond
-    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-    true
-
-    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-    true
-
-    :else
-    (let [try1 (check-disjoint t1 t2 :dont-know)]
-      (if (not= :dont-know try1)
-        try1
-        (let [t1-simple (-canonicalize-type t1)
-              t2-simple (-canonicalize-type t2)]
-          (if (and (= t1-simple t1)
-                   (= t2-simple t2))
-            default
-            (check-disjoint t1-simple t2-simple default)))))))
-
-(defmethod -disjoint? :primary [t1 t2]
-  (cond
-    (= :empty-set t1)
-    true
-    
-    (= :empty-set t2)
-    true
-    
-    (= t1 t2)
-    false
-    
-    (= :epsilon t1)
-    false
-    
-    (= :epsilon t2)
-    false
-    
-    (= :sigma t1)
-    false
-    
-    (= :sigma t2)
-    false
-    
-    (isa? t1 t2)
-    false
-    
-    (isa? t2 t1)
-    false
-    
-    :else
-    :dont-know))
-
-(defmethod -disjoint? 'or [t1 t2]
-  (cond (not (gns/or? t1))
-        :dont-know
-        
-        (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1))
-        true
-
-        :else
-        :dont-know))
-
-(defmethod -disjoint? 'and [t1 t2]
-  (let [inhabited-t1 (delay (inhabited? t1 false))
-        inhabited-t2 (delay (inhabited? t2 false))]
-    (cond (not (gns/and? t1))
-          :dont-know
-
-          (exists [t (rest t1)]
-                  (disjoint? t2 t false))
-          ;; (disjoint? (and A B C) X)
-          true
-
-          ;; (disjoint? (and A B C) B)
-          (and (member t2 (rest t1))
-               @inhabited-t2
-               @inhabited-t1)
-          false
-          
-          ;; (disjoint? '(and B C) 'A)
-          ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
-          (and @inhabited-t2
-               @inhabited-t1
-               (exists [t1' (rest t1)]
-                       (or (subtype? t1' t2 false)
-                           (subtype? t2 t1' false)
-                           )))
-          false
-
-          (and (class-designator? t2)
-               (= (find-class t2) java.lang.Object)
-               (some class-designator? (rest t1)))
-          false
-
-          
-          ;; (disjoint? (and A B C) X)
-          (and (class-designator? t2)
-               (every? class-designator? (rest t1)))
-          (not (forall-pairs [[a b] (conj (rest t1) t2)]
-                             (or (isa? (find-class a) (find-class b))
-                                 (isa? (find-class b) (find-class a))
-                                 ;; TODO isn't this wrong? because () is not false
-                                 (compatible-members? a b))))
-
-          ;; I don't know the general form of this, so make it a special case for the moment.
-          ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)
-          ;;                      A   (not B)                     C
-          ;; should return false
-          ;; TODO generalize this special case.
-          ;; If B < A and A !< B    and A < C and C !< A
-          ;;   then (and A !B) is NOT disjoint from C
-          (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (gns/not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
-               (let [[_ A [_ B]] t1
-                     C t2]
-                 (and (subtype? B A false)
-                      (not (subtype? A B true))
-                      (subtype? A C false)
-                      (not (subtype? C A true)))))
-          false
-
-          ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
-          ;;                       A     (not B)                      C
-          ;;  since A and B are disjoint
-          ;;  we may ask (disjoint? A C)
-          (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (gns/not? (nth t1 2))  ;; t1 of the form (and x (not y))
-               (let [[_ A [_ B]] t1]
-                 (disjoint? A B false)))
-          (disjoint? (second t1) t2 :dont-know)
-
-          :else
-          :dont-know)))
-
-(defmethod -disjoint? '= [t1 t2]
-  (cond (gns/=? t1)
-        (not (typep (second t1) t2))
-        
-        ;; (= ...) is finite, types are infinite
-        ;; (disjoint? '(not (= 1)) 'Long)
-        (and (gns/not? t1)
-             (gns/=? (second t1))
-             (class-designator? t2))
-        false
-        
-        :else
-        :dont-know))
-
-(defmethod -disjoint? 'member [t1 t2]
-  (cond (or (gns/member? t1)
-            (gns/=? t1))
-        (every? (fn [e1]
-                  (not (typep e1 t2))) (rest t1))
-
-        ;; (member ...) is finite, types are infinite
-        ;; (disjoint? '(not (member 1 2 3)) 'Long)
-        (and (gns/not-member-or-=? t1)
-             (class-designator? t2))
-        false
-        
-        (and (gns/not-member-or-=? t1)
-             (gns/not-member-or-=? t2))
-        false
-
-        :else
-        :dont-know))
-
-(defmulti -subtype?
-  "This function should never be called.
-  Applications may install methods via (defmethod -subtype? ...).
-  The method accepts two arguments which are type-designators,
-  [sub-designator super-designator],  pontentially application specific.
-  The method should examine the designated types to determine whether
-  they have a subtype relation, and return true, false, or :dont-know.
-  When subtype? (the public calling interface) is called,
-  the methods of -subtype? are called in some order
-  (:primary first) until one method returns true or false,
-  in which case subtype? returns that value.
-  If no method returns true or false, then the default is
-  returned.
-
-  The methods of 'subtype? must specify a dispatch value.
-  It is conventional that the method responsible for
-  checking the subtypeness of (X ...) vs Y, or
-  Y vs (X ...) specify a dispatch value of 'X.
-  However, this is not enforced.
-  For example, the implementator may wish to also check
-  the subtypeness of (not (X ...)), and there is already a method
-  whose dispatch value is 'not.  For this reason the implementor
-  might wish to add two (or more) methods, one with dispatch value 'X
-  and others whith dispatch values such as :not-X, :X-case-2."
-  (fn [sub super]
-    (throw (ex-info "-subtype? should not be called directly"
-                    {:error-type :should-not-be-called-directly
-                     :sub sub
-                     :super super}))))
-
-(defn subtype?
-  "Determine whether sub-designator specifies a type which is a subtype
-  of super-designator. Sometimes this decision cannot be made/computed, in
-  which case the given default value is interpreted as a binary
-  function which is called, and its value returned.  The default value
-  of default is one of: true, false, :dont-know or :error."
-  [sub-designator super-designator default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (loop [[k & ks] (sort-method-keys -subtype?)]
-    (let [s ((k (methods -subtype?)) sub-designator super-designator)]
-      (case s
-        (true false) s
-        (if ks
-          (recur ks)
-          default)))))
-
-(defmulti -inhabited?
-  "This function should never be called.
-  Applications may install methods via (defmethod -inhabited? ...).
-  The method accepts one argument which is a type-designator,
-  pontentially application specific.
-  The method should examine the type designator and return
-  true, false, or :dont-know.
-  When inhabited? (the public calling interface) is called,
-  the methods of -inhabited? are called in some order
-  (:primary first) until one method returns true or false,
-  in which case inhabited? returns that value.
-
-  Each method of -inhabited? must specify a dispatch value.
-  Conventionally a dispatch value of 'X indicates the code
-  to determine whether the type designator (X ...) is inhabited.
-  However, this is not enforced.  Such code may also check, for
-  example, the habitation of (not (X ...)), or the implementor
-  might elect to implement a different method for this purpose.
-  For this reason the code within the must must both determine
-  applicability, (is the type designator one we are interested),
-  and if applicable, then logic to determine habitation.
-  "
-  (fn [type-designator]
-    (throw (ex-info "-inhabited? should not be called directly"
-                    {:type-designator type-designator
-                     :error-type :should-not-be-called-directly}))))
-
-(defn inhabited?
-  "Given a type-designator, perhaps application specific,
-  determine whether the type is inhabited, i.e., not the
-  empty type."
-  [type-designator default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (letfn [(calc-inhabited [type-designator default]
-            (loop [[k & ks] (sort-method-keys -inhabited?)]
-              (case ((k (methods -inhabited?)) type-designator)
-                (true) true
-                (false) false
-                (if ks
-                  (recur ks)
-                  default))))]
-    (let [i (calc-inhabited type-designator :dont-know)
-          td-canon (delay (-canonicalize-type type-designator))]
-      (cond (member i '(true false))
-            i
-
-            (= @td-canon type-designator)
-            default
-            
-            :else
-            (calc-inhabited @td-canon default)))))
-
-(defmethod -inhabited? :primary [type-designator]
-  (cond
-    (class-designator? type-designator)
-    true
-
-    (= :sigma type-designator)
-    true
-    
-    (= :empty-set type-designator)
-    false
-
-    :else    
-    :dont-know))
-
-(defn vacuous? 
-  "Determine whether the specified type is empty, i.e., not inhabited."
-  [type-designator]
-  (let [inh (inhabited? type-designator :dont-know)]
-    (if (= :dont-know inh)
-      :dont-know
-      (not inh))))
-
-(defmethod -subtype? :primary [sub-designator super-designator]
-  (cond (and (class-designator? super-designator)
-             (= Object (find-class super-designator)))
-        true
-        
-        (and (class-designator? sub-designator)
-             (class-designator? super-designator))
-        (isa? (find-class sub-designator) (find-class super-designator))
-        
-        :else
-        :dont-know))
 
 (defn-memoized [class-primary-flag -class-primary-flag]
   "Takes a class-name and returns either :abstract, :interface, :public, or :final,
@@ -689,457 +206,6 @@
                        :a-type t
                        :flags flags})))))
 
-(defmethod -subtype? '= [sub super]
-  (cond (gns/=? sub)
-        (subtype? (cons 'member (rest sub)) super :dont-know)
-
-        (gns/=? super)
-        (subtype? sub (cons 'member (rest super)) :dont-know)
-
-        :else
-        :dont-know))
-
-(defmethod -subtype? 'not [sub super]
-  (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
-             (disjoint? sub (second super) false))
-        true
-
-        ;; (subtype? '(not Double) 'Long)
-        (and (gns/not? sub)
-             (disjoint? super (second sub) false))
-        false
-
-        (and (gns/not? sub)
-             (type-equivalent? (second sub) super false))
-        false
-
-        (and (gns/not? super)
-             (type-equivalent? sub (second super) false))
-        false
-        
-        (not (gns/not? sub))
-        :dont-know
-
-        (not (gns/not? super))
-        :dont-know
-
-        :else
-        (let [x (subtype? (second super) (second sub) :dont-know)]
-          (if (= :dont-know x)
-            :dont-know
-            x))))
-
-(defmethod -subtype? 'member [sub super]
-  (cond (gns/member? sub)
-        (every? (fn [e1]
-                  (typep e1 super)) (rest sub))
-
-        ;; (subtype? 'Long '(member 1 2 3))
-        (and (gns/member? super)
-             (class-designator? sub)) ;; assuming a class is infinite
-        false
-
-        ;; (subtype? 'Long '(not (member 1 2 3))) ==> false
-        ;; (subtype? 'Long '(not (member 1.1 2 3))) ==> false
-        ;; (subtype? 'Long '(not (member 1.1 2.2 3.3))) ==> true
-        (and (gns/not? super)
-             (class-designator? sub)
-             (gns/member? (second super)))
-        (every? (fn [e2]
-                  (not (typep e2 sub))) (rest (second super)))
-
-        :else
-        :dont-know))
-
-(defmethod -subtype? 'or [t1 t2]
-  (cond
-    (not (gns/or? t1))
-    :dont-know
-
-    :else
-    (let [values (map (fn [t] (subtype? t t2))
-                      (unchunk (rest t1)))]
-      (cond (some true? values)
-            true
-
-            (every? false? values)
-            false
-
-            :else
-            :dont-know))))
-
-(defmethod -subtype? 'and [t1 t2]
-  (cond
-    (not (gns/and? t1))
-    :dont-know
-    
-    (member t2 (rest t1))
-    ;; (subtype? (and A B) A)
-    true
-
-    
-    (exists [t (rest t1)] (subtype? t t2 false))
-    ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
-    true
-
-
-    ;; (subtype? '(and A B) '(not A))
-    (and (gns/not? t2)
-         (exists [t (rest t1)]
-                 (= t (second t2)))
-         (inhabited? t1 false))
-    false
-
-    ;; (subtype? (and A B C X Y) (and A B C) )
-    (and (gns/and? t2)
-         (subset? (set (rest t2)) (set (rest t1))))
-    true
-    
-    :else
-    :dont-know))
-
-(defmethod -disjoint? :subtype [sub super]
-  (cond (and (subtype? sub super false)
-             (inhabited? sub false))
-        false
-        
-        :else
-        :dont-know))
-
-(defmethod -disjoint? :classes [t1 t2]
-  (if (and (class-designator? t1)
-           (class-designator? t2))
-    (let [c1 (find-class t1)
-          c2 (find-class t2)]
-      (cond (= c1 c2)
-            false
-
-            (isa? c1 c2)
-            false
-
-            (isa? c2 c1)
-            false
-
-            :else
-            (let [ct1 (class-primary-flag t1)
-                  ct2 (class-primary-flag t2)]
-              (cond
-                (or (= :final ct1)
-                    (= :final ct2))
-                true ;; we've already checked isa? above
-
-                (or (= :interface ct1)
-                    (= :interface ct2))
-                (not (compatible-members? c1 c2))
-
-                :else
-                true))))
-    
-    :dont-know))
-
-(defmethod -inhabited? 'or [t1]
-  (cond
-    (not (gns/or? t1))
-    :dont-know
-    
-    :else
-    (let [values (map (fn [t] (inhabited? t :dont-know))
-                      (unchunk (rest t1)))]
-      ;; we are depending on the fact that map is lazy here.
-      ;; i.e. if true appears in the values list, then we
-      ;; dont call inhabited? on any elements of (rest t1)
-      ;; that come to the right of that element.
-      (cond (some true? values)
-            true
-
-            (every? false? values)
-            false
-
-            :else
-            :dont-know))))
-
-(defmethod -inhabited? 'and [t1]
-  (cond
-    (not (gns/and? t1))
-    :dont-know
-
-    (and (< 2 (count t1))
-         (forall-pairs [[a b] (rest t1)]
-                       (and (or (class-designator? a)
-                                (and (gns/not? a)
-                                     (class-designator? (second a))))
-                            (or (class-designator? b)
-                                (and (gns/not? b)
-                                     (class-designator? (second b))))
-                            (not (disjoint? a b true)))))
-    true
-
-    (exists-pair [[a b] (rest t1)]
-                 (and (or (class-designator? a)
-                          (and (gns/not? a)
-                               (class-designator? (second a))))
-                      (or (class-designator? b)
-                          (and (gns/not? b)
-                               (class-designator? (second b))))
-                      (disjoint? a b false)))
-    false
-    
-    ;; if any of the types are empty, the intersection is empty,
-    ;;   even if others are unknown.  (or A B empty D E).
-    ;;   Careful, the computation here depends on laziness of map.
-    ;;   Once a false is found, we don't call inhabited? on the remaining
-    ;;   part of (rest t1).
-    (some false? (map (fn [t] (inhabited? t :dont-know))
-                      (unchunk (rest t1))))
-    false
-    
-    ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
-
-    (and (not-empty (filter class-designator? (rest t1)))
-         (= 1 (count (filter gns/not-member-or-=?
-                             (rest t1))))
-         (let [t2 (canonicalize-type (cons 'and
-                                           (remove gns/not-member-or-=?
-                                                   (rest t1))))]
-           (inhabited? t2 false)))
-    true
-
-    ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
-    (exists-pair [[ta tb] (rest t1)]
-                 (disjoint? ta tb false))
-    false
-
-    :else
-    :dont-know))
-
-(defmethod -inhabited? 'not [t1]
-  (cond (not (gns/not? t1))
-        :dont-know
-
-        (class-designator? (second t1))
-        (not= Object (find-class (second t1))) ;; (not Object) is empty, (not any-other-class) is inhabited
-
-        (or (gns/member? (second t1))
-            (gns/=? (second t1)))
-        true
-
-        :else
-        :dont-know))
-
-(defmethod -inhabited? 'member [t1]
-  (cond (not (gns/member? t1))
-        :dont-know
-
-        (empty? (rest t1))
-        false
-        
-        :else    
-        true))
-
-(defmethod -inhabited? '= [t1]
-  (if (gns/=? t1)
-    true
-    :dont-know))
-
-(defmethod -disjoint? 'not [t1 t2]
-  (cond
-    (not (gns/not? t1))
-    :dont-know
-    
-    ;; (disjoint? (not Object) X)
-    (and (class-designator? (second t1))
-         (isa? Object (find-class (second t1))))
-    true
-
-    ;; (disjoint? (not X) X)
-    (= t2 (second t1))
-    true
-    
-    ;; (disjoint? (not B) A)
-    ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
-    (and (class-designator? (second t1))
-         (class-designator? t2)
-         (subtype? t2 (second t1) false))
-    true
-
-    ;; (disjoint? (not B) A) ;; when A and B are disjoint
-    (disjoint? t2 (second t1) false)
-    false
-
-    ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
-    ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (or (= :interface (class-primary-flag (second t1)))
-             (= :interface (class-primary-flag t2)))
-         (empty? (find-incompatible-members (second t1) t2)))
-    false
-
-    ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
-    ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (member (class-primary-flag t2) '(:abstract :interface))
-         (member (class-primary-flag (second t1)) '(:abstract :interface))
-         (not (= (find-class t2) (find-class (second t1)))))
-    false
-
-    ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
-    (and (gns/not? t2)
-         (class-designator? (second t1))
-         (class-designator? (second t2)))
-    false
-    
-    ;; if t2 < t1, then t2 disjoint from (not t1)
-    ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
-    (and (subtype? t2 (second t1) false)
-         (not (subtype? (second t1) t2 true)))
-    true
-
-    ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
-    (and (subtype? (second t1) t2 false)
-         (not (subtype? t2 (second t1) true)))
-    false
-
-    ;; (disjoint? '(not Long) 'Number)
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (not (= (find-class (second t1)) (find-class t2)))
-         (isa? (find-class (second t1)) (find-class t2)))
-    false
-
-    ;; (disjoint? '(not Boolean) '(not Long))
-    ;; (disjoint? '(not A) '(not B))
-    ;; if disjoint classes A and B
-    (and (gns/not? t2)
-         ;;(class-designator? (second t1))
-         ;;(class-designator? (second t2))
-         (disjoint? (second t1) (second t2) false))
-    false
-
-    ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
-    (and (gns/not? t2)
-         (not (disjoint? (second t1) (second t2) true)))
-    false         
-
-    :else
-    :dont-know))
-
-
-(letfn [(type-min-max [atoms selector]
-          (some (fn [sub]
-                  (when (class-designator? sub)
-                    (let [csub (find-class sub)]
-                      (some (fn [super]
-                              (when (class-designator? super)
-                                (let [csuper (find-class super)]
-                                  (and (not (= csub csuper))
-                                       (isa? csub csuper)
-                                       (selector sub super))))) atoms)))) atoms))]
-  (defn type-min
-    "Find an element of the given sequence which is a subtype
-  of some other type and is not =.  not necessarily the global minimum."
-    [atoms]
-    (type-min-max atoms (fn [sub _] sub)))
-
-  (defn type-max
-    "Find an element of the given sequence which is a supertype
-  of some other type and is not =.  not necessarily the global maximum"
-    [atoms]
-    (type-min-max atoms (fn [_ super] super))))
-
-(defn map-type-partitions
-  "Iterate through all the ways to partition types between a right and left set.
-  Some care is made to prune branches which are provably empty.
-  The given binary-fun will be called on all such pairs [(l1 l2 ... ln) (r1 r2 ... rm)]
-  for which is provable that (and l1 l2 .. ln
-                                  (not r1) (not r2) ... (not rm))
-  is non-empty."
-  [items binary-fun]
-  (letfn [(remove-s*types [types isa]
-            ;; generalization of remove-supertypes and remove-subtypes,
-            ;; caller must either pass isa? or an isa? which reverse the arguments.
-            (let [supers (for [t1 types
-                               :when (class-designator? t1)
-                               :let [c1 (find-class t1)]
-                               t2 types
-                               :when (and (not= t1 t2)
-                                          (class-designator? t2))
-                               :let [c2 (find-class t2)]
-                               :when (and (not (= c1 c2))
-                                          (isa c1 c2))
-                               ]
-                           t2)]
-              (for [x types
-                    :when (not (member x supers))]
-                x)))
-          (remove-supertypes [types]
-            ;; Given a list of symbols designating types, return a new list
-            ;; excluding those which are supertypes of others in the list.
-            (remove-s*types types isa?))
-          (remove-subtypes [types]
-            ;; Given a list of symbols designating types, return a new list
-            ;; excluding those which are subypes of others in the list.
-            (remove-s*types types (fn [c1 c2] (isa? c2 c1))))
-          (type-reduce [left right]
-            (loop [left left
-                   right right]
-              (cond
-                (and (< 1 (count left))
-                     (member :sigma left))
-                (recur (remove #{:sigma} left) right)
-
-                :else [left right])))
-          (recurring [items left right]
-            (cl/cl-cond
-             ((member :sigma right)
-              ;; prune
-              )
-             ((and (member :sigma left)
-                   right)
-              (recurring items (remove #{:sigma} left) right))
-             ((and left
-                   (some (fn [t2]
-                           (disjoint? t2 (first left) false)) (rest left)))
-              ;; prune
-              )
-             ((and (not-empty left) (not-empty right)
-                   ;; exists t2 in right such that t1 < t2
-                   ;; then t1 & !t2 = nil
-                   (exists [t2 right]
-                           (subtype? (first left) t2 false)))
-              ;; prune
-              )
-
-             ((and (not-empty left) (not-empty right)
-                   ;; exists t1 in left such that t1 < t2
-                   ;; then t1 & !t2 = nil
-                   (exists [t1 left]
-                           (subtype? t1 (first right) false)))
-              ;; prune
-              )
-
-             ((empty? items)
-              (let [[left right] (type-reduce (remove-supertypes left) (remove-subtypes right))]
-                (binary-fun left right)))
-             ;; TODO consider subsets A < B
-             ;;    then A and ! B is empty
-             ;;    A & B is A
-             ;;    !A and !B is !B
-
-             (:else
-              (let [new-type (first items)]
-                (case new-type
-                  (nil) (recurring (rest items) left right)
-                  (:sigma) (recurring (rest items) (cons new-type left) right)
-                  (do
-                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type false))
-                                                                         right))
-                    (if (some (fn [t2] (disjoint? new-type t2 false)) left)
-                      (recurring (rest items) left right) ;;   Double & !Float, we can omit Float in right
-                      (recurring (rest items) left (cons new-type right)))))))))]
-    (recurring items () ())))
-
 (defn- get-fn-source
   "Use the clojure.repl/source-fn function to extract a string representing the
   code body of the definition of the named function, fn-name.
@@ -1153,8 +219,6 @@
 
       :else
       (read-string src-str))))
-
-(declare type-predicate-to-type-designator)
 
 (defn- extract-type-from-expression
   "After the expression representing the code body has been extracted from the code body
@@ -1271,6 +335,299 @@
       ((type-predicate-to-type-designator (second type-designator)))
       (:else
        type-designator)))))
+
+
+(letfn [(type-min-max [atoms selector]
+          (some (fn [sub]
+                  (when (class-designator? sub)
+                    (let [csub (find-class sub)]
+                      (some (fn [super]
+                              (when (class-designator? super)
+                                (let [csuper (find-class super)]
+                                  (and (not (= csub csuper))
+                                       (isa? csub csuper)
+                                       (selector sub super))))) atoms)))) atoms))]
+  (defn type-min
+    "Find an element of the given sequence which is a subtype
+  of some other type and is not =.  not necessarily the global minimum."
+    [atoms]
+    (type-min-max atoms (fn [sub _] sub)))
+
+  (defn type-max
+    "Find an element of the given sequence which is a supertype
+  of some other type and is not =.  not necessarily the global maximum"
+    [atoms]
+    (type-min-max atoms (fn [_ super] super))))
+
+(defn map-type-partitions
+  "Iterate through all the ways to partition types between a right and left set.
+  Some care is made to prune branches which are provably empty.
+  The given binary-fun will be called on all such pairs [(l1 l2 ... ln) (r1 r2 ... rm)]
+  for which is provable that (and l1 l2 .. ln
+                                  (not r1) (not r2) ... (not rm))
+  is non-empty."
+  [items binary-fun]
+  (letfn [(remove-s*types [types isa]
+            ;; generalization of remove-supertypes and remove-subtypes,
+            ;; caller must either pass isa? or an isa? which reverse the arguments.
+            (let [supers (for [t1 types
+                               :when (class-designator? t1)
+                               :let [c1 (find-class t1)]
+                               t2 types
+                               :when (and (not= t1 t2)
+                                          (class-designator? t2))
+                               :let [c2 (find-class t2)]
+                               :when (and (not (= c1 c2))
+                                          (isa c1 c2))
+                               ]
+                           t2)]
+              (for [x types
+                    :when (not (member x supers))]
+                x)))
+          (remove-supertypes [types]
+            ;; Given a list of symbols designating types, return a new list
+            ;; excluding those which are supertypes of others in the list.
+            (remove-s*types types isa?))
+          (remove-subtypes [types]
+            ;; Given a list of symbols designating types, return a new list
+            ;; excluding those which are subypes of others in the list.
+            (remove-s*types types (fn [c1 c2] (isa? c2 c1))))
+          (type-reduce [left right]
+            (loop [left left
+                   right right]
+              (cond
+                (and (< 1 (count left))
+                     (member :sigma left))
+                (recur (remove #{:sigma} left) right)
+
+                :else [left right])))
+          (recurring [items left right]
+            (cl/cl-cond
+             ((member :sigma right)
+              ;; prune
+              )
+             ((and (member :sigma left)
+                   right)
+              (recurring items (remove #{:sigma} left) right))
+             ((and left
+                   (some (fn [t2]
+                           (disjoint? t2 (first left) false)) (rest left)))
+              ;; prune
+              )
+             ((and (not-empty left) (not-empty right)
+                   ;; exists t2 in right such that t1 < t2
+                   ;; then t1 & !t2 = nil
+                   (exists [t2 right]
+                           (subtype? (first left) t2 false)))
+              ;; prune
+              )
+
+             ((and (not-empty left) (not-empty right)
+                   ;; exists t1 in left such that t1 < t2
+                   ;; then t1 & !t2 = nil
+                   (exists [t1 left]
+                           (subtype? t1 (first right) false)))
+              ;; prune
+              )
+
+             ((empty? items)
+              (let [[left right] (type-reduce (remove-supertypes left) (remove-subtypes right))]
+                (binary-fun left right)))
+             ;; TODO consider subsets A < B
+             ;;    then A and ! B is empty
+             ;;    A & B is A
+             ;;    !A and !B is !B
+
+             (:else
+              (let [new-type (first items)]
+                (case new-type
+                  (nil) (recurring (rest items) left right)
+                  (:sigma) (recurring (rest items) (cons new-type left) right)
+                  (do
+                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type false))
+                                                                         right))
+                    (if (some (fn [t2] (disjoint? new-type t2 false)) left)
+                      (recurring (rest items) left right) ;;   Double & !Float, we can omit Float in right
+                      (recurring (rest items) left (cons new-type right)))))))))]
+    (recurring items () ())))
+
+(def ^:dynamic *test-types*
+  "Some type designators used for testing"
+  '((satisfies integer?)
+    (satisfies int?)
+    (satisfies rational?)
+    (satisfies ratio?)
+    (satisfies string?)
+    (satisfies keyword?)
+    (satisfies symbol?)
+    (satisfies decimal?)
+    (satisfies float?)
+    (satisfies seq?)
+    java.io.Serializable
+    java.lang.CharSequence
+    java.lang.Comparable
+    java.lang.Number
+    java.lang.Object
+    clojure.lang.IMeta
+    (= 1)
+    (= 0)
+    (= a)
+    (= [1 2 3])
+    (= [])
+    (member [1 2 3] [1 2] [1] [])
+    (member [1 2 3] [2 1 3])
+    (member a b c "a" "b" "c")
+    (member a b)
+    (member 1 2 3)
+    (member 2 3 4)
+    (member "a" "b" "c")
+    (member "a" "b" "c" 1 2 3)
+    (member 1 "a")
+    ))
+
+(defn gen-type
+  "Generate a type designator for testing."
+  ([size]
+   (gen-type size *test-types*))
+  ([size types]
+   (if (< 0 size)
+     (case (rand-nth '(or and not :else))
+       (or) (template (or ~(gen-type (dec size) types)
+                          ~(gen-type (dec size) types)))
+       (and) (template (and ~(gen-type (dec size) types)
+                            ~(gen-type (dec size) types)))
+       (not) (template (not ~(gen-type (dec size) types)))
+       (rand-nth types))
+     (rand-nth types))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implementation of typep and its methods
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti typep 
+  "(typep value type-descriptor)
+  Like clojure.core/instance? except that the arguments are reversed, and the
+  given type designator need not be a class.  The given type 
+  designator may be a 1: class, 2: a symbol resolving to a class, or
+  3: a CL style type designator such as
+   (not A)
+   (and A B)
+   (or A B)
+   (satisfies A)
+   (= obj)
+   (member a b c)
+  Methods of typep should specify the symbol which distinguishes the type.
+  For example, the method whose dispatch value is 'member handles the decision
+  of (typep 3 '(member 1 2 3 4 5)), and the method whose dispatch value is
+  :empty-set handles the decision of (typep 3 :empty-set)."
+  (fn [_value type-designator]
+    (type-dispatch type-designator)))
+
+(defmethod typep :sigma [_ _]
+  true)
+
+(defmethod typep :empty-set [_ _]
+  false)
+
+(defmethod typep :default [a-value a-type]
+  (cond
+    (class? a-type)
+    (instance? a-type a-value)
+    
+    (not (symbol? a-type))
+    (throw (ex-info (format "typep: [178] invalid type of %s, expecting a symbol or class , got %s"
+                            a-type (type a-type))
+                    {:error-type :invalid-type-designator
+                     :a-type a-type
+                     :a-value a-value
+                     }))
+
+    (not (resolve a-type))
+    (throw (ex-info (format "typep: [179] invalid type %s, no resolvable value" a-type)
+                    {:error-type :invalid-type-designator
+                     :a-type a-type
+                     :a-value a-value
+                     }))
+
+    (not (class? (resolve a-type)))
+    (throw (ex-info (format "typep: [180] invalid type of %s, does not resolve to a class, got %s of type %s"
+                            a-type (resolve a-type) (type (resolve a-type)))
+                    {:error-type :invalid-type-designator
+                     :a-type a-type
+                     :a-value a-value
+                     }))
+    :else
+    (isa? (type a-value) (resolve a-type))))
+
+(defmethod typep 'not [a-value [_a-type t]]
+  (not (typep a-value t)))
+
+(defmethod typep 'and [a-value [_a-type & others]]
+  (every? (fn [t1]
+            (typep a-value t1)) others))
+
+(defmethod typep 'satisfies [a-value [_a-type f]]
+  (boolean (if (fn? f)
+             (f a-value)
+             ((resolve f) a-value))))
+
+(defmethod typep '= [a-value [_type value]]
+  (= value a-value))
+
+(defmethod typep 'member [a-value [_type & others]]
+  (member a-value others))
+
+(defmethod typep 'or [a-value [_a-type & others]]
+  (boolean (some (fn [t1]
+                   (typep a-value t1)) others)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implementation of canonicalize-typef and the methods of -canonicalize-type
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn canonicalize-type
+  "Simplify the given type-designator to a stable form"
+  [type-designator]
+  (fixed-point type-designator -canonicalize-type =))
+
+(defmulti -canonicalize-type
+  "Methods of -canonicalize-type implement the behavior of canonicalize-type.
+  The method of -canonicalize-type whose dispatch value is 'X handles
+  the canonicalization of the type designator (X ...).
+  Such a method may return the given value to indicate no further 
+  canonicalization is possible, or should return a value which will be
+  considered a simpler form.  For example, converting 
+  (member 1 1 2 2 3) to (member 1 2 3)"
+  type-dispatch)
+
+(defmethod -canonicalize-type :default
+  [type-designator]
+  (cond   
+    (class-designator? type-designator)
+    type-designator
+    
+    (member type-designator '(:sigma :empty-set))
+    type-designator
+
+    (not (sequential? type-designator))
+    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
+                    {:error-type :not-a-sequence
+                     :type type-designator }))
+
+    (not (valid-type? type-designator))
+    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
+                    {:error-type :unknown-type
+                     :type (type type-designator)
+                     :type-designator type-designator }))
+
+    :else
+    type-designator
+    ))
+
+(defmethod -canonicalize-type 'satisfies
+  [type-designator]
+  (expand-satisfies type-designator))
 
 (defmethod -canonicalize-type 'not
   [type-designator]
@@ -1486,76 +843,752 @@
                       (cons 'or (map -canonicalize-type (rest type-designator))))
                     ]))
 
-(defmethod -canonicalize-type :default
-  [type-designator]
-  (cond   
-    (class-designator? type-designator)
-    type-designator
-    
-    (member type-designator '(:sigma :empty-set))
-    type-designator
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implementation of valid-type? and its methods
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    (not (sequential? type-designator))
-    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
-                    {:error-type :not-a-sequence
-                     :type type-designator }))
+(defmulti valid-type?
+  "Look at a type-desnignator and determine whether it is syntactically correct.
+  Methods of valid-type? implement the behavior of valid-type?.
+  The method of valid-type? whose dispatch value is 'X handles
+  the validation the type designator (X ...).
+  Such a method must return either true or false, depending on whether
+  the operands are syntactically correct."
+  type-dispatch)
 
-    (not (valid-type? type-designator))
-    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
-                    {:error-type :unknown-type
-                     :type (type type-designator)
-                     :type-designator type-designator }))
+(defmethod valid-type? :sigma [_]
+  true)
+
+(defmethod valid-type? :empty-set [_]
+  true)
+
+(defmethod valid-type? :default [type-designator]
+  (boolean (find-class type-designator)))
+
+(defmethod valid-type? 'not [[_not & type-designators]]
+  (and (sequential? type-designators)
+       (not-empty type-designators)
+       (empty? (rest type-designators))
+       (valid-type? (first type-designators))))
+
+(defmethod valid-type? 'and [[_and & others]]
+  (every? valid-type? others))
+
+(defmethod valid-type? 'or [[_or & others]]
+  (every? valid-type? others))
+
+(defmethod valid-type? 'satisfies [[_ f]]
+  (or (member f *pseudo-type-functions*)
+      (callable-designator? f)))
+
+(defmethod valid-type? '= [[_ & args]]
+  (boolean (= 1 (count args))))
+
+(defmethod valid-type? 'member [[_ & _]]
+  true)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implementation of disjoint? and -disjoint?
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn disjoint?
+  "Predicate to determine whether the two types overlap.
+  If it cannot be determined whether the two designated types
+  are disjoint, then the default value is returned."
+  [t1 t2 default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (cond
+    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+    true
+
+    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+    true
 
     :else
-    type-designator
-    ))
+    (let [try1 (check-disjoint t1 t2 :dont-know)]
+      (if (not= :dont-know try1)
+        try1
+        (let [t1-simple (-canonicalize-type t1)
+              t2-simple (-canonicalize-type t2)]
+          (if (and (= t1-simple t1)
+                   (= t2-simple t2))
+            default
+            (check-disjoint t1-simple t2-simple default)))))))
+
+(defn-memoized [check-disjoint -check-disjoint]
+  "Internal function used in top level disjoint? implementation."
+  [t1' t2' default]
+  (loop [[k & ks] (sort-method-keys -disjoint?)]
+    (case ((k (methods -disjoint?)) t1' t2')
+      (true) true
+      (false) false
+      (case ((k (methods -disjoint?)) t2' t1')
+        (true) true
+        (false) false
+        (if ks
+          (recur ks)
+          default)))))
+
+(defmulti -disjoint?
+  "This function should never be called.
+  Applications may install methods via (defmethod -disjoint? ...).
+  The method accepts two arguments which are type-designators,
+  [t1 t2],  pontentially application specific.
+  The method should examine the designated types to determine whether
+  the designated types are disjoint, i.e., whether they have no
+  element in common, i.e., whether their intersection is empty.
+  The method must return true, false, or :dont-know.
+  The function, disjoint?, will call (-disjoint? t1 t2)
+  and also (-disjoint? t2 t1) if necessary, therefore
+  the methods need only check one or the other.
+  When disjoint? (the public calling interface) is called,
+  the methods of -disjoint? are called in some order
+  (:primary first) until one method returns true or false,
+  in which case disjoint? returns that value.
+  If no method returns true or false, then disjoint?
+  the function returns the given default value.
+
+  The methods of 'disjoint? must specify a dispatch value.
+  It is conventional that the method responsible for
+  checking the disjointness of (X ...) vs Y, specify
+  a dispatch value of 'X.  However, this is not enforced.
+  For example, the implementator may wish to also check
+  the disjointness of (not (X ...)), and there is already a method
+  whose dispatch value is 'not.  For this reason the implementor
+  might wish to add two methods, one with dispatch value 'X
+  and one with dispatch value :not-X.  Any symbol or keyword
+  is allowed but dispatch values must be unique.
+  It is also conventional that the first thing checked
+  in the method (defmethod -disjoint? 'X [t1 t2] ...)
+  should be to detect whether t1 is a sequence whose
+  first element is (= 'X)."
+  (fn [t1 t2]
+    (throw (ex-info "-disjoint? should not be called directly"
+                    {:error-type :should-not-be-called-directly
+                     :t1 t1
+                     :t2 t2}))))
+
+(defmethod -disjoint? :primary [t1 t2]
+  (cond
+    (= :empty-set t1)
+    true
+    
+    (= :empty-set t2)
+    true
+    
+    (= t1 t2)
+    false
+    
+    (= :epsilon t1)
+    false
+    
+    (= :epsilon t2)
+    false
+    
+    (= :sigma t1)
+    false
+    
+    (= :sigma t2)
+    false
+    
+    (isa? t1 t2)
+    false
+    
+    (isa? t2 t1)
+    false
+    
+    :else
+    :dont-know))
+
+(defmethod -disjoint? :subtype [sub super]
+  (cond (and (subtype? sub super false)
+             (inhabited? sub false))
+        false
+        
+        :else
+        :dont-know))
+
+(defmethod -disjoint? :classes [t1 t2]
+  (if (and (class-designator? t1)
+           (class-designator? t2))
+    (let [c1 (find-class t1)
+          c2 (find-class t2)]
+      (cond (= c1 c2)
+            false
+
+            (isa? c1 c2)
+            false
+
+            (isa? c2 c1)
+            false
+
+            :else
+            (let [ct1 (class-primary-flag t1)
+                  ct2 (class-primary-flag t2)]
+              (cond
+                (or (= :final ct1)
+                    (= :final ct2))
+                true ;; we've already checked isa? above
+
+                (or (= :interface ct1)
+                    (= :interface ct2))
+                (not (compatible-members? c1 c2))
+
+                :else
+                true))))
+    
+    :dont-know))
+
+(defmethod -disjoint? 'or [t1 t2]
+  (cond (not (gns/or? t1))
+        :dont-know
+        
+        (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1))
+        true
+
+        :else
+        :dont-know))
+
+(defmethod -disjoint? 'and [t1 t2]
+  (let [inhabited-t1 (delay (inhabited? t1 false))
+        inhabited-t2 (delay (inhabited? t2 false))]
+    (cond (not (gns/and? t1))
+          :dont-know
+
+          (exists [t (rest t1)]
+                  (disjoint? t2 t false))
+          ;; (disjoint? (and A B C) X)
+          true
+
+          ;; (disjoint? (and A B C) B)
+          (and (member t2 (rest t1))
+               @inhabited-t2
+               @inhabited-t1)
+          false
+          
+          ;; (disjoint? '(and B C) 'A)
+          ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
+          (and @inhabited-t2
+               @inhabited-t1
+               (exists [t1' (rest t1)]
+                       (or (subtype? t1' t2 false)
+                           (subtype? t2 t1' false)
+                           )))
+          false
+
+          (and (class-designator? t2)
+               (= (find-class t2) java.lang.Object)
+               (some class-designator? (rest t1)))
+          false
+
+          ;; (disjoint? (and A B C) X)
+          (and (class-designator? t2)
+               (every? class-designator? (rest t1)))
+          (not (forall-pairs [[a b] (conj (rest t1) t2)]
+                             (or (isa? (find-class a) (find-class b))
+                                 (isa? (find-class b) (find-class a))
+                                 ;; TODO isn't this wrong? because () is not false
+                                 (compatible-members? a b))))
+
+          ;; I don't know the general form of this, so make it a special case for the moment.
+          ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)
+          ;;                      A   (not B)                     C
+          ;; should return false
+          ;; TODO generalize this special case.
+          ;; If B < A and A !< B    and A < C and C !< A
+          ;;   then (and A !B) is NOT disjoint from C
+          (and (= 3 (count t1)) ;; t1 of the form (and x y)
+               (gns/not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (let [[_ A [_ B]] t1
+                     C t2]
+                 (and (subtype? B A false)
+                      (not (subtype? A B true))
+                      (subtype? A C false)
+                      (not (subtype? C A true)))))
+          false
+
+          ;; (gns/disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
+          ;;                       A     (not B)                      C
+          ;;  since A and B are disjoint
+          ;;  we may ask (disjoint? A C)
+          (and (= 3 (count t1)) ;; t1 of the form (and x y)
+               (gns/not? (nth t1 2))  ;; t1 of the form (and x (not y))
+               (let [[_ A [_ B]] t1]
+                 (disjoint? A B false)))
+          (disjoint? (second t1) t2 :dont-know)
+
+          :else
+          :dont-know)))
+
+(defmethod -disjoint? '= [t1 t2]
+  (cond (gns/=? t1)
+        (not (typep (second t1) t2))
+        
+        ;; (= ...) is finite, types are infinite
+        ;; (disjoint? '(not (= 1)) 'Long)
+        (and (gns/not? t1)
+             (gns/=? (second t1))
+             (class-designator? t2))
+        false
+        
+        :else
+        :dont-know))
+
+(defmethod -disjoint? 'member [t1 t2]
+  (cond (or (gns/member? t1)
+            (gns/=? t1))
+        (every? (fn [e1]
+                  (not (typep e1 t2))) (rest t1))
+
+        ;; (member ...) is finite, types are infinite
+        ;; (disjoint? '(not (member 1 2 3)) 'Long)
+        (and (gns/not-member-or-=? t1)
+             (class-designator? t2))
+        false
+        
+        (and (gns/not-member-or-=? t1)
+             (gns/not-member-or-=? t2))
+        false
+
+        :else
+        :dont-know))
+
+(defmethod -disjoint? 'not [t1 t2]
+  (cond
+    (not (gns/not? t1))
+    :dont-know
+    
+    ;; (disjoint? (not Object) X)
+    (and (class-designator? (second t1))
+         (isa? Object (find-class (second t1))))
+    true
+
+    ;; (disjoint? (not X) X)
+    (= t2 (second t1))
+    true
+    
+    ;; (disjoint? (not B) A)
+    ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
+    (and (class-designator? (second t1))
+         (class-designator? t2)
+         (subtype? t2 (second t1) false))
+    true
+
+    ;; (disjoint? (not B) A) ;; when A and B are disjoint
+    (disjoint? t2 (second t1) false)
+    false
+
+    ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
+    ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
+    (and (class-designator? t2)
+         (class-designator? (second t1))
+         (or (= :interface (class-primary-flag (second t1)))
+             (= :interface (class-primary-flag t2)))
+         (empty? (find-incompatible-members (second t1) t2)))
+    false
+
+    ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
+    ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
+    (and (class-designator? t2)
+         (class-designator? (second t1))
+         (member (class-primary-flag t2) '(:abstract :interface))
+         (member (class-primary-flag (second t1)) '(:abstract :interface))
+         (not (= (find-class t2) (find-class (second t1)))))
+    false
+
+    ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
+    (and (gns/not? t2)
+         (class-designator? (second t1))
+         (class-designator? (second t2)))
+    false
+    
+    ;; if t2 < t1, then t2 disjoint from (not t1)
+    ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
+    (and (subtype? t2 (second t1) false)
+         (not (subtype? (second t1) t2 true)))
+    true
+
+    ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
+    (and (subtype? (second t1) t2 false)
+         (not (subtype? t2 (second t1) true)))
+    false
+
+    ;; (disjoint? '(not Long) 'Number)
+    (and (class-designator? t2)
+         (class-designator? (second t1))
+         (not (= (find-class (second t1)) (find-class t2)))
+         (isa? (find-class (second t1)) (find-class t2)))
+    false
+
+    ;; (disjoint? '(not Boolean) '(not Long))
+    ;; (disjoint? '(not A) '(not B))
+    ;; if disjoint classes A and B
+    (and (gns/not? t2)
+         ;;(class-designator? (second t1))
+         ;;(class-designator? (second t2))
+         (disjoint? (second t1) (second t2) false))
+    false
+
+    ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
+    (and (gns/not? t2)
+         (not (disjoint? (second t1) (second t2) true)))
+    false         
+
+    :else
+    :dont-know))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implementation of subtype? and -subtype?
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn subtype?
+  "Determine whether sub-designator specifies a type which is a subtype
+  of super-designator. Sometimes this decision cannot be made/computed, in
+  which case the given default value is interpreted as a binary
+  function which is called, and its value returned.  The default value
+  of default is one of: true, false, :dont-know or :error."
+  [sub-designator super-designator default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (loop [[k & ks] (sort-method-keys -subtype?)]
+    (let [s ((k (methods -subtype?)) sub-designator super-designator)]
+      (case s
+        (true false) s
+        (if ks
+          (recur ks)
+          default)))))
+
+(defmulti -subtype?
+  "This function should never be called.
+  Applications may install methods via (defmethod -subtype? ...).
+  The method accepts two arguments which are type-designators,
+  [sub-designator super-designator],  pontentially application specific.
+  The method should examine the designated types to determine whether
+  they have a subtype relation, and return true, false, or :dont-know.
+  When subtype? (the public calling interface) is called,
+  the methods of -subtype? are called in some order
+  (:primary first) until one method returns true or false,
+  in which case subtype? returns that value.
+  If no method returns true or false, then the default is
+  returned.
+
+  The methods of 'subtype? must specify a dispatch value.
+  It is conventional that the method responsible for
+  checking the subtypeness of (X ...) vs Y, or
+  Y vs (X ...) specify a dispatch value of 'X.
+  However, this is not enforced.
+  For example, the implementator may wish to also check
+  the subtypeness of (not (X ...)), and there is already a method
+  whose dispatch value is 'not.  For this reason the implementor
+  might wish to add two (or more) methods, one with dispatch value 'X
+  and others whith dispatch values such as :not-X, :X-case-2."
+  (fn [sub super]
+    (throw (ex-info "-subtype? should not be called directly"
+                    {:error-type :should-not-be-called-directly
+                     :sub sub
+                     :super super}))))
+
+(defmethod -subtype? :primary [sub-designator super-designator]
+  (cond (and (class-designator? super-designator)
+             (= Object (find-class super-designator)))
+        true
+        
+        (and (class-designator? sub-designator)
+             (class-designator? super-designator))
+        (isa? (find-class sub-designator) (find-class super-designator))
+        
+        :else
+        :dont-know))
+
+(defmethod -subtype? '= [sub super]
+  (cond (gns/=? sub)
+        (subtype? (cons 'member (rest sub)) super :dont-know)
+
+        (gns/=? super)
+        (subtype? sub (cons 'member (rest super)) :dont-know)
+
+        :else
+        :dont-know))
+
+(defmethod -subtype? 'not [sub super]
+  (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
+             (disjoint? sub (second super) false))
+        true
+
+        ;; (subtype? '(not Double) 'Long)
+        (and (gns/not? sub)
+             (disjoint? super (second sub) false))
+        false
+
+        (and (gns/not? sub)
+             (type-equivalent? (second sub) super false))
+        false
+
+        (and (gns/not? super)
+             (type-equivalent? sub (second super) false))
+        false
+        
+        (not (gns/not? sub))
+        :dont-know
+
+        (not (gns/not? super))
+        :dont-know
+
+        :else
+        (let [x (subtype? (second super) (second sub) :dont-know)]
+          (if (= :dont-know x)
+            :dont-know
+            x))))
+
+(defmethod -subtype? 'member [sub super]
+  (cond (gns/member? sub)
+        (every? (fn [e1]
+                  (typep e1 super)) (rest sub))
+
+        ;; (subtype? 'Long '(member 1 2 3))
+        (and (gns/member? super)
+             (class-designator? sub)) ;; assuming a class is infinite
+        false
+
+        ;; (subtype? 'Long '(not (member 1 2 3))) ==> false
+        ;; (subtype? 'Long '(not (member 1.1 2 3))) ==> false
+        ;; (subtype? 'Long '(not (member 1.1 2.2 3.3))) ==> true
+        (and (gns/not? super)
+             (class-designator? sub)
+             (gns/member? (second super)))
+        (every? (fn [e2]
+                  (not (typep e2 sub))) (rest (second super)))
+
+        :else
+        :dont-know))
+
+(defmethod -subtype? 'or [t1 t2]
+  (cond
+    (not (gns/or? t1))
+    :dont-know
+
+    :else
+    (let [values (map (fn [t] (subtype? t t2))
+                      (unchunk (rest t1)))]
+      (cond (some true? values)
+            true
+
+            (every? false? values)
+            false
+
+            :else
+            :dont-know))))
+
+(defmethod -subtype? 'and [t1 t2]
+  (cond
+    (not (gns/and? t1))
+    :dont-know
+    
+    (member t2 (rest t1))
+    ;; (subtype? (and A B) A)
+    true
+
+    
+    (exists [t (rest t1)] (subtype? t t2 false))
+    ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
+    true
 
 
-(def ^:dynamic *test-types*
-  "Some type designators used for testing"
-  '((satisfies integer?)
-    (satisfies int?)
-    (satisfies rational?)
-    (satisfies ratio?)
-    (satisfies string?)
-    (satisfies keyword?)
-    (satisfies symbol?)
-    (satisfies decimal?)
-    (satisfies float?)
-    (satisfies seq?)
-    java.io.Serializable
-    java.lang.CharSequence
-    java.lang.Comparable
-    java.lang.Number
-    java.lang.Object
-    clojure.lang.IMeta
-    (= 1)
-    (= 0)
-    (= a)
-    (= [1 2 3])
-    (= [])
-    (member [1 2 3] [1 2] [1] [])
-    (member [1 2 3] [2 1 3])
-    (member a b c "a" "b" "c")
-    (member a b)
-    (member 1 2 3)
-    (member 2 3 4)
-    (member "a" "b" "c")
-    (member "a" "b" "c" 1 2 3)
-    (member 1 "a")
-    ))
+    ;; (subtype? '(and A B) '(not A))
+    (and (gns/not? t2)
+         (exists [t (rest t1)]
+                 (= t (second t2)))
+         (inhabited? t1 false))
+    false
 
-(defn gen-type
-  "Generate a type designator for testing."
-  ([size]
-   (gen-type size *test-types*))
-  ([size types]
-   (if (< 0 size)
-     (case (rand-nth '(or and not :else))
-       (or) (template (or ~(gen-type (dec size) types)
-                          ~(gen-type (dec size) types)))
-       (and) (template (and ~(gen-type (dec size) types)
-                            ~(gen-type (dec size) types)))
-       (not) (template (not ~(gen-type (dec size) types)))
-       (rand-nth types))
-     (rand-nth types))))
+    ;; (subtype? (and A B C X Y) (and A B C) )
+    (and (gns/and? t2)
+         (subset? (set (rest t2)) (set (rest t1))))
+    true
+    
+    :else
+    :dont-know))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implementation of inhabite? and -inhabited?
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn inhabited?
+  "Given a type-designator, perhaps application specific,
+  determine whether the type is inhabited, i.e., not the
+  empty type."
+  [type-designator default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (letfn [(calc-inhabited [type-designator default]
+            (loop [[k & ks] (sort-method-keys -inhabited?)]
+              (case ((k (methods -inhabited?)) type-designator)
+                (true) true
+                (false) false
+                (if ks
+                  (recur ks)
+                  default))))]
+    (let [i (calc-inhabited type-designator :dont-know)
+          td-canon (delay (-canonicalize-type type-designator))]
+      (cond (member i '(true false))
+            i
+
+            (= @td-canon type-designator)
+            default
+            
+            :else
+            (calc-inhabited @td-canon default)))))
+
+(defn vacuous? 
+  "Determine whether the specified type is empty, i.e., not inhabited."
+  [type-designator]
+  (let [inh (inhabited? type-designator :dont-know)]
+    (if (= :dont-know inh)
+      :dont-know
+      (not inh))))
+
+(defmulti -inhabited?
+  "This function should never be called.
+  Applications may install methods via (defmethod -inhabited? ...).
+  The method accepts one argument which is a type-designator,
+  pontentially application specific.
+  The method should examine the type designator and return
+  true, false, or :dont-know.
+  When inhabited? (the public calling interface) is called,
+  the methods of -inhabited? are called in some order
+  (:primary first) until one method returns true or false,
+  in which case inhabited? returns that value.
+
+  Each method of -inhabited? must specify a dispatch value.
+  Conventionally a dispatch value of 'X indicates the code
+  to determine whether the type designator (X ...) is inhabited.
+  However, this is not enforced.  Such code may also check, for
+  example, the habitation of (not (X ...)), or the implementor
+  might elect to implement a different method for this purpose.
+  For this reason the code within the must must both determine
+  applicability, (is the type designator one we are interested),
+  and if applicable, then logic to determine habitation.
+  "
+  (fn [type-designator]
+    (throw (ex-info "-inhabited? should not be called directly"
+                    {:type-designator type-designator
+                     :error-type :should-not-be-called-directly}))))
+
+(defmethod -inhabited? :primary [type-designator]
+  (cond
+    (class-designator? type-designator)
+    true
+
+    (= :sigma type-designator)
+    true
+    
+    (= :empty-set type-designator)
+    false
+
+    :else    
+    :dont-know))
+
+(defmethod -inhabited? 'or [t1]
+  (cond
+    (not (gns/or? t1))
+    :dont-know
+    
+    :else
+    (let [values (map (fn [t] (inhabited? t :dont-know))
+                      (unchunk (rest t1)))]
+      ;; we are depending on the fact that map is lazy here.
+      ;; i.e. if true appears in the values list, then we
+      ;; dont call inhabited? on any elements of (rest t1)
+      ;; that come to the right of that element.
+      (cond (some true? values)
+            true
+
+            (every? false? values)
+            false
+
+            :else
+            :dont-know))))
+
+(defmethod -inhabited? 'and [t1]
+  (cond
+    (not (gns/and? t1))
+    :dont-know
+
+    (and (< 2 (count t1))
+         (forall-pairs [[a b] (rest t1)]
+                       (and (or (class-designator? a)
+                                (and (gns/not? a)
+                                     (class-designator? (second a))))
+                            (or (class-designator? b)
+                                (and (gns/not? b)
+                                     (class-designator? (second b))))
+                            (not (disjoint? a b true)))))
+    true
+
+    (exists-pair [[a b] (rest t1)]
+                 (and (or (class-designator? a)
+                          (and (gns/not? a)
+                               (class-designator? (second a))))
+                      (or (class-designator? b)
+                          (and (gns/not? b)
+                               (class-designator? (second b))))
+                      (disjoint? a b false)))
+    false
+    
+    ;; if any of the types are empty, the intersection is empty,
+    ;;   even if others are unknown.  (or A B empty D E).
+    ;;   Careful, the computation here depends on laziness of map.
+    ;;   Once a false is found, we don't call inhabited? on the remaining
+    ;;   part of (rest t1).
+    (some false? (map (fn [t] (inhabited? t :dont-know))
+                      (unchunk (rest t1))))
+    false
+    
+    ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
+
+    (and (not-empty (filter class-designator? (rest t1)))
+         (= 1 (count (filter gns/not-member-or-=?
+                             (rest t1))))
+         (let [t2 (canonicalize-type (cons 'and
+                                           (remove gns/not-member-or-=?
+                                                   (rest t1))))]
+           (inhabited? t2 false)))
+    true
+
+    ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
+    (exists-pair [[ta tb] (rest t1)]
+                 (disjoint? ta tb false))
+    false
+
+    :else
+    :dont-know))
+
+(defmethod -inhabited? 'not [t1]
+  (cond (not (gns/not? t1))
+        :dont-know
+
+        (class-designator? (second t1))
+        (not= Object (find-class (second t1))) ;; (not Object) is empty, (not any-other-class) is inhabited
+
+        (or (gns/member? (second t1))
+            (gns/=? (second t1)))
+        true
+
+        :else
+        :dont-know))
+
+(defmethod -inhabited? 'member [t1]
+  (cond (not (gns/member? t1))
+        :dont-know
+
+        (empty? (rest t1))
+        false
+        
+        :else    
+        true))
+
+(defmethod -inhabited? '= [t1]
+  (if (gns/=? t1)
+    true
+    :dont-know))
