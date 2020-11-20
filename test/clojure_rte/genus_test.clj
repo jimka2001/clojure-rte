@@ -66,6 +66,15 @@
       ;;                     'java.io.Serializable
       ;;                     (constantly true))))
 
+      (is (= false (gns/subtype? '(or (member 1 2 3) (= 1)) '(member a 1) :dont-know)))
+      (is (not= true (gns/subtype? '(and (or (member 1 2 3) (= 1))) '(member a 1) :dont-know)))
+
+      (is (= false
+             (gns/disjoint? '(and (or (member  1 2 3)
+                                      (= 1)))
+                            '(not (member a 1))
+                            :dont-know)))
+
       )))
 
 (deftest t-disjoint-not?
@@ -411,24 +420,74 @@
 (deftest t-inhabited-random
   (testing "checking some randomly generated types for inhabited?"
     (with-compile-env []
-      (dotimes [_ 1000]
-        (let [type-designator (gns/gen-type 4)
-              inh (gns/inhabited? type-designator :dont-know)
-              t2 (gns/canonicalize-type type-designator)
-              inh-2 (gns/inhabited? t2 :dont-know)]
-          (cond
-            (= true inh)
-            (is (not= false inh-2)
-                (cl-format false "~A is inhabited but its canonicalized form is not ~A"
-                           type-designator
-                           t2))
-
-            (= false inh)
-            (is (not= true inh-2)
-                (cl-format false "~A is not inhabited but its canonicalized form is ~A"
-                           type-designator
-                           t2))
-            ))))))
+      (letfn [(check [type-designator]
+                (let [inh (gns/inhabited? type-designator :dont-know)
+                      t2 (gns/canonicalize-type type-designator)
+                      inh-2 (gns/inhabited? t2 :dont-know)]
+                  (cond
+                    (= true inh)
+                    (is (not= false inh-2)
+                        (cl-format false "~A is inhabited but its canonicalized form is not ~A"
+                                   type-designator
+                                   t2))
+                    
+                    (= false inh)
+                    (is (not= true inh-2)
+                        (cl-format false "~A is not inhabited but its canonicalized form is ~A"
+                                   type-designator
+                                   t2)))))]
+        (check '(and (and (and (or (member a b c 1 2 3) (= 1))
+                               (not (member a b c a b c)))
+                          (not (and java.lang.CharSequence
+                                    (satisfies ratio?))))
+                     (and (not (and (satisfies symbol?)
+                                    (satisfies ratio?)))
+                          (not (or (= a)
+                                   (= 1))))))
+        ;; (check '(and (and (or (member a b c 1 2 3) (= 1))
+        ;;                   (not (member a b c a b c))
+        ;;                   (not (and java.lang.CharSequence
+        ;;                             (satisfies ratio?))))
+        ;;              (and (not (and (satisfies symbol?)
+        ;;                             (satisfies ratio?)))
+        ;;                   (not (or (= a)
+        ;;                            (= 1))))))
+        ;; (check '(and (and (or (member a b c 1 2 3) (= 1))
+        ;;                   (not (member a b c a b c))
+        ;;                   (not (and java.lang.CharSequence
+        ;;                             (satisfies ratio?))))
+        ;;              (not (and (satisfies symbol?)
+        ;;                        (satisfies ratio?)))
+        ;;              (not (or (= a)
+        ;;                       (= 1)))))
+        ;; (check '(and (and (or (member a b c 1 2 3) (= 1))
+        ;;                   (not (member a b c a b c))
+        ;;                   (not (and java.lang.CharSequence
+        ;;                             (satisfies ratio?))))
+        ;;              (not (and (satisfies symbol?)
+        ;;                        (satisfies ratio?)))
+        ;;              (and (not (= a))
+        ;;                   (not (= 1)))))
+        ;; (check '(and (and (or (member a b c 1 2 3) (= 1))
+        ;;                   (not (member a b c a b c))
+        ;;                   (not (and java.lang.CharSequence
+        ;;                             (satisfies ratio?))))
+        ;;              (or (not (satisfies symbol?))
+        ;;                  (not (satisfies ratio?)))
+        ;;              (and (not (= a))
+        ;;                   (not (= 1)))))
+        (check '(and (and (or (member a b c 1 2 3)
+                              (= 1)
+                              )
+                          (not (member a b c a b c))
+                          (not java.lang.CharSequence))
+                     
+                     (and  (not (= a))
+                           (not (= 1))
+                           )))
+       
+        (dotimes [_ 1000]
+          (check (gns/gen-type 4)))))))
 
 (deftest t-canonicalize-not-member
   (testing "canonicalize (and (not (member ...)))"

@@ -89,25 +89,27 @@
 
 (deftest t-rte-not-random
   (testing ":not random"
-    (clojure-rte.rte-tester/test-rte-not-1 :sigma)
-    (clojure-rte.rte-tester/test-rte-not-1 :empty-set)
-    (clojure-rte.rte-tester/test-rte-not-1 '(:* :sigma))
-    (clojure-rte.rte-tester/test-rte-not-1 '(:or (:and (:cat (:cat (:not :epsilon)) (member 1 a))
-                                                       (:or (:? (:or)) (:and (satisfies keyword?)))
-                                                       (:not :sigma))
-                                                 :empty-set
-                                                 (:not :sigma)
-                                                 (:cat (:? (:* (:not (:cat))))
-                                                       (:and :empty-set :sigma)
-                                                       (:? (:* (:? :sigma))))))
-    (clojure-rte.rte-tester/test-rte-not-1 '(:contains-any :empty-set 
-                                                          (:or (:cat (:? :epsilon) 
-                                                                     (:cat (:* (:not :sigma))))
-                                                               :sigma 
-                                                               (:contains-any :epsilon 
-                                                                              (:and (member (1 2 3) (2 1 3)))))
-                                                          :epsilon 
-                                                          (satisfies seq?)))
+    (doseq [rte '(:sigma
+                  :empty-set
+                  (:* :sigma)
+                  (:or (:and (:cat (:cat (:not :epsilon)) (member 1 a))
+                             (:or (:? (:or)) (:and (satisfies keyword?)))
+                             (:not :sigma))
+                       :empty-set
+                       (:not :sigma)
+                       (:cat (:? (:* (:not (:cat))))
+                             (:and :empty-set :sigma)
+                             (:? (:* (:? :sigma)))))
+                  (:contains-any :empty-set 
+                                 (:or (:cat (:? :epsilon) 
+                                            (:cat (:* (:not :sigma))))
+                                      :sigma 
+                                      (:contains-any :epsilon 
+                                                     (:and (member (1 2 3) (2 1 3)))))
+                                 :epsilon 
+                                 (satisfies seq?)))]
+      (println [:rte rte])
+      (clojure-rte.rte-tester/test-rte-not-1 rte))
 
 
     (test-rte-not 1000 4
