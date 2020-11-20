@@ -1369,7 +1369,7 @@
     :dont-know
 
     :else
-    (let [values (map (fn [t] (subtype? t t2))
+    (let [values (map (fn [t] (subtype? t t2 :dont-know))
                       (unchunk (rest t1)))]
       (cond (some true? values)
             true
