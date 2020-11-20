@@ -930,7 +930,8 @@
                                           (compute-compound-derivative type wrt)
 
                                           :else
-                                          (throw (ex-info (format "cannot compute derivative of overlapping types because %s is not a subtype of %s" wrt type)
+                                          (throw (ex-info (cl-format false
+                                                                     "cannot compute derivative of overlapping types because ~A is not a subtype of ~A" wrt type)
                                                           {:error-type :derivative-undefined
                                                            :wrt wrt
                                                            :expr expr
