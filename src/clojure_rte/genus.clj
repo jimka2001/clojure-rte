@@ -1047,6 +1047,9 @@
         (every? (fn [t1'] (disjoint? t1' t2 false)) (rest t1))
         true
 
+        (some (fn [t1'] (not (disjoint? t1' t2 true))) (rest t1))
+        false
+        
         :else
         :dont-know))
 
