@@ -100,9 +100,18 @@
                                                  (:cat (:? (:* (:not (:cat))))
                                                        (:and :empty-set :sigma)
                                                        (:? (:* (:? :sigma))))))
+    (clojure-rte.rte-tester/test-rte-not-1 '(:contains-any :empty-set 
+                                                          (:or (:cat (:? :epsilon) 
+                                                                     (:cat (:* (:not :sigma))))
+                                                               :sigma 
+                                                               (:contains-any :epsilon 
+                                                                              (:and (member (1 2 3) (2 1 3)))))
+                                                          :epsilon 
+                                                          (satisfies seq?)))
+
 
     (test-rte-not 1000 4
-                  false ;verbose
+                  true ;verbose
                   )))
 
 ;; this test is not yet correctly implemented,
