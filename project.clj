@@ -31,7 +31,6 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [lein-cloverage "1.1.2"]
                  [org.clojure/data.json "1.0.0"]
-                 [com.clojure-goes-fast/clj-async-profiler "0.4.1"] ;; this dependency is only temporarily necessary while debugging an OutOfMemoryError
                  [backtick "0.3.4"]
                  [org.clojure/math.combinatorics "0.1.6"]]
   :main ^:skip-aot clojure-rte.rte-core

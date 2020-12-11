@@ -1374,10 +1374,10 @@
     :else
     (let [values (map (fn [t] (subtype? t t2 :dont-know))
                       (unchunk (rest t1)))]
-      (cond (some true? values)
+      (cond (every? true? values)
             true
 
-            (every? false? values)
+            (some false? values)
             false
 
             :else
