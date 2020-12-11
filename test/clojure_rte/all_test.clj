@@ -33,6 +33,7 @@
              clojure-rte.genus-test
              clojure-rte.util-test             
              clojure-rte.genus-spec-test
+             clojure-rte.typecase
              )
   (:gen-class))
 
@@ -50,6 +51,7 @@
                           'clojure-rte.genus-test
                           'clojure-rte.util-test
                           'clojure-rte.genus-spec-test
+                          'clojure-rte.typecase
                           ))
 
 (defn -main []
