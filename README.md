@@ -79,6 +79,7 @@ git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 
 * [Binary Decision Diagrams](doc/bdd.md)
 * [Genus: A Simple Extensible Type System](doc/genus.md)
+* [typecase: switch on type of an object](doc/genus.md/#typecase)
 * [Xymbolyco: Sigma Complete Deterministic Finite Automata](doc/xymbolyco.md)
 * [Expert details w.r.t. RTE](doc/expert.md)
 * [API](doc/api.md)

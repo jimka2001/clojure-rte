@@ -36,22 +36,22 @@
             )]
     (mapcat collect tds)))
 
-(defn canonicalize-pairs [pairs]
+(defn canonicalize-pairs
+  "pairs is a sequence of items which are implicitly (not explicitly grouped),
+  e.g., pairs = (a 100 b 200 c 300).  This function interprets "
+  [pairs]
+  
   (if (empty? pairs)
     ()
     (let [[td consequent & others] pairs]
       `([~(gns/canonicalize-type td) ~consequent] ~@(canonicalize-pairs others)))))
 
-(defn rev-typep [td value]
-  (gns/typep value td))
-
-(defn typecase-as-cond [value pairs]
-  (let [condp-args (mapcat (fn [[td consequent]]
-                             `['~td ~consequent]) pairs)]
-    `(condp rev-typep ~value
-       ~@condp-args)))
-
-(defn substitute-1-type [td-search td-replace td-domain]
+(defn substitute-1-type
+  "Helper function for substitute-type, which does the search/replace
+  on one given type designators, td-domain.  This function search for
+  occurances of td-search in td-domain, and if found, replaces with
+  td-replace."
+  [td-search td-replace td-domain]
   (cond (= td-search td-domain)
         td-replace
         (gns/not? td-domain)
@@ -63,13 +63,27 @@
         :else
         td-domain))
         
-(defn substitute-type [td-old td-new pairs]
+(defn substitute-type
+  "pairs is a sequence of items each of the form [type-designator consequent].
+  This function attempts to simplify each of the type designators, return a
+  new sequence of the same length, with the consequents untouched.  Each
+  type-designator has had occurances of the type designator td-old replaced
+  with td-new."
+  [td-old td-new pairs]
+  
   (for [[td consequent] pairs
         y [(gns/canonicalize-type (substitute-1-type td-old td-new td))
            consequent]]
     y))
   
-(defn prune-pairs [pairs]
+(defn prune-pairs
+  "This is a helper function used in optimizing the macro expansion
+  of typecase.  pairs is a sequence of objects, each of the form 
+  [type-designator expression].  This function returns a new sequence
+  which prunes (removes the trailing elements) the sequence at the first
+  occurance of [:sigma ...], if such occurs, removes any pair
+  of the form [:empty-set ...]."
+  [pairs]
   (cond (empty? pairs)
         nil
 
@@ -80,12 +94,34 @@
             (:empty-set) (prune-pairs others)
             (cons [td consequent] (prune-pairs others))))))
 
-(defn most-frequent [items]
+(defn most-frequent
+  "Returns a pair [item count] which contains a item which appears most
+  frequently in the given sequence of items, and count which is the number
+  of times that item appears.  If two (or more) items appear with the same 
+  frequency, it is unspecified as to which item is returned"
+ [items]
   (if (empty? items)
     nil
     (apply max-key val (frequencies items))))
 
-(defmacro typecase [value & pairs]
+(defn ret-typep [td v] (gns/typep v td))
+
+(defmacro typecase 
+  "Takes an expression and a set of clauses
+  type-descriptor consequent
+  and an optional final default value.
+  The type-descriptors are those as specified in clojure.rte-genus
+  The given expression is evaluated a maximum of once, but in some
+  optimized cases it may not be evaluated at all.  If none of the type
+  designators designate a type for which the given value is a member,
+  then either the default value is returned, or nil if no default is
+  given.
+  Otherwise the consequent is evaluated and returned corresponding
+  to the first (top most) type designator which matches the value.
+  These type checks are highly optimized so that no type explicitly
+  mentioned is checked more than once, including (and especially)
+  (satisfies ...)."
+  [value & pairs]
   (cond (odd? (count pairs))
         `(typecase ~value ~@(butlast pairs) :sigma ~(last pairs))
         
@@ -102,7 +138,18 @@
                 (second (first canonicalized-pairs))
                 
                 (= 1 most-freq-count)
-                (typecase-as-cond value canonicalized-pairs)
+                (let [condp-args (mapcat (fn [[td consequent]]
+                                           `['~td ~consequent]) canonicalized-pairs)
+                      condp-args' (if (= '':sigma (last (butlast condp-args)))
+                                    `(~@(butlast (butlast condp-args)) ~(last condp-args))
+                                    condp-args)
+                                    ]
+                  ;; leaf-level expansion to condp, because no type designator
+                  ;;   appears more than once.  We have to reverse the arguments
+                  ;;   of gns/typep because condp is going to call with the type
+                  ;;   designator as first argument and the value as second argument.
+                  `(condp ret-typep ~value
+                     ~@condp-args'))
 
                 :else
                 (let [if-true  (substitute-type most-freq :sigma canonicalized-pairs)

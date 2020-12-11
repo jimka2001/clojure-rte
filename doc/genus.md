@@ -96,6 +96,64 @@ Example
 (inhabited? '(rte (:and (:+ Number) (:+ String))) :dont-know) ;; false
 ```
 
+## typecase
+
+The `typecase` macro is similar to `case` except that the value of the
+given is expression is matched against the types designated.
+The given type designators are not evaluated (are implicitly quoted),
+and at most one of the consequents is evaluated, i.e., the top most
+one for which the expression evaluates to an object of the designated type.
+The evaluation of `typecase` is optimized in a way that it is no longer
+guaranteed that the types be considered in order, or at all.  If it can
+be proven at macro expansion time that the object is not of one of the
+specified types then that type designated and consequent may be removed
+from the macro expansion.   Also in some (rare) cases the expression itself
+may not need to be evaluated to determine which consequent to evaluate.
+
+```clojure
+(typecase some-expresion
+  td-1 consequent-1
+  td-2 consequent-2
+  ...
+  optional-default)
+```
+In the following example, 44 will be returned from the third clause.  Furthermore, 
+it is guaranteed that `odd?` is only called once,
+even though there is a reference to `odd?` in the 2nd clause.
+
+```clojure
+(typecase (+ 1 2 3)
+ (or String Double) 42
+ (and (satisfies int?) (satisfies odd?)) 43
+ (and (satisfies int?) (not (satisfies odd?)) (not (satisfies neg?))) 44
+ 45)
+```
+
+This macro call expands to code equivalent to the following.
+```clojure
+(let [v1 (+ 1 2 3)]
+  (if (gns/typep v1 'Byte)
+    (let [v1 v1]
+      (if (gns/typep v1 '(satisfies odd?))
+        (condp sut/ret-typep v1
+          '(or String Double) 42
+          43)
+        (condp sut/ret-typep v1
+          '(or String Double) 42
+          '(not (satisfies neg?)) 44
+          45)))
+    (let [v1 v1]
+      (if (gns/typep v1 '(satisfies odd?))
+        (condp sut/ret-typep v1
+          '(or String Double) 42
+          '(or Long Integer Short) 43
+          45)
+        (condp sut/ret-typep v1
+          '(or String Double) 42
+          '(and (or Long Integer Short) (not (satisfies neg?))) 44
+          45)))))
+```
+
 ## How to extend the type system
 
 An application may extend the type system by adding a new type
@@ -279,5 +337,5 @@ For more information, see the documentation in the source code.
  -->
 <!--  LocalWords:  destructured designatable alt clojure multimethods
  -->
-<!--  LocalWords:  multimethod
+<!--  LocalWords:  multimethod typecase
  -->
