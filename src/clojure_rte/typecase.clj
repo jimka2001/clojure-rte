@@ -21,6 +21,7 @@
 
 (ns clojure-rte.typecase
   (:require [clojure-rte.genus :as gns]
+            [clojure-rte.util :refer [setof]]
             [backtick :refer [template]]))
 
 (defn collect-leaf-types [tds]
@@ -71,11 +72,20 @@
   with td-new."
   [td-old td-new pairs]
   
-  (for [[td consequent] pairs
-        y [(gns/canonicalize-type (substitute-1-type td-old td-new td))
-           consequent]]
-    y))
-  
+  (for [[td consequent] pairs]
+    [(gns/canonicalize-type (substitute-1-type td-old td-new td))
+     consequent]))
+
+(defn substitute-types
+  "Helper function which performs multiple type designator substitutions."
+  [td-olds td-new pairs]
+  (loop [td-olds td-olds
+         pairs pairs]
+    (if (empty? td-olds)
+      pairs
+      (recur (rest td-olds)
+             (substitute-type (first td-olds) td-new pairs)))))
+      
 (defn prune-pairs
   "This is a helper function used in optimizing the macro expansion
   of typecase.  pairs is a sequence of objects, each of the form 
@@ -129,6 +139,9 @@
         (let [canonicalized-pairs (prune-pairs (canonicalize-pairs pairs))
               leaves (collect-leaf-types (map first canonicalized-pairs))
               [most-freq most-freq-count] (most-frequent leaves)
+              disjoints (setof [t leaves] (= true (gns/disjoint? t most-freq :dont-know)))
+              supers    (setof [t leaves] (= true (gns/subtype? most-freq t :dont-know)))
+              subs      (setof [t leaves] (= true (gns/subtype? t most-freq :dont-know)))
               ]
           (cond (empty? canonicalized-pairs)
                 nil
@@ -152,9 +165,10 @@
                      ~@condp-args'))
 
                 :else
-                (let [if-true  (substitute-type most-freq :sigma canonicalized-pairs)
-                      if-false (substitute-type most-freq :empty-set canonicalized-pairs)]
+                (let [if-true  (substitute-types disjoints :empty-set
+                                                 (substitute-types (cons most-freq supers) :sigma canonicalized-pairs))
+                      if-false (substitute-types (cons most-freq subs) :empty-set canonicalized-pairs)]
                   `(let [value# ~value]
                      (if (gns/typep value# '~most-freq)
-                       (typecase value# ~@if-true)
-                       (typecase value# ~@if-false))))))))
+                       (typecase value# ~@(mapcat identity if-true))
+                       (typecase value# ~@(mapcat identity if-false)))))))))

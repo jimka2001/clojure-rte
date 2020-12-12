@@ -135,11 +135,8 @@ This macro call expands to code equivalent to the following.
   (if (gns/typep v1 'Byte)
     (let [v1 v1]
       (if (gns/typep v1 '(satisfies odd?))
+        43
         (condp sut/ret-typep v1
-          '(or String Double) 42
-          43)
-        (condp sut/ret-typep v1
-          '(or String Double) 42
           '(not (satisfies neg?)) 44
           45)))
     (let [v1 v1]
@@ -150,7 +147,8 @@ This macro call expands to code equivalent to the following.
           45)
         (condp sut/ret-typep v1
           '(or String Double) 42
-          '(and (or Long Integer Short) (not (satisfies neg?))) 44
+          '(and (or Long Integer Short)
+                (not (satisfies neg?))) 44
           45)))))
 ```
 

@@ -23,6 +23,9 @@
   (:require [clojure-rte.typecase :as sut]
             [clojure.test :as t]))
 
+(defn -main []
+  (clojure.test/run-tests 'clojure-rte.typecase-test))
+
 (t/deftest test-most-frequent
   (t/testing "test most-frequent"
     (assert (= nil (sut/most-frequent '())))
@@ -41,11 +44,56 @@
 (t/deftest test-collect-leaf-types
   (t/testing "collect-leaf-types"
     (assert (= (sut/collect-leaf-types '((or a b a c)
-                                        (and a b a c)
+                                         (and a b a c)
                                          (not (and a b a c))))
                '(a b a c
                    a b a c
                    a b a c)))))
+
+(defn odd-int? [x]
+  (and (int? x)
+       (odd? x)))
+
+(t/deftest test-typecase-optimization
+  (t/testing "typcase optimization"
+    (assert (= (sut/typecase "hello"
+                             (or String Double) 42
+                             ;; TODO need a way to avoid using fully qualified name here.
+                             (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
+                             (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         45)
+               42))
+    (assert (= (sut/typecase 1.0
+                         (or String Double) 42
+                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         45)
+               42))
+    (assert (= (sut/typecase 1
+                         (or String Double) 42
+                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         45)
+               43))
+    (assert (= (sut/typecase 2
+                         (or String Double) 42
+                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         45)
+               44))
+    (assert (= (sut/typecase -2
+                         (or String Double) 42
+                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         45)
+               45))
+    (assert (= (sut/typecase -1
+                         (or String Double) 42
+                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         45)
+               43))
+    ))            
 
 (t/deftest test-typecase
   (t/testing "typecase"
@@ -64,6 +112,7 @@
                              String 2
                              (satisfies int?) 3)
                2))
+
     (assert (= (sut/typecase 1.0
                              Number 1
                              String 2
