@@ -566,10 +566,18 @@
   (every? (fn [t1]
             (typep a-value t1)) others))
 
-(defmethod typep 'satisfies [a-value [_a-type f]]
-  (boolean (if (fn? f)
-             (f a-value)
-             ((resolve f) a-value))))
+(defmethod typep 'satisfies [a-value [a-type f]]
+  (boolean (cond (fn? f)
+                 (f a-value)
+
+                 (resolve f)
+                 ((resolve f) a-value)
+
+                 :else
+                 (throw (ex-info (format "typep satisfies: unknown function %s" f)
+                                 {:a-value a-value
+                                  :a-type a-type
+                                  :f f})))))
 
 (defmethod typep '= [a-value [_type value]]
   (= value a-value))
