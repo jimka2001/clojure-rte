@@ -26,24 +26,19 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.typecase-test))
 
-(t/deftest test-most-frequent
-  (t/testing "test most-frequent"
-    (assert (= nil (sut/most-frequent '())))
-    (assert (= [100 1] (sut/most-frequent '(100))))
-    (assert (= [:a 3] (sut/most-frequent '(:b :a :b :a :c :a))))))
-
 (t/deftest test-substitute-1-type
   (t/testing "substitute-1-type"
-    (assert (= (sut/substitute-1-type 'a :empty-set '(or a b a c))
-               '(or :empty-set b :empty-set c)))
-    (assert (= (sut/substitute-1-type 'a :empty-set '(and a b a c))
-               '(and :empty-set b :empty-set c)))
-    (assert (= (sut/substitute-1-type 'a :empty-set '(not (and a b a c)))
-               '(not (and :empty-set b :empty-set c))))))
+    (let [substitute-1-type @#'sut/substitute-1-type]
+      (assert (= (substitute-1-type 'a :empty-set '(or a b a c))
+                 '(or :empty-set b :empty-set c)))
+      (assert (= (substitute-1-type 'a :empty-set '(and a b a c))
+                 '(and :empty-set b :empty-set c)))
+      (assert (= (substitute-1-type 'a :empty-set '(not (and a b a c)))
+                 '(not (and :empty-set b :empty-set c)))))))
 
 (t/deftest test-collect-leaf-types
   (t/testing "collect-leaf-types"
-    (assert (= (sut/collect-leaf-types '((or a b a c)
+    (assert (= (@#'sut/collect-leaf-types '((or a b a c)
                                          (and a b a c)
                                          (not (and a b a c))))
                '(a b a c
@@ -132,6 +127,3 @@
                              Number 3
                              (satisfies int?) 4)
                1))))
-    
-    
-               

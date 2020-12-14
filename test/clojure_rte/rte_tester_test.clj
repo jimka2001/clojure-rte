@@ -107,7 +107,9 @@
                                       (:contains-any :epsilon 
                                                      (:and (member (1 2 3) (2 1 3)))))
                                  :epsilon 
-                                 (satisfies seq?)))]
+                                 (satisfies seq?))
+
+                  )]
       (println [:rte rte])
       (clojure-rte.rte-tester/test-rte-not-1 rte))
 

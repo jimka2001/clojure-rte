@@ -129,27 +129,40 @@ even though there is a reference to `odd?` in the 2nd clause.
  45)
 ```
 
-This macro call expands to code equivalent to the following.
+This macro call expands to code equivalent to the following.  To make the
+code more human readable we have replaced machine generated symbols with `v1`.
+
 ```clojure
 (let [v1 (+ 1 2 3)]
-  (if (gns/typep v1 'Byte)
-    (let [v1 v1]
-      (if (gns/typep v1 '(satisfies odd?))
-        43
-        (condp sut/ret-typep v1
-          '(not (satisfies neg?)) 44
-          45)))
-    (let [v1 v1]
-      (if (gns/typep v1 '(satisfies odd?))
-        (condp sut/ret-typep v1
-          '(or String Double) 42
-          '(or Long Integer Short) 43
-          45)
-        (condp sut/ret-typep v1
-          '(or String Double) 42
-          '(and (or Long Integer Short)
-                (not (satisfies neg?))) 44
-          45)))))
+  (if (gns/typep v1 'Double)
+    42
+    (if (gns/typep v1 'String)
+      42
+      (if (gns/typep v1 'Byte)
+        (if (odd? v1)
+          43
+          (if (neg? v1)
+              45
+              44))
+        (if (gns/typep v1 'Short)
+          (if (odd? v1)
+            43
+            (if (neg? v1)
+                45
+                44))
+          (if (gns/typep v1 'Integer)
+            (if (odd? v1)
+              43
+              (if (neg? v1)
+                  45
+                  44))
+            (if (odd? v1)
+              (if (gns/typep v1 'Long)
+                  43
+                  45)
+              (if (gns/typep v1 '(and Long (not (satisfies neg?))))
+                  44
+                  45))))))))
 ```
 
 ## How to extend the type system

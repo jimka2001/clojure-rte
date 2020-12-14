@@ -24,7 +24,7 @@
             [clojure-rte.util :refer [setof]]
             [backtick :refer [template]]))
 
-(defn collect-leaf-types [tds]
+(defn- collect-leaf-types [tds]
   (letfn [(collect [td]
             (cond (gns/not? td)
                   (collect (second td))
@@ -37,7 +37,7 @@
             )]
     (mapcat collect tds)))
 
-(defn canonicalize-pairs
+(defn- canonicalize-pairs
   "pairs is a sequence of items which are implicitly (not explicitly grouped),
   e.g., pairs = (a 100 b 200 c 300).  This function interprets "
   [pairs]
@@ -47,7 +47,7 @@
     (let [[td consequent & others] pairs]
       `([~(gns/canonicalize-type td) ~consequent] ~@(canonicalize-pairs others)))))
 
-(defn substitute-1-type
+(defn- substitute-1-type
   "Helper function for substitute-type, which does the search/replace
   on one given type designators, td-domain.  This function search for
   occurances of td-search in td-domain, and if found, replaces with
@@ -63,8 +63,8 @@
         (template (or ~@(map (fn [td] (substitute-1-type td-search td-replace td)) (rest td-domain))))
         :else
         td-domain))
-        
-(defn substitute-type
+
+(defn- substitute-type
   "pairs is a sequence of items each of the form [type-designator consequent].
   This function attempts to simplify each of the type designators, return a
   new sequence of the same length, with the consequents untouched.  Each
@@ -76,7 +76,7 @@
     [(gns/canonicalize-type (substitute-1-type td-old td-new td))
      consequent]))
 
-(defn substitute-types
+(defn- substitute-types
   "Helper function which performs multiple type designator substitutions."
   [td-olds td-new pairs]
   (loop [td-olds td-olds
@@ -86,7 +86,7 @@
       (recur (rest td-olds)
              (substitute-type (first td-olds) td-new pairs)))))
       
-(defn prune-pairs
+(defn- prune-pairs
   "This is a helper function used in optimizing the macro expansion
   of typecase.  pairs is a sequence of objects, each of the form 
   [type-designator expression].  This function returns a new sequence
@@ -104,17 +104,51 @@
             (:empty-set) (prune-pairs others)
             (cons [td consequent] (prune-pairs others))))))
 
-(defn most-frequent
-  "Returns a pair [item count] which contains a item which appears most
-  frequently in the given sequence of items, and count which is the number
-  of times that item appears.  If two (or more) items appear with the same 
-  frequency, it is unspecified as to which item is returned"
- [items]
-  (if (empty? items)
-    nil
-    (apply max-key val (frequencies items))))
+(defn- calc-influence [all-freq all-leaves leaf]
+  (let [disjoints (setof [t all-leaves] (= true (gns/disjoint? t leaf :dont-know)))
+        proper-supers    (setof [t all-leaves] (and (not= t leaf)
+                                             (= true (gns/subtype? leaf t :dont-know))))
+        proper-subs      (setof [t all-leaves] (and (not= t leaf)
+                                                    (= true (gns/subtype? t leaf :dont-know))))
+        f (fn [sum leaf] (+ sum (get all-freq leaf)))
+        influence   (+ (get all-freq leaf)
+                       (reduce f 0 disjoints)
+                       (reduce f 0 proper-supers)
+                       (reduce f 0 proper-subs))]
+    [leaf influence disjoints proper-supers proper-subs]))
 
-(defn ret-typep [td v] (gns/typep v td))
+(defn- maximize-influence [canonicalized-pairs]
+  (let [all-leaves (collect-leaf-types (map first canonicalized-pairs))
+        all-freq (frequencies all-leaves)
+        first-leaves (collect-leaf-types (list (first (first canonicalized-pairs))))
+        ]
+
+    ;; find the leaf in first-leaves with the maximum occurances counting disjoints, supers, and subs 
+    (reduce (fn [[most-freq' influence' disjoints' supers' subs'] leaf]
+               (let [[most-freq influence disjoints supers subs] (calc-influence all-freq all-leaves leaf)]
+                 (if (> influence' influence)
+                   [most-freq' influence' disjoints' supers' subs']
+                   [most-freq  influence  disjoints  supers  subs])))
+             [:ignore 0 () () ()]
+             first-leaves)))
+
+(defmacro optimized-let
+  "Macro used in the macro expansion of typecase.
+  This is a very simple let form which checks for a very special
+  case such as (let [x x] y) and optimizes it simply to y."
+  [[a b] c]
+  (if (= a b)
+    c
+    `(let [~a ~b] ~c)))
+  
+(defmacro optimized-typep
+  "Macro used to optimize the a call such as (typep x '(satisfies y))
+  to (y x)"
+  [v t]
+  (if (gns/satisfies? t)
+    (let [[_ pred] t]
+      `(boolean (~pred ~v)))
+    `(gns/typep ~v '~t)))
 
 (defmacro typecase 
   "Takes an expression and a set of clauses
@@ -132,43 +166,41 @@
   mentioned is checked more than once, including (and especially)
   (satisfies ...)."
   [value & pairs]
-  (cond (odd? (count pairs))
-        `(typecase ~value ~@(butlast pairs) :sigma ~(last pairs))
+  (if (odd? (count pairs))
+    `(typecase ~value ~@(butlast pairs) :sigma ~(last pairs))
         
-        :else
-        (let [canonicalized-pairs (prune-pairs (canonicalize-pairs pairs))
-              leaves (collect-leaf-types (map first canonicalized-pairs))
-              [most-freq most-freq-count] (most-frequent leaves)
-              disjoints (setof [t leaves] (= true (gns/disjoint? t most-freq :dont-know)))
-              supers    (setof [t leaves] (= true (gns/subtype? most-freq t :dont-know)))
-              subs      (setof [t leaves] (= true (gns/subtype? t most-freq :dont-know)))
-              ]
-          (cond (empty? canonicalized-pairs)
-                nil
+    (let [canonicalized-pairs (prune-pairs (canonicalize-pairs pairs))]
+      (if (empty? canonicalized-pairs)
+        nil
+        (let [[most-freq influence disjoints proper-supers proper-subs] (maximize-influence canonicalized-pairs)]
+          (cond
+            (and (= 1 (count canonicalized-pairs))
+                 (= :sigma (first (first canonicalized-pairs))))
+            (second (first canonicalized-pairs))
+            
+            (= 1 influence)
+            (let [[[type consequent] & others] canonicalized-pairs]
+              ;; canonicalized-pairs ([type consequent] [type consequent] ...)
+              (if (gns/not? type)
+                `(optimized-let [value# ~value]
+                                ;; if the type is (not x), then strip off the not, and swap the then/else
+                                (if (optimized-typep value# ~(second type))
+                                  (typecase value# ~@(mapcat identity others))
+                                  ~consequent))
+                `(optimized-let [value# ~value]
+                                (if (optimized-typep value# ~type)
+                                  ~consequent
+                                  (typecase value# ~@(mapcat identity others))))))
 
-                (and (= 1 (count canonicalized-pairs))
-                     (= :sigma (first (first canonicalized-pairs))))
-                (second (first canonicalized-pairs))
-                
-                (= 1 most-freq-count)
-                (let [condp-args (mapcat (fn [[td consequent]]
-                                           `['~td ~consequent]) canonicalized-pairs)
-                      condp-args' (if (= '':sigma (last (butlast condp-args)))
-                                    `(~@(butlast (butlast condp-args)) ~(last condp-args))
-                                    condp-args)
-                                    ]
-                  ;; leaf-level expansion to condp, because no type designator
-                  ;;   appears more than once.  We have to reverse the arguments
-                  ;;   of gns/typep because condp is going to call with the type
-                  ;;   designator as first argument and the value as second argument.
-                  `(condp ret-typep ~value
-                     ~@condp-args'))
-
-                :else
-                (let [if-true  (substitute-types disjoints :empty-set
-                                                 (substitute-types (cons most-freq supers) :sigma canonicalized-pairs))
-                      if-false (substitute-types (cons most-freq subs) :empty-set canonicalized-pairs)]
-                  `(let [value# ~value]
-                     (if (gns/typep value# '~most-freq)
-                       (typecase value# ~@(mapcat identity if-true))
-                       (typecase value# ~@(mapcat identity if-false)))))))))
+            :else
+            ;; most-freq is a leaf-level type which appears multiple times, either
+            ;; appearing explicitly, or disjoint, sub/super types also appear.
+            ;; we expand to two cases, one where the type is matched, and one where
+            ;; the complement of the type is not matched.
+            (let [if-true  (substitute-types disjoints :empty-set
+                                             (substitute-types (cons most-freq proper-supers) :sigma canonicalized-pairs))
+                  if-false (substitute-types (cons most-freq proper-subs) :empty-set canonicalized-pairs)]
+              `(optimized-let [value# ~value]
+                              (if (optimized-typep value# ~most-freq)
+                                (typecase value# ~@(mapcat identity if-true))
+                                (typecase value# ~@(mapcat identity if-false)))))))))))
