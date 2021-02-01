@@ -502,3 +502,18 @@
     (is (= (gns/canonicalize-type '(and Boolean (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
            'Boolean) "line 444")
     ))
+
+(deftest t-random-subtype
+  (testing "randomized testing of subtype?"
+    (letfn [(check-subtype [td-1 td-2 comment]
+              (is (not= false (gns/subtype? td-1 td-2 :dont-know)) (cl-format "~a td-1=~a td-2=~a" comment td-1 td-2))
+              (is (not= false (gns/subtype? td-2 td-1 :dont-know)) (cl-format "~a td-2=~a td-1=~a" comment td-2 td-1)))]
+      (for [_ (range 200)
+            n (range 5)
+            :let [rt (gns/gen-type n)
+                  rt-can (gns/canonicalize-type rt)]]
+        (do
+          (check-subtype rt rt-can "rt < rt-can ?")
+          (check-subtype rt-can rt "rt-can < rt ?"))))))
+
+          
