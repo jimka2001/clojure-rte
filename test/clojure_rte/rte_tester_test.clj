@@ -115,7 +115,7 @@
 
 
     (test-rte-not 1000 4
-                  true ;verbose
+                  false ;verbose
                   )))
 
 ;; this test is not yet correctly implemented,
