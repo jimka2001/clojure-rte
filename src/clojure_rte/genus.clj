@@ -624,11 +624,13 @@
     (not (sequential? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :not-a-sequence
+                     :normal-form nf
                      :type type-designator }))
 
     (not (valid-type? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :unknown-type
+                     :normal-form nf
                      :type (type type-designator)
                      :type-designator type-designator }))
 
@@ -640,30 +642,53 @@
   [nf type-designator]
   (expand-satisfies type-designator))
 
+(defn not-simplifiers [nf]
+  [(fn [type-designator]
+     ;; (not (not x)) --> x
+     (if (gns/not? (second type-designator))
+       (second (second type-designator))
+       type-designator))
+   (fn [type-designator]
+     (if (= :sigma (second type-designator))
+       :empty-set
+       type-designator))
+   (fn [type-designator]
+     (if (and (class-designator? (second type-designator))
+              (= Object (find-class (second type-designator))))
+       ;; (not Object) --> :empty-set
+       :empty-set
+       type-designator))
+   (fn [type-designator]
+     (if (= :empty-set (second type-designator))
+       :sigma
+       type-designator))
+   (fn [type-designator]
+     (cond (not (member nf '(:dnf :cnf)))
+           type-designator
+
+           ;; (not (and ...)) --> (or  (not ...) (not ...) ...)
+           (gns/and? (second type-designator))
+           (let [[_not [_and &rest and-args]] type-designator]
+             (cons 'or
+                   (map (fn [arg]
+                          (list 'not arg))
+                        and-args)))
+           
+           ;; (not (or ...))  --> (and (not ...) (not ...) ...)
+           (gns/or? (second type-designator))
+           (let [[_not [_or &rest or-args]] type-designator]
+             (cons 'and
+                   (map (fn [arg]
+                          (list 'not arg))
+                        or-args)))
+           :else
+           type-designator))
+   (fn [type-designator]
+     (list 'not (-canonicalize-type nf (second type-designator))))])
+
 (defmethod -canonicalize-type 'not
-  (find-simplifier type-designator
-                   [(fn [type-designator]
-                      ;; (not (not x)) --> x
-                      (if (gns/not? (second type-designator))
-                        (second (second type-designator))
-                        type-designator))
-                    (fn [type-designator]
-                      (if (= :sigma (second type-designator))
-                        :empty-set
-                        type-designator))
-                    (fn [type-designator]
-                      (if (and (class-designator? (second type-designator))
-                               (= Object (find-class (second type-designator))))
-                        ;; (not Object) --> :empty-set
-                        :empty-set
-                        type-designator))
-                    (fn [type-designator]
-                      (if (= :empty-set (second type-designator))
-                        :sigma
-                        type-designator))
-                    (fn [type-designator]
-                      (list 'not (-canonicalize-type (second type-designator))))]))
   [nf type-designator]
+  (find-simplifier type-designator (not-simplifiers nf)))
 
 (defmethod -canonicalize-type 'fn*
   [nf type-designator]
@@ -685,92 +710,115 @@
                                 :else
                                 type-designator))))]))
 
+(defn and-simplifiers
+  "Unary functions used to canonicalize an (and ...) type designator"
+  [nf]
+  [(fn [type-designator]
+     (if (member :empty-set (rest type-designator))
+       :empty-set
+       type-designator))
+   
+   (fn [type-designator]
+     (cons 'and (distinct (rest type-designator))))
+   
+   (fn [type-designator]
+     (cond (empty? (rest type-designator))
+           :sigma
+
+           (empty? (rest (rest type-designator)))
+           (second type-designator)
+
+           :else
+           type-designator))
+   
+   (fn [type-designator]
+     (if (some gns/=? (rest type-designator))
+       ;; (and Double (= "a")) --> (member)
+       ;; (and String (= "a")) --> (member "a")
+       (let [=-candidates (filter gns/=? (rest type-designator))
+             candidates (rest (first =-candidates))]
+         (cons 'member (filter (fn [x] (typep x type-designator)) candidates)))
+       type-designator))
+   
+   (fn [type-designator]
+     ;; (and Double (member 1.0 2.0 "a" "b")) --> (member 1.0 2.0)
+     (if (some gns/member? (rest type-designator))
+       (let [member-candidates (filter gns/member? (rest type-designator))
+             candidates (rest (first member-candidates))]
+         (cons 'member (filter (fn [x]
+                                 (typep x type-designator)) candidates)))
+       type-designator))
+   
+   (fn [type-designator]
+     (if (member :sigma (rest type-designator))
+       (cons 'and (map (fn [td] (-canonicalize-type nf td)) (remove #{:sigma} (rest type-designator))))
+       type-designator))
+
+   ;; (and Long (not (member 1 2)) (not (member 3 4)))
+   ;;  --> (and Long (not (member 1 2 3 4)))
+   (fn [type-designator]
+     (let [not-member (filter gns/not-member-or-=? (rest type-designator))
+           remaining (remove (fn [t]
+                               (member t not-member)) (rest type-designator))
+           merged-member (mapcat (fn [[_not [_member & items]]]
+                                   items) not-member)]
+       (if (< (count not-member) 2)
+         type-designator
+         (template (and ~@remaining
+                        (not (member ~@merged-member)))))))
+
+   (fn [type-designator]
+     ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
+     ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
+     (if (some gns/not-member-or-=? (rest type-designator))
+       (let [not-member (first (filter gns/not-member-or-=? (rest type-designator)))
+             [_not [_member & candidates]] not-member
+             remaining (remove (fn [t]
+                                 (= t not-member)) (rest type-designator))
+             filtered-td (template (and ~@remaining))
+             filtered-candidates (filter (fn [t2] (typep t2 filtered-td))
+                                         candidates)
+             repaired (gns/canonicalize-type nf (template (not (member ~@filtered-candidates))))
+             ]
+         (template (and ~@remaining ~repaired)))
+       type-designator))
+
+   (fn [type-designator]
+     ;; (and A (and B C) D) --> (and A B C D)
+     (if (exists [x (rest type-designator)]
+                 (gns/and? x))
+       (cons 'and
+             (mapcat (fn [x]
+                       (if (gns/and? x)
+                         (rest x)
+                         (list x))) (rest type-designator)))
+       type-designator))
+
+   ;; if we are trying to compute the DNF canonical form, then
+   ;;   this rule pulls an OR outside an AND
+   (fn [type-designator]
+     (cond (not= nf :dnf)
+           type-designator
+
+           ;; (and a (or X Y) b)
+           ;; --> (or (and a X b) (and a Y b))
+           (some gns/or? (rest type-designator))
+           (let [or-td (first (filter gns/or? (rest type-designator)))
+                 or-args (rest or-td)
+                 others (remove (fn [td] (not= td or-td)) type-designator)]
+             (cons 'or (map (fn [or-arg]
+                               (template (or ~or-arg ~@others)))
+                            or-args)))
+           
+           :else
+           type-designator))
+   
+   (fn [type-designator]
+     (cons 'and (map (fn [td] (canonicalize-type nf td)) (rest type-designator))))])
+
 (defmethod -canonicalize-type 'and
-  (find-simplifier type-designator
-                   [(fn [type-designator]
-                      (if (member :empty-set (rest type-designator))
-                        :empty-set
-                        type-designator))
-                    
-                    (fn [type-designator]
-                      (cons 'and (distinct (rest type-designator))))
-                    
-                    (fn [type-designator]
-                      (cond (empty? (rest type-designator))
-                            :sigma
-
-                            (empty? (rest (rest type-designator)))
-                            (second type-designator)
-
-                            :else
-                            type-designator))
-                    
-                    (fn [type-designator]
-                      (if (some gns/=? (rest type-designator))
-                        ;; (and Double (= "a")) --> (member)
-                        ;; (and String (= "a")) --> (member "a")
-                        (let [=-candidates (filter gns/=? (rest type-designator))
-                              candidates (rest (first =-candidates))]
-                          (cons 'member (filter (fn [x] (typep x type-designator)) candidates)))
-                        type-designator))
-                    
-                    (fn [type-designator]
-                      ;; (and Double (member 1.0 2.0 "a" "b")) --> (member 1.0 2.0)
-                      (if (some gns/member? (rest type-designator))
-                        (let [member-candidates (filter gns/member? (rest type-designator))
-                              candidates (rest (first member-candidates))]
-                          (cons 'member (filter (fn [x]
-                                                  (typep x type-designator)) candidates)))
-                        type-designator))
-                    
-                    (fn [type-designator]
-                      (if (member :sigma (rest type-designator))
-                        (cons 'and (map -canonicalize-type (remove #{:sigma} (rest type-designator))))
-                        type-designator))
-
-                    ;; (and Long (not (member 1 2)) (not (member 3 4)))
-                    ;;  --> (and Long (not (member 1 2 3 4)))
-                    (fn [type-designator]
-                      (let [not-member (filter gns/not-member-or-=? (rest type-designator))
-                            remaining (remove (fn [t]
-                                                (member t not-member)) (rest type-designator))
-                            merged-member (mapcat (fn [[_not [_member & items]]]
-                                                    items) not-member)]
-                        (if (< (count not-member) 2)
-                          type-designator
-                          (template (and ~@remaining
-                                         (not (member ~@merged-member)))))))
-
-                    (fn [type-designator]
-                      ;; (and Double (not (member 1.0 2.0 "a" "b"))) --> (and Double (not (member 1.0 2.0)))
-                      ;; (and Double (not (= "a"))) --> (and Double  (not (member)))
-                      (if (some gns/not-member-or-=? (rest type-designator))
-                        (let [not-member (first (filter gns/not-member-or-=? (rest type-designator)))
-                              [_not [_member & candidates]] not-member
-                              remaining (remove (fn [t]
-                                                  (= t not-member)) (rest type-designator))
-                              filtered-td (template (and ~@remaining))
-                              filtered-candidates (filter (fn [t2] (typep t2 filtered-td))
-                                                          candidates)
-                              repaired (gns/canonicalize-type (template (not (member ~@filtered-candidates))))
-                              ]
-                          (template (and ~@remaining ~repaired)))
-                        type-designator))
-
-                    (fn [type-designator]
-                      ;; (and A (and B C) D) --> (and A B C D)
-                      (if (exists [x (rest type-designator)]
-                                  (gns/and? x))
-                        (cons 'and
-                              (mapcat (fn [x]
-                                        (if (gns/and? x)
-                                          (rest x)
-                                          (list x))) (rest type-designator)))
-                        type-designator))
-
-                    (fn [type-designator]
-                      (cons 'and (map canonicalize-type (rest type-designator))))]))
   [nf type-designator]
+  (find-simplifier type-designator (and-simplifiers nf)))
 
 (defmethod -canonicalize-type 'member
   [nf type-designator]
@@ -789,70 +837,93 @@
                           type-designator
                           (cons 'member items))))]))
 
+(defn or-simplifiers
+  "Unary functions used to canonicalize an (or ...) type designator"
+  [nf]
+  [(fn [type-designator]
+     (if (member :empty-set (rest type-designator))
+       (cons 'or (map (fn [td](-canonicalize-type nf td))
+                      (remove #{:empty-set} (rest type-designator))))
+       type-designator))
+
+   (fn [type-designator]
+     (cons 'or (distinct (rest type-designator))))
+
+   (fn [type-designator]
+     (cond (empty? (rest type-designator))
+           :empty-set
+
+           (empty? (rest (rest type-designator)))
+           (second type-designator)
+
+           :else
+           type-designator))
+
+   (fn [type-designator]
+     (if (member :sigma (rest type-designator))
+       :sigma
+       type-designator))
+
+   (fn [type-designator]
+     ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+     (if (<= 2 (bounded-count 2 (filter gns/member-or-=? (rest type-designator))))
+       (let [[members others] (partition-by-pred gns/member-or-=? (rest type-designator))
+             repaired (gns/canonicalize-type nf (template (member ~@(distinct (mapcat rest members)))))]
+         (template (or ~repaired ~@others)))
+       type-designator))
+
+   (fn [type-designator]
+     ;; (or Double (member 1.0 2.0 "a" "b")) --> (or Double (member "a" "b"))
+     (if (some gns/member? (rest type-designator))
+       (let [mapped (map (fn [t]
+                           (cond
+                             (gns/member? t)
+                             (let [td2 (cons 'or (remove #{t} (rest type-designator)))]
+                               (cons 'member (filter (fn [candidate]
+                                                       (not (typep candidate td2)))
+                                                     (rest t))))
+                             :else
+                             t))
+                         (rest type-designator))]
+         (cons 'or mapped))
+       type-designator))
+   
+   (fn [type-designator]
+     (if (exists [x (rest type-designator)]
+                 (gns/or? x))
+       (cons 'or
+             (mapcat (fn [x]
+                       (if (gns/or? x)
+                         (rest x)
+                         (list x))) (rest type-designator)))
+       type-designator))
+
+   ;; if we are trying to compute the CNF canonical form, then
+   ;;   this rule pulls an AND outside an OR
+   (fn [type-designator]
+     (cond (not= nf :cnf)
+           type-designator
+
+           ;; (or a (and X Y) b)
+           ;; --> (and (or a X b) (or a Y b))
+           (some gns/and? (rest type-designator))
+           (let [and-td (first (filter gns/and? (rest type-designator)))
+                 and-args (rest and-td)
+                 others (remove (fn [td] (not= td and-td)) type-designator)]
+             (cons 'and (map (fn [and-arg]
+                               (template (or ~and-arg ~@others)))
+                             and-args)))
+           
+           :else
+           type-designator))
+
+   (fn [type-designator]
+     (cons 'or (map (fn [td] (-canonicalize-type nf td)) (rest type-designator))))
+   ])
+
 (defmethod -canonicalize-type 'or
-  (find-simplifier type-designator
-                   [(fn [type-designator]
-                      (if (member :empty-set (rest type-designator))
-                        (cons 'or (map -canonicalize-type
-                                       (remove #{:empty-set} (rest type-designator))))
-                        type-designator))
-
-                    (fn [type-designator]
-                      (cons 'or (distinct (rest type-designator))))
-
-                    (fn [type-designator]
-                      (cond (empty? (rest type-designator))
-                            :empty-set
-
-                            (empty? (rest (rest type-designator)))
-                            (second type-designator)
-
-                            :else
-                            type-designator))
-
-                    (fn [type-designator]
-                      (if (member :sigma (rest type-designator))
-                        :sigma
-                        type-designator))
-
-                    (fn [type-designator]
-                      ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
-                      (if (<= 2 (bounded-count 2 (filter gns/member-or-=? (rest type-designator))))
-                        (let [[members others] (partition-by-pred gns/member-or-=? (rest type-designator))
-                              repaired (gns/canonicalize-type (template (member ~@(distinct (mapcat rest members)))))]
-                          (template (or ~repaired ~@others)))
-                        type-designator))
-
-                    (fn [type-designator]
-                      ;; (or Double (member 1.0 2.0 "a" "b")) --> (or Double (member "a" "b"))
-                      (if (some gns/member? (rest type-designator))
-                        (let [mapped (map (fn [t]
-                                            (cond
-                                              (gns/member? t)
-                                              (let [td2 (cons 'or (remove #{t} (rest type-designator)))]
-                                                (cons 'member (filter (fn [candidate]
-                                                                        (not (typep candidate td2)))
-                                                                      (rest t))))
-                                              :else
-                                              t))
-                                          (rest type-designator))]
-                          (cons 'or mapped))
-                        type-designator))
-                    
-                    (fn [type-designator]
-                      (if (exists [x (rest type-designator)]
-                                  (gns/or? x))
-                        (cons 'or
-                              (mapcat (fn [x]
-                                        (if (gns/or? x)
-                                          (rest x)
-                                          (list x))) (rest type-designator)))
-                        type-designator))
-
-                    (fn [type-designator]
-                      (cons 'or (map -canonicalize-type (rest type-designator))))
-                    ]))
   [nf type-designator]
+  (find-simplifier type-designator (or-simplifiers nf)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of valid-type? and its methods
@@ -920,8 +991,8 @@
     (let [try1 (check-disjoint t1 t2 :dont-know)]
       (if (not= :dont-know try1)
         try1
-        (let [t1-simple (-canonicalize-type t1)
-              t2-simple (-canonicalize-type t2)]
+        (let [t1-simple (canonicalize-type t1)
+              t2-simple (canonicalize-type t2)]
           (if (and (= t1-simple t1)
                    (= t2-simple t2))
             default
@@ -1444,7 +1515,7 @@
                   (recur ks)
                   default))))]
     (let [i (calc-inhabited type-designator :dont-know)
-          td-canon (delay (-canonicalize-type type-designator))]
+          td-canon (delay (canonicalize-type type-designator))]
       (cond (member i '(true false))
             i
 
