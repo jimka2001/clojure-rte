@@ -596,8 +596,10 @@
 
 (defn canonicalize-type
   "Simplify the given type-designator to a stable form"
-  [type-designator]
-  (fixed-point type-designator -canonicalize-type =))
+  ([normal-form type-designator]
+   (fixed-point type-designator (fn [td] (-canonicalize-type normal-form td)) =))
+  ([type-designator]
+   (canonicalize-type nil type-designator)))
 
 (defmulti -canonicalize-type
   "Methods of -canonicalize-type implement the behavior of canonicalize-type.
@@ -607,10 +609,11 @@
   canonicalization is possible, or should return a value which will be
   considered a simpler form.  For example, converting 
   (member 1 1 2 2 3) to (member 1 2 3)"
-  type-dispatch)
+  (fn [_normal-form type-designator]
+    (type-dispatch type-designator)))
 
 (defmethod -canonicalize-type :default
-  [type-designator]
+  [nf type-designator]
   (cond   
     (class-designator? type-designator)
     type-designator
@@ -634,11 +637,10 @@
     ))
 
 (defmethod -canonicalize-type 'satisfies
-  [type-designator]
+  [nf type-designator]
   (expand-satisfies type-designator))
 
 (defmethod -canonicalize-type 'not
-  [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; (not (not x)) --> x
@@ -661,9 +663,10 @@
                         type-designator))
                     (fn [type-designator]
                       (list 'not (-canonicalize-type (second type-designator))))]))
+  [nf type-designator]
 
 (defmethod -canonicalize-type 'fn*
-  [type-designator]
+  [nf type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; convert (fn* [p1__19751#] (clojure.core/even? p1__19751#))}
@@ -683,7 +686,6 @@
                                 type-designator))))]))
 
 (defmethod -canonicalize-type 'and
-  [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (member :empty-set (rest type-designator))
@@ -768,9 +770,10 @@
 
                     (fn [type-designator]
                       (cons 'and (map canonicalize-type (rest type-designator))))]))
+  [nf type-designator]
 
 (defmethod -canonicalize-type 'member
-  [type-designator]
+  [nf type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (empty? (rest type-designator))
@@ -787,7 +790,6 @@
                           (cons 'member items))))]))
 
 (defmethod -canonicalize-type 'or
-  [type-designator]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (member :empty-set (rest type-designator))
@@ -850,6 +852,7 @@
                     (fn [type-designator]
                       (cons 'or (map -canonicalize-type (rest type-designator))))
                     ]))
+  [nf type-designator]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of valid-type? and its methods

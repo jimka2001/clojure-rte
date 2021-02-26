@@ -587,7 +587,7 @@
   (seq-matcher :or))
 
 (defmethod gns/-canonicalize-type 'rte
-  [type-designator]
+  [nf type-designator]
   (cons 'rte (map canonicalize-pattern (rest type-designator))))
 
 (defn remove-first-duplicate

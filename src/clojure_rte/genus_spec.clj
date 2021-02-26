@@ -178,7 +178,7 @@
         ))
 
 (defmethod gns/-canonicalize-type 'spec
-  [[_spec pattern]]
+  [nf [_spec pattern]]
   (try (wrap-spec (spec-to-rte pattern))
        (catch clojure.lang.ExceptionInfo ei
          (if (:unsupported-pattern (ex-data ei))
