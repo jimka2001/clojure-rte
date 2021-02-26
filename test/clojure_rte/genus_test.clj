@@ -516,4 +516,50 @@
           (check-subtype rt rt-can "rt < rt-can ?")
           (check-subtype rt-can rt "rt-can < rt ?"))))))
 
-          
+(deftest t-intersection-union-subtype
+  (testing "intersection-union-subtype"
+    (letfn [(check-subtype [rt-1 rt-2 comment]
+              (is (not= false (gns/subtype? rt-1 rt-2 :dont-know))
+                  (cl-format false "~A: rt-1=~A rt-2=~A" comment rt-1 rt-2)))]
+      (doseq [_ (range 20 ;; 200
+                       )
+              n (range 5)
+              :let [rt-1 (gns/gen-type n)
+                    rt-2 (gns/gen-type n)
+                    union (template (or ~rt-1 ~rt-2))
+                    intersect (template (and ~rt-1 ~rt-2))]]
+        (check-subtype rt-1 union "x <: x || y")
+        (check-subtype rt-2 union "y <: x || y")
+        (check-subtype intersect rt-1 "x&y <: x")
+        (check-subtype intersect rt-2 "x&y <: y")))))
+
+(deftest t-normalized-subtype-test
+  (testing "randomized testing of subtypep with normalization"
+    (letfn [(check-subtype [rt-1 rt-2 comment]
+              (is (not= false (gns/subtype? rt-1 rt-2 :dont-know))
+                  (cl-format false "~A: rt-1=~A rt-2=~A" comment rt-1 rt-2))
+              (is (not= false (gns/subtype? rt-2 rt-1 :dont-know))
+                  (cl-format false "~A: rt-2=~A rt-1=~A" comment rt-2 rt-1)))]
+      (doseq [_ (range 20 ;; 200
+                       )
+              n (range 5)
+              :let [rt (gns/gen-type n)
+                    dnf (gns/canonicalize-type :dnf rt)
+                    cnf (gns/canonicalize-type :cnf rt)
+                    dnf-cnf (gns/canonicalize-type :cnf dnf)
+                    cnf-dnf (gns/canonicalize-type :dnf cnf)]]
+        (check-subtype rt (gns/canonicalize-type nil rt) "canonicalize")
+        (check-subtype rt dnf "dnf")
+        (check-subtype rt cnf "cnf")
+        (check-subtype rt dnf-cnf "(cnf (dnf ...))")
+        (check-subtype rt cnf-dnf "(dnf (cnf ...))")))))
+
+(deftest t-discovered-cases
+  (testing "discovered cases"
+    (is (= true (gns/subtype? 'Long '(not Double) :dont-know)) "Long <: not(Double)")
+    (is (= false (gns/subtype? '(not Double) 'Long :dont-know)) "not(Double) !<: Long")
+    (is (not= false (gns/subtype? '(not (member 1 2)) '(or (= 3) (not (member 1 2))) :dont-know))
+        "simplified found in random test")
+    (is (not= false (gns/subtype? '(not (member a b))
+                                  '(or (= []) (not (member a b)))
+                                  :dont-know)) "found in random test")))

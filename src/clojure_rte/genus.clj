@@ -471,6 +471,7 @@
     clojure.lang.IMeta
     (= 1)
     (= 0)
+    (= -1)
     (= a)
     (= [1 2 3])
     (= [])
@@ -480,6 +481,8 @@
     (member a b)
     (member 1 2 3)
     (member 2 3 4)
+    (member 1.5 3.5)
+    (member 4.5 6.5)
     (member "a" "b" "c")
     (member "a" "b" "c" 1 2 3)
     (member 1 "a")
@@ -1677,3 +1680,5 @@
   (if (gns/=? t1)
     true
     :dont-know))
+
+
