@@ -1378,16 +1378,24 @@
                      :super super}))))
 
 (defmethod -subtype? :primary [sub-designator super-designator]
-  (cond (and (class-designator? super-designator)
-             (= Object (find-class super-designator)))
-        true
-        
-        (and (class-designator? sub-designator)
-             (class-designator? super-designator))
-        (isa? (find-class sub-designator) (find-class super-designator))
-        
-        :else
-        :dont-know))
+  (let [super-canon (delay (gns/canonicalize-type super-designator))
+        sub-canon   (delay (gns/canonicalize-type sub-designator))]
+    (cond (and (class-designator? super-designator)
+               (= Object (find-class super-designator)))
+          true
+          
+          (and (class-designator? sub-designator)
+               (class-designator? super-designator))
+          (isa? (find-class sub-designator) (find-class super-designator))
+
+          (= :sigma @super-canon)
+          true
+          
+          (= :empty-set @sub-canon)
+          true
+          
+          :else
+          :dont-know)))
 
 (defmethod -subtype? '= [sub super]
   (cond (gns/=? sub)
@@ -1404,8 +1412,11 @@
              (disjoint? sub (second super) false))
         true
 
-        ;; (subtype? '(not Double) 'Long)
+        ;; (subtype? '(not Double) 'Long) = false
+        ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
         (and (gns/not? sub)
+             ;; TODO there is still something wrong with this logic.
+             (= true (gns/inhabited? (gns/canonicalize-type (template (and ~(second sub) (not ~super)))) :dont-know))
              (disjoint? super (second sub) false))
         false
 
