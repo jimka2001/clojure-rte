@@ -1415,8 +1415,8 @@
         ;; (subtype? '(not Double) 'Long) = false
         ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
         (and (gns/not? sub)
-             ;; TODO there is still something wrong with this logic.
-             (= true (gns/inhabited? (gns/canonicalize-type (template (and ~(second sub) (not ~super)))) :dont-know))
+             (class-designator? super)
+             (class-designator? (second sub))
              (disjoint? super (second sub) false))
         false
 
