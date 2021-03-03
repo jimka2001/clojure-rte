@@ -513,6 +513,23 @@
        (rand-nth types))
      (rand-nth types))))
 
+(defn gen-inhabited-type 
+  "gen-type may generate a type designator which reduces to :empty-set.
+  gen-inhabited-type generates a type designator which is guaranteed
+  NOT to reduce to :empty-set.  If filter (a unary predicate) is
+  given, gen-inhabited-type loops until it generates a type which
+  satisifies the predicate.  If the predicate is never satisifed, it
+  will loop forever."
+  ([size]
+   (gen-inhabited-type size (constantly true)))
+  ([size filter]
+   (loop []
+     (let [td (gen-type size)
+           td-inhabited (inhabited? td false)]
+       (if (and td-inhabited (filter td))
+         td
+         (recur))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of typep and its methods
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
