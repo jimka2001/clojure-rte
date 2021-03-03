@@ -698,7 +698,7 @@
 
            ;; (not (and ...)) --> (or  (not ...) (not ...) ...)
            (gns/and? (second type-designator))
-           (let [[_not [_and &rest and-args]] type-designator]
+           (let [[_not [_and & and-args]] type-designator]
              (cons 'or
                    (map (fn [arg]
                           (list 'not arg))
@@ -706,7 +706,7 @@
            
            ;; (not (or ...))  --> (and (not ...) (not ...) ...)
            (gns/or? (second type-designator))
-           (let [[_not [_or &rest or-args]] type-designator]
+           (let [[_not [_or & or-args]] type-designator]
              (cons 'and
                    (map (fn [arg]
                           (list 'not arg))
