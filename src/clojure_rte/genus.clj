@@ -142,20 +142,30 @@
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
-  (if (= t1 t2)
-    true
+  (let [sp1 (delay (subtype? t1 t2 :dont-know))
+        can1 (delay (canonicalize-type :dnf t1))
+        sp2 (delay (subtype? @can1 t2 :dont-know))
+        can2 (delay (canonicalize-type :dnf t2))
+        sp3 (delay (subtype? @can1 @can2 :dont-know))]
     ;; two types are equivalent if each is a subtype of the other.
-    ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
-    ;;    as that may be compute intensive.
-    (let [s1 (subtype? t1 t2 :dont-know)
-          s2 (delay (subtype? t2 t1 :dont-know))]
-      (case s1
-        (false) false
-        (case @s2
-          (false) false
-          (if (= true s1 @s2)
-            true
-            default))))))
+    (cond (= t1 t2)
+          true
+          ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
+          ;;    as that may be compute intensive.
+          (= @sp1 false)
+          false
+
+          (and (= @sp1 :dont-know)
+               (= @sp2 false))
+          false
+
+          (and (= @sp1 :dont-know)
+               (= @sp2 :dont-know)
+               (= @sp3 false))
+          false
+
+          :else
+          (subtype? @can2 @can1 default))))
 
 (defn type-dispatch [type-designator]
   "Dispatch function for several defmulti's.  If the type-designator is a sequence,
