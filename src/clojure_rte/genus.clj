@@ -655,7 +655,7 @@
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :not-a-sequence
                      :normal-form nf
-                     :type type-designator }))
+                     :type-designator type-designator }))
 
     (not (valid-type? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
