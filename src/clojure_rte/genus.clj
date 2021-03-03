@@ -1435,6 +1435,7 @@
         :dont-know
 
         :else
+        ;; isn't this just the same as directly returning x?
         (let [x (subtype? (second super) (second sub) :dont-know)]
           (if (= :dont-know x)
             :dont-know
@@ -1691,5 +1692,3 @@
   (if (gns/=? t1)
     true
     :dont-know))
-
-
