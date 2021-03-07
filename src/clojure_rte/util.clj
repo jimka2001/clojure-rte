@@ -438,3 +438,31 @@
     (lazy-seq
       (cons (first s)
             (unchunk (next s))))))
+
+(defn tree-fold
+  "Like the 3-arg version of reduce except that does not compute from left-to-right
+  but rather effectingly by grouping in concentric groups of two. e.g.
+   (+ (+ (+ 1 2) (+ 3 4)) (+ (+ 5 6) (+ 7 8))) ...
+  The remaining (right-most) elements are partitioned into 2's as much as possible."
+  [f z coll]
+  (letfn [(dwindle-tree-1 [stack]
+            (loop [stack stack]
+              (if (empty? (rest (rest stack)))
+                stack
+                (let [[[i b1] [j b2] & tail] stack]
+                  (if (= i j)
+                    (recur (cons [(inc i) (f b2 b1)] tail))
+                    stack)))))
+          (dwindle-tree-2 [stack]
+            (if (empty? (rest (rest stack)))
+              stack
+              (let [[[i b1] [j b2] & tail] stack]
+                (if (= i j)
+                  (dwindle-tree-2 (cons [(inc i) (f b2 b1)] tail))
+                  stack))))]
+    (let [stack (reduce (fn [stack ob]
+                          (dwindle-tree-1 (cons [1 ob] stack)))
+                        (list [1 z])
+                        coll)]
+      (reduce (fn [a1 a2] (f a2 a1))
+              (map second stack)))))

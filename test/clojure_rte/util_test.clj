@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2021 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -24,7 +24,8 @@
             [clojure-rte.util :refer [sort-operands partition-by-pred
                                       call-with-collector
                                       visit-permutations
-                                      remove-once fixed-point member]]
+                                      remove-once fixed-point member
+                                      tree-fold]]
             [clojure.test :refer [deftest testing is]]))
 
 (defn -main []
@@ -331,3 +332,41 @@
     (is (not (member 1 [])))
     (is (not (member 1 ())))))
 
+(deftest t-tree-fold
+  (testing "tree-fold"
+    (doseq [seq [[]
+                 [1]
+                 [1 2]
+                 [1 2 3]
+                 [1 2 3 4 5 6 7]
+                 [1 2 3 4 5 6 7 8]
+                 [1 2 3 4 5 6 7 8
+                  10 20 30 40 50 60 70 80
+                  100 200 300 400 500 600 700 800]]]
+      (is (= (reduce + 0 seq)
+             (tree-fold + 0 seq)))
+      (is (= (reduce *' 0 seq)
+             (tree-fold *' 0 seq)))
+      (is (= (reduce bit-xor 0 seq)
+             (tree-fold bit-xor 0 seq))))
+
+    (letfn [(range-ext [left right]
+              (range left (inc right)))
+            (add-inverses [a b]
+              (println [a b])
+              (+ (/ 1 a) (/ 1 b)))]
+
+    (doseq [n (range 100)
+            i (range n)
+            :let [seq (map / (concat (range-ext (- i) -1)
+                                     (range-ext 1 i)))]
+            ]
+      (do
+        (is (= 0 (reduce + 0 seq)))
+        
+        (is (= (reduce + 0 seq)
+               (tree-fold + 0 seq)))
+        )
+      ))))
+
+      
