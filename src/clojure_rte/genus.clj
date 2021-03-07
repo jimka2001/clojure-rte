@@ -496,6 +496,8 @@
     (member "a" "b" "c")
     (member "a" "b" "c" 1 2 3)
     (member 1 "a")
+    :sigma
+    :empty-set
     ))
 
 (defn gen-type
