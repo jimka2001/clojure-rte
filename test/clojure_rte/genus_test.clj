@@ -566,7 +566,7 @@
 
 (defn statistics
   "Generate a table of statics indicating the accuracy of the subtype? function."
-  []
+  [nreps]
   (letfn [(measure-subtype-computability [n depth inh]
             (assert (> n 0))
             (let [m (reduce (fn [m current-item]
@@ -583,44 +583,48 @@
                                     can2 (gns/canonicalize-type :dnf rt2)
                                     s1 (gns/subtype? rt1 rt2 :dont-know)
                                     s2 (gns/subtype? can1 can2 :dont-know)]
-                                
-                                {:inhabited (+ (get m :inhabited 0)
-                                               (if (gns/inhabited? rt1 false) 1 0))
-                                 :inhabited-dnf (+ (get m :inhabited-dn 0)
-                                                   (if (gns/inhabited? can1 false) 1 0))
-                                 :equal (+ (get m :equal 0)
-                                           (if (gns/type-equivalent? can1 can2 false) 1 0))
-                                 :subtype-true (+ (get m :subtype-true 0)
-                                                  (if (= s1 true) 1 0))
-                                 :subtype-false (+ (get m :subtype-false 0)
-                                                   (if (= s1 false) 1 0))
-                                 :subtype-dont-know (+ (get m :subtype-dont-know 0)
-                                                       (if (= s1 :dont-know) 1 0))
-                                 :subtype-know (+ (get m :subtype-know 0)
-                                                  (if (not= s1 :dont-know) 1 0))
-                                 :subtype-dnf-true (+ (get m :subtype-dnf-true-know 0)
-                                                      (if (= s2 true) 1 0))
-                                 :subtype-dnf-false (+ (get m :subtype-dnf-false 0)
-                                                       (if (= s2 false) 1 0))
-                                 :subtype-dnf-dont-know (+ (get m :subtype-dnf-dont-know 0)
-                                                           (if (= s2 :dont-know) 1 0))
-                                 :subtype-dnf-know (+ (get m :subtype-dnf-know 0)
-                                                      (if (not= s1 :dont-know) 1 0))
-                                 :gained (+ (get m :gained 0)
-                                            (if (and (= s1 :dont-know) (not= s2 :dont-know)) 1 0))
-                                 :lost (+ (get m :lost 0)
-                                          (if (and (not= s1 :dont-know) (= s2 :dont-know)) 1 0))
-                                 }))
+                                (letfn [(f [key bool]
+                                          [key (+ (get m key 0)
+                                                (if bool 1 0))]
+                                          )]
+                                  (into {} [(f :inhabited
+                                               (gns/inhabited? rt1 false))
+                                            (f :inhabited-dnf
+                                               (gns/inhabited? can1 false))
+                                            (f :equal
+                                               (gns/type-equivalent? can1 can2 false))
+                                            (f :subtype-true
+                                               (= s1 true))
+                                            (f :subtype-false
+                                               (= s1 false))
+                                            (f :subtype-dont-know
+                                               (= s1 :dont-know))
+                                            (f :subtype-know ;; accuracy
+                                               (not= s1 :dont-know) )
+                                            (f :subtype-dnf-true
+                                               (= s2 true))
+                                            (f :subtype-dnf-false
+                                               (= s2 false))
+                                            (f :subtype-dnf-dont-know
+                                               (= s2 :dont-know))
+                                            (f :subtype-dnf-know ;; accuracy DNF
+                                               (not= s2 :dont-know))
+                                            (f :gained
+                                               (and (= s1 :dont-know) (not= s2 :dont-know)))
+                                            (f :lost
+                                               (and (not= s1 :dont-know) (= s2 :dont-know)))
+                                            ]))
+                                  ))
                             {}
                             (range n))]
               (map (fn [[k v]] [k
                                 (/ (* 100.0 v) n)]) m)
               )
             )]
-    (doall (map println (measure-subtype-computability 1000 3 false)))
+    (doall (map println (measure-subtype-computability nreps 3 false)))
     (println "--------------------")
-    (doall (map println (measure-subtype-computability 1000 3 true)))))
+    (doall (map println (measure-subtype-computability nreps 3 true)))))
 
 (deftest t-statistics
   (testing "statistics"
-    (statistics)))
+    (statistics 10000)))
