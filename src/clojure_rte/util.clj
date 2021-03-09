@@ -441,22 +441,23 @@
 
 (defn tree-fold
   "Like the 3-arg version of reduce except that does not compute from left-to-right
-  but rather effectingly by grouping in concentric groups of two. e.g.
+  but rather computes by grouping in concentric groups of two. e.g.
    (+ (+ (+ 1 2) (+ 3 4)) (+ (+ 5 6) (+ 7 8))) ...
-  The remaining (right-most) elements are partitioned into 2's as much as possible."
+  The remaining (right-most) elements are partitioned into 2's as much as possible.
+  Intermediate values become unreferenced as quickly as possible, allowing them to 
+  be GCed"
   [f z coll]
   (letfn [(dwindle-tree [stack]
-            (loop [stack stack]
-              (if (empty? (rest (rest stack)))
-                stack
-                (let [[[i b1] [j b2] & tail] stack]
-                  (if (= i j)
-                    (recur (cons [(inc i) (f b2 b1)] tail))
-                    stack)))))]
-    (let [stack (reduce (fn [stack ob]
-                          (dwindle-tree (cons [1 ob] stack)))
-                        (list [1 z])
-                        coll)]
-      ;; stack is guaranteed to have at least one element
+            (if (empty? (rest (rest stack)))
+              stack
+              (let [[[i b1] [j b2] & tail] stack]
+                (if (= i j)
+                  (dwindle-tree (cons [(inc i) (f b2 b1)] tail))
+                  stack))))
+          (reduce-1 [stack ob]
+            (dwindle-tree (cons [1 ob] stack)))]
+    (let [stack (reduce reduce-1 (list [1 z]) coll)]
+      ;; stack is guaranteed to have at least one element,
+      ;; because every stack operation pops twice and pushes once.
       (reduce (fn [a1 a2] (f a2 a1))
               (map second stack)))))
