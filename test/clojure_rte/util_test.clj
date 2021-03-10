@@ -369,4 +369,17 @@
         )
       ))))
 
+(deftest t-tree-fold-2
+  (testing "tree-fold 2"
+    (let [s (map / [23 29 31 37 41 43 47 53 57 67
+                    71 73 79 83 89 97])
+          ]
+      (reduce + 0 s)
+      (clojure-rte.util/tree-fold + 0 s)
+      (is (= (reduce + 0 s)
+             (clojure-rte.util/tree-fold + 0 s))))))
+
+
+
+
       
