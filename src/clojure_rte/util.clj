@@ -448,7 +448,7 @@
   be GCed"
   [f z coll]
   (letfn [(dwindle-tree [stack]
-            (if (empty? (rest (rest stack)))
+            (if (empty? (rest stack))
               stack
               (let [[[i b1] [j b2] & tail] stack]
                 (if (= i j)
