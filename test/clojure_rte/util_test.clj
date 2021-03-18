@@ -21,6 +21,7 @@
 
 (ns clojure-rte.util-test
   (:require [clojure-rte.rte-core]
+            [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [sort-operands partition-by-pred
                                       call-with-collector
                                       visit-permutations
@@ -332,8 +333,8 @@
     (is (not (member 1 [])))
     (is (not (member 1 ())))))
 
-(deftest t-tree-fold
-  (testing "tree-fold"
+(deftest t-fold
+  (testing "fold"
     (doseq [seq [[]
                  [1]
                  [1 2]
@@ -343,49 +344,53 @@
                  [1 2 3 4 5 6 7 8
                   10 20 30 40 50 60 70 80
                   100 200 300 400 500 600 700 800]]]
-      (is (= (reduce + 0 seq)
-             (tree-fold + 0 seq)))
-      (is (= (reduce *' 0 seq)
-             (tree-fold *' 0 seq)))
-      (is (= (reduce bit-xor 0 seq)
-             (tree-fold bit-xor 0 seq))))
-
-    (letfn [(range-ext [left right]
-              (range left (inc right)))
-            (add-inverses [a b]
-              (println [a b])
-              (+ (/ 1 a) (/ 1 b)))]
-
-    (doseq [n (range 100)
-            i (range n)
-            :let [seq (map / (concat (range-ext (- i) -1)
-                                     (range-ext 1 i)))]
-            ]
-      (do
-        (is (= 0 (reduce + 0 seq)))
-        
+      (doseq [fold [clojure-rte.util/pairwise-fold
+                    clojure-rte.util/tree-fold]]
         (is (= (reduce + 0 seq)
-               (tree-fold + 0 seq)))
-        )
-      ))))
+               (fold + 0 seq))
+            (cl-format false "351: ~A" fold))
+        (is (= (reduce *' 1 seq)
+               (fold *' 1 seq))
+            (cl-format false "354: ~A: seq=~A" fold seq))
+        (is (= (reduce bit-xor 0 seq)
+               (fold bit-xor 0 seq))
+            (cl-format false "357: ~A" fold))
 
-(deftest t-tree-fold-2
-  (testing "tree-fold 2"
+        (letfn [(range-ext [left right]
+                  (range left (inc right)))
+                ]
+
+          (doseq [n (range 100)
+                  i (range n)
+                  :let [seq (map / (concat (range-ext (- i) -1)
+                                           (range-ext 1 i)))]
+                  ]
+            (do
+              (is (= 0 (reduce + 0 seq)))
+              
+              (is (= (reduce + 0 seq)
+                     (fold + 0 seq))
+                  (cl-format false "374: ~A" fold))
+              )
+            ))))))
+
+(deftest t-fold-2
+  (testing "fold 2"
     (let [s (map / [23 29 31 37 41 43 47 53 57 67
                     71 73 79 83 89 97])
           ]
-      (reduce + 0 s)
-      (clojure-rte.util/tree-fold + 0 s)
-      (is (= (reduce + 0 s)
-             (clojure-rte.util/tree-fold + 0 s))))))
+      (doseq [fold [clojure-rte.util/pairwise-fold
+                    clojure-rte.util/tree-fold]]
 
+        (reduce + 0 s)
+        (fold + 0 s)
+        (is (= (reduce + 0 s)
+               (fold + 0 s))
+            (print-str fold))))))
 
-
-
-      
-(deftest t-tree-fold-3
-  (testing "tree-fold 3"
-    (doseq [f [reduce clojure-rte.util/tree-fold]]
+(deftest t-fold-3
+  (testing "fold 3"
+    (doseq [f [reduce clojure-rte.util/pairwise-fold clojure-rte.util/tree-fold ]]
       (let [x (atom 0)
             s [1/23 1/29
                1/31 1/37
@@ -399,7 +404,6 @@
             denom-digits (fn [ratio]
                            (if (zero? ratio) 0
                                (count (print-str (denominator ratio)))))
-            
             ]
         (f (fn [acc i] 
              (let [m (max (denom-digits acc)

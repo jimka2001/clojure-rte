@@ -439,6 +439,36 @@
       (cons (first s)
             (unchunk (next s))))))
 
+(defn pairwise-fold
+  "Similar to reduce, but iterates over the sequence
+  several times, each time reducing adjacent pairs using the given
+  function.  e.g., (((1 + 2) + (3 + 4)) + ((5 + 6) + (7 + 8))) ..."
+  [f z coll]
+  (if (empty? coll)
+    z
+    (letfn [(f-effective [[a b]]
+              (f a b))
+            (make-pairs [lazy-list]
+              ;; returns either
+              ;;   [vec-of-pairs ()] if lazy-list has even length
+              ;;   [vec-of-paris (item)] if lazy-list has odd length
+              (loop [vec []
+                     lazy-list lazy-list]
+                (cond (>= 1 (bounded-count 2 lazy-list))
+                      [vec lazy-list]
+
+                      :else
+                      (recur (conj vec [(first lazy-list) (second lazy-list)])
+                             (rest (rest lazy-list))))))]                    
+      (loop [coll coll]
+        (cond (= 1 (bounded-count 2 coll))
+              (first coll)
+
+              :else
+              (let [[pair-vec residue] (make-pairs coll)]
+                (recur (concat (map f-effective pair-vec)
+                               residue))))))))
+
 (defn tree-fold
   "Like the 3-arg version of reduce except that does not compute from left-to-right
   but rather computes by grouping in concentric groups of two. e.g.
