@@ -456,8 +456,13 @@
                   stack))))
           (reduce-1 [stack ob]
             (dwindle-tree (cons [1 ob] stack)))]
-    (let [stack (reduce reduce-1 (list [1 z]) coll)]
-      ;; stack is guaranteed to have at least one element,
-      ;; because every stack operation pops twice and pushes once.
-      (reduce (fn [a1 a2] (f a2 a1))
-              (map second stack)))))
+    (cond
+      (empty? coll)
+      z
+
+      :else
+      (let [stack (reduce reduce-1 (list [1 (first coll)]) (rest coll))]
+        ;; stack is guaranteed to have at least one element,
+        ;; because every stack operation pops twice and pushes once.
+        (reduce (fn [a1 a2] (f a2 a1))
+                (map second stack))))))

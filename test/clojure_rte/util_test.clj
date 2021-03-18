@@ -383,3 +383,28 @@
 
 
       
+(deftest t-tree-fold-3
+  (testing "tree-fold 3"
+    (doseq [f [reduce clojure-rte.util/tree-fold]]
+      (let [x (atom 0)
+            s [1/23 1/29
+               1/31 1/37
+               1/41 1/43 1/47
+               1/53 1/57 
+               1/67
+               1/71 1/73
+               1/83 1/89
+               1/97
+               ]
+            denom-digits (fn [ratio]
+                           (if (zero? ratio) 0
+                               (count (print-str (denominator ratio)))))
+            
+            ]
+        (f (fn [acc i] 
+             (let [m (max (denom-digits acc)
+                          (denom-digits i))]
+               (swap! x (fn [old new] (+ old (* new new new))) m)
+               (println [:acc acc :i i :max-denom m :sum (deref x)])
+               (+ acc i)))
+           0/1 s)))))
