@@ -21,9 +21,9 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-# `destructuring-fn` and `destructuring-case`
+# `dsfn` and `destructuring-case`
 
-## destructuring-fn
+## dsfn
 
 The `dsfn` macro can be thought of as a generalization of the clojure build-in `fn` macro.
 However `dsfn` offers two features that `fn` does not:
