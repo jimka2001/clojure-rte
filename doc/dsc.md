@@ -128,7 +128,7 @@ and `^{a Boolean c String} [a [b c] d]`.  With simple type specifiers, the two f
 However, the second form allows more flexible type constraints such as the following.
 
 - `^{[a b] Boolean c String}   [a [b c] d]` --- `a` and `b` are both `Boolean`, and `c` is String.
-- `^{a  Boolean b (or Boolean String) String}   [a [b c] d]` --- `a` is `Boolean`, `c` is String, and `b` is either `Boolean` or `String`.
+- `^{a  Boolean b (or Boolean String) c String}   [a [b c] d]` --- `a` is `Boolean`, `c` is String, and `b` is either `Boolean` or `String`.
 - `^{a Boolean b (and Number (not Long))}  [a [b c] d]` --- `a` is `Boolean`, and `b` is either `Number` but not `Long`.
 - `^{a (member -1 0 1) b (and (Number (not (= 0))))}   [a b c]` --- `a` is -1, 0 or 1, and `b` is a `Number` different from 0.
 
