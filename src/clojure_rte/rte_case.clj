@@ -316,5 +316,15 @@
               (let [meta-data (meta (first form))]
                 (cons [(first form) (if (nil? meta-data) {} meta-data) ] (rest form)))
               form))]
-    `(destructuring-fn
-      ~@(map process forms))))
+    (cond
+      (and (or (nil? (first forms))
+               (symbol? (first forms)))
+           (vector? (second forms)))
+      `(dsfn ~(first forms) (~@(rest forms)))
+
+      (vector? (first forms))
+      `(dsfn (~@forms))
+
+      :else
+      `(destructuring-fn
+        ~@(map process forms)))))
