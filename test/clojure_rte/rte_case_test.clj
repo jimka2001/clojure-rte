@@ -26,6 +26,7 @@
             [clojure.test :refer [deftest is]]
             [clojure-rte.rte-case :refer [rte-case destructuring-case
                                           memoized-rte-case-clauses-to-dfa
+                                          dsfn
                                           -destructuring-fn-many destructuring-fn]]
 ))
 
@@ -599,3 +600,147 @@
         "test 5")
     ))
 
+
+(deftest t-dsfn
+  (testing "dsfn"
+    (is (= 42
+           (let [f (dsfn
+                    ^{a Boolean b String d Boolean}
+                     [a [b c] & d]  
+                    42)]
+             (f true ["hello" 3] true true)))
+        "test 612")
+
+    (is (= 42
+           (let [f (dsfn fake-name
+                    ^{a Boolean b String d Boolean}
+                     [a [b c] & d]  
+                    42)]
+             (f true ["hello" 3] true true)))
+        "test 613")
+
+    (is (= 42
+           (let [f (dsfn fake-name
+                         (^{a Boolean b String d Boolean}
+                          [a [b c] & d]  
+                          42))]
+             (f true ["hello" 3] true true)))
+        "test 614")
+
+    (is (= 42
+           ;; test recursive anonymous function
+           (let [f (dsfn fake-name
+                         ([^Double a]
+                          41)
+                         ([^Long a]
+                          (+ 1 (fake-name (+ 0.0 a)))))]
+
+             (f 12)))
+        "test 615")
+
+    (is (= nil
+           (let [f (dsfn
+                    (^{a Boolean b String d Boolean}
+                     [a [b c] & d]  
+                     1)
+
+                    (^ {a Boolean b (or String Boolean)}
+                     [a b]
+                     2))]
+             (apply f  '(true [3 3] true))))
+        "test 3")
+
+    (is (= 1
+           (let [f (dsfn
+                    ([^Boolean a [^String b c] & ^Boolean d]
+                     1 ;; this is returned
+                     )
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2))]
+             (apply f '(true ["hello" xyz] true false true))))
+        "test 4")
+    (is (= 2
+           (let [f (dsfn
+                    ([^Boolean a [^String b c] & ^Boolean d]
+                     1
+                     )
+                    ([^Boolean a [^String b c] & d]
+                     2 ;; this is returned
+                     ))]
+             (apply f '(true ["hello" xyz] true false 1 2 3))))
+        "test 5")
+    (is (= nil
+           (let [f (dsfn
+                    (^{d Number}
+                     [^Boolean a [^String b c] & ^Boolean d]
+                     1 ;; this is NOT returned
+                     )
+                    (^{d Boolean} [^Boolean a [^String b c] & ^Number d]
+                     2 ;; this is NOT returned
+                     ))]
+             (apply f '(true ["hello" xyz] true false 1 2 3))))
+        "test 6")
+
+    (is (= 1 
+           (let [f (dsfn
+                    (^{[a d] Boolean b String} [a [b c] & d]
+                     1)
+                    
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2))]
+             (apply f '(true ["3" 3] true))))
+        "test 7")
+
+    (is (= 1
+           (let [f (dsfn
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2)
+                    (^{[a d] Boolean b String} [a [b c] & d]
+                     1))]
+             (apply f '(true ["3" 3] true))))
+        "test 8")
+
+    (is (= 1
+           (let [f (dsfn
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2)
+                    (^{[a d] Boolean a (not Number) b String} [a [b c] & d]
+                     1))]
+             (apply f '(true ["3" 3] true))))
+        "test 9")
+    (is (= 1 
+           (let [f (dsfn
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2)
+                    (^{[a d] (not Number) a Boolean b String} [a [b c] & d]
+                     1))]
+             (apply f  '(true ["3" 3] true))))
+        "test 10")
+    (is (= 1 
+           (let [f (dsfn
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2)
+                    (^{[a d] (not Number) a Boolean b String} [a [b c] & ^Boolean d]
+                     1))]
+             (apply f  '(true ["3" 3] true))))
+        "test 11")
+    (is (= 1 
+           (let [f (dsfn
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2)
+                    (^{[a d] (not Number) a Boolean b String}[a [b c] & ^Boolean d]
+                     1))]
+             (apply f  '(true ["3" 3] true false true))))
+        "test 12")
+    (is (= 3 
+           (let [f (dsfn
+                    (^{a Boolean b (or String Boolean)} [a b]
+                     2)
+                    ;; TODO, not sure if [[& ^Boolean d] {d (not number)}] works properly.
+                    ;;  still need to debug this test case
+                    (^{[a d] (not Number) a Boolean b String} [a [b c] & ^Boolean d]
+                     1)
+                    ([& others]
+                     3))]
+             (apply f  '(true ["3" 3] true "miss" false true))))
+        "test 13")))
