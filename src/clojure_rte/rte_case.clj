@@ -279,7 +279,8 @@
          ~@others)))
 
     (every? (fn [clause]
-              (and (list? clause)
+              (and (sequential? clause)
+                   (not (vector? clause))
                    (not-empty clause)
                    (vector? (first clause))))
             (rest args))
@@ -291,5 +292,29 @@
     :else
     (throw (IllegalArgumentException. 
             (cl-format false
-                       "destructuring-fn, invalid argument list: ~A"
-                       args)))))
+                       "destructuring-fn, invalid argument list: ~A first non-conforming element ~A"
+                       args
+                       (map (fn [clause]
+                              (and (type clause);;(list? clause)
+                                   ;;(not-empty clause)
+                                   ;;(vector? (first clause))
+
+                                   )) (rest args))
+                       )))))
+
+(defmacro dsfn
+  "Syntactically easier wrapper around destructuring-fn.
+  The syntax of dsfn is the same as the syntax of fn
+  except that meta-data may be placed before a lambda-list which
+  will be considered its constr-map.  E.g.,
+  (dsfn name? (^{x Boolean} [x] ...)
+              (^{x (and Number (not Long))} [x] ...))"
+  [& forms]
+  (letfn [(process [form]
+            (if (and (sequential? form)
+                     (not (empty? form)))
+              (let [meta-data (meta (first form))]
+                (cons [(first form) (if (nil? meta-data) {} meta-data) ] (rest form)))
+              form))]
+    `(destructuring-fn
+      ~@(map process forms))))

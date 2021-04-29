@@ -83,7 +83,7 @@ git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 * [Xymbolyco: Sigma Complete Deterministic Finite Automata](doc/xymbolyco.md)
 * [Expert details w.r.t. RTE](doc/expert.md)
 * [API](doc/api.md)
-* [destructuring-fn](doc/dsc.md)
+* [dsfn](doc/dsc.md)
 * [destructuring-case](doc/dsc.md/#destructuring-case)
 * [spec integration](doc/spec.md)
 ## Usage
