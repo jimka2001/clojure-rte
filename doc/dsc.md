@@ -133,6 +133,30 @@ However, the second form allows more flexible type constraints such as the follo
 - `^{a (member -1 0 1) b (and (Number (not (= 0))))}   [a b c]` --- `a` is -1, 0 or 1, and `b` is a `Number` different from 0.
 
 
+## destructuring using keys
+
+A syntax such as the following can be used to match optional keyword arguments.
+
+```clojure
+((dsfn 
+   ([a b & {:keys [foo bar]}]  12) ;; same as :allow-other-keys false
+   ([a b & {:keys [foo bar] :allow-other-keys true}]   13)
+   ([a b & {:keys [foo bar] :or {a 1 b 2}]             15)
+ ...)
+```
+
+There are some subtle semantics about keys.  For example if
+`:allow-other-keys` is not specified or if it is specified to be
+`false`, then the clause will NOT match if the call-site has a key
+which is not mentioned.  By *not mentioned* we man neither mentioned
+in the defaults `:or` nor mentioned in the call-site argument list
+
+If `:allow-other-keys true` is specified, then unmentioned keys will
+have no effect on whether a clause matches.
+
+If `:or` is given to specify default values, the semantics are
+equivalent to add the corresponding keys to the call-site arguments if
+they are missing.
 
 ## destructuring-case
 

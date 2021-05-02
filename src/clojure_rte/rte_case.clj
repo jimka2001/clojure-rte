@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -21,10 +21,11 @@
 
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.util :refer [defn-memoized]]
+            [clojure-rte.util :refer [defn-memoized member]]
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
+            [backtick :refer [template]]
             )
   )
 
@@ -121,7 +122,7 @@
             ;; finished parsing
             (if (empty? suffix-rte)
               `(:cat ~@prefix-rte)
-              `(:cat ~@prefix-rte (:* ~@suffix-rte)))
+              `(:cat ~@prefix-rte ~@suffix-rte))
 
             (and (not-empty required)
                  (= '& (first required)))
@@ -132,6 +133,44 @@
                    suffix-rte ; suffix-rte
                    (conj parsed '&))
 
+            (and (not-empty others)
+                 (map? (first others)))
+            (letfn [(make-keyword-matcher-rte [var]
+                      (let [k (keyword var)
+                            default-given (contains? (get (first others) :or {}) var)
+                            term-1 (template (:* (:cat (:not (= ~k)) :sigma)))
+                            td (pretty-and (get (meta var) :tag :sigma)
+                                           (get types-map var :sigma))
+                            term-2 (template (:cat (:* (:cat :sigma :sigma))
+                                                   (:cat (= ~k) ~td)
+                                                   (:* (:cat (:not (= ~k)) :sigma))))]
+                        (list (if default-given
+                                (template (:or ~term-1
+                                               ~term-2
+                                               ))
+                                term-2))))]
+              
+              (assert (vector? (get (first others) :keys))
+                      (cl-format false "parsing ~A expecting a vector specified for :keys, not ~A"
+                                 lambda-list
+                                 (get (first others) :keys)))
+              
+              (let [given-keys (get (first others) :keys)
+                    allow-other-keys  (get (first others) :allow-other-keys false)
+                    valid-key (if allow-other-keys
+                                (template (satisfies keyword?))
+                                (template (member ~@(map keyword given-keys))))]
+
+                (recur required
+                       (rest others)
+                       prefix-rte
+                       (conj suffix-rte
+                             ;; enforce keyword :sigma pairs
+                             ;; and simultaneously a constraint for each key specified
+                             (template (:and (:* (:cat ~valid-key :sigma))
+                                             ~@(mapcat make-keyword-matcher-rte (:keys (first others))))))
+                       (conj parsed (first others)))))
+            
             (not-empty required)
             (let [var (first required)]
               (recur (rest required)
@@ -172,8 +211,8 @@
                      (rest others)
                      prefix-rte
                      (conj suffix-rte
-                           (pretty-and (get (meta var) :tag :sigma)
-                                       (get types-map var :sigma)))
+                           (template (:* ~(pretty-and (get (meta var) :tag :sigma)
+                                                      (get types-map var :sigma)))))
                      (conj parsed var)))
 
             (not-empty others)
@@ -211,11 +250,32 @@
                                   (if type-2
                                     [var (list 'and type-1 type-2)]
                                     [var type-1])))))
+              (remove-extra-syntax [lambda-list]
+                ;; lambda-list is a vector which is almost compatible with the
+                ;;   lambda-list of fn.   However there might be a :allow-other-keys
+                ;;   in the map immediately of the &
+                ;;   E.g.,  [1 2 3 & {:keys [a b c] :allow-other-keys true}]
+                ;;   If such an element is found, return a copy of the vector
+                ;;      except with :allow-other-keys removed from the map
+                ;;   otherwise just return the vector as is.
+                (if (not (member '& lambda-list))
+                  lambda-list
+                  (let [[before after] (split-with (fn [x] (not= x '&)) lambda-list)]
+                    (cond
+                      (<= (count after) 1)
+                      lambda-list
+                      (not (map? (nth after 1)))
+                      lambda-list
+                      :else
+                      (into [] (concat before
+                                       ['&]
+                                       [(dissoc (nth after 1) :allow-other-keys)]
+                                       (drop 2 after)))))))
               (conv-1-case-clause [[[lambda-list types-map] consequence]]
                 (assert (map? types-map)
                         (cl-format false "destructuring-case expecting a map, not ~A" types-map))
                 [(lambda-list-to-rte lambda-list (expand-multi-restrictions types-map))
-                 `(let [~lambda-list ~var]
+                 `(let [~(remove-extra-syntax lambda-list) ~var]
                     ~consequence)])]
         (let [pairs (partition 2 pairs)
               cases (mapcat conv-1-case-clause pairs)]

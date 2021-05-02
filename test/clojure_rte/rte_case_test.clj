@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -744,3 +744,72 @@
                      3))]
              (apply f  '(true ["3" 3] true "miss" false true))))
         "test 13")))
+
+
+(deftest t-dsfn-assoc
+  (is (= 41 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys false}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :bar true)))
+  (is (= 41 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys true}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :bar true :xyzzy 1)))
+  (is (= 44 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys false}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar] :allow-other-keys true}]               44))
+             :bar true :xyzzy 1))
+      "test 765 a")
+  (is (= 41 ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :bar true)))
+  (is (= 42 ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :bar 12)))
+  (is (= 43 ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :foo 3))
+      "test 765 b")
+  (is (= 44 ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :bar "hello")))
+
+  (is (= nil ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+              )))
+
+  (is (= 41 ((dsfn ([& {:keys [^Boolean bar]
+                         :or {bar false}}]      41)
+                   ([& {:keys [^Long bar]}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             )))
+
+  (is (= 42 ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]
+                        :or {bar 12}}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             )))
+   (is (= 43 ((dsfn ([& {:keys [^Boolean bar]}]      41)
+                   ([& {:keys [^Long bar]
+                        :or {bar 12}}]         42)
+                   ([& {:keys [foo]}]               43)
+                   ([& {:keys [bar]}]               44))
+             :foo 12))
+       "test 797"
+       )
+  )
