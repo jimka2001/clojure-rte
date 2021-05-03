@@ -227,15 +227,15 @@
   "After evaluating the expression (only once) determine whether its return value
   conforms to any of the given lambda lists and type restrictions.  If so,
   bind the variables as if by let, and evaluate the corresponding form."
-  [expr & pairs]
+  [expr & operands]
   (cond
-    (not= 0 (mod (count pairs) 2))
+    (not= 0 (mod (count operands) 2))
     (throw (ex-info (cl-format false
-                               "destructuring-case expects multiple of 2 number of arguments after the first: not ~A, ~A"
-                               (count pairs) (apply list 'destructuring-case expr pairs))
+                               "destructuring-case expects multiple of 2 number of operands after the first: not ~A, ~A"
+                               (count operands) (apply list 'destructuring-case expr operands))
                     {:error-type :invalid-destructuring-case-call-site
                      :expr expr
-                     :pairs pairs}))
+                     :operands operands}))
 
     :else
     (let [var (gensym "v")]
@@ -277,10 +277,51 @@
                 [(lambda-list-to-rte lambda-list (expand-multi-restrictions types-map))
                  `(let [~(remove-extra-syntax lambda-list) ~var]
                     ~consequence)])]
-        (let [pairs (partition 2 pairs)
+        (let [pairs (partition 2 operands)
               cases (mapcat conv-1-case-clause pairs)]
           `(let [~var ~expr]
              (rte-case ~var ~@cases ~sigma-* nil)))))))
+
+(defmacro dscase
+  "Semantically similar to destructuring-case but arguably simpler syntax.
+  (dscase evaluatable-value
+    lambda-list-1 consequent-1
+    lambda-list-2 consequent-2
+    lambda-list-3 consequent-3 ...
+    )
+  Any of the lambda-lists may be preceeded by meta data which maps
+  variable names to type designators.
+
+  The first consequent will be evaluated whose corresponding lambda-list
+  is applicable to the value specified by evaluatable-value.
+  "
+  [expr & operands]
+  (cond
+    (not= 0 (mod (count operands) 2))
+    (throw (ex-info (cl-format false
+                               "dscase expects multiple of 2 number of operands after the first: not ~A, ~A"
+                               (count operands) (apply list 'dscase expr operands))
+                    {:error-type :invalid-dscase-call-site
+                     :expr expr
+                     :operands operands}))
+
+    :else
+    (let [pairs (partition 2 operands)]
+      (letfn [(conv-1-pair [[lambda-list consequent]]
+                (if (not (vector? lambda-list))
+                  (throw (ex-info (cl-format false
+                                             "dscase expecting vector not ~A" lambda-list)
+                                  {:error-type :invalid-dscase-lambda-list
+                                   :expr expr
+                                   :operands operands})))
+                (let [meta-data (meta lambda-list)]
+                  (if (nil? meta-data)
+                    [[lambda-list {}] consequent]
+                    [[lambda-list meta-data]  consequent]))
+                )]
+        `(destructuring-case ~expr
+                             ~@(mapcat conv-1-pair pairs))))))
+
 
 (defmacro -destructuring-fn-many
   "Internal macro used in the expansion of destructuring-fn"

@@ -21,7 +21,7 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-# `dsfn` and `destructuring-case`
+# `dsfn` and `dscase`
 
 ## dsfn
 
@@ -205,22 +205,22 @@ For the second example, we include some default values.
 
 
 
-## destructuring-case
+## dscase
 
-The `destructuring-case` macro can be thought of as an inline version of `dsfn`.
+The `dscase` macro can be thought of as an inline version of `dsfn`.
 The syntax mimics that of `case` in that the first argument is a value to evaluate one,
 and the remaining arguments come in implicit pairs of *pattern*/*consequent*.
 The first *consequent* is evaluated for which the *pattern* matches the given expression.
 
 ```clojure
-(destructuring-case '(1 2 (3 4))
-  [[[^Boolean a b] c d] {}] 
+(dscase '(1 2 (3 4))
+  [[^Boolean a b] c d]
   12
 
-  [[^Boolean a [b c] ^String d] {}]
+  [^Boolean a [b c] ^String d]
   13
 
-  [[^Boolean a b [^String c ^String d]] {}]
+  [^Boolean a b [^String c ^String d]]
   (do
     (some-side-effect)
     (another-side-effect)
@@ -235,58 +235,57 @@ The following is equivalent but arguably more readable as the type constraints a
 structure constraints are presented separately.
 
 ```clojure
-(destructuring-case '(1 2 (3 4))
-  [[[a b] c d] 
-   {a Boolean}] 
+(dscase '(1 2 (3 4))
+  ^{a Boolean}
+  [[a b] c d] 
   12
 
-  [[a [b c] d]
-   {a Boolean
-    d String}]
+  ^{a Boolean    d String}
+  [a [b c] d]
   13
 
-  [[a b [c d]]
-   {a Boolean
-    [c d] String}]
+  ^{a Boolean
+    [c d] String}
+  [a b [c d]]
   (do
     (some-side-effect)
     (another-side-effect)
     14)
 
-  [[a b [c d]] {a Number}]
+  ^{a Number} [a b [c d]]
   15
 )
 ```
 
 ## Several special cases
 
-- For both `dsfn` and also `destructuring-case` the type constraint
-`[[a b & c] {c String}` means that `c` is a sequence of elements each of type `String`
+- For both `dsfn` and also `dscase` the type constraint
+`^{c String} [a b & c]` means that `c` is a sequence of elements each of type `String`
 not that `c` has type string.
 
 - If there are multiple type constraints on the same variable, the semantics is intersection.
 I.e., both constraints are required.
-`[[^Number a b] {a (not (= 0))}]` this means that `a` is both a `Number` and also different from zero, effectively `a` has type `(and Number (not (= 0)))`.
+`^{a (not (= 0))} [^Number a b]` this means that `a` is both a `Number` and also different from zero, effectively `a` has type `(and Number (not (= 0)))`.
 
 - Multiple type constraints may accidentally make code unreachable.  
-E.g., `[[^Number a b] {a String}]` means that `a` is both a `Number` and also a `String`.  Equivalently, `(and Number String)` is the empty type. 
+E.g., `^{a String} [^Number a b]` means that `a` is both a `Number` and also a `String`.  Equivalently, `(and Number String)` is the empty type. 
 There is no such object so this pattern will never
 match and the corresponding consequent code will be unreachable.
 
 - A function such as `(fn [a & as] ...)` cannot be called on an empty
  argument list as an exception will be thrown.  However, using `let`,
 `nil` can be destructured into `[a & as]` with both `a` and `as`
- bound to `nil`.  The `destructuring-case` and `dsfn`
+ bound to `nil`.  The `dscase` and `dsfn`
 macros favor function application to let binding to determine
 semantics.  For example, the following evaluates to `13`, not to
 `12`.
 
 ```clojure
-(destructuring-case '()
-  [[a & as]    {}] 
+(dscase '()
+  [a & as] 
   12
 
-  [[]       {}]
+  []
   13
 )
 ```

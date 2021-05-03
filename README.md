@@ -84,7 +84,7 @@ git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 * [Expert details w.r.t. RTE](doc/expert.md)
 * [API](doc/api.md)
 * [dsfn](doc/dsc.md)
-* [destructuring-case](doc/dsc.md/#destructuring-case)
+* [dscase](doc/dsc.md/#dscase)
 * [spec integration](doc/spec.md)
 ## Usage
 
