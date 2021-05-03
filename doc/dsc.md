@@ -141,7 +141,8 @@ A syntax such as the following can be used to match optional keyword arguments.
 ((dsfn 
    ([a b & {:keys [foo bar]}]  12) ;; same as :allow-other-keys false
    ([a b & {:keys [foo bar] :allow-other-keys true}]   13)
-   ([a b & {:keys [foo bar] :or {a 1 b 2}]             15)
+   ([a b & {:keys [foo bar] :or {a 1 b 2}}]             15)
+   ...)
  ...)
 ```
 
@@ -157,6 +158,52 @@ have no effect on whether a clause matches.
 If `:or` is given to specify default values, the semantics are
 equivalent to add the corresponding keys to the call-site arguments if
 they are missing.
+
+### examples of dsfn using :keys
+
+For the first example, we ignore type designators and default values.
+If `:allow-other-keys false` is used (or if `:allow-other-keys` is completely omitted) in a
+clause, then the clause is select which specifies exactly the given keys.
+
+Suppose a function is defined as follows:
+
+```clojure
+(def g (dsfn 
+         ([& {:keys [foo bar] :allow-other-keys false}]  12) 
+         ([& {:keys [foo bar] :allow-other-keys true}]   13)
+         ([& {:keys [foo] :allow-other-keys false}]      14)
+         ))
+```
+
+- `(g :foo 1 :bar 2)` evaluates to 12, as the call-site specifies exactly the keys `:foo` and `:bar` and `:allow-other-keys` is `false`.
+- `(g :foo 1 :bar 2 :baz 3)` evaluates to 13, as the call-site specifies a key  other than `:foo` and `:bar` and `:allow-other-keys` is true.
+- `(g :foo 1)` evaluates to 14, because that is the first clause which specifies only key `:foo`.
+- `(g :bar 1)` evaluates to `nil`, because every clause requires a `:foo` be given.
+- `(g :foo 1 :baz 2)` evaluates to `nil`.   Neither 12 nor 13 is returned, as the call site does not include `:bar`.  14 is not returned because the call site contains `:baz`, but the pattern contains `:allow-other-keys false`.
+- `(g)` evaluates to `nil` as no clause matches.  Each of the given clauses requires at least `:foo` at the call-site.
+
+
+For the second example, we include some default values.
+
+```clojure
+(def g (dsfn 
+         ([& {:keys [foo bar] 
+              :or {foo 1}
+              :allow-other-keys false}]  12) 
+         ([& {:keys [foo bar] :allow-other-keys true}]   13)
+         ([& {:keys [foo] :allow-other-keys false}]      14)
+         ))
+```
+
+- `(g :foo 1 :bar 2)` evaluates to 12, as the call-site specifies exactly the keys `:foo` and `:bar` and `:allow-other-keys` is `false`.
+- `(g :foo 1 :bar 2 :baz 3)` evaluates to 13, as the call-site specifies a key  other than `:foo` and `:bar` and `:allow-other-keys` is true.
+- `(g :foo 1)` evaluates to 14, because that is the first clause which specifies only key `:foo`.
+- `(g :bar 2)` evaluates to 12, because the first clause requires `:foo` and `:bar`.  The call-site provides the `:bar` and the defaults `:or {foo 1}` effectively provides the `:foo`.
+- `(g :foo 1 :baz 2)` evaluates to `nil`.   Neither 12 nor 13 is returned, as the call site does not include `:bar`.  14 is not returned because the call site contains `:baz`, but the pattern contains `:allow-other-keys false`.
+- `(g)` evaluates to `nil` as no clause matches.  Each of the given clauses requires at least `:foo` at the call-site.
+
+
+
 
 ## destructuring-case
 
