@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -556,8 +556,17 @@
                              :and mr
                              :not (fn [operand _functions]
                                     (first-types operand))
-                             :cat (fn [[head & tail] _functions]
-                                    (cond (nullable head)
+                             :cat (fn [[head & tail :as operands] _functions]
+                                    ;; this cond is perhaps more verbose than absolutely necessary.
+                                    ;; we make special cases of empty operands and empty tail
+                                    ;;  in order to avoid calling first-types on head
+                                    (cond (empty? operands)
+                                          (first-types :epsilon)
+
+                                          (empty? tail)
+                                          (first-types head)
+
+                                          (nullable head)
                                           (union (first-types head)
                                                  (first-types (cons :cat tail)))
 

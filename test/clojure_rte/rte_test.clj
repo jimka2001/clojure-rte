@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -34,6 +34,10 @@
             [clojure-rte.genus :as gns]
             [clojure-rte.rte-tester :refer []]
             [clojure-rte.xymbolyco :as xym]))
+
+(defn -main []
+  (clojure.test/run-tests 'clojure-rte.rte-test))
+
 
 (defmacro testing
   [string & body]
@@ -81,6 +85,9 @@
 
     (is (= (first-types '(:cat :sigma ::Lion ::Wolf))
            #{:sigma}) "first types cat sigma")
+
+    (is (= (first-types '(:cat))
+           (first-types :epsilon)))
     ))
 
 (deftest t-canonicalize-pattern-subtypes
