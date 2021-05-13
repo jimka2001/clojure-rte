@@ -927,20 +927,20 @@
                                 :empty-set (rte-constantly :empty-set)     
                                 :sigma (fn [_type _functions]
                                          :epsilon)
-                                :type (fn [type _functions]
+                                :type (fn [td _functions]
                                         (cond 
-                                          (disjoint?-false-warn wrt type)
+                                          (disjoint?-false-warn wrt td)
                                           :empty-set
 
-                                          (gns/subtype? wrt type false)
+                                          (gns/subtype? wrt td false)
                                           :epsilon
                                           
                                           (gns/and? wrt)
-                                          (compute-compound-derivative type wrt)
+                                          (compute-compound-derivative td wrt)
 
                                           :else
                                           (throw (ex-info (cl-format false
-                                                                     "cannot compute derivative of overlapping types because ~A is not a subtype of ~A" wrt type)
+                                                                     "cannot compute derivative of overlapping types because ~A is not a subtype of ~A" wrt td)
                                                           {:error-type :derivative-undefined
                                                            :wrt wrt
                                                            :expr expr
