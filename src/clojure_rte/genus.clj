@@ -797,17 +797,17 @@
                  SAnd(x1,x2,  y2,  x3,x4),
                  SAnd(x1,x2,  y3,  x3,x4)
                )"
-  [this]
-  (let [tds (filter (fn [x] (dual-combination? this x))
-                   (rest this))]
+  [[combo & operands :as this]]
+  (let [[dual-td & _ :as tds] (filter (fn [x] (dual-combination? this x))
+                                      operands)]
     (if (empty? tds)
       this
       (create-dual this (map (fn [y]
-                               (map (fn [x]
-                                      (if (= x (first tds))
-                                        y x))
-                                    (rest this)))
-                             (rest tds))))))
+                               (create this (map (fn [x]
+                                                   (if (= x dual-td)
+                                                     y x))
+                                                 operands)))
+                             (rest dual-td))))))
 
 (defmethod compute-dnf 'and
   [td]
@@ -818,15 +818,14 @@
   (compute-nf td))
 
 (defmethod compute-dnf 'not
-  [self]
-  (let [arg (first self)]
-    (cond (gns/combo? arg)
-          (create-dual arg (map (fn [td]
-                                  (template (not ~td)))
-                                (rest arg)))
+  [[_not arg :as self]]
+  (cond (gns/combo? arg)
+        (create-dual arg (map (fn [td]
+                                (template (not ~td)))
+                              (rest arg)))
 
-          :else
-          self)))
+        :else
+        self))
 
 (defmethod compute-cnf 'not
   [self]
@@ -884,40 +883,40 @@
 (defn conversion-2
   "(and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
    (or A B STop C D) -> STop, unit = SEmpty, zero = STop"
-  [td]
-  (if (member (zero td) (rest td))
+  [[_ & operands :as td]]
+  (if (member (zero td) operands)
     (zero td)
     td))
 
 (defn conversion-3
   "(and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
    (or A ( not A)) --> STop, unit = SEmpty, zero = STop"
-  [td]
-  (if (exists [n (rest td)]
+  [[_ & operands :as td]]
+  (if (exists [n operands]
               (and (gns/not? n)
-                   (member (second n) (rest td))))
+                   (member (second n) operands)))
     (zero td)
     td))
 
 (defn conversion-4
   "SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
    SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop"
-  [td]
-  (if (member (unit td) (rest td))
-    (create td (remove-element (unit td) (rest td)))
+  [[_ & operands :as td]]
+  (if (member (unit td) operands)
+    (create td (remove-element (unit td) operands))
     td))
 
 (defn conversion-5
   "(and A B A C) -> (and A B C)
    (or A B A C) -> (or A B C)"
-  [td]
-  (create td (uniquify (rest td))))
+  [[_ & operands :as td]]
+  (create td (uniquify operands)))
 
 (defn conversion-6
   "(and A ( and B C) D) --> (and A B C D)
    (or A ( or B C) D) --> (or A B C D)"
-  [td]
-  (if (not (exists [td1 (rest td)]
+  [[_ & operands :as td]]
+  (if (not (exists [td1 operands]
                    (and (gns/combo? td1)
                         (same-combination td td1))))
     td
@@ -930,7 +929,7 @@
                                
                                :else
                                [td2]))
-                       (rest td)))))
+                       operands))))
               
 (defn conversion-7
   "Convert to DNF or CNF or leave as is depending on the nf argument"
