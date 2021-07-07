@@ -614,46 +614,18 @@
     (is (= (gns/conversion-7 '(or w x (and a b c) y z) :cnf)
            '(and (or w x a y z)
                  (or w x b y z)
-                 (or w x c y z))))
+                 (or w x c y z)))
+        618)
     (is (= (gns/conversion-7 '(or w x (and a b c) y z) :cnf)
-           '(or w x (and a b c) y z)))
+           '(and (or w x a y z) (or w x b y z) (or w x c y z)))
+        620)
 
     (is (= (gns/conversion-7 '(or w (not x) (and a (not b))) :dnf)
-           '(or w (not x) (and a (not b)))))
+           '(or w (not x) (and a (not b))))
+        622)
     (is (= (gns/conversion-7 '(or w (not x) (and a (not b))) :cnf)
            ;; FIXME 
-           nil))
-
-    (is (= (gns/conversion-7 '(not (and a b c)) :dnf)
-           nil ;; fixme
-           ))
-
-    (is (= (gns/conversion-7 '(not (or a b c)) :dnf)
-           nil ;; fixme
-           ))
-
-    (is (= (gns/conversion-7 '(not (and a (or b c))) :dnf)
-           nil ;; fixme
-           ))
-
-
-    (is (= (gns/conversion-7 '(not (or a (and b c))) :cnf)
-           nil ;; fixme
-           ))
-    (is (= (gns/conversion-7 '(not (and a b c)) :cnf)
-           nil ;; fixme
-           ))
-
-    (is (= (gns/conversion-7 '(not (or a b c)) :cnf)
-           nil ;; fixme
-           ))
-
-    (is (= (gns/conversion-7 '(not (and a (or b c))) :cnf)
-           nil ;; fixme
-           ))
-
-    (is (= (gns/conversion-7 '(not (or a (and b c))) :dnf)
-           nil ;; fixme
-           ))
+           '(and (or w (not x) a) (or w (not x) (not b))))
+        625)
     ))
  
