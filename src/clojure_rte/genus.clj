@@ -22,9 +22,10 @@
 (ns clojure-rte.genus
   (:refer-clojure :exclude [satisfies?])
   (:require [clojure.set :refer [subset?]]
+            [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
-                                      partition-by-pred
+                                      partition-by-pred remove-element uniquify
                                       seq-matcher member find-simplifier defn-memoized
                                       unchunk]]
             [clojure-rte.cl-compat :as cl]
@@ -58,6 +59,12 @@
 (def gns/or? 
   "Detect sequence starting with the simple symbol or"
   (seq-matcher 'or))
+
+(def gns/combo?
+  "Detect sequence starting with the simple symbol or or and"
+  (fn [td]
+    (or (gns/or? td)
+        (gns/and? td))))
 
 (def gns/=?
   "Detect sequence starting with the simple symbol ="
@@ -666,7 +673,9 @@
                         :sigma
                         type-designator))
                     (fn [type-designator]
-                      (list 'not (-canonicalize-type (second type-designator) nf)))]))
+                      (to-nf
+                       (list 'not (-canonicalize-type (second type-designator) nf))
+                       nf))]))
 
 (defmethod -canonicalize-type 'fn*
   [type-designator nf]
@@ -687,6 +696,64 @@
 
                                 :else
                                 type-designator))))]))
+
+(defmulti dual-combination?
+  "Given this as an :or ask whether that is an :and,
+  Given this as an :and ask whether that is an :or."
+  (fn [this that]
+    (type-dispatch this)))
+
+(defmethod dual-combination? 'or
+  [this td]
+  (and (combo? td)
+       (= 'and (first td))))
+
+(defmethod dual-combination? 'and
+  [this td]
+  (and (combo? td)
+       (= 'or (first td))))
+
+(defmulti create 
+  (fn [td operands]
+    (type-dispatch td)))
+
+(letfn [(cr [td operands]
+          (cond (empty? operands)
+                (unit td)
+
+                (empty? (rest operands))
+                (first operands)
+
+                :else
+                (cons (first td) operands)))]
+  (defmethod create 'or
+    [td operands]
+    (cr td operands))
+  (defmethod create 'and
+    [td operands]
+    (cr td operands)))
+
+(defmulti create-dual
+  "Given this as an :or and a list of operands, create an :and with those operands.
+   Given this as an :and and a list of operands, create an :orwith those operands."
+  (fn [this operands]
+    (type-dispatch this)))
+
+(defn create-or
+  [operands]
+  (create '(or) operands))
+
+(defn create-and
+  [operands]
+  (create '(and) operands))
+
+(defmethod create-dual 'or
+  [this operands]
+  (create-and operands))
+
+(defmethod create-dual 'and
+  [this operands]
+  (create-or operands))
 
 (defmulti compute-dnf
   "Convert to DNF"
@@ -762,10 +829,203 @@
 (defmethod compute-cnf 'not
   [self]
   (compute-dnf self))
+
+(defmulti same-combination
+  ":sigma for and, :empty-set for or"
+  (fn [td-1 td-2]
+    (type-dispatch td-1)))
+
+(defmethod same-combination 'or
+  [td td-2]
+  (= 'or (first td-2)))
+
+(defmethod same-combination 'and
+  [td td-2]
+  (= 'and (first td-2)))
+
+(defmulti unit 
+  ":sigma for and, :empty-set for or"
+  type-dispatch)
+
+(defmethod unit 'or
+  [td]
+  :empty-set)
+
+(defmethod unit 'and
+  [td]
+  :sigma)
+
+(defmulti zero
+  ":empty-set for and, :sigma for or"
+  type-dispatch)
+
+(defmethod zero 'and
+  [td]
+  :empty-set)
+
+(defmethod zero 'or
+  [td]
+  :sigma)
+
+
+
+(defn conversion-1
+  "(and) -> STop, unit = STop, zero = SEmpty
+  (and x) -> x
+  (and ...) -> (and ...)
+  (or) -> SEmpty, unit = SEmpty, zero = STop
+  (or x) -> x
+  (or ...) -> (or ...)"
+  [td]
+  (create td (rest td)))
+
+(defn conversion-2
+  "(and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
+   (or A B STop C D) -> STop, unit = SEmpty, zero = STop"
+  [td]
+  (if (member (zero td) (rest td))
+    (zero td)
+    td))
+
+(defn conversion-3
+  "(and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
+   (or A ( not A)) --> STop, unit = SEmpty, zero = STop"
+  [td]
+  (if (exists [n (rest td)]
+              (and (gns/not? n)
+                   (member (second n) (rest td))))
+    (zero td)
+    td))
+
+(defn conversion-4
+  "SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
+   SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop"
+  [td]
+  (if (member (unit td) (rest td))
+    (create td (remove-element (unit td) (rest td)))
+    td))
+
+(defn conversion-5
+  "(and A B A C) -> (and A B C)
+   (or A B A C) -> (or A B C)"
+  [td]
+  (create td (uniquify (rest td))))
+
+(defn conversion-6
+  "(and A ( and B C) D) --> (and A B C D)
+   (or A ( or B C) D) --> (or A B C D)"
+  [td]
+  (if (not (exists [td1 (rest td)]
+                   (and (gns/combo? td1)
+                        (same-combination td td1))))
+    td
+    (create td (mapcat (fn [td2]
+                         (cond (not (gns/combo? td2))
+                               [td2]
+                               
+                               (same-combination td td2)
+                               (rest td2)
+                               
+                               :else
+                               [td2]))
+                       (rest td)))))
+              
+(defn conversion-7
+  "Convert to DNF or CNF or leave as is depending on the nf argument"
+  [td nf]
+  (to-nf td nf))
+
+(defn conversion-8
+  ""
+  [td]
+  td)
+(defn conversion-9
+  ""
+  [td]
+  td)
+(defn conversion-10
+  ""
+  [td]
+  td)
+(defn conversion-11
+  ""
+  [td]
+  td)
+(defn conversion-12
+  ""
+  [td]
+  td)
+(defn conversion-13
+  ""
+  [td]
+  td)
+(defn conversion-14
+  ""
+  [td]
+  td)
+(defn conversion-15
+  ""
+  [td]
+  td)
+(defn conversion-16
+  ""
+  [td]
+  td)
+(defmulti conversion-D1
+  ""
+  type-dispatch)
+(defmethod conversion-D1 'and [td]
+  td)
+(defmethod conversion-D1 'or [td]
+  td)
+
+(defmulti conversion-D3
+  ""
+  type-dispatch)
+(defmethod conversion-D3 'and [td]
+  td)
+(defmethod conversion-D3 'or [td]
+  td)
+(defn conversion-98
+  ""
+  [td]
+  td)
+
+(defn conversion-99
+  ""
+  [td tf]
+  td)
+
+
+(defn combination-simplifiers [nf]
+  [conversion-1
+   conversion-2
+   conversion-3
+   conversion-4
+   conversion-5
+   conversion-6
+   (fn [td] (conversion-7 td nf))
+   conversion-8
+   conversion-9
+   conversion-10
+   conversion-11
+   conversion-12
+   conversion-13
+   conversion-14
+   conversion-15
+   conversion-16
+   conversion-D1
+   conversion-D3
+   conversion-98
+   (fn [td] (conversion-99 td nf))])
+
 (defmethod -canonicalize-type 'and
   [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
+                      (find-simplifier type-designator
+                                       (combination-simplifiers nf)))
+                    (fn [type-designator]
                       (if (member :empty-set (rest type-designator))
                         :empty-set
                         type-designator))
@@ -871,6 +1131,9 @@
   [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
+                      (find-simplifier type-designator
+                                       (combination-simplifiers nf)))
+                    (fn [type-designator]
                       (if (member :empty-set (rest type-designator))
                         (cons 'or (map (fn [td] (-canonicalize-type td nf))
                                        (remove #{:empty-set} (rest type-designator))))
