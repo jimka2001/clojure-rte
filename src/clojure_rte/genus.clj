@@ -596,8 +596,13 @@
 
 (defn canonicalize-type
   "Simplify the given type-designator to a stable form"
-  [type-designator]
-  (fixed-point type-designator -canonicalize-type =))
+  ([type-designator]
+   (canonicalize-type type-designator :dnf))
+  ([type-designator nf]
+   (fixed-point type-designator
+                (fn [td]
+                  (-canonicalize-type td nf))
+                =)))
 
 (defmulti -canonicalize-type
   "Methods of -canonicalize-type implement the behavior of canonicalize-type.
@@ -607,10 +612,11 @@
   canonicalization is possible, or should return a value which will be
   considered a simpler form.  For example, converting 
   (member 1 1 2 2 3) to (member 1 2 3)"
-  type-dispatch)
+  (fn [td nf]
+    (type-dispatch td)))
 
 (defmethod -canonicalize-type :default
-  [type-designator]
+  [type-designator nf]
   (cond   
     (class-designator? type-designator)
     type-designator
@@ -634,11 +640,11 @@
     ))
 
 (defmethod -canonicalize-type 'satisfies
-  [type-designator]
+  [type-designator nf]
   (expand-satisfies type-designator))
 
 (defmethod -canonicalize-type 'not
-  [type-designator]
+  [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; (not (not x)) --> x
@@ -660,10 +666,10 @@
                         :sigma
                         type-designator))
                     (fn [type-designator]
-                      (list 'not (-canonicalize-type (second type-designator))))]))
+                      (list 'not (-canonicalize-type (second type-designator) nf)))]))
 
 (defmethod -canonicalize-type 'fn*
-  [type-designator]
+  [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; convert (fn* [p1__19751#] (clojure.core/even? p1__19751#))}
@@ -683,7 +689,7 @@
                                 type-designator))))]))
 
 (defmethod -canonicalize-type 'and
-  [type-designator]
+  [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (member :empty-set (rest type-designator))
@@ -723,7 +729,8 @@
                     
                     (fn [type-designator]
                       (if (member :sigma (rest type-designator))
-                        (cons 'and (map -canonicalize-type (remove #{:sigma} (rest type-designator))))
+                        (cons 'and (map (fn [td] (-canonicalize-type td nf))
+                                        (remove #{:sigma} (rest type-designator))))
                         type-designator))
 
                     ;; (and Long (not (member 1 2)) (not (member 3 4)))
@@ -770,7 +777,7 @@
                       (cons 'and (map canonicalize-type (rest type-designator))))]))
 
 (defmethod -canonicalize-type 'member
-  [type-designator]
+  [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (empty? (rest type-designator))
@@ -787,11 +794,11 @@
                           (cons 'member items))))]))
 
 (defmethod -canonicalize-type 'or
-  [type-designator]
+  [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       (if (member :empty-set (rest type-designator))
-                        (cons 'or (map -canonicalize-type
+                        (cons 'or (map (fn [td] (-canonicalize-type td nf))
                                        (remove #{:empty-set} (rest type-designator))))
                         type-designator))
 
@@ -848,7 +855,8 @@
                         type-designator))
 
                     (fn [type-designator]
-                      (cons 'or (map -canonicalize-type (rest type-designator))))
+                      (cons 'or (map (fn [td] (-canonicalize-type td nf))
+                                     (rest type-designator))))
                     ]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -917,8 +925,8 @@
     (let [try1 (check-disjoint t1 t2 :dont-know)]
       (if (not= :dont-know try1)
         try1
-        (let [t1-simple (-canonicalize-type t1)
-              t2-simple (-canonicalize-type t2)]
+        (let [t1-simple (-canonicalize-type t1 :dnf)
+              t2-simple (-canonicalize-type t2 :dnf)]
           (if (and (= t1-simple t1)
                    (= t2-simple t2))
             default
@@ -1441,7 +1449,7 @@
                   (recur ks)
                   default))))]
     (let [i (calc-inhabited type-designator :dont-know)
-          td-canon (delay (-canonicalize-type type-designator))]
+          td-canon (delay (-canonicalize-type type-designator :dnf))]
       (cond (member i '(true false))
             i
 

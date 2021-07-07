@@ -596,8 +596,11 @@
   (seq-matcher :or))
 
 (defmethod gns/-canonicalize-type 'rte
-  [type-designator]
-  (cons 'rte (map canonicalize-pattern (rest type-designator))))
+  [type-designator nf]
+  ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
+  ;;    gns/canonicalize-type, we'll need nf again
+  (cons 'rte (map canonicalize-pattern
+                  (rest type-designator))))
 
 (defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
