@@ -1684,6 +1684,14 @@
         (and (gns/not? super)
              (type-equivalent? sub (second super) false))
         false
+
+        (and (gns/not? sub)
+             (inhabited? (second sub) false)
+             (subtype? (second sub) super false)
+             (inhabited? (template (not ~super)) false))
+        ;; TODO to test this take random tds td1, td2, and assert that (or (not td1) (not td2))
+        ;;    is a subtype of (not (and td1 td2)) especially in the case that td1 and td2 are disjoint
+        false
         
         (not (gns/not? sub))
         :dont-know
