@@ -50,7 +50,9 @@
 (declare type-equivalent?)
 (declare type-predicate-to-type-designator)
 (declare typep)
+(declare unit)
 (declare valid-type?)
+(declare zero)
 
 (def gns/and?
   "Detect sequence starting with the simple symbol and"
