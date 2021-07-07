@@ -45,11 +45,11 @@
 (declare -inhabited?)
 (declare subtype?)
 (declare -subtype?)
+(declare to-nf)
 (declare type-equivalent?)
 (declare type-predicate-to-type-designator)
 (declare typep)
 (declare valid-type?)
-
 
 (def gns/and?
   "Detect sequence starting with the simple symbol and"
@@ -688,6 +688,80 @@
                                 :else
                                 type-designator))))]))
 
+(defmulti compute-dnf
+  "Convert to DNF"
+  type-dispatch)
+
+(defmulti compute-cnf
+  "Convert to CNF"
+  type-dispatch)
+
+(defn to-nf
+  ;; TODO add caching
+  "Convert to DNF or CNF or leave as is"
+  [td nf]
+  (case nf
+    (:dnf) (compute-dnf td)
+    (:cnf) (compute-cnf td)
+    :else td))
+
+(defmethod compute-cnf :default
+  [td]
+  td)
+
+(defmethod compute-dnf :default
+  [td]
+  td)
+
+(defn compute-nf
+  "it turns out SAnd.compute_dnf and SOr.compute_cnf contain
+   the exact same code.  So I've factored that code here.
+   convert SOr( x1, x2, SAnd(y1,y2,y3), x3, x4)
+            --> td = SAnd(y1,y2,y3)
+        --> SAnd(SOr(x1,x2,  y1,  x3,x4),
+                 SOr(x1,x2,  y2,  x3,x4),
+                 SOr(x1,x2,  y3,  x3,x4)
+            )
+        convert SAnd( x1, x2, SOr(y1,y2,y3), x3, x4)
+           --> td = SOr(y1,y2,y3)
+        --> SOr(SAnd(x1,x2,  y1,  x3,x4),
+                 SAnd(x1,x2,  y2,  x3,x4),
+                 SAnd(x1,x2,  y3,  x3,x4)
+               )"
+  [this]
+  (let [tds (filter (fn [x] (dual-combination? this x))
+                   (rest this))]
+    (if (empty? tds)
+      this
+      (create-dual this (map (fn [y]
+                               (map (fn [x]
+                                      (if (= x (first tds))
+                                        y x))
+                                    (rest this)))
+                             (rest tds))))))
+
+(defmethod compute-dnf 'and
+  [td]
+  (compute-nf td))
+
+(defmethod compute-cnf 'or
+  [td]
+  (compute-nf td))
+
+(defmethod compute-dnf 'not
+  [self]
+  (let [arg (first self)]
+    (cond (gns/combo? arg)
+          (create-dual arg (map (fn [td]
+                                  (template (not ~td)))
+                                (rest arg)))
+
+          :else
+          self)))
+
+(defmethod compute-cnf 'not
+  [self]
+  (compute-dnf self))
 (defmethod -canonicalize-type 'and
   [type-designator nf]
   (find-simplifier type-designator
