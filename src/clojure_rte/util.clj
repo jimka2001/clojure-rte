@@ -41,6 +41,11 @@
           :else
           (recur (rest items)))))
 
+(defn remove-element
+  "Non-destructively remove a given element from a sequence"
+  [element-to-remove xs]
+  (filter (fn [x] (not= x element-to-remove)) xs)) 
+
 (defn remove-once 
   "Non-destructively remove the first element of the sequence which is
    = to the target value.  The list is unrolled as much as necessary,
@@ -496,3 +501,9 @@
         ;; because every stack operation pops twice and pushes once.
         (reduce (fn [a1 a2] (f a2 a1))
                 (map second stack))))))
+
+(defn uniquify
+  "returns a new sequence with duplicates remove.
+   If duplicates exist, left-most is removed, right-most remains"
+  [seq]
+  (reverse (distinct (reverse seq))))
