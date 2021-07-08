@@ -828,7 +828,6 @@
            '(and (or a b c) (not x)))
         827)))
     
-
 (deftest t-combo-conversion-13
   (testing "combo conversion-13"
     ;; multiple !member
@@ -841,9 +840,29 @@
         841)
     (is (= (gns/conversion-13 '(and x (not (member -1 1)) (not (member 1 2 3 4))))
            '(and x (not (member -1 1 2 3 4))))
-        842)
+        842)))
+
+(deftest t-combo-conversion-14
+  (testing "combo conversion-14"
+    ;; multiple member
+    ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+    (is (= (gns/conversion-14 '(or (member 1 2 3) (member 2 3 4 5)))
+           '(member 1 2 3 4 5))
+        851)
+    (is (= (gns/conversion-14 '(or x (member 1 2 3) (member 2 3 4 5)))
+           '(or x (member 1 2 3 4 5)))
+        852)
     
-    ))
+    ;; (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
+    (is (= (gns/conversion-14 '(and (member 1 2 3) (member 2 3 4 5 )))
+           '(member 2 3))
+        859)
+
+    (is (= (gns/conversion-14 '(and x (member 1 2 3) (member 2 3 4 5 )))
+           '(and x (member 2 3)))
+        860)))
+        
+    
 
 (deftest t-nf-subset
   (testing ""

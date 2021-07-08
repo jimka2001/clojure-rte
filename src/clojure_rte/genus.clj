@@ -1205,9 +1205,25 @@
 
 
 (defn conversion-14
-  ""
-  [td]
-  td)
+  "multiple member
+   (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
+   (or String (member 1 2 \"3\") (member 2 3 4 \"5\")) --> (or String (member 1 2 4))
+   (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)"
+  [self]
+  (let [members (filter gns/member-or-=? (operands self))]
+    (if (< (bounded-count 2 members) 2)
+      self
+      (let [items (map operands members)
+            combined (reduce (fn [x y]
+                               (combinator self x y))
+                             items)
+            new-member (create-member combined)]
+        (letfn [(f [td]
+                  (if (member td members)
+                    new-member
+                    td))]
+          (create self (uniquify (map f (operands self)))))))))
+
 (defn conversion-15
   ""
   [td]
