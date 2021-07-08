@@ -154,20 +154,30 @@
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
-  (if (= t1 t2)
-    true
+  (let [sp1 (delay (subtype? t1 t2 :dont-know))
+        can1 (delay (canonicalize-type :dnf t1))
+        sp2 (delay (subtype? @can1 t2 :dont-know))
+        can2 (delay (canonicalize-type :dnf t2))
+        sp3 (delay (subtype? @can1 @can2 :dont-know))]
     ;; two types are equivalent if each is a subtype of the other.
-    ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
-    ;;    as that may be compute intensive.
-    (let [s1 (subtype? t1 t2 :dont-know)
-          s2 (delay (subtype? t2 t1 :dont-know))]
-      (case s1
-        (false) false
-        (case @s2
-          (false) false
-          (if (= true s1 @s2)
-            true
-            default))))))
+    (cond (= t1 t2)
+          true
+          ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
+          ;;    as that may be compute intensive.
+          (= @sp1 false)
+          false
+
+          (and (= @sp1 :dont-know)
+               (= @sp2 false))
+          false
+
+          (and (= @sp1 :dont-know)
+               (= @sp2 :dont-know)
+               (= @sp3 false))
+          false
+
+          :else
+          (subtype? @can2 @can1 default))))
 
 (defn type-dispatch [type-designator]
   "Dispatch function for several defmulti's.  If the type-designator is a sequence,
@@ -489,6 +499,7 @@
     clojure.lang.IMeta
     (= 1)
     (= 0)
+    (= -1)
     (= a)
     (= [1 2 3])
     (= [])
@@ -498,9 +509,13 @@
     (member a b)
     (member 1 2 3)
     (member 2 3 4)
+    (member 1.5 3.5)
+    (member 4.5 6.5)
     (member "a" "b" "c")
     (member "a" "b" "c" 1 2 3)
     (member 1 "a")
+    :sigma
+    :empty-set
     ))
 
 (defn gen-type
@@ -517,6 +532,23 @@
        (not) (template (not ~(gen-type (dec size) types)))
        (rand-nth types))
      (rand-nth types))))
+
+(defn gen-inhabited-type 
+  "gen-type may generate a type designator which reduces to :empty-set.
+  gen-inhabited-type generates a type designator which is guaranteed
+  NOT to reduce to :empty-set.  If filter (a unary predicate) is
+  given, gen-inhabited-type loops until it generates a type which
+  satisifies the predicate.  If the predicate is never satisifed, it
+  will loop forever."
+  ([size]
+   (gen-inhabited-type size (constantly true)))
+  ([size filter]
+   (loop []
+     (let [td (gen-type size)
+           td-inhabited (inhabited? td false)]
+       (if (and td-inhabited (filter td))
+         td
+         (recur))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of typep and its methods
@@ -645,11 +677,13 @@
     (not (sequential? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :not-a-sequence
-                     :type type-designator }))
+                     :normal-form nf
+                     :type-designator type-designator }))
 
     (not (valid-type? type-designator))
     (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
                     {:error-type :unknown-type
+                     :normal-form nf
                      :type (type type-designator)
                      :type-designator type-designator }))
 
@@ -1168,7 +1202,7 @@
                         type-designator))
 
                     (fn [type-designator]
-                      (cons 'and (map canonicalize-type (rest type-designator))))]))
+                      (cons 'and (map (fn [td] (canonicalize-type nf td)) (rest type-designator))))]))
 
 (defmethod -canonicalize-type 'member
   [type-designator nf]
@@ -1221,7 +1255,7 @@
                       ;; (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
                       (if (<= 2 (bounded-count 2 (filter gns/member-or-=? (rest type-designator))))
                         (let [[members others] (partition-by-pred gns/member-or-=? (rest type-designator))
-                              repaired (gns/canonicalize-type (template (member ~@(distinct (mapcat rest members)))))]
+                              repaired (gns/canonicalize-type (template (member ~@(distinct (mapcat rest members)))) nf)]
                           (template (or ~repaired ~@others)))
                         type-designator))
 
@@ -1252,8 +1286,8 @@
                         type-designator))
 
                     (fn [type-designator]
-                      (cons 'or (map (fn [td] (-canonicalize-type td nf))
-                                     (rest type-designator))))
+                      (to-nf (cons 'or (map (fn [td] (-canonicalize-type td nf))
+                                     (rest type-designator))) nf))
                     ]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1322,8 +1356,8 @@
     (let [try1 (check-disjoint t1 t2 :dont-know)]
       (if (not= :dont-know try1)
         try1
-        (let [t1-simple (-canonicalize-type t1 :dnf)
-              t2-simple (-canonicalize-type t2 :dnf)]
+        (let [t1-simple (canonicalize-type t1 :dnf)
+              t2-simple (canonicalize-type t2 :dnf)]
           (if (and (= t1-simple t1)
                    (= t2-simple t2))
             default
@@ -1706,16 +1740,24 @@
                      :super super}))))
 
 (defmethod -subtype? :primary [sub-designator super-designator]
-  (cond (and (class-designator? super-designator)
-             (= Object (find-class super-designator)))
-        true
-        
-        (and (class-designator? sub-designator)
-             (class-designator? super-designator))
-        (isa? (find-class sub-designator) (find-class super-designator))
-        
-        :else
-        :dont-know))
+  (let [super-canon (delay (gns/canonicalize-type super-designator))
+        sub-canon   (delay (gns/canonicalize-type sub-designator))]
+    (cond (and (class-designator? super-designator)
+               (= Object (find-class super-designator)))
+          true
+          
+          (and (class-designator? sub-designator)
+               (class-designator? super-designator))
+          (isa? (find-class sub-designator) (find-class super-designator))
+
+          (= :sigma @super-canon)
+          true
+          
+          (= :empty-set @sub-canon)
+          true
+          
+          :else
+          :dont-know)))
 
 (defmethod -subtype? '= [sub super]
   (cond (gns/=? sub)
@@ -1732,8 +1774,11 @@
              (disjoint? sub (second super) false))
         true
 
-        ;; (subtype? '(not Double) 'Long)
+        ;; (subtype? '(not Double) 'Long) = false
+        ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
         (and (gns/not? sub)
+             (class-designator? super)
+             (class-designator? (second sub))
              (disjoint? super (second sub) false))
         false
 
@@ -1760,6 +1805,7 @@
         :dont-know
 
         :else
+        ;; isn't this just the same as directly returning x?
         (let [x (subtype? (second super) (second sub) :dont-know)]
           (if (= :dont-know x)
             :dont-know
@@ -1854,7 +1900,7 @@
                   (recur ks)
                   default))))]
     (let [i (calc-inhabited type-designator :dont-know)
-          td-canon (delay (-canonicalize-type type-designator :dnf))]
+          td-canon (delay (canonicalize-type type-designator :dnf))]
       (cond (member i '(true false))
             i
 
