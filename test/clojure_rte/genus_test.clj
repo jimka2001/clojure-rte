@@ -624,8 +624,53 @@
            '(or w (not x) (and a (not b))))
         622)
     (is (= (gns/conversion-7 '(or w (not x) (and a (not b))) :cnf)
-           ;; FIXME 
            '(and (or w (not x) a) (or w (not x) (not b))))
         625)
     ))
  
+(deftest t-combo-conversion-8
+  (testing "combo conversion-8"
+    (is (= (gns/conversion-8 '(and (= 1) (not (member 1 2)) (= 3)))
+           :empty-set)
+        635)
+    (is (= (gns/conversion-8 '(and (not (= 1)) (member 1 2) (= 3)))
+           '(and (not (= 1)) (member 1 2) (= 3)))
+        638)
+    (is (= (gns/conversion-8 '(or (= 1) (not (member 1 2)) (= 3)))
+           '(or (= 1) (not (member 1 2)) (= 3)))
+        641)
+    (is (= (gns/conversion-8 '(or (not (= 1)) (member 1 2) (= 3)))
+           :sigma)
+        644)))
+
+(deftest t-nf-subset
+  (testing ""
+    ()))
+
+;; TODO enable this
+;;
+;; (deftest t-compute-nf
+;;   (testing "to-nf"
+;;     (let [a '(:= "a")
+;;           b '(:= "b")
+;;           c '(:= "c")
+;;           x '(:= "x")
+;;           y '(:= "y")
+;;           ]
+          
+;;       (is (= (gns/canonicalize-type (template (not (and ~a ~b ~c))) :dnf)
+;;              (template (or (not ~a) (not ~b) (not ~c))))
+;;           645)
+;;       (is (= (gns/canonicalize-type (template (not (and a b c))) :cnf)
+;;              (template (or (not a) (not b) (not c))))
+;;           648)
+;;       (is (= (gns/canonicalize-type '(not (or ~a ~b ~c)) :dnf)
+;;              (template (and (not ~a) (not ~b) (not ~c))))
+;;           651)
+      
+;;       (is (= (gns/canonicalize-type (template (not (or ~a ~b ~c))) :cnf)
+;;              (template (and (not a) (not b) (not c))))
+;;           655)
+;;       (is (= (gns/canonicalize-type (template (not (and (or ~a ~b) (or ~x ~y)))) :dnf)
+;;              nil)
+;;           661))))

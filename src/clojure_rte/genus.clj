@@ -36,6 +36,7 @@
 ;; allow gns/ prefix even in this file.
 (alias 'gns 'clojure-rte.genus)
 
+(declare annihilator)
 (declare canonicalize-type)
 (declare -canonicalize-type)
 (declare check-disjoint)
@@ -44,6 +45,8 @@
 (declare expand-satisfies)
 (declare inhabited?)
 (declare -inhabited?)
+(declare operand)
+(declare operands)
 (declare subtype?)
 (declare -subtype?)
 (declare to-nf)
@@ -172,6 +175,12 @@
   (if (sequential? type-designator)
     (first type-designator)
     type-designator))
+
+(defmulti operands
+  type-dispatch)
+
+(defmulti operand
+  type-dispatch)
 
 (defn callable-designator? [f]
   (and (symbol? f)
@@ -715,6 +724,36 @@
   (and (combo? td)
        (= 'or (first td))))
 
+(defmethod operands :default
+  [self]
+  (throw (ex-info (cl-format false "no operands for ~A" self)
+                  {:self self})))
+
+(defmethod operand :default
+  [self]
+  (throw (ex-info (cl-format false "no operand for ~A" self)
+                  {:self self})))
+
+(defmethod operands 'or
+  [self]
+  (rest self))
+
+(defmethod operands 'and
+  [self]
+  (rest self))
+
+(defmethod operands 'member
+  [self]
+  (rest self))
+
+(defmethod operand '=
+  [self]
+  (second self))
+
+(defmethod operand 'not
+  [self]
+  (second self))
+
 (defmulti create 
   (fn [td operands]
     (type-dispatch td)))
@@ -868,6 +907,18 @@
   [td]
   :sigma)
 
+(defmulti annihilator
+  "subtype? for (and ...), supertype? for (or ...)"
+  (fn [self td-1 td-2]
+    (type-dispatch self)))
+
+(defmethod annihilator 'and
+  [self a b]
+  (subtype? a b :dont-know))
+
+(defmethod annihilator 'or
+  [self a b]
+  (subtype? b a :dont-know))
 
 
 (defn conversion-1
@@ -937,9 +988,17 @@
   (to-nf td nf))
 
 (defn conversion-8
-  ""
-  [td]
-  td)
+  "(or A (not B)) --> STop if B is subtype of A, zero = STop
+   (and A (not B)) --> SEmpty if B is supertype of A, zero = SEmpty"
+  [self]
+  (if (exists [a (operands self)]
+              (exists [n (operands self)]
+                      (cl-format true "a=~A n=~A~%" a n)
+                      (and (gns/not? n)
+                           (= true (annihilator self a (operand n))))))
+    (zero self)
+    self))
+
 (defn conversion-9
   ""
   [td]
