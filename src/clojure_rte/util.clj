@@ -41,6 +41,11 @@
           :else
           (recur (rest items)))))
 
+(defn remove-element
+  "Non-destructively remove a given element from a sequence"
+  [element-to-remove xs]
+  (filter (fn [x] (not= x element-to-remove)) xs)) 
+
 (defn remove-once 
   "Non-destructively remove the first element of the sequence which is
    = to the target value.  The list is unrolled as much as necessary,
@@ -438,3 +443,67 @@
     (lazy-seq
       (cons (first s)
             (unchunk (next s))))))
+
+(defn pairwise-fold
+  "Similar to reduce, but iterates over the sequence
+  several times, each time reducing adjacent pairs using the given
+  function.  e.g., (((1 + 2) + (3 + 4)) + ((5 + 6) + (7 + 8))) ..."
+  [f z coll]
+  (if (empty? coll)
+    z
+    (letfn [(f-effective [[a b]]
+              (f a b))
+            (make-pairs [lazy-list]
+              ;; returns either
+              ;;   [vec-of-pairs ()] if lazy-list has even length
+              ;;   [vec-of-paris (item)] if lazy-list has odd length
+              (loop [vec []
+                     lazy-list lazy-list]
+                (cond (>= 1 (bounded-count 2 lazy-list))
+                      [vec lazy-list]
+
+                      :else
+                      (recur (conj vec [(first lazy-list) (second lazy-list)])
+                             (rest (rest lazy-list))))))]                    
+      (loop [coll coll]
+        (cond (= 1 (bounded-count 2 coll))
+              (first coll)
+
+              :else
+              (let [[pair-vec residue] (make-pairs coll)]
+                (recur (concat (map f-effective pair-vec)
+                               residue))))))))
+
+(defn tree-fold
+  "Like the 3-arg version of reduce except that does not compute from left-to-right
+  but rather computes by grouping in concentric groups of two. e.g.
+   (+ (+ (+ 1 2) (+ 3 4)) (+ (+ 5 6) (+ 7 8))) ...
+  The remaining (right-most) elements are partitioned into 2's as much as possible.
+  Intermediate values become unreferenced as quickly as possible, allowing them to 
+  be GCed"
+  [f z coll]
+  (letfn [(dwindle-tree [stack]
+            (if (empty? (rest stack))
+              stack
+              (let [[[i b1] [j b2] & tail] stack]
+                (if (= i j)
+                  (dwindle-tree (cons [(inc i) (f b2 b1)] tail))
+                  stack))))
+          (reduce-1 [stack ob]
+            (dwindle-tree (cons [1 ob] stack)))]
+    (cond
+      (empty? coll)
+      z
+
+      :else
+      (let [stack (reduce reduce-1 (list [1 (first coll)]) (rest coll))]
+        ;; stack is guaranteed to have at least one element,
+        ;; because every stack operation pops twice and pushes once.
+        (reduce (fn [a1 a2] (f a2 a1))
+                (map second stack))))))
+
+(defn uniquify
+  "returns a new sequence with duplicates remove.
+   If duplicates exist, left-most is removed, right-most remains"
+  [seq]
+  (reverse (distinct (reverse seq))))
