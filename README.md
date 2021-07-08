@@ -1,5 +1,5 @@
 <!--
- Copyright (c) 2020 EPITA Research and Development Laboratory
+ Copyright (c) 2020,21 EPITA Research and Development Laboratory
 
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation
@@ -28,7 +28,7 @@ This package implements rational type expressions (RTEs) for the
 The implementation is based on a similar package for 
 [Common Lisp](https://lisp-lang.org).
 The theory of how RTEs work can be found here: 
-[Type-Checking of Heterogeneous Sequences in Common Lisp](https://www.lrde.epita.fr/wiki/Publications/newton.16.els) and [Representing and Computing with Types in Dynamically Typed Languages](https://www.lrde.epita.fr/wiki/Publications/newton.18.phd)
+[A Portable, Simple, Embeddable Type System](https://www.lrde.epita.fr/wiki/Publications/newton.21.els), [Type-Checking of Heterogeneous Sequences in Common Lisp](https://www.lrde.epita.fr/wiki/Publications/newton.16.els) and [Representing and Computing with Types in Dynamically Typed Languages](https://www.lrde.epita.fr/wiki/Publications/newton.18.phd)
 
 An important aspect of this implementation is that a regular type
 expression pattern is represented internally (after compilation with
@@ -83,8 +83,8 @@ git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 * [Xymbolyco: Sigma Complete Deterministic Finite Automata](doc/xymbolyco.md)
 * [Expert details w.r.t. RTE](doc/expert.md)
 * [API](doc/api.md)
-* [destructuring-fn](doc/dsc.md)
-* [destructuring-case](doc/dsc.md/#destructuring-case)
+* [dsfn](doc/dsc.md)
+* [dscase](doc/dsc.md/#dscase)
 * [spec integration](doc/spec.md)
 ## Usage
 

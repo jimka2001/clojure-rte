@@ -556,8 +556,17 @@
                              :and mr
                              :not (fn [operand _functions]
                                     (first-types operand))
-                             :cat (fn [[head & tail] _functions]
-                                    (cond (nullable head)
+                             :cat (fn [[head & tail :as operands] _functions]
+                                    ;; this cond is perhaps more verbose than absolutely necessary.
+                                    ;; we make special cases of empty operands and empty tail
+                                    ;;  in order to avoid calling first-types on head
+                                    (cond (empty? operands)
+                                          (first-types :epsilon)
+
+                                          (empty? tail)
+                                          (first-types head)
+
+                                          (nullable head)
                                           (union (first-types head)
                                                  (first-types (cons :cat tail)))
 
@@ -587,8 +596,11 @@
   (seq-matcher :or))
 
 (defmethod gns/-canonicalize-type 'rte
-  [nf type-designator]
-  (cons 'rte (map canonicalize-pattern (rest type-designator))))
+  [type-designator nf]
+  ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
+  ;;    gns/canonicalize-type, we'll need nf again
+  (cons 'rte (map canonicalize-pattern
+                  (rest type-designator))))
 
 (defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
@@ -808,9 +820,13 @@
                                     ;; TODO (:or (:cat A B sigma-*)
                                     ;;           (:cat A B ))
                                     ;;  --> (:or (:cat A B sigma-*))
+
+                                    ;; TODO (:or A B C (:* B) D)
+                                    ;;  --> (:or A C (:* B) D)
                                     
                                     ;; (:or A :epsilon B (:cat X (:* X)) C)
-                                    ;;   --> (:or A :epsilon B (:* X) C ) --> (:or A B (:* X) C)
+                                    ;;   --> (:or A :epsilon B (:* X) C )
+                                    ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
                                     ((and (member :epsilon operands)
                                           (some (fn [obj]
                                                   (and (cat? obj)
@@ -900,6 +916,7 @@
             (map (fn [p]
                    (derivative (canonicalize-pattern p) wrt))
                  patterns))]
+    ;; TODO need to test deriv x wrt :sigma, should be empty-word unless x is :empty-set and :empty-set if x is :empty-set
     (canonicalize-pattern
      (cond
        (= :empty-set expr)
@@ -918,20 +935,20 @@
                                 :empty-set (rte-constantly :empty-set)     
                                 :sigma (fn [_type _functions]
                                          :epsilon)
-                                :type (fn [type _functions]
+                                :type (fn [td _functions]
                                         (cond 
-                                          (disjoint?-false-warn wrt type)
+                                          (disjoint?-false-warn wrt td)
                                           :empty-set
 
-                                          (gns/subtype? wrt type false)
+                                          (gns/subtype? wrt td false)
                                           :epsilon
                                           
                                           (gns/and? wrt)
-                                          (compute-compound-derivative type wrt)
+                                          (compute-compound-derivative td wrt)
 
                                           :else
                                           (throw (ex-info (cl-format false
-                                                                     "cannot compute derivative of overlapping types because ~A is not a subtype of ~A" wrt type)
+                                                                     "cannot compute derivative of overlapping types because ~A is not a subtype of ~A" wrt td)
                                                           {:error-type :derivative-undefined
                                                            :wrt wrt
                                                            :expr expr

@@ -476,7 +476,7 @@
   [type-designator-1 type-designator-2]
   (with-hash []
     (= :empty-set
-       (canonicalize-type (list 'and type-designator-1 type-designator-2)))))
+       (bdd/canonicalize-type (list 'and type-designator-1 type-designator-2)))))
 
 (defn type-subtype?
   "given two type designators, use bdds to determine whether one is a subtype of the other.

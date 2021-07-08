@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,2021 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -516,6 +516,25 @@
           (check-subtype rt rt-can "rt < rt-can ?")
           (check-subtype rt-can rt "rt-can < rt ?"))))))
 
+(deftest t-random-subtype-2
+  (testing "randomized testing of subtype? with de morgan"
+    (letfn [(check-subtype [td-1 td-2 comment]
+              (is (not= false (gns/subtype? td-1 td-2 :dont-know)) (cl-format "~a td-1=~a td-2=~a" comment td-1 td-2))
+              (is (not= false (gns/subtype? td-2 td-1 :dont-know)) (cl-format "~a td-2=~a td-1=~a" comment td-2 td-1)))]
+    
+      (for [_ (range 200)
+            n (range 5)
+            :let [rt-1 (gns/gen-type n)
+                  rt-2 (gns/gen-type n)
+                  rt-and-not (template (and (not ~rt-1) (not ~rt-2)))
+                  rt-not-or (template (not (or ~rt-1) (or ~rt-2)))
+                  ]]
+        (do 
+          (check-subtype rt-and-not 
+                         rt-not-or "rt-and-not < rt-not-or")
+          (check-subtype rt-not-or 
+                         rt-and-not "rt-not-or < rt-and-not"))))))
+
 (deftest t-intersection-union-subtype
   (testing "intersection-union-subtype"
     (letfn [(check-subtype [rt-1 rt-2 comment]
@@ -628,3 +647,142 @@
 (deftest t-statistics
   (testing "statistics"
     (statistics 10000)))
+
+(deftest t-combo-conversion-1
+  (testing "combo conversion-1"
+    (is (= (gns/conversion-1 '(or))
+           :empty-set))
+    (is (= (gns/conversion-1 '(and))
+           :sigma))
+    (is (= (gns/conversion-1 '(and x))
+           'x))
+    (is (= (gns/conversion-1 '(or x))
+           'x))
+    (is (= (gns/conversion-1 '(and x y))
+           '(and x y)))
+    (is (= (gns/conversion-1 '(or x y))
+           '(or x y)))))
+
+(deftest t-combo-conversion-2
+  (testing "combo conversion-2"
+    (is (= (gns/conversion-2 '(or x :sigma y))
+           :sigma))
+    (is (= (gns/conversion-2 '(and x :sigma y))
+           '(and x :sigma y)))
+    (is (= (gns/conversion-2 '(or x :empty-set y))
+           '(or x :empty-set y)))
+    (is (= (gns/conversion-2 '(and x :empty-set y))
+           :empty-set))))
+
+(deftest t-combo-conversion-3
+  (testing "combo conversion-3"
+    (is (= (gns/conversion-3 '(or x (not x)))
+           :sigma))
+    (is (= (gns/conversion-3 '(and x (not x)))
+           :empty-set))
+    (is (= (gns/conversion-3 '(or x (not y)))
+           '(or x (not y))))
+    (is (= (gns/conversion-3 '(and x (not y)))
+           '(and x (not y))))))
+
+(deftest t-combo-conversion-4
+  (testing "combo conversion-4"
+    (is (= (gns/conversion-4 '(or x :empty-set y))
+           '(or x y)))
+    (is (= (gns/conversion-4 '(and x :empty-set y))
+           '(and x :empty-set y)))
+    (is (= (gns/conversion-4 '(or x :sigma y))
+           '(or x :sigma y)))
+    (is (= (gns/conversion-4 '(and x :sigma y))
+           '(and x y)))))
+
+(deftest t-combo-conversion-5
+  (testing "combo conversion-5"
+    (is (= (gns/conversion-5 '(or x y z z y))
+           '(or x z y)))
+    (is (= (gns/conversion-5 '(and x y z z y))
+           '(and x z y)))))
+
+(deftest t-combo-conversion-6
+  (testing "combo conversion-7"
+    (is (= (gns/conversion-6 '(or x (or a b c) (or l m n) y))
+           '(or x a b c l m n y)))
+    (is (= (gns/conversion-6 '(and x (and a b c) (and l m n) y))
+           '(and x a b c l m n y)))
+    (is (= (gns/conversion-6 '(or x (and a b c) (or l m n) y))
+           '(or x (and a b c) l m n y)))
+    (is (= (gns/conversion-6 '(and x (or a b c) (and l m n) y))
+           '(and x (or a b c) l m n y)))))
+
+(deftest t-combo-conversion-7
+  (testing "combo conversion-7"
+    (is (= (gns/conversion-7 '(and w x (or a b c) y z) :dnf)
+           '(or (and w x a y z)
+                (and w x b y z)
+                (and w x c y z))))
+    (is (= (gns/conversion-7 '(and w x (or a b c) y z) :cnf)
+           '(and w x (or a b c) y z)))
+
+    (is (= (gns/conversion-7 '(or w x (and a b c) y z) :cnf)
+           '(and (or w x a y z)
+                 (or w x b y z)
+                 (or w x c y z)))
+        618)
+    (is (= (gns/conversion-7 '(or w x (and a b c) y z) :cnf)
+           '(and (or w x a y z) (or w x b y z) (or w x c y z)))
+        620)
+
+    (is (= (gns/conversion-7 '(or w (not x) (and a (not b))) :dnf)
+           '(or w (not x) (and a (not b))))
+        622)
+    (is (= (gns/conversion-7 '(or w (not x) (and a (not b))) :cnf)
+           '(and (or w (not x) a) (or w (not x) (not b))))
+        625)
+    ))
+ 
+(deftest t-combo-conversion-8
+  (testing "combo conversion-8"
+    (is (= (gns/conversion-8 '(and (= 1) (not (member 1 2)) (= 3)))
+           :empty-set)
+        635)
+    (is (= (gns/conversion-8 '(and (not (= 1)) (member 1 2) (= 3)))
+           '(and (not (= 1)) (member 1 2) (= 3)))
+        638)
+    (is (= (gns/conversion-8 '(or (= 1) (not (member 1 2)) (= 3)))
+           '(or (= 1) (not (member 1 2)) (= 3)))
+        641)
+    (is (= (gns/conversion-8 '(or (not (= 1)) (member 1 2) (= 3)))
+           :sigma)
+        644)))
+
+(deftest t-nf-subset
+  (testing ""
+    ()))
+
+;; TODO enable this
+;;
+;; (deftest t-compute-nf
+;;   (testing "to-nf"
+;;     (let [a '(:= "a")
+;;           b '(:= "b")
+;;           c '(:= "c")
+;;           x '(:= "x")
+;;           y '(:= "y")
+;;           ]
+          
+;;       (is (= (gns/canonicalize-type (template (not (and ~a ~b ~c))) :dnf)
+;;              (template (or (not ~a) (not ~b) (not ~c))))
+;;           645)
+;;       (is (= (gns/canonicalize-type (template (not (and a b c))) :cnf)
+;;              (template (or (not a) (not b) (not c))))
+;;           648)
+;;       (is (= (gns/canonicalize-type '(not (or ~a ~b ~c)) :dnf)
+;;              (template (and (not ~a) (not ~b) (not ~c))))
+;;           651)
+      
+;;       (is (= (gns/canonicalize-type (template (not (or ~a ~b ~c))) :cnf)
+;;              (template (and (not a) (not b) (not c))))
+;;           655)
+;;       (is (= (gns/canonicalize-type (template (not (and (or ~a ~b) (or ~x ~y)))) :dnf)
+;;              nil)
+;;           661))))

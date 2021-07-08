@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -21,10 +21,12 @@
 
 (ns clojure-rte.util-test
   (:require [clojure-rte.rte-core]
+            [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [sort-operands partition-by-pred
                                       call-with-collector
                                       visit-permutations
-                                      remove-once fixed-point member]]
+                                      remove-once fixed-point member
+                                      tree-fold]]
             [clojure.test :refer [deftest testing is]]))
 
 (defn -main []
@@ -331,3 +333,82 @@
     (is (not (member 1 [])))
     (is (not (member 1 ())))))
 
+(deftest t-fold
+  (testing "fold"
+    (doseq [seq [[]
+                 [1]
+                 [1 2]
+                 [1 2 3]
+                 [1 2 3 4 5 6 7]
+                 [1 2 3 4 5 6 7 8]
+                 [1 2 3 4 5 6 7 8
+                  10 20 30 40 50 60 70 80
+                  100 200 300 400 500 600 700 800]]]
+      (doseq [fold [clojure-rte.util/pairwise-fold
+                    clojure-rte.util/tree-fold]]
+        (is (= (reduce + 0 seq)
+               (fold + 0 seq))
+            (cl-format false "351: ~A" fold))
+        (is (= (reduce *' 1 seq)
+               (fold *' 1 seq))
+            (cl-format false "354: ~A: seq=~A" fold seq))
+        (is (= (reduce bit-xor 0 seq)
+               (fold bit-xor 0 seq))
+            (cl-format false "357: ~A" fold))
+
+        (letfn [(range-ext [left right]
+                  (range left (inc right)))
+                ]
+
+          (doseq [n (range 100)
+                  i (range n)
+                  :let [seq (map / (concat (range-ext (- i) -1)
+                                           (range-ext 1 i)))]
+                  ]
+            (do
+              (is (= 0 (reduce + 0 seq)))
+              
+              (is (= (reduce + 0 seq)
+                     (fold + 0 seq))
+                  (cl-format false "374: ~A" fold))
+              )
+            ))))))
+
+(deftest t-fold-2
+  (testing "fold 2"
+    (let [s (map / [23 29 31 37 41 43 47 53 57 67
+                    71 73 79 83 89 97])
+          ]
+      (doseq [fold [clojure-rte.util/pairwise-fold
+                    clojure-rte.util/tree-fold]]
+
+        (reduce + 0 s)
+        (fold + 0 s)
+        (is (= (reduce + 0 s)
+               (fold + 0 s))
+            (print-str fold))))))
+
+(deftest t-fold-3
+  (testing "fold 3"
+    (doseq [f [reduce clojure-rte.util/pairwise-fold clojure-rte.util/tree-fold ]]
+      (let [x (atom 0)
+            s [1/23 1/29
+               1/31 1/37
+               1/41 1/43 1/47
+               1/53 1/57 
+               1/67
+               1/71 1/73
+               1/83 1/89
+               1/97
+               ]
+            denom-digits (fn [ratio]
+                           (if (zero? ratio) 0
+                               (count (print-str (denominator ratio)))))
+            ]
+        (f (fn [acc i] 
+             (let [m (max (denom-digits acc)
+                          (denom-digits i))]
+               (swap! x (fn [old new] (+ old (* new new new))) m)
+               (println [:acc acc :i i :max-denom m :sum (deref x)])
+               (+ acc i)))
+           0/1 s)))))

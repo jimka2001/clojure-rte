@@ -1,5 +1,5 @@
 <!--
- Copyright (c) 2020 EPITA Research and Development Laboratory
+ Copyright (c) 2020,21 EPITA Research and Development Laboratory
 
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation
@@ -21,12 +21,12 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-# `destructuring-fn` and `destructuring-case`
+# `dsfn` and `dscase`
 
-## destructuring-fn
+## dsfn
 
-The `destructuring-fn` macro can be thought of as a generalization of the clojure build-in `fn` macro.
-However `destructuring-fn` offers two features that `fn` does not:
+The `dsfn` macro can be thought of as a generalization of the clojure build-in `fn` macro.
+However `dsfn` offers two features that `fn` does not:
 
 1. [Runtime selection by structure](#runtime-selection-by-structure)
 2. [Runtime selection by type](#runtime-selection-by-type)
@@ -44,7 +44,7 @@ results in an error such as
 Execution error (ArityException) at clojure-rte.core/eval41272 (form-init6569138664565782700.clj:12360).
 Wrong number of args (1) passed to: clojure-rte.core/eval41272/fn--41274
 ```
-But, `((destructuring-fn [[a [b c] d] {}] 12) 1 2 3)`, simply returns `nil` as the data `(1 2 3)` 
+But, `((dsfn [a [b c] d] 12) 1 2 3)`, simply returns `nil` as the data `(1 2 3)` 
 does not match the template `[a [b c] d]`.
 
 Similarly, `fn` provides a syntax for providing several argument templates, however the semantics
@@ -67,16 +67,16 @@ On the contrary the following expression evaluates to 14 as it matches the struc
 to the argument list `[a b [c d]]`.
 
 ```clojure
-((destructuring-fn ;; TODO doesn't work
-   ([[[a b] c d] {}]  12)
-   ([[a [b c] d] {}]  13)
-   ([[a b [c d]] {}]  14))
+((dsfn
+   ([[a b] c d]  12)
+   ([a [b c] d]  13)
+   ([a b [c d]]  14))
  1 2 [3 4])
 ```
 
 ### Runtime selection by type
 
-Use `destructuring-fn` to perform run-time format and type checking.
+Use `dsfn` to perform run-time format and type checking.
 in addition to a structured argument list such as `[a [b c] d]`,
 you may also specify type constraints, with as meta-data within
 the argument list itself, or in the map specified after the
@@ -87,14 +87,14 @@ supported by `clojure-rte.type`.  See [Extensible types](genus.md) for more deta
 
 ```clojure
 ;; match if a is of type Number
-((destructuring-fn [[^Number a [b c] d] {}] 
+((dsfn [^Number a [b c] d]
   12)
  1 [2 3] 4)
 ```
 
 ```clojure
 ;; match if a is of type Number and c is String
-((destructuring-fn [[^Boolean a [b ^String c] d] {}] 
+((dsfn [^Boolean a [b ^String c] d]
   12)
  true [2 "three"] 4)
 ```
@@ -103,10 +103,10 @@ The following expression returns `nil` because although `(1 2 (3 4))`
 matches the structure `[a b [c d]]`, the type of `a` is not `Boolean`.
 
 ```clojure
-((destructuring-fn 
-   ([[[^Boolean a b] c d] {}]  12)
-   ([[^Boolean a [b c] d] {}] 13)
-   ([[^Boolean a b [c d]] {}] 14))
+((dsfn 
+   ([[^Boolean a b] c d]  12)
+   ([^Boolean a [b c] d] 13)
+   ([^Boolean a b [c d]] 14))
  1 2 [3 4])
 ```
 
@@ -114,42 +114,113 @@ The following expression evaluates to 15.  Why? Because `(1 2 (3 4))` matches
 `[^Number a b [c d]]` in type and structure.
 
 ```clojure
-((destructuring-fn 
-   ([[[^Boolean a b] c d] {}]  12)
-   ([[^Boolean a [b c] d] {}] 13)
-   ([[^Boolean a b [c d]] {}] 14)
-   ([[^Number  a b [c d]] {}] 15))
+((dsfn 
+   ([[^Boolean a b] c d]  12)
+   ([^Boolean a [b c] d] 13)
+   ([^Boolean a b [c d]] 14)
+   ([^Number  a b [c d]] 15))
  1 2 [3 4])
 ```
 
-The map, `{}` in the above examples, specifies a map from variable name to type constraint.
-The following two clauses are equivalent `[[^Boolean a [b ^String c] d] {}]` 
-and `[[a [b c] d] {a Boolean c String}]`.  With simple type specifiers, the two forms are equivalent.
+A map, `{...}`, may be used to specify a map from variable name to type constraint.
+The following two clauses are equivalent `[^Boolean a [b ^String c] d]` 
+and `^{a Boolean c String} [a [b c] d]`.  With simple type specifiers, the two forms are equivalent.
 However, the second form allows more flexible type constraints such as the following.
 
-- `[[a [b c] d] {[a b] Boolean c String}]` --- `a` and `b` are both `Boolean`, and `c` is String.
-- `[[a [b c] d] {a  Boolean b (or Boolean String) String}]` --- `a` is `Boolean`, `c` is String, and `b` is either `Boolean` or `String`.
-- `[[a [b c] d] {a Boolean b (and Number (not Long))}]` --- `a` is `Boolean`, and `b` is either `Number` but not `Long`.
-- `[[a b c] {a (member -1 0 1) b (and (Number (not (= 0))))}]` --- `a` is -1, 0 or 1, and `b` is a `Number` different from 0.
+- `^{[a b] Boolean c String}   [a [b c] d]` --- `a` and `b` are both `Boolean`, and `c` is String.
+- `^{a  Boolean b (or Boolean String) c String}   [a [b c] d]` --- `a` is `Boolean`, `c` is String, and `b` is either `Boolean` or `String`.
+- `^{a Boolean b (and Number (not Long))}  [a [b c] d]` --- `a` is `Boolean`, and `b` is either `Number` but not `Long`.
+- `^{a (member -1 0 1) b (and (Number (not (= 0))))}   [a b c]` --- `a` is -1, 0 or 1, and `b` is a `Number` different from 0.
+
+
+## destructuring using keys
+
+A syntax such as the following can be used to match optional keyword arguments.
+
+```clojure
+((dsfn 
+   ([a b & {:keys [foo bar]}]  12) ;; same as :allow-other-keys false
+   ([a b & {:keys [foo bar] :allow-other-keys true}]   13)
+   ([a b & {:keys [foo bar] :or {a 1 b 2}}]             15)
+   ...)
+ ...)
+```
+
+There are some subtle semantics about keys.  For example if
+`:allow-other-keys` is not specified or if it is specified to be
+`false`, then the clause will NOT match if the call-site has a key
+which is not mentioned.  By *not mentioned* we man neither mentioned
+in the defaults `:or` nor mentioned in the call-site argument list
+
+If `:allow-other-keys true` is specified, then unmentioned keys will
+have no effect on whether a clause matches.
+
+If `:or` is given to specify default values, the semantics are
+equivalent to add the corresponding keys to the call-site arguments if
+they are missing.
+
+### examples of dsfn using :keys
+
+For the first example, we ignore type designators and default values.
+If `:allow-other-keys false` is used (or if `:allow-other-keys` is completely omitted) in a
+clause, then the clause is select which specifies exactly the given keys.
+
+Suppose a function is defined as follows:
+
+```clojure
+(def g (dsfn 
+         ([& {:keys [foo bar] :allow-other-keys false}]  12) 
+         ([& {:keys [foo bar] :allow-other-keys true}]   13)
+         ([& {:keys [foo] :allow-other-keys false}]      14)
+         ))
+```
+
+- `(g :foo 1 :bar 2)` evaluates to 12, as the call-site specifies exactly the keys `:foo` and `:bar` and `:allow-other-keys` is `false`.
+- `(g :foo 1 :bar 2 :baz 3)` evaluates to 13, as the call-site specifies a key  other than `:foo` and `:bar` and `:allow-other-keys` is true.
+- `(g :foo 1)` evaluates to 14, because that is the first clause which specifies only key `:foo`.
+- `(g :bar 1)` evaluates to `nil`, because every clause requires a `:foo` be given.
+- `(g :foo 1 :baz 2)` evaluates to `nil`.   Neither 12 nor 13 is returned, as the call site does not include `:bar`.  14 is not returned because the call site contains `:baz`, but the pattern contains `:allow-other-keys false`.
+- `(g)` evaluates to `nil` as no clause matches.  Each of the given clauses requires at least `:foo` at the call-site.
+
+
+For the second example, we include some default values.
+
+```clojure
+(def g (dsfn 
+         ([& {:keys [foo bar] 
+              :or {foo 1}
+              :allow-other-keys false}]  12) 
+         ([& {:keys [foo bar] :allow-other-keys true}]   13)
+         ([& {:keys [foo] :allow-other-keys false}]      14)
+         ))
+```
+
+- `(g :foo 1 :bar 2)` evaluates to 12, as the call-site specifies exactly the keys `:foo` and `:bar` and `:allow-other-keys` is `false`.
+- `(g :foo 1 :bar 2 :baz 3)` evaluates to 13, as the call-site specifies a key  other than `:foo` and `:bar` and `:allow-other-keys` is true.
+- `(g :foo 1)` evaluates to 14, because that is the first clause which specifies only key `:foo`.
+- `(g :bar 2)` evaluates to 12, because the first clause requires `:foo` and `:bar`.  The call-site provides the `:bar` and the defaults `:or {foo 1}` effectively provides the `:foo`.
+- `(g :foo 1 :baz 2)` evaluates to `nil`.   Neither 12 nor 13 is returned, as the call site does not include `:bar`.  14 is not returned because the call site contains `:baz`, but the pattern contains `:allow-other-keys false`.
+- `(g)` evaluates to `nil` as no clause matches.  Each of the given clauses requires at least `:foo` at the call-site.
 
 
 
-## destructuring-case
 
-The `destructuring-case` macro can be thought of as an inline version of `destructuring-fn`.
+## dscase
+
+The `dscase` macro can be thought of as an inline version of `dsfn`.
 The syntax mimics that of `case` in that the first argument is a value to evaluate one,
 and the remaining arguments come in implicit pairs of *pattern*/*consequent*.
 The first *consequent* is evaluated for which the *pattern* matches the given expression.
 
 ```clojure
-(destructuring-case '(1 2 (3 4))
-  [[[^Boolean a b] c d] {}] 
+(dscase '(1 2 (3 4))
+  [[^Boolean a b] c d]
   12
 
-  [[^Boolean a [b c] ^String d] {}]
+  [^Boolean a [b c] ^String d]
   13
 
-  [[^Boolean a b [^String c ^String d]] {}]
+  [^Boolean a b [^String c ^String d]]
   (do
     (some-side-effect)
     (another-side-effect)
@@ -164,58 +235,57 @@ The following is equivalent but arguably more readable as the type constraints a
 structure constraints are presented separately.
 
 ```clojure
-(destructuring-case '(1 2 (3 4))
-  [[[a b] c d] 
-   {a Boolean}] 
+(dscase '(1 2 (3 4))
+  ^{a Boolean}
+  [[a b] c d] 
   12
 
-  [[a [b c] d]
-   {a Boolean
-    d String}]
+  ^{a Boolean    d String}
+  [a [b c] d]
   13
 
-  [[a b [c d]]
-   {a Boolean
-    [c d] String}]
+  ^{a Boolean
+    [c d] String}
+  [a b [c d]]
   (do
     (some-side-effect)
     (another-side-effect)
     14)
 
-  [[a b [c d]] {a Number}]
+  ^{a Number} [a b [c d]]
   15
 )
 ```
 
 ## Several special cases
 
-- For both `destructuring-fn` and also `destructuring-case` the type constraint
-`[[a b & c] {c String}` means that `c` is a sequence of elements each of type `String`
+- For both `dsfn` and also `dscase` the type constraint
+`^{c String} [a b & c]` means that `c` is a sequence of elements each of type `String`
 not that `c` has type string.
 
 - If there are multiple type constraints on the same variable, the semantics is intersection.
 I.e., both constraints are required.
-`[[^Number a b] {a (not (= 0))}]` this means that `a` is both a `Number` and also different from zero, effectively `a` has type `(and Number (not (= 0)))`.
+`^{a (not (= 0))} [^Number a b]` this means that `a` is both a `Number` and also different from zero, effectively `a` has type `(and Number (not (= 0)))`.
 
 - Multiple type constraints may accidentally make code unreachable.  
-E.g., `[[^Number a b] {a String}]` means that `a` is both a `Number` and also a `String`.  Equivalently, `(and Number String)` is the empty type. 
+E.g., `^{a String} [^Number a b]` means that `a` is both a `Number` and also a `String`.  Equivalently, `(and Number String)` is the empty type. 
 There is no such object so this pattern will never
 match and the corresponding consequent code will be unreachable.
 
 - A function such as `(fn [a & as] ...)` cannot be called on an empty
  argument list as an exception will be thrown.  However, using `let`,
 `nil` can be destructured into `[a & as]` with both `a` and `as`
- bound to `nil`.  The `destructuring-case` and `destructuring-fn`
+ bound to `nil`.  The `dscase` and `dsfn`
 macros favor function application to let binding to determine
 semantics.  For example, the following evaluates to `13`, not to
 `12`.
 
 ```clojure
-(destructuring-case '()
-  [[a & as]    {}] 
+(dscase '()
+  [a & as] 
   12
 
-  [[]       {}]
+  []
   13
 )
 ```
