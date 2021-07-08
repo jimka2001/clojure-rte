@@ -519,5 +519,5 @@
 
 (defn search-replace 
   "Search for all occurances of search-for in xs and replace with replace-with"
-[xs search-for replace-with]
+  [xs search-for replace-with]
   (search-replace-splice xs search-for [replace-with]))

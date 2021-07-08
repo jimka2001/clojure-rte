@@ -906,16 +906,16 @@
   [self]
   (compute-dnf self))
 
-(defmulti same-combination
+(defmulti same-combination?
   ":sigma for and, :empty-set for or"
   (fn [td-1 td-2]
     (type-dispatch td-1)))
 
-(defmethod same-combination 'or
+(defmethod same-combination? 'or
   [td td-2]
   (= 'or (first td-2)))
 
-(defmethod same-combination 'and
+(defmethod same-combination? 'and
   [td td-2]
   (= 'and (first td-2)))
 
@@ -1005,13 +1005,13 @@
   [[_ & operands :as td]]
   (if (not (exists [td1 operands]
                    (and (gns/combo? td1)
-                        (same-combination td td1))))
+                        (same-combination? td td1))))
     td
     (create td (mapcat (fn [td2]
                          (cond (not (gns/combo? td2))
                                [td2]
                                
-                               (same-combination td td2)
+                               (same-combination? td td2)
                                (rest td2)
                                
                                :else
@@ -1074,9 +1074,38 @@
           (create self keep))))))
 
 (defn conversion-11
-  ""
-  [td]
-  td)
+  "A + !A B -> A + B
+   A + !A BX + Y = (A + BX + Y)
+   A + ABX + Y = (A + Y)"
+  [self]
+  (let [combos (filter combo? (operands self))
+        duals (setof [td combos] (dual-combination? self td))]
+    (letfn [(pred [a]
+              (let [n (template (not ~a))]
+                (exists [td duals]
+                        (or (member a (operands td))
+                            (member n (operands td))))))]
+      (let [ao (filter pred (operands self))
+            not-ao (first ao)]
+        (letfn [(consume [td]
+                  (cond (not (combo? td))
+                        [td]
+
+                        (same-combination? self td)
+                        [td]
+
+                        (member (first ao) (operands td))
+                        [] ;;  (A + ABX + Y) --> (A + Y)
+
+                        (member not-ao (operands td))
+                        ;; td is a dual, so td.create creates a dual
+                        ;;    (A + !ABX + Y) --> (A + BX + Y)
+                        [(create td (remove-element not-ao (operands td)))]
+
+                        :else
+                        [td]))]
+          (create self (mapcat consume (operands self))))))))
+
 (defn conversion-12
   ""
   [td]

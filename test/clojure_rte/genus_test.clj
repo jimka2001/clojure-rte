@@ -792,6 +792,31 @@
            '(or (member 1 2) (= 3)))
         793)))
 
+(deftest t-combo-conversion-11
+  (testing "combo conversion-11"
+    ;; A + !A B -> A + B
+    (is (= (gns/conversion-11 '(or a (and (not a) b)))
+           '(or a b))
+        800)
+    (is (= (gns/conversion-11 '(and a (or (not a) b)))
+           '(and a b))
+        801)
+    
+    ;; A + !A BX + Y = (A + BX + Y)
+    (is (= (gns/conversion-11 '(or a (and (not a) b x) y))
+           '(or a (and b x) y))
+        802)
+    (is (= (gns/conversion-11 '(and a (or (not a) b x) y))
+           '(and a (or b x) y))
+        803)
+    
+    ;; A + ABX + Y = (A + Y)
+    (is (= (gns/conversion-11 '(or a (and a b x) y))
+           '(or a y))
+        804)
+    (is (= (gns/conversion-11 '(and a (or a b x) y))
+           '(and a y))
+        805)))
 
 (deftest t-nf-subset
   (testing ""
