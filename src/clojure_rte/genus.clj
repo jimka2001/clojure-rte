@@ -42,8 +42,10 @@
 (declare canonicalize-type)
 (declare -canonicalize-type)
 (declare check-disjoint)
+(declare combinator)
 (declare disjoint?)
 (declare -disjoint?)
+(declare dual-combinator)
 (declare expand-satisfies)
 (declare inhabited?)
 (declare -inhabited?)
@@ -744,6 +746,33 @@
                                 :else
                                 type-designator))))]))
 
+(defmulti dual-combinator
+  (fn [self a b]
+    (type-dispatch self)))
+
+(defmulti combinator
+  (fn [self a b]
+    (type-dispatch self)))
+
+(defmethod combinator 'and
+  [self a b]
+  (setof [x a]
+         (member x b)))
+
+(defmethod dual-combinator 'and
+  [self a b]
+  (uniquify (concat a b)))
+
+(defmethod combinator 'or
+  [self a b]
+  (uniquify (concat a b)))
+
+(defmethod dual-combinator 'or
+  [self a b]
+  (setof [x a]
+         (member x b)))
+  
+
 (defmulti dual-combination?
   "Given this as an :or ask whether that is an :and,
   Given this as an :and ask whether that is an :or."
@@ -815,6 +844,17 @@
    Given this as an :and and a list of operands, create an :orwith those operands."
   (fn [this operands]
     (type-dispatch this)))
+
+(defn create-member
+  [operands]
+  (cond (empty? operands)
+        :empty-set
+
+        (empty? (rest operands))
+        (template (= ~(first operands)))
+
+        :else
+        (cons 'member operands)))
 
 (defn create-or
   [operands]
@@ -1107,13 +1147,63 @@
           (create self (mapcat consume (operands self))))))))
 
 (defn conversion-12
-  ""
-  [td]
-  td)
+  "AXBC + !X = ABC + !X"
+  [self]
+  (let [combos (filter combo? (operands self))
+        duals (setof [td combos] (dual-combination? self td))
+        comp (filter (fn [n]
+                       (and (not? n)
+                            (exists [td duals]
+                                    (member (operand n) (operands td)))))
+                     (operands self))]
+    (if (empty? comp)
+      self
+      (letfn [(f [td]
+                (cond (gns/combo? td)
+                      td
+
+                      (not (dual-combination? self td))
+                      td
+
+                      :else
+                      (create td (remove-element (operand (first comp))
+                                                 (operands td)))))]
+        (create self (map f (operands self)))))))
+
+
 (defn conversion-13
-  ""
-  [td]
-  td)
+  "multiple !member
+    SOr(x,!{-1, 1},!{1, 2, 3, 4})
+     --> SOr(x,!{1}) // intersection of non-member
+    SAnd(x,!{-1, 1},!{1, 2, 3, 4})
+     --> SOr(x,!{-1, 1, 2, 3, 4}) // union of non-member"
+  [self]
+  (let [not-members (setof [td (operands self)]
+                           (and (gns/not? td)
+                                (gns/member-or-=? (operand td))))]
+    (if (< (bounded-count 2 not-members) 2)
+      self
+      (let [
+            ;; find all the items in all the SNot(SMember(...)) elements
+            ;;    this is a list of lists
+            items (for [n not-members]
+                    (operands (operand n)))
+            ;; flatten the list of lists into a single list, either by
+            ;;   union or intersection depending on SOr or SAnd
+            combined (reduce (fn [x y]
+                               (dual-combinator self x y))
+                             items)
+            new-not-member (template (not ~(create-member combined)))]
+        (letfn [(f [td]
+                  (if (member td not-members)
+                    new-not-member
+                    td))]
+          ;; we replace all SNot(SMember(...)) with the newly computed
+          ;;  SNot(SMember(...)), the remove duplicates.  This effectively
+          ;;  replaces the right-most one, and removes all others.
+          (create self (uniquify (map f (operands self)))))))))
+
+
 (defn conversion-14
   ""
   [td]

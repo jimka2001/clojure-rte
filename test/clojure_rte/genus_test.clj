@@ -818,6 +818,33 @@
            '(and a y))
         805)))
 
+(deftest t-combo-conversion-12
+  (testing "combo conversion-12"
+    ;; AXBC + !X = ABC + !X
+    (is (= (gns/conversion-12 '(or (and a x b c) (not x)))
+           '(or (and a b c) (not x)))
+        826)
+    (is (= (gns/conversion-12 '(and (or a x b c) (not x)))
+           '(and (or a b c) (not x)))
+        827)))
+    
+
+(deftest t-combo-conversion-13
+  (testing "combo conversion-13"
+    ;; multiple !member
+    ;; SOr(x,!{-1, 1},!{1, 2, 3, 4})
+    ;; --> SOr(x,!{1}) // intersection of non-member
+    ;;  SAnd(x,!{-1, 1},!{1, 2, 3, 4})
+    ;; --> SOr(x,!{-1, 1, 2, 3, 4}) // union of non-member
+    (is (= (gns/conversion-13 '(or x (not (member -1 1)) (not (member 1 2 3 4))))
+           '(or x (not (= 1))))
+        841)
+    (is (= (gns/conversion-13 '(and x (not (member -1 1)) (not (member 1 2 3 4))))
+           '(and x (not (member -1 1 2 3 4))))
+        842)
+    
+    ))
+
 (deftest t-nf-subset
   (testing ""
     ()))
