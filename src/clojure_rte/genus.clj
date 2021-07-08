@@ -1057,9 +1057,22 @@
       (create self (map f (operands self))))))
 
 (defn conversion-10
-  ""
-  [td]
-  td)
+  "(and A B C) --> (and A C) if A is subtype of B
+   (or A B C) -->  (or B C) if A is subtype of B"
+  [self]
+  (letfn [(pred [u]
+            (exists [v (operands self)]
+                    (and (not= u v)
+                         (= (annihilator self u v) true))))]
+    (let [subs (filter pred (operands self))]
+      (if (empty? subs)
+        self
+        (let [sub (first subs)
+              keep (setof [sup (operands self)]
+                          (or (= sup sub)
+                              (not= (annihilator self sub sup) true)))]
+          (create self keep))))))
+
 (defn conversion-11
   ""
   [td]

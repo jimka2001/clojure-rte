@@ -781,6 +781,17 @@
               '(or (and a b (not c)) (and a (not b) c) a))
         782)))
     
+(deftest t-combo-conversion-10
+  (testing "combo conversion-10"
+    ;; (and A B C) --> (and A C) if A is subtype of B
+    ;; (or A B C) -->  (or B C) if A is subtype of B
+    (is (= (gns/conversion-10 '(and (= 1) (member 1 2) (= 3)))
+           '(and (= 1) (= 3)))
+        790)
+    (is (= (gns/conversion-10 '(or (= 1) (member 1 2) (= 3)))
+           '(or (member 1 2) (= 3)))
+        793)))
+
 
 (deftest t-nf-subset
   (testing ""
