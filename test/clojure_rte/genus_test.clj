@@ -755,6 +755,33 @@
            :sigma)
         644)))
 
+(deftest t-combo-conversion-9
+  (testing "combo conversion-9"
+    ;; (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
+    (is (= (gns/conversion-9 '(and (or a b c) (or a (not b) c) x))
+                             '(and (or a b c) (or a c) x))
+        763)
+    (is (= (gns/conversion-9 '(or (and a b c) (and a (not b) c) x))
+           '(or (and a b c) (and a c) x))
+        765)
+
+    ;; (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
+    (is (= (gns/conversion-9 '(and (or a b (not c)) (or a (not b) c) (or a (not b) (not c))))
+           '(and (or a b (not c)) (or a (not b) c) (or a (not c))))
+        769)
+    (is (= (gns/conversion-9 '(or (and a b (not c)) (and a (not b) c) (and a (not b) (not c))))
+           '(or (and a b (not c)) (and a (not b) c) (and a (not c))))
+        774)
+    
+    ;; (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
+    (is (not= (gns/conversion-9 '(and (or a b (not c)) (or a (not b) c) (or a (not b) (not c))))
+              '(and (or a b (not c)) (or a (not b) c) a))
+        779)
+    (is (not= (gns/conversion-9 '(or (and a b (not c)) (and a (not b) c) (and a (not b) (not c))))
+              '(or (and a b (not c)) (and a (not b) c) a))
+        782)))
+    
+
 (deftest t-nf-subset
   (testing ""
     ()))

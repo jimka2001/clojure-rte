@@ -26,8 +26,10 @@
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       partition-by-pred remove-element uniquify
+                                      search-replace setof
                                       seq-matcher member find-simplifier defn-memoized
-                                      unchunk]]
+                                      unchunk
+                                      print-vals]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
@@ -1034,9 +1036,26 @@
     self))
 
 (defn conversion-9
-  ""
-  [td]
-  td)
+  "(A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
+   (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
+   (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)"
+  [self]
+  (let [combos (setof [td (operands self)] (gns/combo? td))
+        duals (setof [td combos] (dual-combination? self td))]
+    (letfn [(f [td]
+              (if (not (member td duals))
+                td
+                (letfn [(pred [n]
+                          (and (gns/not? n)
+                               (exists [d duals]
+                                       (= (operands d) (search-replace (operands td) n (operand n))))))]
+                  ;; find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
+                  (let [to-remove (filter pred (operands td))]
+                    (if (empty? to-remove)
+                      td
+                      (create td (remove-element (first to-remove) (operands td))))))))]
+      (create self (map f (operands self))))))
+
 (defn conversion-10
   ""
   [td]

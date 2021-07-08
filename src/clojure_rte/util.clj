@@ -507,3 +507,17 @@
    If duplicates exist, left-most is removed, right-most remains"
   [seq]
   (reverse (distinct (reverse seq))))
+
+(defn search-replace-splice
+  "Search for all occurances of search-for in xs and replace with the elements of replace-with"
+  [xs search-for replace-with]
+  (mapcat (fn [x]
+            (if (= x search-for)
+              replace-with
+              [x]))
+          xs))
+
+(defn search-replace 
+  "Search for all occurances of search-for in xs and replace with replace-with"
+[xs search-for replace-with]
+  (search-replace-splice xs search-for [replace-with]))
