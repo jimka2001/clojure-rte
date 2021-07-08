@@ -1086,7 +1086,7 @@
                         (or (member a (operands td))
                             (member n (operands td))))))]
       (let [ao (filter pred (operands self))
-            not-ao (first ao)]
+            not-ao (template (not ~(first ao)))]
         (letfn [(consume [td]
                   (cond (not (combo? td))
                         [td]
