@@ -160,9 +160,9 @@
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
   (let [sp1 (delay (subtype? t1 t2 :dont-know))
-        can1 (delay (canonicalize-type :dnf t1))
+        can1 (delay (canonicalize-type t1 :dnf))
         sp2 (delay (subtype? @can1 t2 :dont-know))
-        can2 (delay (canonicalize-type :dnf t2))
+        can2 (delay (canonicalize-type t2 :dnf))
         sp3 (delay (subtype? @can1 @can2 :dont-know))]
     ;; two types are equivalent if each is a subtype of the other.
     (cond (= t1 t2)
