@@ -523,6 +523,18 @@
     :empty-set
     ))
 
+(def ^:dynamic *test-values*
+  "Some values used for random tests"
+  `(~*in* ~*out*
+    0 1 -1 2 -2
+      0.0 1.0 1.1 -1.0 -1.1 1.5 3.5 4.5 6.5
+      1/2
+      "" "hello" "a" "b" "c"
+      a b c
+      12345678901234567890
+      [1 2 3] [1 2] [1] [] [1 2 3 4]
+    ))
+
 (defn gen-type
   "Generate a type designator for testing."
   ([size]

@@ -942,6 +942,20 @@
            '(and (and) (or)))
         941)))
 
+(deftest t-type-membership
+  (testing "random type membership"
+    
+    (doseq [depth (range 5)
+          nf [:dnf :cnf :none]
+          reps (range 1000)
+          :let [td (gns/gen-type depth)
+                td-canonical (gns/canonicalize-type td nf)]
+          value gns/*test-values*]
+      (is (= (gns/typep value td)
+             (gns/typep value td-canonical))
+          (cl-format false "~%value=~A belongs to type but not its canonicalized form~%  td=~A~%  canonicalized=~A~%  nf=~A" value td td-canonical nf)))))
+      
+
 (deftest t-nf-subset
   (testing ""
     ()))

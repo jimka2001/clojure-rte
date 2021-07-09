@@ -53,7 +53,7 @@
      (assert false \"some error message\").
   arg-generator is called num-tries number of times to generate input for
   num-tries number of calls to function unary-test-fun.
-  gen-components is currently unused, but in the future will be used to simply expression
+  gen-components is currently unused, but in the future will be used to simplify expression
       to attempt to generate a simpler test case, if test fails.
   verbose indicates whether to print verbose information about progression of tests."
   [num-tries unary-test-fun arg-generator _gen-components verbose]
