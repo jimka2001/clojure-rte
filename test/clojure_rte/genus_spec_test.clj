@@ -32,6 +32,8 @@
 
 (s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 (every-pred int? even?))  
                                  :2  (s/cat :5 (every-pred int? odd?) :6 pos?))))
+(def odd-int? (every-pred int? odd?))
+(def even-int? (every-pred int? even?))
 
 (defmacro testing
   [string & body]
