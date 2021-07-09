@@ -1095,7 +1095,6 @@
   [self]
   (if (exists [a (operands self)]
               (exists [n (operands self)]
-                      (cl-format true "a=~A n=~A~%" a n)
                       (and (gns/not? n)
                            (= true (annihilator self a (operand n))))))
     (zero self)
