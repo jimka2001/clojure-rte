@@ -43,6 +43,7 @@
 (declare -canonicalize-type)
 (declare check-disjoint)
 (declare combinator)
+(declare combo-filter)
 (declare disjoint?)
 (declare -disjoint?)
 (declare dual-combinator)
@@ -589,8 +590,8 @@
     (instance? a-type a-value)
     
     (not (symbol? a-type))
-    (throw (ex-info (format "typep: [178] invalid type of %s, expecting a symbol or class , got %s"
-                            a-type (type a-type))
+    (throw (ex-info (format "typep: [178] invalid type of %s, expecting a symbol or class, (class? %s)=%s got %s"
+                            a-type a-type (class? a-type) (type a-type))
                     {:error-type :invalid-type-designator
                      :a-type a-type
                      :a-value a-value
@@ -772,6 +773,19 @@
   (setof [x a]
          (member x b)))
   
+
+(defmulti combo-filter
+  ""
+  (fn [self pred xs]
+    (type-dispatch self)))
+
+(defmethod combo-filter 'or
+  [self pred xs]
+  (filter (fn [x] (not (pred x))) xs))
+
+(defmethod combo-filter 'and
+  [self pred xs]
+  (filter pred xs))
 
 (defmulti dual-combination?
   "Given this as an :or ask whether that is an :and,
@@ -1276,9 +1290,32 @@
               (create self (mapcat f (operands self))))))))
 
 (defn conversion-16
-  ""
-  [td]
-  td)
+  "Now(after conversions 13, 14, and 15, there is at most one SMember(...) and
+   at most one SNot(SMember(...))
+   (and Double (not (member 1.0 2.0 \"a\" \"b\"))) --> (and Double (not (member 1.0 2.0)))
+   (or Double (member 1.0 2.0 \"a\" \"b\")) --> (and Double (member \"a\" \"b\"))"
+  [self]
+  (let [fewer (for [td (operands self)
+                    :when (not (gns/member-or-=? td))
+                    :when (not (and (gns/not? td)
+                                    (gns/member-or-=? (operand td))))]
+                td)
+        stricter (create self fewer)]
+    (letfn [(stricter-typep [x]
+              (gns/typep x stricter))
+            (f [td]
+              (cond (gns/member-or-=? td)
+                    (create-member (combo-filter self stricter-typep (operands td)))
+
+                    (and (gns/not? td)
+                         (gns/member-or-=? (operand td)))
+                    (template (not ~(create-member (combo-filter self stricter-typep (operands (operand td))))))
+
+                    :else
+                    td))]
+      (create self (map f (operands self))))))
+
+
 (defmulti conversion-D1
   ""
   type-dispatch)

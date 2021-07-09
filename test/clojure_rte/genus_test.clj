@@ -887,6 +887,20 @@
            '(or x (not (member 3 4 5 6))))
         882)))
     
+(deftest t-combo-conversion-16
+  (testing "combo conversion-16"
+    ;; (and Double (not (member 1.0 2.0 \"a\" \"b\"))) --> (and Double (not (member 1.0 2.0)))
+    (is (= (gns/conversion-16 '(and Double (not (member 1.0 2.0 "a" "b"))))
+           '(and Double (not (member 1.0 2.0))))
+        895)
+    ;; (or Double (member 1.0 2.0 \"a\" \"b\")) --> (and Double (member \"a\" \"b\")
+    int Double
+    (is (= (gns/conversion-16 '(or Double (member 1.0 2.0 "a" "b")))
+           '(or Double (member "a" "b")))
+        896)))
+    
+
+    
 
 (deftest t-nf-subset
   (testing ""
