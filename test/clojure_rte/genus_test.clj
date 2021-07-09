@@ -578,11 +578,11 @@
                        )
               n (range 5)
               :let [rt (gns/gen-type n)
-                    dnf (gns/canonicalize-type :dnf rt)
-                    cnf (gns/canonicalize-type :cnf rt)
-                    dnf-cnf (gns/canonicalize-type :cnf dnf)
-                    cnf-dnf (gns/canonicalize-type :dnf cnf)]]
-        (check-subtype rt (gns/canonicalize-type nil rt) "canonicalize")
+                    dnf (gns/canonicalize-type rt :dnf)
+                    cnf (gns/canonicalize-type rt :cnf)
+                    dnf-cnf (gns/canonicalize-type dnf :cnf)
+                    cnf-dnf (gns/canonicalize-type cnf :dnf)]]
+        (check-subtype rt (gns/canonicalize-type rt :none) "canonicalize")
         (check-subtype rt dnf "dnf")
         (check-subtype rt cnf "cnf")
         (check-subtype rt dnf-cnf "(cnf (dnf ...))")
@@ -613,8 +613,8 @@
                                                                   (fn [td]
                                                                     (not (gns/type-equivalent? td rt1 true))))
                                           (gns/gen-type depth))
-                                    can1 (gns/canonicalize-type :dnf rt1)
-                                    can2 (gns/canonicalize-type :dnf rt2)
+                                    can1 (gns/ocanonicalize-type rt1 :dnf)
+                                    can2 (gns/canonicalize-type rt2 :dnf)
                                     s1 (gns/subtype? rt1 rt2 :dont-know)
                                     s2 (gns/subtype? can1 can2 :dont-know)]
                                 (letfn [(f [key bool]
