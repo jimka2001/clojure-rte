@@ -1381,9 +1381,9 @@
 
 (defn conversion-99
   ""
-  [td tf]
-  td)
-
+  [self nf]
+  (create self (for [td (operands self)]
+                 (canonicalize-type td nf))))
 
 (defn combination-simplifiers [nf]
   [conversion-1
