@@ -1035,45 +1035,45 @@
   (or x) -> x
   (or ...) -> (or ...)"
   [td]
-  (create td (rest td)))
+  (create td (operands td)))
 
 (defn conversion-C2
   "(and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
    (or A B STop C D) -> STop, unit = SEmpty, zero = STop"
-  [[_ & operands :as td]]
-  (if (member (zero td) operands)
+  [td]
+  (if (member (zero td) (operands td))
     (zero td)
     td))
 
 (defn conversion-C3
   "(and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
    (or A ( not A)) --> STop, unit = SEmpty, zero = STop"
-  [[_ & operands :as td]]
-  (if (exists [n operands]
+  [td]
+  (if (exists [n (operands td)]
               (and (gns/not? n)
-                   (member (second n) operands)))
+                   (member (operand n) (operands td))))
     (zero td)
     td))
 
 (defn conversion-C4
   "SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
    SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop"
-  [[_ & operands :as td]]
-  (if (member (unit td) operands)
-    (create td (remove-element (unit td) operands))
+  [td]
+  (if (member (unit td) (operands td))
+    (create td (remove-element (unit td) (operands td)))
     td))
 
 (defn conversion-C5
   "(and A B A C) -> (and A B C)
    (or A B A C) -> (or A B C)"
-  [[_ & operands :as td]]
-  (create td (uniquify operands)))
+  [td]
+  (create td (uniquify (operands td))))
 
 (defn conversion-C6
   "(and A ( and B C) D) --> (and A B C D)
    (or A ( or B C) D) --> (or A B C D)"
-  [[_ & operands :as td]]
-  (if (not (exists [td1 operands]
+  [td]
+  (if (not (exists [td1 (operands td)]
                    (and (gns/combo? td1)
                         (same-combination? td td1))))
     td
@@ -1082,11 +1082,11 @@
                                [td2]
                                
                                (same-combination? td td2)
-                               (rest td2)
+                               (operands td2)
                                
                                :else
                                [td2]))
-                       operands))))
+                       (operands td)))))
               
 (defn conversion-C7
   "Convert to DNF or CNF or leave as is depending on the nf argument"
