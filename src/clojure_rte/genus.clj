@@ -913,7 +913,7 @@
   (case nf
     (:dnf) (compute-dnf td)
     (:cnf) (compute-cnf td)
-    :else td))
+    td))
 
 (defmethod compute-cnf :default
   [td]
