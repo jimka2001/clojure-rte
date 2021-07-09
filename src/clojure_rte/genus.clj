@@ -638,7 +638,12 @@
                  (f a-value)
 
                  (resolve f)
-                 ((resolve f) a-value)
+                 (try ((resolve f) a-value)
+                      (catch Exception e
+                        (cl-format true "gns/typep 'satisfies %A returning false because of exception ~A"
+                                   [(resolve f) a-value]
+                                   e)
+                        false))
 
                  :else
                  (throw (ex-info (format "typep satisfies: unknown function %s" f)
