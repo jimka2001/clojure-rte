@@ -912,6 +912,27 @@
     (is (= (gns/conversion-D1 '(and (member 42 43 44 "a" "b") String))
            '(member "a" "b")))))
 
+(deftest t-combo-conversion-D3
+  (testing "combo conversion-D3"
+    (is (= (gns/disjoint? 'Integer 'String :dont-know)
+           true))
+    ;; SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
+    (is (= (gns/conversion-D3 '(or (not String) (not Integer)))
+           :sigma)
+        920)
+    (is (= (gns/conversion-D3 '(or (= 1) (= "") (not String) (not Integer)))
+           :sigma)
+        921)
+    
+    ;; SAnd(A, B) --> SEmpty if A and B are disjoint"
+    (is (= (gns/conversion-D3 '(and String Integer))
+           :empty-set)
+        922)
+    (is (= (gns/conversion-D3 '(and (or String Integer) String Integer))
+           :empty-set)
+        923)))
+    
+
 (deftest t-nf-subset
   (testing ""
     ()))

@@ -354,7 +354,11 @@
   `(every? (fn [~var]
              ~@body) ~seq))
 
-(defn lazy-pairs [seq]
+(defn lazy-pairs
+  "Generate (lazily) a sequence of pairs (a b) from the given sequence such
+  that a is always to the left of b in the given sequence.   Supposing that
+  the given sequence has no duplicates (1 2 3) -> ((1 2) (1 3) (2 3))"
+  [seq]
   (cond (empty? seq)
         ()
 

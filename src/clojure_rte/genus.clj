@@ -1354,12 +1354,26 @@
         (template (not ~(create-member member-operands)))))))
 
 (defmulti conversion-D3
-  ""
+  "# discover disjoint pair
+  SOr(SNot(A), SNot(B)) -> STop if A and B are disjoint
+  SAnd(A, B) --> SEmpty if A and B are disjoint"
   type-dispatch)
-(defmethod conversion-D3 'and [td]
-  td)
-(defmethod conversion-D3 'or [td]
-  td)
+
+(defmethod conversion-D3 'and
+  [self]
+  (if (exists-pair [[i j] (operands self)]
+                   (disjoint? i j false))
+    :empty-set
+    self))
+
+(defmethod conversion-D3 'or
+  [self]
+  (let [nots (filter gns/not? (operands self))]
+    (if (exists-pair [[i j] nots]
+                     (disjoint? (operand i) (operand j) false))
+      :sigma
+      self)))
+
 (defn conversion-98
   ""
   [td]
