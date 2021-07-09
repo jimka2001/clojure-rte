@@ -1027,7 +1027,7 @@
   (subtype? b a :dont-know))
 
 
-(defn conversion-1
+(defn conversion-C1
   "(and) -> STop, unit = STop, zero = SEmpty
   (and x) -> x
   (and ...) -> (and ...)
@@ -1037,7 +1037,7 @@
   [td]
   (create td (rest td)))
 
-(defn conversion-2
+(defn conversion-C2
   "(and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
    (or A B STop C D) -> STop, unit = SEmpty, zero = STop"
   [[_ & operands :as td]]
@@ -1045,7 +1045,7 @@
     (zero td)
     td))
 
-(defn conversion-3
+(defn conversion-C3
   "(and A ( not A)) --> SEmpty, unit = STop, zero = SEmpty
    (or A ( not A)) --> STop, unit = SEmpty, zero = STop"
   [[_ & operands :as td]]
@@ -1055,7 +1055,7 @@
     (zero td)
     td))
 
-(defn conversion-4
+(defn conversion-C4
   "SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
    SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop"
   [[_ & operands :as td]]
@@ -1063,13 +1063,13 @@
     (create td (remove-element (unit td) operands))
     td))
 
-(defn conversion-5
+(defn conversion-C5
   "(and A B A C) -> (and A B C)
    (or A B A C) -> (or A B C)"
   [[_ & operands :as td]]
   (create td (uniquify operands)))
 
-(defn conversion-6
+(defn conversion-C6
   "(and A ( and B C) D) --> (and A B C D)
    (or A ( or B C) D) --> (or A B C D)"
   [[_ & operands :as td]]
@@ -1088,12 +1088,12 @@
                                [td2]))
                        operands))))
               
-(defn conversion-7
+(defn conversion-C7
   "Convert to DNF or CNF or leave as is depending on the nf argument"
   [td nf]
   (to-nf td nf))
 
-(defn conversion-8
+(defn conversion-C8
   "(or A (not B)) --> STop if B is subtype of A, zero = STop
    (and A (not B)) --> SEmpty if B is supertype of A, zero = SEmpty"
   [self]
@@ -1104,7 +1104,7 @@
     (zero self)
     self))
 
-(defn conversion-9
+(defn conversion-C9
   "(A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
    (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
    (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)"
@@ -1125,7 +1125,7 @@
                       (create td (remove-element (first to-remove) (operands td))))))))]
       (create self (map f (operands self))))))
 
-(defn conversion-10
+(defn conversion-C10
   "(and A B C) --> (and A C) if A is subtype of B
    (or A B C) -->  (or B C) if A is subtype of B"
   [self]
@@ -1142,7 +1142,7 @@
                               (not= (annihilator self sub sup) true)))]
           (create self keep))))))
 
-(defn conversion-11
+(defn conversion-C11
   "A + !A B -> A + B
    A + !A BX + Y = (A + BX + Y)
    A + ABX + Y = (A + Y)"
@@ -1175,7 +1175,7 @@
                         [td]))]
           (create self (mapcat consume (operands self))))))))
 
-(defn conversion-12
+(defn conversion-C12
   "AXBC + !X = ABC + !X"
   [self]
   (let [combos (filter combo? (operands self))
@@ -1200,7 +1200,7 @@
         (create self (map f (operands self)))))))
 
 
-(defn conversion-13
+(defn conversion-C13
   "multiple !member
     SOr(x,!{-1, 1},!{1, 2, 3, 4})
      --> SOr(x,!{1}) // intersection of non-member
@@ -1233,7 +1233,7 @@
           (create self (uniquify (map f (operands self)))))))))
 
 
-(defn conversion-14
+(defn conversion-C14
   "multiple member
    (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
    (or String (member 1 2 \"3\") (member 2 3 4 \"5\")) --> (or String (member 1 2 4))
@@ -1253,7 +1253,7 @@
                     td))]
           (create self (uniquify (map f (operands self)))))))))
 
-(defn conversion-15
+(defn conversion-C15
   "SAnd(X, member1, not-member) --> SAnd(X,member2)
    SOr(X, member, not-member1) --> SOr(X,not-member2)
    
@@ -1304,7 +1304,7 @@
                         [td]))]
               (create self (mapcat f (operands self))))))))
 
-(defn conversion-16
+(defn conversion-C16
   "Now(after conversions 13, 14, and 15, there is at most one SMember(...) and
    at most one SNot(SMember(...))
    (and Double (not (member 1.0 2.0 \"a\" \"b\"))) --> (and Double (not (member 1.0 2.0)))
@@ -1330,10 +1330,9 @@
                     td))]
       (create self (map f (operands self))))))
 
-
 (defmulti conversion-D1
   "Note this isn't consumed in SCombination:conversion16,
-   conversion-16 converts SAnd(SMember(42, 43, 44, \"a\", \"b\", \"c\"), SInt)
+   conversion-C16 converts SAnd(SMember(42, 43, 44, \"a\", \"b\", \"c\"), SInt)
    to SAnd(SMember(42, 43, 44), SInt)
    while conversion-D1() converts it to
    SMember(42, 43, 44)
@@ -1389,38 +1388,38 @@
       :sigma
       self)))
 
-(defn conversion-98
+(defn conversion-C98
   "Sort the operands into deterministic order"
   [self]
   (create self (sort-operands (operands self))))
 
-(defn conversion-99
+(defn conversion-C99
   ""
   [self nf]
   (create self (for [td (operands self)]
                  (canonicalize-type td nf))))
 
 (defn combination-simplifiers [nf]
-  [conversion-1
-   conversion-2
-   conversion-3
-   conversion-4
-   conversion-5
-   conversion-6
-   (fn [td] (conversion-7 td nf))
-   conversion-8
-   conversion-9
-   conversion-10
-   conversion-11
-   conversion-12
-   conversion-13
-   conversion-14
-   conversion-15
-   conversion-16
+  [conversion-C1
+   conversion-C2
+   conversion-C3
+   conversion-C4
+   conversion-C5
+   conversion-C6
+   (fn [td] (conversion-C7 td nf))
+   conversion-C8
+   conversion-C9
+   conversion-C10
+   conversion-C11
+   conversion-C12
+   conversion-C13
+   conversion-C14
+   conversion-C15
+   conversion-C16
    conversion-D1
    conversion-D3
-   conversion-98
-   (fn [td] (conversion-99 td nf))])
+   conversion-C98
+   (fn [td] (conversion-C99 td nf))])
 
 
 (defmethod -canonicalize-type 'and
