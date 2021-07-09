@@ -613,7 +613,7 @@
                                                                   (fn [td]
                                                                     (not (gns/type-equivalent? td rt1 true))))
                                           (gns/gen-type depth))
-                                    can1 (gns/ocanonicalize-type rt1 :dnf)
+                                    can1 (gns/canonicalize-type rt1 :dnf)
                                     can2 (gns/canonicalize-type rt2 :dnf)
                                     s1 (gns/subtype? rt1 rt2 :dont-know)
                                     s2 (gns/subtype? can1 can2 :dont-know)]
