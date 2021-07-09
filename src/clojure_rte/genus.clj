@@ -837,6 +837,10 @@
   [self]
   (rest self))
 
+(defmethod operands '=
+  [self]
+  [(operand self)])
+
 (defmethod operand '=
   [self]
   (second self))
