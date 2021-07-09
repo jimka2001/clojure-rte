@@ -1317,12 +1317,41 @@
 
 
 (defmulti conversion-D1
-  ""
+  "Note this isn't consumed in SCombination:conversion16,
+   conversion-16 converts SAnd(SMember(42, 43, 44, \"a\", \"b\", \"c\"), SInt)
+   to SAnd(SMember(42, 43, 44), SInt)
+   while conversion-D1() converts it to
+   SMember(42, 43, 44)
+
+   SAnd(SMember(42, 43, 44), A, B, C)
+    == > SMember(42, 44)
+   SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+   == > SNot(SMember(42, 43, 44))"
   type-dispatch)
-(defmethod conversion-D1 'and [td]
-  td)
-(defmethod conversion-D1 'or [td]
-  td)
+
+(defmethod conversion-D1 'and
+  [self]
+  (let [members (filter gns/member-or-=? (operands self))]
+    (if (empty? members)
+      self
+      (create-member (setof [x (operands (first members))]
+                            (gns/typep x self))))))
+
+(defmethod conversion-D1 'or
+  [self]
+  ;; This is the dual of conversion-D1 'and,
+  ;;   the code is a bit more complicated because we have to destructure (not (member ...))
+  ;;   a couple of times.
+  (let [not-members (for [td (operands self)
+                          :when (gns/not? td)
+                          :when (gns/member-or-=? (operand td ))]
+                      td)]
+    (if (empty? not-members)
+      self
+      (let [member-operands (for [x (operands (operand (first not-members)))
+                                  :when (not (gns/typep x self))]
+                              x)]
+        (template (not ~(create-member member-operands)))))))
 
 (defmulti conversion-D3
   ""

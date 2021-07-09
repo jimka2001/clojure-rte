@@ -900,7 +900,17 @@
         896)))
     
 
-    
+(deftest t-combo-conversion-D1
+  (testing "combo conversion-D1"
+    ;; SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+    ;; == > SNot(SMember(42, 43, 44))
+    (is (= (gns/conversion-D1 '(or (not (member 42 43 44 "a" "b")) String))
+           '(not (member 42 43 44)))
+        909)
+    ;; SAnd(SMember(42, 43, 44), A, B, C)
+    ;; == > SMember(42, 44)
+    (is (= (gns/conversion-D1 '(and (member 42 43 44 "a" "b") String))
+           '(member "a" "b")))))
 
 (deftest t-nf-subset
   (testing ""
