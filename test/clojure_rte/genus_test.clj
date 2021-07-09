@@ -933,6 +933,15 @@
         923)))
     
 
+(deftest t-combo-conversion-98
+  (testing "combo conversion-98"
+    (is (= (gns/conversion-98 '(or z x c a b y))
+           '(or a b c x y z))
+        940)
+    (is (= (gns/conversion-98 '(and (or) (and)))
+           '(and (and) (or)))
+        941)))
+
 (deftest t-nf-subset
   (testing ""
     ()))

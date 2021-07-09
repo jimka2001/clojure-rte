@@ -26,7 +26,7 @@
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
                                       partition-by-pred remove-element uniquify
-                                      search-replace setof
+                                      search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       unchunk
                                       print-vals]]
@@ -1375,9 +1375,9 @@
       self)))
 
 (defn conversion-98
-  ""
-  [td]
-  td)
+  "Sort the operands into deterministic order"
+  [self]
+  (create self (sort-operands (operands self))))
 
 (defn conversion-99
   ""
