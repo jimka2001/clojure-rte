@@ -1325,7 +1325,7 @@
 
    SAnd(SMember(42, 43, 44), A, B, C)
     == > SMember(42, 44)
-   SOr(SNot(SMember(42, 43, 44, "a","b")), String)
+   SOr(SNot(SMember(42, 43, 44, \"a\",\"b\")), String)
    == > SNot(SMember(42, 43, 44))"
   type-dispatch)
 
