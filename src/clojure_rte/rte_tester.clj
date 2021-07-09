@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -88,15 +88,25 @@
   [num-tries size verbose]
   (tester/random-test num-tries
                       (fn [rte]
-                        (if (nullable rte)
-                          (assert (not (nullable (list :not rte)))
-                                  (cl-format false
-                                             "rte ~A is nullable but its complement (:not ...) is not nullable"
-                                             rte))
-                          (assert (nullable (list :not rte))
-                                  (cl-format false
-                                             "rte ~A is not nullable but its complement (:not ...) is nullable"
-                                             rte))))                          
+                        (let [rte-can (canonicalize-pattern rte)]
+                          (if (nullable rte)
+                            (do (assert (not (nullable (list :not rte)))
+                                        (cl-format false
+                                                   "rte ~A is nullable but its complement (:not ...) is not nullable"
+                                                   rte))
+                                (assert (not (nullable rte-can))
+                                        (cl-format false
+                                                   "rte ~A is nullable but its canonicalization is not: ~A"
+                                                   rte rte-can)))
+                            (do
+                              (assert (nullable (list :not rte))
+                                      (cl-format false
+                                                 "rte ~A is not nullable but its complement (:not ...) is nullable"
+                                                 rte))
+                              (assert (nullable rte-can)
+                                      (cl-format false
+                                                 "rte ~A is non-nullable but its canonicalization is nullable: ~A"
+                                                 rte rte-can))))))
                       (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))

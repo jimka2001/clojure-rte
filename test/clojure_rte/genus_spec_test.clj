@@ -30,8 +30,8 @@
             [backtick :refer [template]]
             [clojure.test :as t]))
 
-(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even?)  
-                                 :2  (s/cat :5 odd? :6 pos?))))
+(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 (every-pred int? even?))  
+                                 :2  (s/cat :5 (every-pred int? odd?) :6 pos?))))
 
 (defmacro testing
   [string & body]
@@ -146,11 +146,11 @@
                    (satisfies clojure.core/pos?)))))]
 
       (doseq [rte2 [rte
-                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                 :y  (s/cat :c odd? :d pos?)))))
+                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b (every-pred int? even?))  
+                                                 :y  (s/cat :c (every-pred int? odd?) :d pos?)))))
                     '(spec ::test-spec-1)
-                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                       :y  (s/cat :c odd? :d pos?))))
+                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b (every-pred int? even?)  )
+                                       :y  (s/cat :c (every-pred int? odd?) :d pos?))))
                     ]
               seq [[]
                    [-1 2]

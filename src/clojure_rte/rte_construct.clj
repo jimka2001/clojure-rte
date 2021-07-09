@@ -596,8 +596,11 @@
   (seq-matcher :or))
 
 (defmethod gns/-canonicalize-type 'rte
-  [type-designator]
-  (cons 'rte (map canonicalize-pattern (rest type-designator))))
+  [type-designator nf]
+  ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
+  ;;    gns/canonicalize-type, we'll need nf again
+  (cons 'rte (map canonicalize-pattern
+                  (rest type-designator))))
 
 (defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
@@ -817,9 +820,13 @@
                                     ;; TODO (:or (:cat A B sigma-*)
                                     ;;           (:cat A B ))
                                     ;;  --> (:or (:cat A B sigma-*))
+
+                                    ;; TODO (:or A B C (:* B) D)
+                                    ;;  --> (:or A C (:* B) D)
                                     
                                     ;; (:or A :epsilon B (:cat X (:* X)) C)
-                                    ;;   --> (:or A :epsilon B (:* X) C ) --> (:or A B (:* X) C)
+                                    ;;   --> (:or A :epsilon B (:* X) C )
+                                    ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
                                     ((and (member :epsilon operands)
                                           (some (fn [obj]
                                                   (and (cat? obj)
@@ -909,6 +916,7 @@
             (map (fn [p]
                    (derivative (canonicalize-pattern p) wrt))
                  patterns))]
+    ;; TODO need to test deriv x wrt :sigma, should be empty-word unless x is :empty-set and :empty-set if x is :empty-set
     (canonicalize-pattern
      (cond
        (= :empty-set expr)

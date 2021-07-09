@@ -41,6 +41,11 @@
           :else
           (recur (rest items)))))
 
+(defn remove-element
+  "Non-destructively remove a given element from a sequence"
+  [element-to-remove xs]
+  (filter (fn [x] (not= x element-to-remove)) xs)) 
+
 (defn remove-once 
   "Non-destructively remove the first element of the sequence which is
    = to the target value.  The list is unrolled as much as necessary,
@@ -349,7 +354,11 @@
   `(every? (fn [~var]
              ~@body) ~seq))
 
-(defn lazy-pairs [seq]
+(defn lazy-pairs
+  "Generate (lazily) a sequence of pairs (a b) from the given sequence such
+  that a is always to the left of b in the given sequence.   Supposing that
+  the given sequence has no duplicates (1 2 3) -> ((1 2) (1 3) (2 3))"
+  [seq]
   (cond (empty? seq)
         ()
 
@@ -496,3 +505,23 @@
         ;; because every stack operation pops twice and pushes once.
         (reduce (fn [a1 a2] (f a2 a1))
                 (map second stack))))))
+
+(defn uniquify
+  "returns a new sequence with duplicates remove.
+   If duplicates exist, left-most is removed, right-most remains"
+  [seq]
+  (reverse (distinct (reverse seq))))
+
+(defn search-replace-splice
+  "Search for all occurances of search-for in xs and replace with the elements of replace-with"
+  [xs search-for replace-with]
+  (mapcat (fn [x]
+            (if (= x search-for)
+              replace-with
+              [x]))
+          xs))
+
+(defn search-replace 
+  "Search for all occurances of search-for in xs and replace with replace-with"
+  [xs search-for replace-with]
+  (search-replace-splice xs search-for [replace-with]))

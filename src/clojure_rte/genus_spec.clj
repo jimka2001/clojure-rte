@@ -1,4 +1,4 @@
-;; Copyright (c) 2020 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -178,7 +178,7 @@
         ))
 
 (defmethod gns/-canonicalize-type 'spec
-  [[_spec pattern]]
+  [[_spec pattern] nf]
   (try (wrap-spec (spec-to-rte pattern))
        (catch clojure.lang.ExceptionInfo ei
          (if (:unsupported-pattern (ex-data ei))

@@ -209,7 +209,6 @@
                                  ))
         "test 10")))
 
-
 (deftest t-destructuring-fn-1
   (testing "destructuring-fn simple form"
     (is (= 1 
