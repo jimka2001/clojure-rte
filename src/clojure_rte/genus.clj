@@ -1193,7 +1193,7 @@
     (if (empty? comp)
       self
       (letfn [(f [td]
-                (cond (gns/combo? td)
+                (cond (not (gns/combo? td))
                       td
 
                       (not (dual-combination? self td))
