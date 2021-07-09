@@ -1225,9 +1225,56 @@
           (create self (uniquify (map f (operands self)))))))))
 
 (defn conversion-15
-  ""
-  [td]
-  td)
+  "SAnd(X, member1, not-member) --> SAnd(X,member2)
+   SOr(X, member, not-member1) --> SOr(X,not-member2)
+   
+   after conversion13 and conversion14 there is a maximum of one SMember(...) and
+   a maximum of one SNot(SMember(...))
+   
+   In the SAnd case we can remove the SNot(SMember(...)) and filter the SMember(...)
+        to memberArgs andNot notMemberArgs.
+   In the SOr  case we can remove the SMember(...) and filter the SNot(SMember(...))
+        to notMemberArgs andNot memberArgs."
+  [self]
+  (letfn [(diff [xs ys]
+            (setof [x xs]
+                   (not (member x ys))))]
+    (let [members (filter gns/member-or-=? (operands self))
+          not-members (filter (fn [x] (and (gns/not? x)
+                                           (gns/member-or-=? (operand x)))) (operands self))]
+      (cond (empty? members)
+            self
+
+            (empty? not-members)
+            self
+
+            :else
+            (letfn [(f [td]
+                      (cond
+                        ;; in the SAnd case we remove the not_member and filter the member args
+                        (and (gns/and? self)
+                             (= td (first not-members)))
+                        []
+
+                        (and (gns/and? self)
+                             (= td (first members)))
+                        [(create-member (diff (operands (first members))
+                                              (operands (operand (first not-members)))))]
+
+                        ;; in the SOr case we remove the member and filter the not-member args
+                        (and (gns/or? self)
+                             (= td (first members)))
+                        []
+
+                        (and (gns/or? self)
+                             (= td (first not-members)))
+                        [(template (not ~(create-member (diff (operands (operand (first not-members)))
+                                                              (operands (first members))))))]
+
+                        :else
+                        [td]))]
+              (create self (mapcat f (operands self))))))))
+
 (defn conversion-16
   ""
   [td]

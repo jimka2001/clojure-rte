@@ -862,6 +862,30 @@
            '(and x (member 2 3)))
         860)))
         
+(deftest t-combo-conversion-15
+
+  (testing "combo conversion-15"
+    ;; SAnd(X, member1, not-member) --> SAnd(X,member2)
+    (is (= (gns/conversion-15 '(and x (member 1 2 3 4) (not (member 3 4 5 6))))
+           '(and x (member 1 2)))
+        871)
+    (is (= (gns/conversion-15 '(and x (member 1 2 3 4)))
+           '(and x (member 1 2 3 4)))
+        872)
+    (is (= (gns/conversion-15 '(and x (not (member 3 4 5 6))))
+           '(and x (not (member 3 4 5 6))))
+        873)
+
+    ;; SOr(X, member, not-member1) --> SOr(X,not-member2)
+    (is (= (gns/conversion-15 '(or x (member 1 2 3 4) (not (member 3 4 5 6))))
+           '(or x (not (member 5 6))))
+        882)
+    (is (= (gns/conversion-15 '(or x (member 1 2 3 4) ))
+           '(or x (member 1 2 3 4) ))
+        883)
+    (is (= (gns/conversion-15 '(or x (not (member 3 4 5 6))))
+           '(or x (not (member 3 4 5 6))))
+        882)))
     
 
 (deftest t-nf-subset
