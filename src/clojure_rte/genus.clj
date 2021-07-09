@@ -1439,22 +1439,15 @@
 
 (defmethod -canonicalize-type 'member
   [type-designator nf]
+  ;; the advantage of using find-simplifier rather than calling create-member
+  ;; simply and directly is that if create-member returns a new sequence (member ...)
+  ;; equal to type-designator, then find-simplfier will return the original
+  ;; type-designator (the old object) rather than the new object.  Thus
+  ;; if the old object has meta data, the meta data will be retained,
+  ;; and presumably the new data is easier to GC.
   (find-simplifier type-designator
                    [(fn [type-designator]
-                      (if (empty? (rest type-designator))
-                        :empty-set
-                        type-designator))
-                    (fn [type-designator]
-                      (if (empty? (rest (rest type-designator)))
-                        (list '= (second type-designator))
-                        type-designator))
-                    (fn [type-designator]
-                      (let [items (distinct (rest type-designator))]
-                        (if (= items (rest type-designator))
-                          type-designator
-                          (cons 'member items))))]))
-
-
+                      (create-member (operands type-designator)))]))
                    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of valid-type? and its methods
