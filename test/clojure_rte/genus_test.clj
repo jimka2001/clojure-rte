@@ -338,7 +338,7 @@
     ;;   from local name space.
     (is (thrown? Exception (gns/typep 13 '(satisfies test-predicate))))))
   
-    
+
 (deftest t-canonicalize-and
   (testing "canonicalize-type and"
     (is (member
@@ -355,7 +355,7 @@
   (testing "canonicalize-type or"
     (is (=
          (gns/canonicalize-type '(or Double (member 1.0 2.0 "a" "b")))
-         '(or Double (member "a" "b")))
+         '(or (member "a" "b") Double))
         "test 0")))
 
 (deftest t-symmetric-disjoint
@@ -491,15 +491,30 @@
 
 (deftest t-canonicalize-not-member
   (testing "canonicalize (and (not (member ...)))"
-    (is (= (gns/canonicalize-type '(and Long (not (member 1 2)) (not (= 12)) (not (= 13)) (not (member 3 4))))
-           '(and Long (not (member 1 2 12 13 3 4)))) "line 436")
-    (is (= (gns/canonicalize-type '(and Long (not (member 1 2)) (not (= "hello")) (not (= 13)) (not (member 3 4))))
-           '(and Long (not (member 1 2 13 3 4)))) "line 438")
-    (is (= (gns/canonicalize-type '(and Long (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
-           '(and Long (not (member 1 2 13 3 4)))) "line 440")
-    (is (= (gns/canonicalize-type '(and String (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
-           '(and String (not (member "world" "hello")))) "line 442")
-    (is (= (gns/canonicalize-type '(and Boolean (not (member 1 2 "world")) (not (= "hello")) (not (= 13)) (not (member 3 4))))
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2))
+                                        (not (= 12))
+                                        (not (= 13))
+                                        (not (member 3 4))))
+           '(and (not (member 1 2 3 4  12 13)) Long)) "line 436")
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2))
+                                        (not (= "hello"))
+                                        (not (= 13))
+                                        (not (member 3 4))))
+           '(and (not (member 1 2 3 4 13)) Long)) "line 438")
+    (is (= (gns/canonicalize-type '(and Long (not (member 1 2 "world"))
+                                        (not (= "hello"))
+                                        (not (= 13))
+                                        (not (member 3 4))))
+           '(and (not (member 1 2 3 4 13)) Long)) "line 440")
+    (is (= (gns/canonicalize-type '(and String (not (member 1 2 "world"))
+                                        (not (= "hello"))
+                                        (not (= 13))
+                                        (not (member 3 4))))
+           '(and (not (member "hello" "world")) String)) "line 442")
+    (is (= (gns/canonicalize-type '(and Boolean (not (member 1 2 "world"))
+                                        (not (= "hello"))
+                                        (not (= 13))
+                                        (not (member 3 4))))
            'Boolean) "line 444")
     ))
 
@@ -563,11 +578,11 @@
                        )
               n (range 5)
               :let [rt (gns/gen-type n)
-                    dnf (gns/canonicalize-type :dnf rt)
-                    cnf (gns/canonicalize-type :cnf rt)
-                    dnf-cnf (gns/canonicalize-type :cnf dnf)
-                    cnf-dnf (gns/canonicalize-type :dnf cnf)]]
-        (check-subtype rt (gns/canonicalize-type nil rt) "canonicalize")
+                    dnf (gns/canonicalize-type rt :dnf)
+                    cnf (gns/canonicalize-type rt :cnf)
+                    dnf-cnf (gns/canonicalize-type dnf :cnf)
+                    cnf-dnf (gns/canonicalize-type cnf :dnf)]]
+        (check-subtype rt (gns/canonicalize-type rt :none) "canonicalize")
         (check-subtype rt dnf "dnf")
         (check-subtype rt cnf "cnf")
         (check-subtype rt dnf-cnf "(cnf (dnf ...))")
@@ -598,8 +613,8 @@
                                                                   (fn [td]
                                                                     (not (gns/type-equivalent? td rt1 true))))
                                           (gns/gen-type depth))
-                                    can1 (gns/canonicalize-type :dnf rt1)
-                                    can2 (gns/canonicalize-type :dnf rt2)
+                                    can1 (gns/canonicalize-type rt1 :dnf)
+                                    can2 (gns/canonicalize-type rt2 :dnf)
                                     s1 (gns/subtype? rt1 rt2 :dont-know)
                                     s2 (gns/subtype? can1 can2 :dont-know)]
                                 (letfn [(f [key bool]
