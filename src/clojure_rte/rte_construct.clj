@@ -26,7 +26,9 @@
                                       visit-permutations fixed-point
                                       sort-operands with-first-match
                                       partition-by-pred seq-matcher
-                                      rte-identity rte-constantly]]
+                                      rte-identity rte-constantly
+                                      print-vals
+                                      find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union subset?]]
@@ -49,6 +51,8 @@
 (declare rte-to-dfa)
 (declare canonicalize-pattern-once)
 (declare -canonicalize-pattern-once)
+(declare operand)
+(declare operands)
 
 (def ^:dynamic *rte-known*
   "Dynamic variable whose value is a map.
@@ -222,6 +226,42 @@
 (def sigma-* '(:* :sigma))
 (def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
 (def not-epsilon `(:cat :sigma ~sigma-*))
+
+(defn type-dispatch [pattern]
+  (cond (sequential? pattern)
+        (first pattern)
+
+        (keyword? pattern)
+        pattern
+
+        :else
+        :default))
+
+(defmulti operands
+  type-dispatch)
+
+(defmulti operand
+  type-dispatch)
+
+(defmethod operands :or
+  [pattern]
+  (rest pattern))
+
+(defmethod operands :and
+  [pattern]
+  (rest pattern))
+
+(defmethod operand :*
+  [pattern]
+  (second pattern))
+
+(defmethod operand :not
+  [pattern]
+  (second pattern))
+
+(defmethod operands :cat
+  [pattern]
+  (rest pattern))
 
 (def ^:dynamic *traversal-functions*
   "Default callbacks for walking an rte tree.
@@ -604,11 +644,11 @@
 
 (defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
-  for whcih (test a b) is a Boolean true.   If not found, return false.
-  If found return a pair [prefix suffix] where prefix is a copy of the squence
+  for which (test a b) is a Boolean true.   If not found, return false.
+  If found return a pair [prefix suffix] where prefix is a copy of the sequence
   up to but not including a, and suffix is the tail after but not including a.
   The suffix sequence starts with b.   I.e., the length of the input sequence
-  is 1 less than the some of the two output sequences, if a duplicate was found."
+  is 1 more than the sum of the two output sequences, if a duplicate was found."
   [test seq]
   (loop [seq seq
          head ()]
@@ -660,6 +700,98 @@
                          t1 t2)
               false)))))
 
+(defn conversion-*1
+  [self]
+  (let [op (operand self)]
+    (cond (= :epsilon op)
+          :epsilon
+
+          (= :empty-set op)
+          :epsilon
+
+          (rte/*? op)
+          op
+
+          :default
+          self)))
+
+(defn conversion-*2
+  [self]
+  (if (not (rte/cat? (operand self)))
+    self
+    ;; Star(Cat(...))
+    (let [c (operand self)
+          cat-operands (operands c)]
+      (cond 
+        (not (member (count cat-operands) '(2 3)))
+        self
+
+        ;; Star(Cat(x,Star(x))) -> Star(x)
+        (and (= 2 (count cat-operands))
+             (rte/*? (second cat-operands))
+             (= (first cat-operands)
+                (operand (second cat-operands))))
+        (second cat-operands)
+
+        ;; Star(Cat(Star(x),x)) -> Star(x)
+        (and (= 2 (count cat-operands))
+             (rte/*? (first cat-operands))
+             (= (second cat-operands)
+                (operand (first cat-operands))))
+        (first cat-operands)
+
+        ;; Star(Cat(Star(x),x,Star(x))) -> Star(x)
+        (and (= 3 (count cat-operands))
+             (rte/*? (first cat-operands))
+             (= (first cat-operands) (last cat-operands))
+             (= (operand (first cat-operands))
+                (second cat-operands)))
+        (first cat-operands)
+
+        :else
+        self))))
+             
+
+(defn conversion-*3
+  [self]
+  (if (not (rte/cat? (operand self)))
+    self
+    (let [c (operand self)
+          cat-operands (operands c)]
+      (cond
+        ;; Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
+        ;;    -->    Star(Cat(X, Y, Z))
+        (and (rte/*? (last cat-operands))
+             (rte/cat? (operand (last cat-operands)))
+             (= (operands (operand (last cat-operands)))
+                (butlast cat-operands)))
+        (last cat-operands)
+
+        ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
+        ;;   -->    Star(Cat(X, Y, Z))
+        (and (rte/*? (first cat-operands))
+             (rte/cat? (operand (first cat-operands)))
+             (= (operands (operand (first cat-operands)))
+                (rest cat-operands)))
+        (first cat-operands)
+
+        ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
+        ;;   -->    Star(Cat(X, Y, Z))
+        (and (<= 3 (count cat-operands))
+             (rte/*? (first cat-operands))
+             (rte/cat? (operand (first cat-operands)))
+             (= (first cat-operands) (last cat-operands))
+             (= (operands (operand (first cat-operands)))
+                (butlast (rest cat-operands))))
+        (first cat-operands)
+
+        :else
+        self))))
+
+(defn conversion-*99
+  [self]
+  (template (:* ~(canonicalize-pattern-once (operand self)))))
+
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -677,13 +809,11 @@
                            :epsilon rte-identity
                            :sigma rte-identity
                            :* (fn [operand _functions]
-                                (let [operand (canonicalize-pattern operand)]
-                                  (case operand
-                                    :epsilon    :epsilon ;; (:* :epsilon) --> :epsilon
-                                    :empty-set  :epsilon ;; (:* :empty-set) --> :epsilon
-                                    (if (*? operand)
-                                      operand ;; (:* (:* something)) --> (:* something)
-                                      (list :* (canonicalize-pattern operand))))))
+                                (find-simplifier (list :* operand)
+                                                 [conversion-*1
+                                                  conversion-*2
+                                                  conversion-*3
+                                                  conversion-*99]))
                            :cat (fn [operands _functions]
                                   (let [operands (map canonicalize-pattern operands)]
                                     (assert (< 1 (count operands))
