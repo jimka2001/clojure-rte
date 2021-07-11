@@ -640,9 +640,8 @@
                  (resolve f)
                  (try ((resolve f) a-value)
                       (catch Exception e
-                        (cl-format true "gns/typep 'satisfies %A returning false because of exception ~A"
-                                   [(resolve f) a-value]
-                                   e)
+                        (cl-format true "gns/typep 'satisfies ~A returning false because of exception~%"
+                                   [(resolve f) a-value])
                         false))
 
                  :else
