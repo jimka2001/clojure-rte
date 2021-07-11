@@ -1454,7 +1454,7 @@
   ;; and presumably the new data is easier to GC.
   (find-simplifier type-designator
                    [(fn [type-designator]
-                      (create-member (operands type-designator)))]))
+                      (create-member (sort-operands (operands type-designator))))]))
                    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of valid-type? and its methods
