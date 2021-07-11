@@ -873,6 +873,37 @@
            '(:* (:cat x y z)))
         862)))
 
+(deftest t-conversion-not-1
+  (testing "conversion not 1"
+    (is (= (rte/conversion-not-1 '(:not :sigma))
+           rte/not-sigma))
+    (is (= (rte/conversion-not-1 '(:not (:* :sigma)))
+           :empty-set))
+    (is (= (rte/conversion-not-1 '(:not :epsilon))
+           rte/not-epsilon))
+    (is (= (rte/conversion-not-1 '(:not :empty-set))
+           rte/sigma-*))))
+
+(deftest t-conversion-not-2
+  (testing "conversion not 2"
+    (is (= (rte/conversion-not-2 '(:not x))
+           '(:not x)))
+    (is (= (rte/conversion-not-2 '(:not (:not x)))
+           'x))))
+
+(deftest t-conversion-not-3
+  (testing "conversion not 3"
+    (is (= (rte/conversion-not-3 '(:not (:or x y z)))
+           '(:and (:not x) (:not y) (:not z))))
+    (is (= (rte/conversion-not-3 '(:not (:or (:not x) y z)))
+           '(:and x (:not y) (:not z))))    
+    (is (= (rte/conversion-not-3 '(:not (:and x y z)))
+           '(:or (:not x) (:not y) (:not z))))
+    (is (= (rte/conversion-not-3 '(:not (:and (:not x) y z)))
+           '(:or x (:not y) (:not z))))))
+    
+    
+
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

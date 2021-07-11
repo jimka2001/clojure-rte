@@ -263,6 +263,7 @@
   [pattern]
   (rest pattern))
 
+
 (def ^:dynamic *traversal-functions*
   "Default callbacks for walking an rte tree.
   A function which wants to perform a recursive action on an
@@ -635,6 +636,35 @@
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
+(def rte/create-or
+  (fn [operands]
+    (cond (empty? operands)
+          :empty-set
+
+          (= 1 (count operands))
+          (first operands)
+
+          :else
+          (cons :or operands))))
+
+(def rte/create-and
+  (fn [operands]
+    (cond (empty? operands)
+          sigma-*
+
+          (= 1 (count operands))
+          (first operands)
+
+          :else
+          (cons :and operands))))
+
+(def rte/create-not
+  (fn [not-operand]
+    (if (rte/not? not-operand)
+      (operand not-operand)
+      (list :not not-operand))))
+
+
 (defmethod gns/-canonicalize-type 'rte
   [type-designator nf]
   ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
@@ -792,6 +822,49 @@
   [self]
   (template (:* ~(canonicalize-pattern-once (operand self)))))
 
+(defn conversion-not-1
+  [self]
+  (let [op (operand self)]
+    (cond (= op :sigma)
+          not-sigma
+
+          (= op sigma-*)
+          :empty-set
+
+          (= op :epsilon)
+          not-epsilon
+
+          (= op :empty-set)
+          sigma-*
+
+          :else
+          self)))
+
+(defn conversion-not-2
+  [self]
+  (cond (rte/not? (operand self))
+        (operand (operand self))
+        :else
+        self))
+
+(defn conversion-not-3
+  [self]
+  (let [op (operand self)]
+    (cond (rte/and? op)
+          (rte/create-or (map rte/create-not (operands op)))
+
+          (rte/or? op)
+          (rte/create-and (map rte/create-not (operands op)))
+
+          :else
+          self)))
+                    
+
+(defn conversion-not-99
+  [self]
+  (rte/create-not (canonicalize-pattern-once (operand self))))
+
+
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -848,32 +921,11 @@
                                      (:else
                                       (cons :cat operands)))))
                            :not (fn [operand _functions]
-                                  (let [operand (canonicalize-pattern operand)]
-                                    (case operand
-                                      (:sigma) not-sigma
-                                      ((:* :sigma)) :empty-set
-                                      (:epsilon) not-epsilon
-                                      (:empty-set) sigma-*
-                                      (cond
-                                        (rte/not? operand) ;; (:not (:not A)) --> A
-                                        (second operand)
-
-                                        (rte/and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
-                                        (cons :or (map (fn [obj]
-                                                         (list :not obj)) (rest operand)))
-
-                                        (rte/or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
-                                        (cons :and (map (fn [obj]
-                                                          (list :not obj)) (rest operand)))
-
-                                        :else
-                                        ;; TODO in CL this expands to
-                                        ;; (:or :empty-word
-                                        ;;      (not pattern) ;; not type does not exist in clojure
-                                        ;;      (:cat t (:+ t)))
-                                        ;; so we need to take care of this when when build the automaton
-                                        (list :not operand))
-                                      )))
+                                  (find-simplifier (list :not operand)
+                                                   [conversion-not-1
+                                                    conversion-not-2
+                                                    conversion-not-3
+                                                    conversion-not-99]))
                            :and (fn [operands _functions]
                                   (let [operands (dedupe (sort-operands (map canonicalize-pattern operands)))]
                                     (cl/cl-cond
