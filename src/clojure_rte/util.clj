@@ -20,7 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.util
-  (:require [clojure.pprint :refer [cl-format]]))
+  (:require [clojure.pprint :refer [cl-format]]
+            [clojure.core.memoize :as m]
+            [clojure.core.cache :as c]))
 
 (defn with-first-match 
   "Find the first element in the given sequence, items,
@@ -305,6 +307,10 @@
      (defn ~internal-name ~@body)
      (def ~(with-meta public-name {:dynamic true}) ~docstring (memoize ~internal-name))
      ))
+
+(defn gc-friendly-memoize
+  [g]
+  (m/memoizer g (c/soft-cache-factory {})))
 
 (defn map-eagerly 
   "Like map, but forces non-lazy behavior"

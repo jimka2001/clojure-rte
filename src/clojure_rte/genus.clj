@@ -28,7 +28,7 @@
                                       partition-by-pred remove-element uniquify
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
-                                      unchunk
+                                      unchunk gc-friendly-memoize forall
                                       print-vals]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -666,15 +666,23 @@
 ;; implementation of canonicalize-typef and the methods of -canonicalize-type
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def canonicalize-memoized (gc-friendly-memoize (fn [type-designator nf]
+                                                  (fixed-point type-designator
+                                                               (fn [td]
+                                                                 (-canonicalize-type td nf))
+                                                               =))))
+
+(def canonicalize-type-atom (atom #{}))
 (defn canonicalize-type
   "Simplify the given type-designator to a stable form"
   ([type-designator]
    (canonicalize-type type-designator :dnf))
   ([type-designator nf]
-   (fixed-point type-designator
-                (fn [td]
-                  (-canonicalize-type td nf))
-                =)))
+   (if (contains? @canonicalize-type-atom [type-designator nf])
+     type-designator
+     (let [canonicalized (canonicalize-memoized type-designator nf)]
+       (swap! canonicalize-type-atom conj canonicalized)
+       canonicalized))))
 
 (defmulti -canonicalize-type
   "Methods of -canonicalize-type implement the behavior of canonicalize-type.
@@ -1497,30 +1505,31 @@
 ;; implementation of disjoint? and -disjoint?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn disjoint?
+(def disjoint?
   "Predicate to determine whether the two types overlap.
   If it cannot be determined whether the two designated types
   are disjoint, then the default value is returned."
-  [t1 t2 default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (cond
-    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-    true
+  (gc-friendly-memoize
+   (fn [t1 t2 default]
+     {:pre [(member default '(true false :dont-know))]
+      :post [(member % '(true false :dont-know))]}
+     (cond
+       (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+       true
 
-    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-    true
+       (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+       true
 
-    :else
-    (let [try1 (check-disjoint t1 t2 :dont-know)]
-      (if (not= :dont-know try1)
-        try1
-        (let [t1-simple (canonicalize-type t1 :dnf)
-              t2-simple (canonicalize-type t2 :dnf)]
-          (if (and (= t1-simple t1)
-                   (= t2-simple t2))
-            default
-            (check-disjoint t1-simple t2-simple default)))))))
+       :else
+       (let [try1 (check-disjoint t1 t2 :dont-know)]
+         (if (not= :dont-know try1)
+           try1
+           (let [t1-simple (canonicalize-type t1 :dnf)
+                 t2-simple (canonicalize-type t2 :dnf)]
+             (if (and (= t1-simple t1)
+                      (= t2-simple t2))
+               default
+               (check-disjoint t1-simple t2-simple default)))))))))
 
 (defn-memoized [check-disjoint -check-disjoint]
   "Internal function used in top level disjoint? implementation."
@@ -2043,31 +2052,32 @@
 ;; implementation of inhabite? and -inhabited?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn inhabited?
+(def inhabited?
   "Given a type-designator, perhaps application specific,
   determine whether the type is inhabited, i.e., not the
   empty type."
-  [type-designator default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (letfn [(calc-inhabited [type-designator default]
-            (loop [[k & ks] (sort-method-keys -inhabited?)]
-              (case ((k (methods -inhabited?)) type-designator)
-                (true) true
-                (false) false
-                (if ks
-                  (recur ks)
-                  default))))]
-    (let [i (calc-inhabited type-designator :dont-know)
-          td-canon (delay (canonicalize-type type-designator :dnf))]
-      (cond (member i '(true false))
-            i
+  (gc-friendly-memoize
+   (fn [type-designator default]
+     {:pre [(member default '(true false :dont-know))]
+      :post [(member % '(true false :dont-know))]}
+     (letfn [(calc-inhabited [type-designator default]
+               (loop [[k & ks] (sort-method-keys -inhabited?)]
+                 (case ((k (methods -inhabited?)) type-designator)
+                   (true) true
+                   (false) false
+                   (if ks
+                     (recur ks)
+                     default))))]
+       (let [i (calc-inhabited type-designator :dont-know)
+             td-canon (delay (canonicalize-type type-designator :dnf))]
+         (cond (member i '(true false))
+               i
 
-            (= @td-canon type-designator)
-            default
-            
-            :else
-            (calc-inhabited @td-canon default)))))
+               (= @td-canon type-designator)
+               default
+               
+               :else
+               (calc-inhabited @td-canon default)))))))
 
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
