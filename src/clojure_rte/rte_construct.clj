@@ -636,6 +636,17 @@
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
+(def rte/create-cat
+  (fn [operands]
+    (cond (empty? operands)
+          :epsilon
+
+          (= 1 (count operands))
+          (first operands)
+
+          :else
+          (cons :cat operands))))
+
 (def rte/create-or
   (fn [operands]
     (cond (empty? operands)
@@ -865,6 +876,84 @@
   (rte/create-not (canonicalize-pattern-once (operand self))))
 
 
+(defn conversion-cat-1
+  [self]
+  (rte/create-cat (operands self)))
+
+(defn conversion-cat-3
+  [self]
+  (if (member :empty-set (operands self))
+    :empty-set
+    self))
+
+(defn conversion-cat-4
+  [self]
+  ;; remove  EmptyWord and flatten  Cat(Cat(...)...
+  (rte/create-cat (mapcat (fn [rt]
+                            (cond (= rt :epsilon)
+                                  []
+
+                                  (rte/cat? rt)
+                                  (operands rt)
+
+                                  :else
+                                  [rt]))
+                          (operands self))))
+  
+(defn conversion-cat-5
+  [self]
+
+  (letfn [;; Cat(..., x*, x, x* ...) --> Cat(..., x*, x, ...)
+          (f [tail]
+            (cond (< (count tail) 3)
+                  tail
+
+                  (and (= (first tail) (nth  tail 2))
+                       (rte/*? (first tail))
+                       (= (operand (first tail)) (second tail)))
+                  (f (concat [(first tail) (second tail)]
+                             (nthrest tail 3)))                          
+
+                  :else
+                  (cons (first tail) (f (rest tail)))))
+          ;; and Cat(..., x*, x* ...) --> Cat(..., x*, ...)
+          (g [tail]
+            (cond (< (count tail) 2)
+                  tail
+
+                  (and (= (first tail) (second tail))
+                       (rte/*? (first tail)))
+                  (g (rest tail))
+
+                  :else
+                  (cons (first tail) (g (rest tail)))))]
+    (rte/create-cat (f (g (operands self))))))
+
+
+(defn conversion-cat-6
+  [self]
+  ;; Cat(A, B, X *, X, C, D) --> Cat(A, B, X, X *, C, D)
+  ;; Cat(A, B, X *, X, X, C, D) --> Cat(A, B, X, X, X *, C, D)
+  (letfn [(f [tail]
+            (cond (empty? (rest tail))
+                  tail
+
+                  (and (rte/*? (first tail))
+                       (= (operand (first tail)) (second tail)))
+                  (cons (second tail) (f (cons (first tail)
+                                               (rest (rest tail)))))
+
+                  :else
+                  (cons (first tail) (f (rest tail)))))]
+    (rte/create-cat (f (operands self)))))
+
+                        
+
+                  
+(defn conversion-cat-99
+  [self]
+  (rte/create-cat (map canonicalize-pattern-once (operands self))))
+
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -888,38 +977,13 @@
                                                   conversion-*3
                                                   conversion-*99]))
                            :cat (fn [operands _functions]
-                                  (let [operands (map canonicalize-pattern operands)]
-                                    (assert (< 1 (count operands))
-                                            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
-                                                    re (count operands) operands))
-                                    (cl/cl-cond
-                                     ;; (:cat A (:* X) (:* X) B)
-                                     ;;  --> (:cat A (:* X) B)
-                                     ((let [x (remove-first-duplicate (fn [a b]
-                                                                        (and (*? a)
-                                                                             (= a b)))
-                                                                      operands)]
-                                        ;; remove-first-duplicate returns false if it didn't find a duplicate
-                                        (and x
-                                             (cons :cat (concat (first x) (second x))))))
-
-                                     ;; (:cat x (:cat a b) y) --> (:cat x a b y)
-                                     ((some cat? operands)
-                                      (cons :cat (mapcat (fn [obj]
-                                                           (if (cat? obj)
-                                                             (rest obj)
-                                                             (list obj))) operands)))
-
-                                     ;; (:cat x "empty-set" y) --> :emptyset
-                                     ((member :empty-set operands)
-                                      :empty-set)
-
-                                     ;; (:cat x :epsilon y) --> (:cat x y)
-                                     ((member :epsilon operands)
-                                      (cons :cat (remove #{:epsilon} operands)))
-
-                                     (:else
-                                      (cons :cat operands)))))
+                                  (find-simplifier (cons :cat operands)
+                                                   [conversion-cat-1
+                                                    conversion-cat-3
+                                                    conversion-cat-4
+                                                    conversion-cat-5
+                                                    conversion-cat-6
+                                                    conversion-cat-99]))
                            :not (fn [operand _functions]
                                   (find-simplifier (list :not operand)
                                                    [conversion-not-1

@@ -901,6 +901,49 @@
            '(:or (:not x) (:not y) (:not z))))
     (is (= (rte/conversion-not-3 '(:not (:and (:not x) y z)))
            '(:or x (:not y) (:not z))))))
+
+(deftest t-conversion-cat-1
+  (testing "conversion cat 1"
+    (is (= (rte/conversion-cat-1 '(:cat))
+           :epsilon))
+    (is (= (rte/conversion-cat-1 '(:cat x))
+           'x))
+    (is (= (rte/conversion-cat-1 '(:cat x y z))
+           '(:cat x y z)))))
+
+(deftest t-conversion-cat-3
+  (testing "conversion cat 3"
+    (is (= (rte/conversion-cat-3 '(:cat x y :empty-set z))
+           :empty-set))
+    (is (= (rte/conversion-cat-3 '(:cat x y z))
+           '(:cat x y z)))))
+
+(deftest t-conversion-cat-4
+  (testing "conversion cat 4"
+    (is (= (rte/conversion-cat-4 '(:cat (:cat a b) (:cat x y)))
+           '(:cat a b x y)))
+    (is (= (rte/conversion-cat-4 '(:cat (:cat a b) :epsilon (:cat x y) :epsilon))
+           '(:cat a b x y)))))
+
+(deftest t-conversion-cat-5
+  (testing "conversion cat 5"
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) (:* x) y z))
+           '(:cat a b (:* x) y z)))
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) (:* x) (:* x) (:* x) y z))
+           '(:cat a b (:* x) y z)))
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) x (:* x) y z))
+           '(:cat a b (:* x) x y z)))
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) x (:* x) (:* x) y z))
+           '(:cat a b (:* x) x y z)))))
+
+
+(deftest t-conversion-cat-6
+  (testing "conversion cat 6"
+    (is (= (rte/conversion-cat-6 '(:cat a b (:* x) x c d))
+           '(:cat a b x (:* x) c d)))
+    (is (= (rte/conversion-cat-6 '(:cat a b (:* x) x x x c d))
+           '(:cat a b x x x (:* x) c d)))))
+    
     
     
 
