@@ -1154,6 +1154,19 @@
     (is (= (rte/conversion-and-9 '(:and (= 1) (:* x)))
            '(:and (= 1) x)))))
 
+(deftest t-conversion-and-10
+  (testing "conversion and 10"
+    ;; And(A,B,Or(X,Y,Z),C,D)
+    ;; --> Or(And(A,B,   X,   C, D)),
+    ;;        And(A,B,   Y,   C, D)),
+    ;;        And(A,B,   Z,   C, D)))
+    (is (= (rte/conversion-and-10 '(:and a b (:or x y z) c d))
+           '(:or (:and a b x c d)
+                 (:and a b y c d)
+                 (:and a b z c d))))
+    (is (= (rte/conversion-and-10 '(:and a b (:and x y z) c d))
+           '(:and a b (:and x y z) c d)))))
+
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

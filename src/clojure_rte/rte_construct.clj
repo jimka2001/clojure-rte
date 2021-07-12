@@ -1360,7 +1360,16 @@
 
 (defn conversion-and-10
   [self]
-  self)
+  ;; And(A,B,Or(X,Y,Z),C,D)
+  ;; --> Or(And(A,B,   X,   C, D)),
+  ;;        And(A,B,   Y,   C, D)),
+  ;;        And(A,B,   Z,   C, D)))
+  (let [ror (filter rte/or? (operands self))]
+    (if (empty? ror)
+      self
+      (let [ror-1 (first ror)]
+        (rte/create-or (for [r (operands ror-1)]
+                         (rte/create-and (search-replace (operands self) ror-1 r))))))))
 
 (defn conversion-and-18
   [self]
@@ -1419,30 +1428,6 @@
 (defmethod conversion-dual-16b :and
   [self]
   self)
-
-
-
-(defn conversion-and-remainder
-  [self]
-  (let [operands (operands self)]
-
-    (cl/cl-cond
-
-
-     ((some rte/or? operands)
-      ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
-      (with-first-match rte/or? operands
-        (fn [or-item]
-          (let [others (remove (fn [x] (= or-item x)) operands)]
-            (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
-
-     
-     
-     
-     (:else
-      (cons :and operands))
-
-     )))
 
 (defn conversion-or-remainder
   [self]
@@ -1546,7 +1531,6 @@
                                                     conversion-combo-17
                                                     conversion-combo-99
                                                     conversion-combo-5
-                                                    conversion-and-remainder
                                                     ]))
                            :or (fn [operands _functions]
                                  (find-simplifier (cons :or operands)
