@@ -21,7 +21,7 @@
 
 (ns clojure-rte.rte-construct
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [member exists setof exists-pair
+            [clojure-rte.util :refer [member exists setof exists-pair forall
                                       call-with-collector defn-memoized
                                       visit-permutations fixed-point
                                       sort-operands with-first-match
@@ -1417,7 +1417,40 @@
 
 (defn conversion-and-17a
   [self]
-  self)
+  ;; if And(...) has more than one Cat(...) which has no nullable operand,
+  ;;    then the number of non-nullables must be the same, else EmptySet.
+  ;;    We also replace the several Cat(...) (having no nullables)
+  ;;    with a single Cat(...) with intersections of operands.
+  ;;    And(Cat(a,b,c),Cat(x,y,z) ...)
+  ;;    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
+  (let [cats (for [c (operands self)
+                   :when (rte/cat? c)
+                   :when (forall [td (operands c)]
+                                 (not (nullable td)))]
+               (operands c))]
+    (cond (empty? cats)
+          self
+
+          (= 1 (count cats))
+          self
+
+          (exists [i (range 1 (count cats))]
+                  (not= (count (first cats))
+                        (count (nth cats i))))
+          ;; we found two Cat(...) of necessarily different lengths
+          :empty-set
+
+          :else
+          (let [invert (for [i (range 0 (count (first cats)))]
+                         (for [c cats]
+                           (nth c i)))
+                cat (rte/create-cat (for [r invert] (create self r)))]
+            (create self (uniquify (map (fn [r]
+                                          (if (and (rte/cat? r)
+                                                   (member (operands r) cats))
+                                            cat
+                                            r))
+                                        (operands self))))))))
 
 (defn conversion-and-17b
   [self]
