@@ -1614,7 +1614,6 @@
     (create self (remove-element :epsilon (operands self)))
     self))
   
-
 (defn conversion-or-11b
   [self]
   ;; if Sigma is in the operands, then filter out all singletons
@@ -1656,19 +1655,38 @@
           (create self (for [r (operands self)
                              :when (not (member r stars))]
                          r)))))
-        
-                                           
 
 (defmulti conversion-dual-16b
   type-dispatch)
 
 (defmethod conversion-dual-16b :or
   [self]
-  self)
+  ;; Or(A, x, Not(y)) --> And(A, Not(x)) if x, y disjoint
+  (let [nss (for [r (operands self)
+                  :when (rte/not? r)
+                  :when (gns/valid-type? (operand r))]
+              ;; collect all td for each Not(Singleton(td))
+              (operand r))]
+    (create self (mapcat (fn [r]
+                           (if (and (gns/valid-type? r)
+                                    (exists [d nss]
+                                            (gns/disjoint? r d false)))
+                             []
+                             [r]))
+                         (operands self)))))
 
 (defmethod conversion-dual-16b :and
   [self]
-  self)
+  ;;And(A, x, Not(y)) --> And(A, x) if x, y disjoint
+  (let [ss (filter gns/valid-type? (operands self))]
+    (create self (mapcat (fn [r]
+                           (if (and (rte/not? r)
+                                    (gns/valid-type? (operand r))
+                                    (exists [d ss]
+                                            (gns/disjoint? (operand r) d false)))
+                             []
+                             [r]))
+                         (operands self)))))
 
 (defn conversion-or-remainder
   [self]

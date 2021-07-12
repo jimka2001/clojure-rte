@@ -1358,6 +1358,17 @@
            '(:or  (:not (member 2 3 4)) (:* (member 3 4 5))))
         801)))
 
+(deftest t-conversion-dual-16b
+  (testing "conversion dual 16b"
+    ;; And(A, x, Not(y)) --> And(A, x) if x, y disjoint
+    (is (= (rte/conversion-dual-16b '(:and (member 1 2 3) (member 10 20) (:not (member 11 21))))
+           '(:and (member 1 2 3) (member 10 20)))
+        800)
+    ;; Or(A, x, Not(y)) --> And(A, Not(x)) if x, y disjoint
+    (is (= (rte/conversion-dual-16b '(:or (member 11 2 3) (member 10 20) (:not (member 11 21))))
+           '(:or (member 11 2 3) (:not (member 11 21))))
+        801)))
+
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))
