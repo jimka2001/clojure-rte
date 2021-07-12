@@ -1128,7 +1128,15 @@
     (is (= (rte/conversion-combo-21 '(:or (:not (member 1 2 3)) (member 3 4 5) (:not (member 5 6 7))))
            '(:* :sigma))
         804)))
-    
+
+(deftest t-conversion-and-7
+  (testing "conversion and 7"
+    (is (= (rte/conversion-and-7 '(:and :sigma :epsilon))
+           :empty-set))
+    (is (= (rte/conversion-and-7 '(:and :epsilon (member 1 2 3)))
+           :empty-set))
+    (is (= (rte/conversion-and-7 '(:and :epsilon (:cat x y)))
+           '(:and :epsilon (:cat x y))))))
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

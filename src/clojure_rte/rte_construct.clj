@@ -1341,7 +1341,10 @@
 
 (defn conversion-and-7
   [self]
-  self)
+  (if (and (member :epsilon (operands self))
+           (some gns/valid-type? (operands self)))
+    :empty-set
+    self))
 
 (defn conversion-and-8
   [self]
