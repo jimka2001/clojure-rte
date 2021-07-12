@@ -1173,6 +1173,14 @@
     (is (= (rte/conversion-and-18 '(:and (and (member 1 2 3) (member 4 5 6))))
            :empty-set))))
 
+(deftest t-conversion-and-13
+  (testing "conversion and 13"
+    ;; if there is an explicit :sigma and also a singleton which is inhabited, then
+    ;;  we can simply remove the sigma.
+    (is (= (rte/conversion-and-13 '(:and (= 1) :sigma (= 2) :sigma))
+           '(:and (= 1) (= 2))))
+    (is (= (rte/conversion-and-13 '(:and a b c))
+           '(:and a b c)))))
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

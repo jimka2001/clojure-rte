@@ -1382,7 +1382,18 @@
 
 (defn conversion-and-13
   [self]
-  self)
+  ;; if there is an explicit :sigma and also a singleton which is inhabited, then
+  ;;  we can simply remove the sigma.
+  (cond (not (member :sigma (operands self)))
+        self
+
+        (exists [r (operands self)]
+                (and (gns/valid-type? r)
+                     (gns/inhabited? r false)))
+        (create self (remove-element :sigma (operands self)))
+
+        :else
+        self))
 
 (defn conversion-and-17
   [self]
