@@ -1337,8 +1337,7 @@
 
 (defn conversion-combo-99
   [self]
-  self)
-
+  (create self canonicalize-pattern-once (operands self)))
 
 (defn conversion-and-7
   [self]
