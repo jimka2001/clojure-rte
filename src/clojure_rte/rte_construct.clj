@@ -1316,7 +1316,24 @@
 
 (defn conversion-combo-21
   [self]
-  self)
+  (let [singletons (mapcat (fn [r]
+                             (cond (and (rte/and? self)
+                                        (gns/valid-type? r))
+                                   [r]
+
+                                   (and (rte/or? self)
+                                        (rte/not? r)
+                                        (gns/valid-type? (operand r)))
+                                   [(operand r)]
+
+                                   :else
+                                   []))
+                           (operands self))]
+    (if (exists [i (range (count singletons))]
+                (exists [j (range (inc i) (count singletons))]
+                        (gns/disjoint? (nth singletons i) (nth singletons j) false)))
+      (zero self)
+      self)))
 
 (defn conversion-combo-99
   [self]

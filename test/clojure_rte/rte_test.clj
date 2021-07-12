@@ -1111,7 +1111,24 @@
         801)))
     
 
-
+(deftest t-conversion-combo-21
+  (testing "conversion combo 21"
+    (is (= (rte/conversion-combo-21 '(:and (member 1 2 3) (member 3 4 5) (member 5 6 7)))
+           :empty-set)
+        800)
+    (is (= (rte/conversion-combo-21 '(:and (member 0 1 2 3) (member 0 3 4 5) (member 0 5 6 7)))
+           '(:and (member 0 1 2 3) (member 0 3 4 5) (member 0 5 6 7)))
+        801)
+    (is (= (rte/conversion-combo-21 '(:or (:not (member 1 2 3)) (:not (member 3 4 5)) (:not (member 5 6 7))))
+           '(:* :sigma))
+        802)
+    (is (= (rte/conversion-combo-21 '(:or (:not (member 0 1 2 3)) (:not (member 0 3 4 5)) (:not (member 0 5 6 7))))
+           '(:or (:not (member 0 1 2 3)) (:not (member 0 3 4 5)) (:not (member 0 5 6 7))))
+        803)
+    (is (= (rte/conversion-combo-21 '(:or (:not (member 1 2 3)) (member 3 4 5) (:not (member 5 6 7))))
+           '(:* :sigma))
+        804)))
+    
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
