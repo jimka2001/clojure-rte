@@ -25,7 +25,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.genus :as gns]
             ;; [clojure-rte.dot :as dot]
-            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable
+            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable?
                                                canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
             ))
 
@@ -89,21 +89,21 @@
   (tester/random-test num-tries
                       (fn [rte]
                         (let [rte-can (canonicalize-pattern rte)]
-                          (if (nullable rte)
-                            (do (assert (not (nullable (list :not rte)))
+                          (if (nullable? rte)
+                            (do (assert (not (nullable? (list :not rte)))
                                         (cl-format false
                                                    "rte ~A is nullable but its complement (:not ...) is not nullable"
                                                    rte))
-                                (assert (not (nullable rte-can))
+                                (assert (not (nullable? rte-can))
                                         (cl-format false
                                                    "rte ~A is nullable but its canonicalization is not: ~A"
                                                    rte rte-can)))
                             (do
-                              (assert (nullable (list :not rte))
+                              (assert (nullable? (list :not rte))
                                       (cl-format false
                                                  "rte ~A is not nullable but its complement (:not ...) is nullable"
                                                  rte))
-                              (assert (nullable rte-can)
+                              (assert (nullable? rte-can)
                                       (cl-format false
                                                  "rte ~A is non-nullable but its canonicalization is nullable: ~A"
                                                  rte rte-can))))))
@@ -141,12 +141,12 @@
     (binding [canonicalize-pattern-once (memoize -canonicalize-pattern-once)]
       (let [can (canonicalize-pattern rte)]
         ;;(cl-format true "canonicalized: ~A~%" can)
-        (if (nullable rte)
-          (assert (nullable can)
+        (if (nullable? rte)
+          (assert (nullable? can)
                   (cl-format false
                              "rte ~A is nullable but its canonicalization ~A is not"
                              rte can))
-          (assert (not (nullable can))
+          (assert (not (nullable? can))
                   (cl-format false
                              "rte ~A is not nullable but its canonicalization ~A is nullable"
                              rte can)))))))

@@ -22,7 +22,7 @@
 (ns clojure-rte.rte-test
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte
-             :refer [nullable first-types
+             :refer [nullable? first-types
                      canonicalize-pattern canonicalize-pattern-once
                      derivative rte-to-dfa
                      with-compile-env rte-trace
@@ -48,21 +48,21 @@
 
 (deftest t-nullable
   (testing "nullable"
-    (is (not (nullable :sigma)) "nullable sigma")
-    (is (nullable :epsilon) "14")
-    (is (not (nullable :empty-set)) "13")
-    (is (nullable '(:and :epsilon :epsilon)) "12")
-    (is (nullable '(:or :epsilon :empty-set)) "11")
-    (is (nullable '(:cat :epsilon :epsilon)) "10")
-    (is (not (nullable '(:cat :epsilon :empty-set))) "9")
-    (is (not (nullable '(:cat :empty-set :epsilon))) "8")
-    (is (nullable '(:cat :epsilon (:* :epsilon))) "7")
-    (is (nullable '(:+ :epsilon)) "6")
-    (is (not (nullable '(:cat :empty-set (:* :empty-set)))) "5")
-    (is (not (nullable '(:cat :empty-set :epsilon))) "4")
-    (is (not (nullable :empty-set)) "3")
-    (is (not (nullable '(:+ :empty-set))) "2")
-    (is (nullable '(:? :epsilon)) "1")))
+    (is (not (nullable? :sigma)) "nullable? sigma")
+    (is (nullable? :epsilon) "14")
+    (is (not (nullable? :empty-set)) "13")
+    (is (nullable? '(:and :epsilon :epsilon)) "12")
+    (is (nullable? '(:or :epsilon :empty-set)) "11")
+    (is (nullable? '(:cat :epsilon :epsilon)) "10")
+    (is (not (nullable? '(:cat :epsilon :empty-set))) "9")
+    (is (not (nullable? '(:cat :empty-set :epsilon))) "8")
+    (is (nullable? '(:cat :epsilon (:* :epsilon))) "7")
+    (is (nullable? '(:+ :epsilon)) "6")
+    (is (not (nullable? '(:cat :empty-set (:* :empty-set)))) "5")
+    (is (not (nullable? '(:cat :empty-set :epsilon))) "4")
+    (is (not (nullable? :empty-set)) "3")
+    (is (not (nullable? '(:+ :empty-set))) "2")
+    (is (nullable? '(:? :epsilon)) "1")))
 
 (deftest t-first-types
   (testing "first-types"
@@ -717,7 +717,7 @@
 
 (deftest t-derivative-2
   (testing "derivative previous failure"
-    (is (nullable (derivative '(:and (:cat (:* :sigma))
+    (is (nullable? (derivative '(:and (:cat (:* :sigma))
                                      (:not (:or (:cat Boolean :sigma (:* :sigma))
                                                 (:cat Boolean :sigma))))
                               '(not Boolean)))
@@ -754,8 +754,8 @@
                               (:+ (:or (:and (:contains-every)) :empty-set))
                               (:not (:* (member [1 2 3] [2 1 3]))))
           rte-canonicalized (canonicalize-pattern rte)]
-      (is (nullable rte) "test 1")
-      (is (nullable rte-canonicalized) "test 2"))))
+      (is (nullable? rte) "test 1")
+      (is (nullable? rte-canonicalized) "test 2"))))
 
 (def pattern-714 '(:or (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma)
                     (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable)
@@ -947,8 +947,8 @@
     
 (deftest t-discovered-948
   (testing "discovered test 948"
-    (is (= (rte/nullable '(member (1 2 3) (1 2) (1) []))
-           (rte/nullable '(member [] [1] [1 2] [1 2 3]))))))
+    (is (= (rte/nullable? '(member (1 2 3) (1 2) (1) []))
+           (rte/nullable? '(member [] [1] [1 2] [1 2 3]))))))
             
 (deftest t-conversion-combo-1
   (testing "conversion combo 1"
@@ -1022,7 +1022,7 @@
   (testing "conversion combo 12"
     ;; Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
     ;;   --> Or( A, B, ... Not(Singleton(X))
-    (is (= 2 (count-if-not  rte/nullable '((= 1) (= 1) (:* :sigma))))
+    (is (= 2 (count-if-not  rte/nullable? '((= 1) (= 1) (:* :sigma))))
         799)
     (is (= (rte/conversion-combo-12 '(:or a b (:cat (= 1) (= 1) (:* :sigma)) (:not (= 2))))
            ;; since (:cat (= 1) (= 1) (:* :sigma)) is already in (:not x))

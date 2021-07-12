@@ -471,7 +471,7 @@
   "Workhorse function for walking an rte pattern.
    This function is the master of understanding the syntax of an rte
    pattern.  Any function which needs to perform a recursive operation
-   such as derivative, nullable, first-types, or canonicalize-pattern
+   such as derivative, nullable?, first-types, or canonicalize-pattern
    may call traverse-pattern with an augmented map of
    *traversal-functions*, indicating the callbacks for each rte
    keyword such as :* :cat etc.  The philosophy is that no other
@@ -559,27 +559,27 @@
              ;; cond-else (:keyword args) or list-expr ;; (:and x y)
              :else (if-multiple-operands pattern))))))
 
-(defn nullable 
+(defn nullable? 
   "Determine whether the given rational type expression is nullable.
   I.e., does the empty-word satisfy the expression."
   [expr]
   (boolean
    (traverse-pattern expr
                      (assoc *traversal-functions*
-                            :client nullable
+                            :client nullable?
                             :empty-set (rte-constantly false)
                             :epsilon (rte-constantly true)
                             :sigma   (rte-constantly false)
                             :type (rte-constantly false)
                             :* (rte-constantly true)
                             :cat (fn [operands _functions]
-                                   (every? nullable operands))
+                                   (every? nullable? operands))
                             :and (fn [operands _functions]
-                                   (every? nullable operands))
+                                   (every? nullable? operands))
                             :or (fn [operands _functions]
-                                  (some nullable operands))
+                                  (some nullable? operands))
                             :not (fn [operand _functions]
-                                   (not (nullable operand)))))))
+                                   (not (nullable? operand)))))))
 
 (defn first-types 
   "Return a possibly empty set of types (i.e., object which can be
@@ -610,7 +610,7 @@
                                           (empty? tail)
                                           (first-types head)
 
-                                          (nullable head)
+                                          (nullable? head)
                                           (union (first-types head)
                                                  (first-types (cons :cat tail)))
 
@@ -1184,7 +1184,7 @@
   
   (let [cats (for [c (operands self)
                    :when (rte/cat? c)
-                   :when (> (count-if-not nullable (operands c)) 1)]
+                   :when (> (count-if-not nullable? (operands c)) 1)]
                c)
         not-sing (setof [n (operands self)]
                         (and (rte/not? n)
@@ -1368,7 +1368,7 @@
   (cond (not (member :epsilon (operands self)))
         self
 
-        (every? nullable (operands self))
+        (every? nullable? (operands self))
         :epsilon
 
         :else
@@ -1434,7 +1434,7 @@
   ;; If both are true, then the And() matches EmptySet
   (let [tds (filter gns/valid-type? (operands self))
         count-non-nullable (fn [c]
-                             (count-if-not nullable (operands c)))
+                             (count-if-not nullable? (operands c)))
         long-cats (filter (fn [c] (and (rte/cat? c)
                                        (> (count-non-nullable c) 1)))
                           (operands self))]
@@ -1455,7 +1455,7 @@
   (let [cats (for [c (operands self)
                    :when (rte/cat? c)
                    :when (forall [td (operands c)]
-                                 (not (nullable td)))]
+                                 (not (nullable? td)))]
                (operands c))]
     (cond (empty? cats)
           self
@@ -1490,13 +1490,13 @@
   (let [cats (filter rte/cat? (operands self))
         non-nullable-cats (filter (fn [c]
                                    (forall [o (operands c)]
-                                           (not (nullable o))))
+                                           (not (nullable? o))))
                                  cats)]
     (if (empty? non-nullable-cats)
       self
       (let [num-non-nullable (count (operands (first non-nullable-cats)))
             count-non-nullable (fn [c]
-                                 (count-if-not nullable (operands c)))]
+                                 (count-if-not nullable? (operands c)))]
         (if (exists [c cats]
                     (> (count-non-nullable c) num-non-nullable))
           :empty-set
@@ -1512,11 +1512,11 @@
   (if (empty? (filter rte/cat? (operands self)))
     self
     (let [count-non-nullable (fn [c]
-                               (count-if-not nullable (operands c)))
+                               (count-if-not nullable? (operands c)))
           cat-non-nullables (filter (fn [c]
                                       (and (rte/cat? c)
                                            (forall [o (operands c)]
-                                                   (not (nullable o)))))
+                                                   (not (nullable? o)))))
                                     (operands self))
           num-non-nullables (cond  (member :sigma (operands self))
                                    1
@@ -1538,7 +1538,7 @@
 
                              (= (count-non-nullable c) num-non-nullables)
                              (create-cat (for [o (operands c)
-                                               :when (not (nullable o))]
+                                               :when (not (nullable? o))]
                                            o))
 
                              :else
@@ -1571,7 +1571,7 @@
   ;;   --> (:or :epsilon (:* X))
   ;; (:or (:* Y) (:cat X (:* X)))
   ;;   --> (:or (:* Y) (:* X))
-  (if (and (some nullable (operands self))
+  (if (and (some nullable? (operands self))
            (some rte/plus? (operands self)))
     (letfn [(f [op]
               (cond (not (rte/cat? op))
@@ -1593,7 +1593,7 @@
   ;;   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
   ;; (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
   ;;   --> (:or :epsilon (:* (:cat X Y Z)))
-  (if (and (some nullable (operands self))
+  (if (and (some nullable? (operands self))
            (some catxy? (operands self)))
     (create self (map (fn [r]
                         (if (rte/catxy? r)
@@ -1844,7 +1844,7 @@
                                                (term2 []
                                                  (derivative `(:cat ~@tail) wrt))]
                                          (cond
-                                           (nullable head) ;; nu = :epsilon
+                                           (nullable? head) ;; nu = :epsilon
                                            `(:or ~(term1) ~(term2))
                                            :else
                                            (term1))))
@@ -2003,7 +2003,7 @@
                        [index
                         (xym/map->State {:index index
                                          :initial (= 0 index)
-                                         :accepting (nullable deriv)
+                                         :accepting (nullable? deriv)
                                          :pattern deriv
                                          :transitions transitions})]))
                    derivatives (range (count derivatives))))})))))
