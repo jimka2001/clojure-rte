@@ -986,6 +986,19 @@
     (is (= (rte/conversion-combo-5 '(:and x y y x z))
            '(:and x x y y z)))))
     
+(deftest t-conversion-combo-6
+  (testing "conversion combo 6"
+    (is (= (rte/conversion-combo-6 '(:or x y :empty-set z :empty-set))
+           '(:or x y z)))
+    (is (= (rte/conversion-combo-6 '(:and x y (:* :sigma) z (:* :sigma)))
+           '(:and x y z)))
+
+    (is (= (rte/conversion-combo-6 '(:or x (:or a b) (:or y z)))
+           '(:or x a b y z)))
+    (is (= (rte/conversion-combo-6 '(:and x (:and a b) (:and y z)))
+           '(:and x a b y z)))))
+    
+    
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

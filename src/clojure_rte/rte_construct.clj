@@ -1096,7 +1096,19 @@
 
 (defn conversion-combo-6
   [self]
-  self)
+  ;; remove Sigma * and flatten And(And(...)...)
+  ;; remove EmptySet and flatten Or(Or(...)...)
+  (create self
+          (mapcat (fn [r]
+                    (cond (= r (one self))
+                          []
+
+                          (same-combination? self r)
+                          (operands r)
+
+                          :else
+                          [r]))
+                  (operands self))))
 
 (defn conversion-combo-7
   [self]
@@ -1229,15 +1241,6 @@
              (member :sigma operands))
         :empty-set)
        
-       ((some rte/and? operands)
-        (cons :and (mapcat (fn [obj]
-                             (if (rte/and? obj)
-                               (rest obj)
-                               (list obj))) operands)))
-
-       ((member sigma-* operands)
-        (cons :and (remove (fn [obj]
-                             (= sigma-* obj)) operands)))
 
        ((some rte/or? operands)
         ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
@@ -1315,14 +1318,7 @@
                                   false))))
                    operands)))
 
-       ((some rte/or? operands)
-        (cons :or (mapcat (fn [obj]
-                            (if (rte/or? obj)
-                              (rest obj)
-                              (list obj))) operands)))
 
-       ((member :empty-set operands)
-        (cons :or (remove #{:empty-set} operands)))
 
        ;; (:or x (:not x)) --> :sigma
        ((let [nots (filter rte/not? operands)
