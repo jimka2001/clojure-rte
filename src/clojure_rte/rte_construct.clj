@@ -28,7 +28,7 @@
                                       partition-by-pred seq-matcher
                                       rte-identity rte-constantly
                                       uniquify print-vals
-                                      find-simplifier]]
+                                      count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union subset?]]
@@ -1147,7 +1147,41 @@
 
 (defn conversion-combo-12
   [self]
-  self)
+  ;; sigmaSigmaStarSigma = Cat(Sigma, Sigma, sigmaStar)
+  ;; Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
+  ;;   --> Or( A, B, ... Not(Singleton(X))
+  ;; This is correct because Cat(Σ,Σ,(Σ)*) is the set of all sequences of length 2 or more
+  ;;    and Not(Singleton(X)) includes the set of all sequences of length 2 or more
+  ;; Similarly, any Cat(...) which contains at least two non-nullables is either the
+  ;;    empty set, or a set of sequences each of length 2 or more.
+  ;;    And Not(Singleton(X)) contains all all sequences of length 2 or more.
+  ;; So se can remove all such sequences.
+  ;; E.g. Or(Singleton(SEql(1)),
+  ;;         Cat(Singleton(SEql(1)),Singleton(SEql(2)),Singleton(SEql(3))),
+  ;;         Not(Singleton(SEql(0))))
+  ;;     we can remove Cat(...) because it contains at least 2 non-nullable items,
+  ;;         and is therefore a subset of Not(Singleton(SEql(0)))
+  ;; If we have  Or rather than And, then we can remove Not(Singleton(SEql(0)))
+  ;;         because it is a superset of Cat(...)
+  
+  (let [cats (for [c (operands self)
+                   :when (rte/cat? c)
+                   :when (> (count-if-not nullable (operands c)) 1)]
+               c)
+        not-sing (setof [n (operands self)]
+                        (and (rte/not? n)
+                             (gns/valid-type? (operand n))))]
+    (cond (or (empty? not-sing)
+              (empty? cats))
+          self
+
+          (rte/or? self)
+          (create self (setof [op (operands self)]
+                              (not (member op cats))))
+
+          :else ;; (rte/and? self)
+          (create self (setof [op (operands self)]
+                              (not (member op not-sing)))))))
 
 (defn conversion-combo-14
   [self]
@@ -1167,7 +1201,44 @@
 
 (defn conversion-combo-15
   [self]
-  self)
+  ;; simplify to maximum of one SMember(...) and maximum of one Not(SMember(...))
+  ;; Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+  ;;   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
+  ;;
+  ;; And(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+  ;;   --> And(<{3,4}>,Not(<{10,11,12,13,14,15}>))
+  (let [members (filter (every-pred gns/valid-type? gns/member-or-=?) (operands self))
+        not-members (for [nsm (operands self)
+                          :when (rte/not? nsm)
+                          :when (gns/valid-type? (operand nsm))
+                          :when (gns/member-or-=? (operand nsm))]
+                      nsm)]
+    (if (or (empty? members)
+            (empty? not-members))
+      self
+      (let [new-member-arglist (reduce #(set-operation self %1 %2)
+                                       (gns/operands (first members))
+                                       (map gns/operands members))
+            new-member (if (empty? new-member-arglist)
+                         (one self)
+                         (gns/create-member new-member-arglist))
+            new-not-member-arglist (reduce #(set-dual-operation self %1 %2)
+                                           (gns/operands (operand (first not-members)))
+                                           (for [nsm not-members]
+                                             (gns/operands (operand nsm))))
+            new-not-member (if (empty? new-not-member-arglist)
+                             (one self)
+                             (list :not (gns/create-member new-not-member-arglist)))]
+        (create self (uniquify (map (fn [op]
+                                      (cond (member op members)
+                                            new-member
+
+                                            (member op not-members)
+                                            new-not-member
+
+                                            :else
+                                            op))
+                                    (operands self))))))))
 
 (defn conversion-combo-16
   [self]

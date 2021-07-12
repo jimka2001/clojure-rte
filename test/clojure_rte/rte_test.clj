@@ -30,7 +30,7 @@
                      rte-combine-labels dfa-to-rte
                      mdtd with-rte reduce-redundant-or]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.util :refer [member]]
+            [clojure-rte.util :refer [member count-if-not]]
             [clojure-rte.genus :as gns]
             [clojure-rte.rte-tester :refer []]
             [clojure-rte.xymbolyco :as xym]))
@@ -1018,6 +1018,26 @@
     (is (= (rte/conversion-combo-11 '(:and a b x c (:not x)))
            :empty-set))))
 
+(deftest t-conversion-combo-12
+  (testing "conversion combo 12"
+    ;; Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
+    ;;   --> Or( A, B, ... Not(Singleton(X))
+    (is (= 2 (count-if-not  rte/nullable '((= 1) (= 1) (:* :sigma))))
+        799)
+    (is (= (rte/conversion-combo-12 '(:or a b (:cat (= 1) (= 1) (:* :sigma)) (:not (= 2))))
+           ;; since (:cat (= 1) (= 1) (:* :sigma)) is already in (:not x))
+           '(:or a b  (:not (= 2))))
+        800)
+    (is (= (rte/conversion-combo-12 '(:or a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+           '(:or a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+        801)
+    (is (= (rte/conversion-combo-12 '(:and a b (:cat (= 1) (= 1) (:* :sigma)) (:not (= 2))))
+           '(:and a b  (:cat (= 1) (= 1) (:* :sigma))))
+        802)
+    (is (= (rte/conversion-combo-12 '(:and a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+           '(:and a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+        803)))
+
 (deftest t-conversion-combo-14
   (testing "conversion combo 14"
     ;; Or(A,Not(B),X) -> Sigma* if B is subtype of A
@@ -1035,6 +1055,28 @@
     (is (= (rte/conversion-combo-14 '(:and (:not (= 1)) (member 1 2 3)))
            '(:and (:not (= 1)) (member 1 2 3)))
         1030)))
+
+(deftest t-conversion-combo-15
+  (testing "conversion combo 15"
+    ;; simplify to maximum of one SMember(...) and maximum of one Not(SMember(...))
+    ;; Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+    ;;   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
+    ;;
+    ;; And(<{1,2,3,4}>,<{3,4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+    ;;   --> And(<{3,4}>,Not(<{10,11,12,13,14,15}>))
+    (is (= (rte/conversion-combo-15 '(:or (member 1 2 3 4) (member 3 4 5 6)
+                                          (:not (member 10 11 12 13))
+                                          (:not (member 12 13 14 15))))
+           '(:or (member 1 2 3 4 5 6)
+                 (:not (member 12 13))))
+        800)
+    (is (= (rte/conversion-combo-15 '(:and (member 1 2 3 4) (member 3 4 5 6)
+                                          (:not (member 10 11 12 13))
+                                          (:not (member 12 13 14 15))))
+           '(:and (member 3 4)
+                 (:not (member 10 11 12 13 14 15))))
+        801)))
+    
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

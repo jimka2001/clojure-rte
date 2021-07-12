@@ -531,3 +531,9 @@
   "Search for all occurances of search-for in xs and replace with replace-with"
   [xs search-for replace-with]
   (search-replace-splice xs search-for [replace-with]))
+
+(defn count-if [pred xs]
+  (count (filter pred xs)))
+
+(defn count-if-not [pred xs]
+  (count-if (fn [x] (not (pred x))) xs))
