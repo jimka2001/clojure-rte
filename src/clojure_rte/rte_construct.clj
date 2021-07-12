@@ -1373,7 +1373,12 @@
 
 (defn conversion-and-18
   [self]
-  self)
+  ;; if there is a singleton which is not inhabited
+  (if (exists [r (operands self)]
+              (and (gns/valid-type? r)
+                   (= (gns/inhabited? r :dont-know) false)))
+    :empty-set
+    self))
 
 (defn conversion-and-13
   [self]

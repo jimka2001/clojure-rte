@@ -1167,6 +1167,12 @@
     (is (= (rte/conversion-and-10 '(:and a b (:and x y z) c d))
            '(:and a b (:and x y z) c d)))))
 
+(deftest t-conversion-and-18
+  (testing "conversion and 18"
+    ;; if there is a singleton which is not inhabited
+    (is (= (rte/conversion-and-18 '(:and (and (member 1 2 3) (member 4 5 6))))
+           :empty-set))))
+
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
