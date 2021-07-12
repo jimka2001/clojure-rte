@@ -1235,7 +1235,30 @@
                                              (:cat (= 1) (= 2) (:* (= 4))))) ;; 2 operands
               :empty-set)
         801)))
-    
+
+(deftest t-conversion-and-17c
+  (testing "conversion and 17c"
+    (is (= (rte/conversion-and-17c '(:and (:cat (= 1) (= 2))
+                                          (:cat (:* (= 4)) (= 1) (:* (= 5)) (= 2))
+                                          (:cat (:* (= 4)) (= 10) (:* (= 5)) (= 20))))
+           '(:and (:cat (= 1) (= 2))
+                  (:cat  (= 1)  (= 2))
+                  (:cat  (= 10)  (= 20))))
+        800)
+    (is (= (rte/conversion-and-17c '(:and :sigma
+                                          (:cat (:* (= 4)) (:* (= 1)) (:* (= 5)) (= 2))
+                                          (:cat (:* (= 4)) (:* (= 10)) (:* (= 5)) (= 20))))
+           '(:and :sigma
+                  (= 2)
+                  (= 20)))
+        801)
+    (is (= (rte/conversion-and-17c '(:and (= 42)
+                                          (:cat (:* (= 4)) (:* (= 1)) (:* (= 5)) (= 2))
+                                          (:cat (:* (= 4)) (:* (= 10)) (:* (= 5)) (= 20))))
+           '(:and (= 42)
+                  (= 2)
+                  (= 20)))
+        802)))
         
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

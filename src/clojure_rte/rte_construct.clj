@@ -1475,7 +1475,49 @@
 
 (defn conversion-and-17c
   [self]
-  self)
+  ;; if And(...) contains a Cat with no nullables, (or explicit Sigma or Singleton)
+  ;;  then remove the nullables from ever other Cat with that many non-nullables.
+  ;; Since 7b has run, there should be no cat with more than this many non-nullables.
+  ;; find a Cat(...) with no nullables, there should be at most one because
+  ;;    conversion17a as run.
+  (if (empty? (filter rte/cat? (operands self)))
+    self
+    (let [count-non-nullable (fn [c]
+                               (count-if-not nullable (operands c)))
+          cat-non-nullables (filter (fn [c]
+                                      (and (rte/cat? c)
+                                           (forall [o (operands c)]
+                                                   (not (nullable o)))))
+                                    (operands self))
+          num-non-nullables (cond  (member :sigma (operands self))
+                                   1
+
+                                   (some gns/valid-type? (operands self))
+                                   1
+
+                                   (non-empty? cat-non-nullables)
+                                   (count (operands (first cat-non-nullables)))
+                                   
+                                   :else
+                                   0)]
+      (print-vals count-non-nullable
+                  cat-non-nullables
+                  num-non-nullables)
+      (if (= 0 num-non-nullables)
+        self
+        (create self
+                (map (fn [c]
+                       (cond (not (rte/cat? c))
+                             c
+
+                             (= (count-non-nullable c) num-non-nullables)
+                             (create-cat (for [o (operands c)
+                                               :when (not (nullable o))]
+                                           o))
+
+                             :else
+                             c))                             
+                     (operands self)))))))
 
 (defn conversion-and-19
   [self]
