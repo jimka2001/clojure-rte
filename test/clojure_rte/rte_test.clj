@@ -1138,6 +1138,23 @@
     (is (= (rte/conversion-and-7 '(:and :epsilon (:cat x y)))
            '(:and :epsilon (:cat x y))))))
 
+(deftest t-conversion-and-8
+  (testing "conversion and 8"
+    ;; if operands contains EmptyWord, then the intersection is either EmptyWord or EmptySet
+    (is (= (rte/conversion-and-8 '(:and a b c))
+           '(:and a b c)))
+    (is (= (rte/conversion-and-8 '(:and (:* a) (:* b) :epsilon))
+           :epsilon))
+    (is (= (rte/conversion-and-8 '(:and (:* a) (:* b) (member 1 2 3) :epsilon))
+           :empty-set))))
+
+(deftest t-conversion-and-9
+  (testing "conversion and 9"
+    ;; if x matches only singleton then And(x,y*) -> And(x,y)
+    (is (= (rte/conversion-and-9 '(:and (= 1) (:* x)))
+           '(:and (= 1) x)))))
+
+
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

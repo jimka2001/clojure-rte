@@ -832,20 +832,7 @@
           (recur (rest seq)
                  (cons (first seq) head)))))
 
-(defn reduce-redundant-or [operands]
-  (let [ands (filter rte/and? operands)
-        xyz (setof [x ands] (exists [y operands] (member y (rest x))))
-        abc (setof [and1 ands]
-                   (let [and1-operands (set (rest and1)) ]
-                     (exists [and2 ands]
-                             (let [and2-operands (set (rest and2))]
-                               (and (not (subset? and1-operands and2-operands))
-                                    (subset? and2-operands and1-operands))))))
-        superfluous-ands (concat xyz abc)]
-    (if (empty? superfluous-ands)
-      operands
-      ;; remove all superfluous-ands from or-operands
-      (remove (fn [to-remove] (member to-remove superfluous-ands)) operands))))
+
 
 (defn disjoint?-false-warn [t1 t2]
   ;; don't complain about rte nor satisfies
@@ -1348,11 +1335,28 @@
 
 (defn conversion-and-8
   [self]
-  self)
+  ;; if operands contains EmptyWord, then the intersection is either EmptyWord or EmptySet
+  (cond (not (member :epsilon (operands self)))
+        self
+
+        (every? nullable (operands self))
+        :epsilon
+
+        :else
+        :empty-set))
 
 (defn conversion-and-9
   [self]
-  self)
+  ;; if x matches only singleton then And(x,y*) -> And(x,y)
+  (if (and (some gns/valid-type? (operands self))
+           (some rte/*? (operands self)))
+    (create self (map (fn [rt]
+                        (if (rte/*? rt)
+                          (operand rt)
+                          rt))
+                      (operands self)))
+    self))
+    
 
 (defn conversion-and-10
   [self]
@@ -1422,85 +1426,61 @@
   [self]
   (let [operands (operands self)]
 
-    (let [operands (map canonicalize-pattern operands)]
-      (cl/cl-cond
-       ;; TODO - (:and :epsilon ...)
-       ;;    if any of the :and arguments is not nullable,
-       ;;    then the result is :empty-set
-       ;;    otherwise the result is :epsilon
+    (cl/cl-cond
 
 
-       ;; (:and :epsilon :sigma A B C)
-       ;; --> :empty-set, because :epsilon and :sigma are disjoint
-       ((and (member :epsilon operands)
-             (member :sigma operands))
-        :empty-set)
-       
+     ((some rte/or? operands)
+      ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
+      (with-first-match rte/or? operands
+        (fn [or-item]
+          (let [others (remove (fn [x] (= or-item x)) operands)]
+            (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
 
-       ((some rte/or? operands)
-        ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
-        (with-first-match rte/or? operands
-          (fn [or-item]
-            (let [others (remove (fn [x] (= or-item x)) operands)]
-              (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
+     
+     
+     
+     (:else
+      (cons :and operands))
 
-       ;; (:and of disjoint types) --> :empty-set
-       ((let [atoms (filter (complement seq?) operands)
-              types (filter (fn [x] (not= x :epsilon)) atoms)
-              ]
-          (when (exists-pair [[i1 i2] types]
-                             (and (not= i1 i2)
-                                  (disjoint?-false-warn i1 i2)))
-            :empty-set)))
-       
-       
-       (:else
-        (cons :and operands))
-
-       ))))
+     )))
 
 (defn conversion-or-remainder
   [self]
   (let [operands (operands self)]
-    (assert (< 1 (count operands))
-            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
-                    self (count operands) operands))
-    (let [operands (map canonicalize-pattern
-                                        (reduce-redundant-or operands))]
-      (cl/cl-cond
-       ;; TODO (:or (:cat A B sigma-*)
-       ;;           (:cat A B ))
-       ;;  --> (:or (:cat A B sigma-*))
+    (cl/cl-cond
+     ;; TODO (:or (:cat A B sigma-*)
+     ;;           (:cat A B ))
+     ;;  --> (:or (:cat A B sigma-*))
 
-       ;; (:or A :epsilon B (:cat X (:* X)) C)
-       ;;   --> (:or A :epsilon B (:* X) C )
-       ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
-       ((and (member :epsilon operands)
-             (some (fn [obj]
-                     (and (cat? obj)
-                          (= 3 (count obj))
-                          (let [[_ x y] obj]
-                            (cond (and (*? x)
-                                       (= y (second x)))
-                                  ;; (:or x A B C)
-                                  (cons :or (cons x (remove (fn [o] (or (= o :epsilon)
-                                                                        (= o obj))) operands)))
+     ;; (:or A :epsilon B (:cat X (:* X)) C)
+     ;;   --> (:or A :epsilon B (:* X) C )
+     ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
+     ((and (member :epsilon operands)
+           (some (fn [obj]
+                   (and (cat? obj)
+                        (= 3 (count obj))
+                        (let [[_ x y] obj]
+                          (cond (and (*? x)
+                                     (= y (second x)))
+                                ;; (:or x A B C)
+                                (cons :or (cons x (remove (fn [o] (or (= o :epsilon)
+                                                                      (= o obj))) operands)))
 
-                                  (and (*? y)
-                                       (= x (second y)))
-                                  ;; (:or y A B C)
-                                  (cons :or (cons y (remove (fn [o] (or (= o :epsilon)
-                                                                        (= o obj))) operands)))
-                                  
-                                  :else
-                                  false))))
-                   operands)))
+                                (and (*? y)
+                                     (= x (second y)))
+                                ;; (:or y A B C)
+                                (cons :or (cons y (remove (fn [o] (or (= o :epsilon)
+                                                                      (= o obj))) operands)))
+                                
+                                :else
+                                false))))
+                 operands)))
 
 
 
-       (:else
-        (cons :or operands))
-       ))))
+     (:else
+      (cons :or operands))
+     )))
 
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
