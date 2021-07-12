@@ -1353,7 +1353,7 @@
 
 (defn conversion-combo-99
   [self]
-  (create self canonicalize-pattern-once (operands self)))
+  (create self (map canonicalize-pattern-once (operands self))))
 
 (defn conversion-and-7
   [self]
@@ -1688,44 +1688,6 @@
                              [r]))
                          (operands self)))))
 
-(defn conversion-or-remainder
-  [self]
-  (let [operands (operands self)]
-    (cl/cl-cond
-     ;; TODO (:or (:cat A B sigma-*)
-     ;;           (:cat A B ))
-     ;;  --> (:or (:cat A B sigma-*))
-
-     ;; (:or A :epsilon B (:cat X (:* X)) C)
-     ;;   --> (:or A :epsilon B (:* X) C )
-     ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
-     ((and (member :epsilon operands)
-           (some (fn [obj]
-                   (and (cat? obj)
-                        (= 3 (count obj))
-                        (let [[_ x y] obj]
-                          (cond (and (*? x)
-                                     (= y (second x)))
-                                ;; (:or x A B C)
-                                (cons :or (cons x (remove (fn [o] (or (= o :epsilon)
-                                                                      (= o obj))) operands)))
-
-                                (and (*? y)
-                                     (= x (second y)))
-                                ;; (:or y A B C)
-                                (cons :or (cons y (remove (fn [o] (or (= o :epsilon)
-                                                                      (= o obj))) operands)))
-                                
-                                :else
-                                false))))
-                 operands)))
-
-
-
-     (:else
-      (cons :or operands))
-     )))
-
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
   "Rewrite the given rte patter to a canonical form.
   This involves recursive re-writing steps for each sub form,
@@ -1812,8 +1774,7 @@
                                                    conversion-combo-15
                                                    conversion-combo-17
                                                    conversion-combo-99
-                                                   conversion-combo-5
-                                                   conversion-or-remainder])))))
+                                                   conversion-combo-5])))))
 
 (defn canonicalize-pattern 
   "find the fixed point of canonicalize-pattern-once"
