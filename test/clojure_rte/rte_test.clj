@@ -1327,6 +1327,17 @@
            '(:or :epsilon (:cat X Y (:* (:cat X Y Z)))))
         803)))
 
+(deftest t-conversion-or-10
+  (testing "conversion or 10"
+    ;; (: or A :epsilon B (: * X) C)
+    ;; --> (: or A B (: * X) C)
+    (is (= (rte/conversion-or-10 '(:or a :epsilon b (:* x) x))
+           '(:or a b (:* x) x)))
+
+    (is (= (rte/conversion-or-10 '(:or A :epsilon B :epsilon C))
+           '(:or A :epsilon B :epsilon C)))))
+
+
 
 
 (defn -main []

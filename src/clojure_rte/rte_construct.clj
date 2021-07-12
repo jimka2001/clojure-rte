@@ -1605,7 +1605,15 @@
 
 (defn conversion-or-10
   [self]
-  self)
+  ;; (: or A :epsilon B (: * X) C)
+  ;; --> (: or A B (: * X) C)
+  (if (and (member :epsilon (operands self))
+           (exists [r (operands self)]
+                   (and (not= :epsilon r)
+                        (nullable? r))))
+    (create self (remove-element :epsilon (operands self)))
+    self))
+  
 
 (defn conversion-or-11b
   [self]
