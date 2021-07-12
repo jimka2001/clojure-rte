@@ -1347,6 +1347,17 @@
     (is (= (rte/conversion-or-11b '(:or :sigma (= 1) (member 1 2 3 4)))
            ':sigma))))
 
+(deftest t-conversion-or-15
+  (testing "conversion or 15"
+    ;; Or(Not(A),B*,C) = Or(Not(A),C) if A and B  disjoint,
+    ;;   i.e. remove all B* where B is disjoint from A
+    (is (= (rte/conversion-or-15 '(:or (:* (= 1)) (:not (member 2 3 4))))
+           '(:not (member 2 3 4)))
+        800)
+    (is (= (rte/conversion-or-15 '(:or (:* (= 1)) (:not (member 2 3 4)) (:* (= 0)) (:* (member 3 4 5))))
+           '(:or  (:not (member 2 3 4)) (:* (member 3 4 5))))
+        801)))
+
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

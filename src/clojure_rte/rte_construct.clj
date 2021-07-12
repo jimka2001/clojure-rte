@@ -1634,7 +1634,30 @@
 
 (defn conversion-or-15
   [self]
-  self)
+  ;; Or(Not(A),B*,C) = Or(Not(A),C) if A and B  disjoint,
+  ;;   i.e. remove all B* where B is disjoint from A
+  (let [tds (for [r (operands self)
+                  :when (rte/not? r)
+                  :when (gns/valid-type? (operand r))]
+              (operand r))
+        stars (for [r (operands self)
+                    :when (rte/*? r)
+                    :when (gns/valid-type? (operand r))
+                    :when (exists [a tds]
+                                  (gns/disjoint? a (operand r) false))]
+                r)]
+    (cond (empty? tds)
+          self
+
+          (empty? stars)
+          self
+
+          :else
+          (create self (for [r (operands self)
+                             :when (not (member r stars))]
+                         r)))))
+        
+                                           
 
 (defmulti conversion-dual-16b
   type-dispatch)
