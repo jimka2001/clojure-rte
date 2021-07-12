@@ -945,6 +945,32 @@
            '(:cat a b x x x (:* x) c d)))))
     
     
+(deftest t-discovered-948
+  (testing "discovered test 948"
+    (is (= (rte/nullable '(member (1 2 3) (1 2) (1) []))
+           (rte/nullable '(member [] [1] [1 2] [1 2 3]))))))
+            
+(deftest t-conversion-combo-1
+  (testing "conversion combo 1"
+    (is (= (rte/conversion-combo-1 '(:and))
+           '(:* :sigma)))
+    (is (= (rte/conversion-combo-1 '(:or))
+           :empty-set))
+    (is (= (rte/conversion-combo-1 '(:and x))
+           'x))
+    (is (= (rte/conversion-combo-1 '(:or x))
+           'x))
+    (is (= (rte/conversion-combo-1 '(:and x y))
+           '(:and x y)))
+    (is (= (rte/conversion-combo-1 '(:or x y))
+           '(:or x y)))))
+    
+(deftest t-conversion-combo-3
+  (testing "conversion combo 3"
+    (is (= (rte/conversion-combo-3 '(:or x y (:* :sigma) z))
+           '(:* :sigma))
+    (is (= (rte/conversion-combo-3 '(:and x y :empty-set z))
+           :empty-set)))))
     
 
 (defn -main []
