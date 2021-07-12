@@ -998,7 +998,17 @@
     (is (= (rte/conversion-combo-6 '(:and x (:and a b) (:and y z)))
            '(:and x a b y z)))))
     
-    
+(deftest t-conversion-combo-7
+  (testing "conversion combo 7"
+    ;; (:or A B (:* B) C)
+    ;; --> (:or A (:* B) C)
+    ;; (:and A B (:* B) C)
+    ;; --> (:and A B C)
+    (is (= (rte/conversion-combo-7 '(:or a b (:* b) c))
+           '(:or a (:* b) c)))
+    (is (= (rte/conversion-combo-7 '(:and a b (:* b) c))
+           '(:and a b c)))))
+
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

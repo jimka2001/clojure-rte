@@ -1112,7 +1112,28 @@
 
 (defn conversion-combo-7
   [self]
-  self)
+  ;; (:or A B (:* B) C)
+  ;; --> (:or A (:* B) C)
+  ;; (:and A B (:* B) C)
+  ;; --> (:and A B C)
+  (let [stars (filter rte/*? (operands self))]
+    (if (empty? stars)
+      self
+      (create self
+              (mapcat (fn [r]
+                        (cond (and (rte/or? self)
+                                   (exists [s stars]
+                                           (= r (operand s))))
+                              []
+
+                              (and (rte/and? self)
+                                   (rte/*? r)
+                                   (member r stars))
+                              []
+
+                              :else
+                              [r]))
+                      (operands self))))))
 
 (defn conversion-combo-11
   [self]
@@ -1291,9 +1312,6 @@
        ;;           (:cat A B ))
        ;;  --> (:or (:cat A B sigma-*))
 
-       ;; TODO (:or A B C (:* B) D)
-       ;;  --> (:or A C (:* B) D)
-       
        ;; (:or A :epsilon B (:cat X (:* X)) C)
        ;;   --> (:or A :epsilon B (:* X) C )
        ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
