@@ -1009,6 +1009,16 @@
     (is (= (rte/conversion-combo-7 '(:and a b (:* b) c))
            '(:and a b c)))))
 
+(deftest t-conversion-combo-11
+  (testing "conversion combo 11"
+    ;; And(...,x,Not(x)...) --> EmptySet
+    ;; Or(...x,Not(x)...) --> SigmaStar
+    (is (= (rte/conversion-combo-11 '(:or a b x c (:not x)))
+           '(:* :sigma)))
+    (is (= (rte/conversion-combo-11 '(:and a b x c (:not x)))
+           :empty-set))))
+    
+
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

@@ -1137,7 +1137,13 @@
 
 (defn conversion-combo-11
   [self]
-  self)
+  ;; And(...,x,Not(x)...) --> EmptySet
+  ;; Or(...x,Not(x)...) --> SigmaStar
+  (if (exists [r1 (operands self)]
+              (and (rte/not? r1)
+                   (member (operand r1) (operands self))))
+    (zero self)
+    self))
 
 (defn conversion-combo-12
   [self]
@@ -1270,13 +1276,6 @@
             (let [others (remove (fn [x] (= or-item x)) operands)]
               (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
 
-       ;; (:and x (:not x)) --> :empty-set
-       ((let [nots (filter rte/not? operands)
-              others (remove rte/not? operands)]
-          (when (some (fn [item]
-                        (some #{(list :not item)} nots)) others)
-            :empty-set)))
-
        ;; (:and of disjoint types) --> :empty-set
        ((let [atoms (filter (complement seq?) operands)
               types (filter (fn [x] (not= x :epsilon)) atoms)
@@ -1337,13 +1336,6 @@
                    operands)))
 
 
-
-       ;; (:or x (:not x)) --> :sigma
-       ((let [nots (filter rte/not? operands)
-              others (remove rte/not? operands)]
-          (when (some (fn [item]
-                        (some #{(list :not item)} nots)) others)
-            sigma-*)))
 
        ;; (:or subtype supertype x y z) --> (:and supertype x y z)
        ((let [atoms (filter (complement seq?) operands)
