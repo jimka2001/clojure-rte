@@ -639,6 +639,22 @@
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
+(def rte/catxy?
+  "Predicate detecting (:cat x y z (:* (:cat x y z)))"
+  (fn [r]
+    (cond (not (rte/cat? r))
+          false
+
+          (< (count (operands r)) 2)
+          false
+
+          :else
+          (let [right (last (operands r))
+                left  (butlast (operands r))]
+            (and (rte/*? right)
+                 (rte/cat? (operand right))
+                 (= left (operands (operand right))))))))
+
 (def rte/plus?
   "there won't be a :+ in a pattern after expansion.
   However, this predicate indicates whether an expression is equivalent to a (:+ x)"
@@ -1573,7 +1589,20 @@
 
 (defn conversion-or-9
   [self]
-  self)
+  ;; (:or A :epsilon B (:cat X Y Z (:* (:cat X Y Z))) C)
+  ;;   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
+  ;; (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
+  ;;   --> (:or :epsilon (:* (:cat X Y Z)))
+  (if (and (some nullable (operands self))
+           (some catxy? (operands self)))
+    (create self (map (fn [r]
+                        (if (rte/catxy? r)
+                          (last r)
+                          r))
+                      (operands self)))
+    self))
+    
+
 (defn conversion-or-10
   [self]
   self)

@@ -1304,7 +1304,30 @@
 
     (is (= (rte/conversion-or-8 '(:or (:* y) (:cat (:* x) x)))
            '(:or (:* y) (:* x)))
-        805)))    
+        805)))
+
+(deftest t-conversion-or-9
+  (testing "conversion or 9"
+    ;; (:or A :epsilon B (:cat X Y Z (:* (:cat X Y Z))) C)
+    ;;   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
+    (is (= (rte/conversion-or-9 '(:or a :epsilon b (:cat x y z (:* (:cat x y z))) c))
+           '(:or a :epsilon b (:* (:cat x y z)) c))
+        800)
+    ;; (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
+    ;;   --> (:or :epsilon (:* (:cat X Y Z)))
+    (is (= (rte/conversion-or-9 '(:or :epsilon (:cat X Y Z (:* (:cat X Y Z)))))
+           '(:or :epsilon (:* (:cat X Y Z))))
+        801)
+
+    (is (= (rte/conversion-or-9 '(:or :epsilon (:cat X Y Z (:* (:cat X Y)))))
+           '(:or :epsilon (:cat X Y Z (:* (:cat X Y)))))
+        802)
+
+    (is (= (rte/conversion-or-9 '(:or :epsilon (:cat X Y (:* (:cat X Y Z)))))
+           '(:or :epsilon (:cat X Y (:* (:cat X Y Z)))))
+        803)))
+
+
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
