@@ -972,6 +972,13 @@
     (is (= (rte/conversion-combo-3 '(:and x y :empty-set z))
            :empty-set)))))
     
+(deftest t-conversion-combo-4
+  (testing "conversion combo 4"
+    (is (= (rte/conversion-combo-4 '(:or x y y x z))
+           '(:or y x z)))
+    (is (= (rte/conversion-combo-4 '(:and x y y x z))
+           '(:and y x z)))))
+    
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

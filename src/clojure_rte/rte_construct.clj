@@ -27,7 +27,7 @@
                                       sort-operands with-first-match
                                       partition-by-pred seq-matcher
                                       rte-identity rte-constantly
-                                      print-vals
+                                      uniquify print-vals
                                       find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
@@ -1088,7 +1088,7 @@
 
 (defn conversion-combo-4
   [self]
-  self)
+  (create self (uniquify (operands self))))
 
 (defn conversion-combo-5
   [self]
@@ -1216,16 +1216,13 @@
   [self]
   (let [operands (operands self)]
 
-    (let [operands (dedupe (sort-operands (map canonicalize-pattern operands)))]
+    (let [operands (sort-operands (map canonicalize-pattern operands))]
       (cl/cl-cond
        ;; TODO - (:and :epsilon ...)
        ;;    if any of the :and arguments is not nullable,
        ;;    then the result is :empty-set
        ;;    otherwise the result is :epsilon
 
-       ;; TODO (:and (:cat A B sigma-*)
-       ;;            (:cat A B ))
-       ;;  --> (:and (:cat A B))
 
        ;; (:and :epsilon :sigma A B C)
        ;; --> :empty-set, because :epsilon and :sigma are disjoint
@@ -1233,9 +1230,6 @@
              (member :sigma operands))
         :empty-set)
        
-       ((member :empty-set operands)
-        :empty-set)
-
        ((some rte/and? operands)
         (cons :and (mapcat (fn [obj]
                              (if (rte/and? obj)
@@ -1288,9 +1282,8 @@
     (assert (< 1 (count operands))
             (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
                     self (count operands) operands))
-    (let [operands (dedupe
-                    (sort-operands (map canonicalize-pattern
-                                        (reduce-redundant-or operands))))]
+    (let [operands (sort-operands (map canonicalize-pattern
+                                        (reduce-redundant-or operands)))]
       (cl/cl-cond
        ;; TODO (:or (:cat A B sigma-*)
        ;;           (:cat A B ))
@@ -1328,9 +1321,6 @@
                             (if (rte/or? obj)
                               (rest obj)
                               (list obj))) operands)))
-
-       ((member sigma-* operands)
-        sigma-*)
 
        ((member :empty-set operands)
         (cons :or (remove #{:empty-set} operands)))
