@@ -1076,7 +1076,42 @@
            '(:and (member 3 4)
                  (:not (member 10 11 12 13 14 15))))
         801)))
+
+(deftest t-conversion-combo-16
+  (testing "conversion combo 16"
+    (is (= (rte/conversion-combo-16 '(:or (member 1 2 3) (member 3 4 5) (= 3)))
+           '(:or (member 1 2 3) (member 3 4 5))))
+    (is (= (rte/conversion-combo-16 '(:and (member 1 2 3) (member 3 4 5) (member 1 2 3 4 5 6)))
+           '(:and (member 1 2 3) (member 3 4 5))))))
     
+
+(deftest t-conversion-combo-17
+  (testing "conversion combo 17"
+    ;; And({1,2,3},Singleton(X),Not(Singleton(Y)))
+    ;;  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
+    ;; --> And({...},Singleton(X),Not(Singleton(Y)))
+    (is (= (rte/conversion-combo-17 '(:and (member -2 -2.5 -1 -1.5 0 1 1.5 2 2.5 3 4 5 6)
+                                           (satisfies pos?)
+                                           (:not (satisfies int?))))
+           '(:and (member 1.5 2.5)
+                  (satisfies pos?)
+                  (:not (satisfies int?))))
+        800)
+
+    ;; Or({1,2,3},Singleton(X),Not(Singleton(Y)))
+    ;;  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
+    ;; --> Or({...},Singleton(X),Not(Singleton(Y)))
+
+    (is (= (rte/conversion-combo-17 '(:or (member -2 -2.5 -1 -1.5 0 1 1.5 2 2.5 3 4 5 6)
+                                           (satisfies pos?)
+                                           (:not (satisfies int?))))
+           '(:or (member -2  -1  0 )
+                  (satisfies pos?)
+                  (:not (satisfies int?))))
+        801)))
+    
+
+
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

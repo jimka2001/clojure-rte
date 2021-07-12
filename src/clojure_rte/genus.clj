@@ -906,6 +906,12 @@
   [operands]
   (create '(and) operands))
 
+(defn create-not
+  [argument]
+  (if (gns/not? argument)
+    (operand argument)
+    (list 'not argument)))
+
 (defmethod create-dual 'or
   [this operands]
   (create-and operands))

@@ -27,7 +27,7 @@
                                       sort-operands with-first-match
                                       partition-by-pred seq-matcher
                                       rte-identity rte-constantly
-                                      uniquify print-vals
+                                      search-replace remove-element uniquify print-vals
                                       count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
@@ -233,6 +233,9 @@
 
         (keyword? pattern)
         pattern
+
+        (gns/valid-type? pattern)
+        :type
 
         :else
         :default))
@@ -768,7 +771,6 @@
   [self operands]
   (gns/create-and operands))
 
-
 (defmulti or-invert
   (fn [self x]
     (type-dispatch self)))
@@ -1228,7 +1230,7 @@
                                              (gns/operands (operand nsm))))
             new-not-member (if (empty? new-not-member-arglist)
                              (one self)
-                             (list :not (gns/create-member new-not-member-arglist)))]
+                             (rte/create-not (gns/create-member new-not-member-arglist)))]
         (create self (uniquify (map (fn [op]
                                       (cond (member op members)
                                             new-member
@@ -1242,11 +1244,75 @@
 
 (defn conversion-combo-16
   [self]
-  self)
+  ;; WARNING, this function assumes there are no repeated elements
+  ;;     according to ==
+  ;;     If there are repeated elements, both will be removed.
+  
+  ;; remove And superclasses
+  ;; remove Or subclasses
+  
+  ;; Must be careful, e.g. if Or(A,B) with A a subset of B and B a subset of A
+  ;;    but A != B, then don't remove both.
+  (let [ss (filter gns/valid-type? (operands self))
+        f (fn [i]
+            (let [td (nth ss i)
+                  right (if (exists [j (range (inc i) (count ss))]
+                                    (= (annihilator self (nth ss j) td) true))
+                          [td]
+                          [])
+                  ;; left is computed lazily, thus not at all if right is non-empty
+                  left (for [j (range (inc i) (count ss))
+                             :when (= (annihilator self td (nth ss j)) true)]
+                         (nth ss j))]
+              (if (empty? right)
+                left
+                right)))
+        redundant (mapcat f (range (dec (count ss))))
+        g (fn [op]
+            (if (member op redundant)
+              []
+              [op]))              
+        filtered (mapcat g (operands self))]
+    (create self filtered)))
 
 (defn conversion-combo-17
   [self]
-  self)
+  ;; And({1,2,3},Singleton(X),Not(Singleton(Y)))
+  ;;  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
+  ;; --> And({...},Singleton(X),Not(Singleton(Y)))
+  
+  ;; Or({1,2,3},Singleton(X),Not(Singleton(Y)))
+  ;;  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
+  ;; --> Or({...},Singleton(X),Not(Singleton(Y)))
+
+  (let [members (filter gns/member-or-=? (operands self))]
+    (if (empty? members)
+      self
+      (let [member-1 (first members)
+            singletons (for [r (remove-element member-1 (operands self))
+                             :when (or (gns/valid-type? r)
+                                       (and (rte/not? r)
+                                            (gns/valid-type? (operand r))))]
+                         r)
+            f (fn [r]
+                (cond (gns/valid-type? r)
+                      [r]
+
+                      (and (rte/not? r)
+                           (gns/valid-type? (operand r)))
+                      [(gns/create-not (operand r))]
+
+                      :else
+                      []))
+            looser (mapcat f singletons)]
+        (if (empty? looser)
+          self
+          (let [td (create-type-descriptor self looser)
+                rt (gns/create-member (setof [a (gns/operands member-1)]
+                                             (or-invert self (gns/typep a td))))]
+            (create self (search-replace (operands self)
+                                         member-1
+                                         rt))))))))
 
 (defn conversion-combo-21
   [self]
@@ -1323,11 +1389,11 @@
 (defmulti conversion-dual-16b
   type-dispatch)
 
-(defmethod conversion-dual-16b 'or
+(defmethod conversion-dual-16b :or
   [self]
   self)
 
-(defmethod conversion-dual-16b 'and
+(defmethod conversion-dual-16b :and
   [self]
   self)
 
@@ -1368,13 +1434,6 @@
                                   (disjoint?-false-warn i1 i2)))
             :empty-set)))
        
-       ;; (:and subtype supertype x y z) --> (:and subtype x y z)
-       ((let [atoms (filter (complement seq?) operands)
-              types (filter (fn [x] (not= x :epsilon)) atoms)
-              max (gns/type-max types)
-              ]
-          (when max
-            (cons :and (remove #{max} operands)))))
        
        (:else
         (cons :and operands))
@@ -1419,13 +1478,6 @@
                    operands)))
 
 
-
-       ;; (:or subtype supertype x y z) --> (:and supertype x y z)
-       ((let [atoms (filter (complement seq?) operands)
-              min (gns/type-min atoms)
-              ]
-          (when min
-            (cons :or (remove #{min} operands)))))
 
        (:else
         (cons :or operands))
