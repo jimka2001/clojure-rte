@@ -750,11 +750,11 @@
 
 (defmethod annihilator :or
   [self a b]
-  (gns/subtype? b a))
+  (gns/subtype? b a :dont-know))
 
 (defmethod annihilator :and
   [self a b]
-  (gns/subtype? a b))
+  (gns/subtype? a b :dont-know))
 
 (defmulti create-type-descriptor
   (fn [self operands]
@@ -1151,7 +1151,19 @@
 
 (defn conversion-combo-14
   [self]
-  self)
+  ;; generalization of conversionC11
+  ;; Or(A,Not(B),X) -> Sigma* if B is subtype of A
+  ;; And(A,Not(B),X) -> EmptySet if A is subtype of B
+  (let [nots (for [r (operands self)
+                   :when (rte/not? r)
+                   :when (gns/valid-type? (operand r))]
+               (operand r))
+        singletons (filter gns/valid-type? (operands self))]
+    (if (exists [sub nots]
+                (exists [sup singletons]
+                        (= (annihilator self sup sub) true)))
+      (zero self)
+      self)))
 
 (defn conversion-combo-15
   [self]

@@ -1017,8 +1017,24 @@
            '(:* :sigma)))
     (is (= (rte/conversion-combo-11 '(:and a b x c (:not x)))
            :empty-set))))
-    
 
+(deftest t-conversion-combo-14
+  (testing "conversion combo 14"
+    ;; Or(A,Not(B),X) -> Sigma* if B is subtype of A
+    ;; And(A,Not(B),X) -> EmptySet if A is subtype of B
+    (is (= (rte/conversion-combo-14 '(:or (= 1) (:not (member 1 2 3))))
+           '(:or (= 1) (:not (member 1 2 3))))
+        1027)
+    (is (gns/subtype? '(= 1) '(member 1 2 3) false))
+    (is (= (rte/conversion-combo-14 '(:and (= 1) (:not (member 1 2 3))))
+           :empty-set)
+        1028)
+    (is (= (rte/conversion-combo-14 '(:or (:not (= 1)) (member 1 2 3)))
+           '(:* :sigma))
+        1029)
+    (is (= (rte/conversion-combo-14 '(:and (:not (= 1)) (member 1 2 3)))
+           '(:and (:not (= 1)) (member 1 2 3)))
+        1030)))
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
