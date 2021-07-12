@@ -1092,8 +1092,7 @@
 
 (defn conversion-combo-5
   [self]
-  self)
-
+  (create self (sort-operands (operands self))))
 
 (defn conversion-combo-6
   [self]
@@ -1216,7 +1215,7 @@
   [self]
   (let [operands (operands self)]
 
-    (let [operands (sort-operands (map canonicalize-pattern operands))]
+    (let [operands (map canonicalize-pattern operands)]
       (cl/cl-cond
        ;; TODO - (:and :epsilon ...)
        ;;    if any of the :and arguments is not nullable,
@@ -1282,8 +1281,8 @@
     (assert (< 1 (count operands))
             (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
                     self (count operands) operands))
-    (let [operands (sort-operands (map canonicalize-pattern
-                                        (reduce-redundant-or operands)))]
+    (let [operands (map canonicalize-pattern
+                                        (reduce-redundant-or operands))]
       (cl/cl-cond
        ;; TODO (:or (:cat A B sigma-*)
        ;;           (:cat A B ))
