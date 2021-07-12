@@ -1182,6 +1182,22 @@
     (is (= (rte/conversion-and-13 '(:and a b c))
            '(:and a b c)))))
 
+(deftest t-conversion-and-17
+  (testing "conversion and 17"
+    ;; if And(...) contains a Cat(...) with at least 2 non-nullable components,
+    ;;    then this Cat matches only sequences of length 2 or more.
+    ;; If And(...) contains a singleton, then it matches only sequences
+    ;;    of length 1, perhaps an empty set of such sequences if the singleton type
+    ;;    is empty.
+    ;; If both are true, then the And() matches EmptySet
+    (is (= (rte/conversion-and-17 '(:and (= 1) (:cat (= 1) (:* x) (= 2) (:* x))))
+           :empty-set))
+    (is (not= (rte/conversion-and-17 '(:and (:* (= 1)) (:cat (= 1) (:* x) (= 2) (:* x))))
+              :empty-set))
+    (is (not= (rte/conversion-and-17 '(:and (= 1) (:cat (:* x) (= 2) (:* x))))
+           :empty-set))))
+    
+    
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

@@ -28,7 +28,7 @@
                                       partition-by-pred seq-matcher
                                       rte-identity rte-constantly
                                       search-replace remove-element uniquify print-vals
-                                      count-if-not find-simplifier]]
+                                      non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union subset?]]
@@ -1397,7 +1397,23 @@
 
 (defn conversion-and-17
   [self]
-  self)
+  ;; if And(...) contains a Cat(...) with at least 2 non-nullable components,
+  ;;    then this Cat matches only sequences of length 2 or more.
+  ;; If And(...) contains a singleton, then it matches only sequences
+  ;;    of length 1, perhaps an empty set of such sequences if the singleton type
+  ;;    is empty.
+  ;; If both are true, then the And() matches EmptySet
+  (let [tds (filter gns/valid-type? (operands self))
+        count-non-nullable (fn [c]
+                             (count-if-not nullable (operands c)))
+        long-cats (filter (fn [c] (and (rte/cat? c)
+                                       (> (count-non-nullable c) 1)))
+                          (operands self))]
+    (if (and (or (member :sigma (operands self))
+                 (non-empty? tds))
+             (non-empty? long-cats))
+      :empty-set
+      self)))
 
 (defn conversion-and-17a
   [self]
