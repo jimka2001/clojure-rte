@@ -1337,8 +1337,15 @@
     (is (= (rte/conversion-or-10 '(:or A :epsilon B :epsilon C))
            '(:or A :epsilon B :epsilon C)))))
 
-
-
+(deftest t-conversion-or-11b
+  (testing "conversion or 11b"
+    ;; if Sigma is in the operands, then filter out all singletons
+    ;; Or(Singleton(A),Sigma,...) -> Or(Sigma,...)
+    (is (= (rte/conversion-or-11b '(:or :sigma :sigma))
+           '(:or :sigma :sigma))
+        800)
+    (is (= (rte/conversion-or-11b '(:or :sigma (= 1) (member 1 2 3 4)))
+           ':sigma))))
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))

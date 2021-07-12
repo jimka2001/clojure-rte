@@ -1617,7 +1617,20 @@
 
 (defn conversion-or-11b
   [self]
-  self)
+  ;; if Sigma is in the operands, then filter out all singletons
+  ;; Or(Singleton(A),Sigma,...) -> Or(Sigma,...)
+  (if (member :sigma (operands self))
+    (create self (mapcat (fn [op]
+                           (cond (= op :sigma)
+                                 [:sigma]
+
+                                 (gns/valid-type? op)
+                                 []
+
+                                 :else
+                                 [op]))
+                         (operands self)))
+    self))
 
 (defn conversion-or-15
   [self]
