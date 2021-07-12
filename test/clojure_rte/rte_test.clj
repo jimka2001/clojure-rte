@@ -1221,7 +1221,22 @@
                   (:cat (= 10) (= 20))))
         802)))
 
+(deftest t-conversion-and-17b
+  (testing "conversion and 17b"
+    ;; after 17a we know that if there are multiple Cats(...) without a nullable,
+    ;;   then all such Cats(...) without a nullable have same number of operands
+    ;;   have been merged into one Cat(...)
+    ;;   So assure that all other Cats have no more non-nullable operands.
+    (is (= (rte/conversion-and-17b '(:and (:cat (= 1) (= 2)) ;; 2 operands
+                                          (:cat (= 1) (= 2) (= 3) (:* (= 4))))) ;; 2 operands
+           :empty-set)
+        800)
+    (is (not= (rte/conversion-and-17b '(:and (:cat (= 1) (= 2)) ;; 2 operands
+                                             (:cat (= 1) (= 2) (:* (= 4))))) ;; 2 operands
+              :empty-set)
+        801)))
     
+        
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

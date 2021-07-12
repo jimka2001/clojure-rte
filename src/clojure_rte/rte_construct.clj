@@ -1454,7 +1454,24 @@
 
 (defn conversion-and-17b
   [self]
-  self)
+  ;; after 17a we know that if there are multiple Cats(...) without a nullable,
+  ;;   then all such Cats(...) without a nullable have same number of operands
+  ;;   have been merged into one Cat(...)
+  ;;   So assure that all other Cats have no more non-nullable operands.
+  (let [cats (filter rte/cat? (operands self))
+        non-nullable-cats (filter (fn [c]
+                                   (forall [o (operands c)]
+                                           (not (nullable o))))
+                                 cats)]
+    (if (empty? non-nullable-cats)
+      self
+      (let [num-non-nullable (count (operands (first non-nullable-cats)))
+            count-non-nullable (fn [c]
+                                 (count-if-not nullable (operands c)))]
+        (if (exists [c cats]
+                    (> (count-non-nullable c) num-non-nullable))
+          :empty-set
+          self)))))
 
 (defn conversion-and-17c
   [self]
