@@ -1260,6 +1260,22 @@
                   (= 20)))
         802)))
         
+(deftest t-conversion-and-19
+  (testing "conversion and 19"
+    ;; if there is at least one singleton and zero or more Not(x) where x is a singleton
+    ;;   then build a SimpleTypeD and ask whether it is inhabited.
+    ;;   if it is not inhabited, then self converts to EmptySet
+    (is (= (rte/conversion-and-19 '(:and (:not :sigma) (:not (= 0))))
+           ;; does not contain singleton
+           '(:and (:not :sigma) (:not (= 0))))
+        800)
+    (is (= (rte/conversion-and-19 '(:and (= 3) (:not :sigma) (:not (= 0))))
+           :empty-set)
+        801)
+    (is (not= (rte/conversion-and-19 '(:and (= 3) (:not (= 4) (:not (member 10 20 30)))))
+              :empty-set)
+        802)))
+    
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

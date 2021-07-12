@@ -1500,9 +1500,6 @@
                                    
                                    :else
                                    0)]
-      (print-vals count-non-nullable
-                  cat-non-nullables
-                  num-non-nullables)
       (if (= 0 num-non-nullables)
         self
         (create self
@@ -1521,7 +1518,21 @@
 
 (defn conversion-and-19
   [self]
-  self)
+  ;; if there is at least one singleton and zero or more Not(x) where x is a singleton
+  ;;   then build a SimpleTypeD and ask whether it is inhabited.
+  ;;   if it is not inhabited, then self converts to EmptySet
+  (let [singletons (filter gns/valid-type? (operands self))]
+    (if (empty? singletons)
+      self
+      (let [not-singletons (for [r (operands self)
+                                 :when (rte/not? r)
+                                 :when (gns/valid-type? (operand r))]
+                             (gns/create-not (operand r)))
+            canonicalized-singletons (gns/canonicalize-type (gns/create-and (concat singletons not-singletons))
+                                                            :dnf)]
+        (if (= (gns/inhabited? canonicalized-singletons :dont-know) false)
+          :empty-set
+          self)))))
 
 (defn conversion-or-8
   [self]
