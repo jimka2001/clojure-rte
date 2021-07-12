@@ -1275,7 +1275,37 @@
     (is (not= (rte/conversion-and-19 '(:and (= 3) (:not (= 4) (:not (member 10 20 30)))))
               :empty-set)
         802)))
+
+(deftest t-conversion-or-8
+  (testing "conversion or 8"
+    ;; (:or A :epsilon B (:cat X (:* X)) C)
+    ;;   --> (:or A :epsilon B (:* X) C )
+    (is (= (rte/conversion-or-8 '(:or a :epsilon b (:cat x (:* x)) c))
+           '(:or a :epsilon b (:* x) c))
+        800)
+    ;; (:or :epsilon (:cat X (:* X)))
+    ;;   --> (:or :epsilon (:* X))
+    (is (= (rte/conversion-or-8 '(:or :epsilon (:cat x (:* x))))
+           '(:or :epsilon (:* x)))
+        801)
+    ;; (:or (:* Y) (:cat X (:* X)))
+    ;;   --> (:or (:* Y) (:* X))
+    (is (= (rte/conversion-or-8 '(:or (:* y) (:cat x (:* x))))
+           '(:or (:* y) (:* x)))
+        802)
     
+    (is (= (rte/conversion-or-8 '(:or a :epsilon b (:cat (:* x) x) c))
+           '(:or a :epsilon b (:* x) c))
+        803)
+
+    (is (= (rte/conversion-or-8 '(:or :epsilon (:cat (:* x) x)))
+           '(:or :epsilon (:* x)))
+        804)
+
+    (is (= (rte/conversion-or-8 '(:or (:* y) (:cat (:* x) x)))
+           '(:or (:* y) (:* x)))
+        805)))    
+
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

@@ -639,6 +639,19 @@
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
+(def rte/plus?
+  "there won't be a :+ in a pattern after expansion.
+  However, this predicate indicates whether an expression is equivalent to a (:+ x)"
+  (fn [r]
+    (if (not (rte/cat? r))
+      false
+      (let [ops (operands r)]
+        (and (= 2 (count ops))
+             (or (and (rte/*? (nth ops 1))
+                      (= (operand (nth ops 1)) (nth ops 0)))
+                 (and (rte/*? (nth ops 0))
+                      (= (operand (nth ops 0)) (nth ops 1)))))))))
+
 (def rte/create-cat
   (fn [operands]
     (cond (empty? operands)
@@ -1536,7 +1549,27 @@
 
 (defn conversion-or-8
   [self]
-  self)
+  ;; (:or A :epsilon B (:cat X (:* X)) C)
+  ;;   --> (:or A :epsilon B (:* X) C )
+  ;; (:or :epsilon (:cat X (:* X)))
+  ;;   --> (:or :epsilon (:* X))
+  ;; (:or (:* Y) (:cat X (:* X)))
+  ;;   --> (:or (:* Y) (:* X))
+  (if (and (some nullable (operands self))
+           (some rte/plus? (operands self)))
+    (letfn [(f [op]
+              (cond (not (rte/cat? op))
+                    op
+
+                    (rte/plus? op)
+                    ;; (:cat x (:* x)) -> (:* x)
+                    ;; (:cat (:* x) x) -> (:* x)
+                    (first (filter rte/*? (operands op)))
+
+                    :else
+                    op))]
+      (create self (map f (operands self))))
+    self))
 
 (defn conversion-or-9
   [self]
@@ -1545,7 +1578,7 @@
   [self]
   self)
 
-(defn conversion-combo-or-11b
+(defn conversion-or-11b
   [self]
   self)
 
@@ -1679,7 +1712,7 @@
                                                    conversion-or-10
                                                    conversion-combo-11
                                                    conversion-combo-14
-                                                   conversion-combo-or-11b
+                                                   conversion-or-11b
                                                    conversion-combo-16
                                                    conversion-dual-16b
                                                    conversion-combo-12
