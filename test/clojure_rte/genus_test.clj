@@ -159,37 +159,6 @@
     (is (not (gns/typep false '(member 1 nil 3))) "test 9")
     (is (not (gns/typep nil '(member 1 false 3))) "test 10")))
 
-
-(deftest t-type-max
-  (testing "type-max"
-    (is (= 'Number (gns/type-max '(Number Integer))))
-    (is (= 'Number (gns/type-max '(Integer Number))))))
-
-(deftest t-type-min
-  (testing "type-min"
-    (is (= 'Integer (gns/type-min '(Number Integer))))
-    (is (= 'Integer (gns/type-min '(Integer Number))))))
-
-(deftest t-map-type-partitions
-  (testing "map-type-partitions"
-    (is (not (contains? (set
-                         (call-with-collector (fn [collect]
-                                                (gns/map-type-partitions ['Long 'Integer 'Object]
-                                                                     (fn [left right]
-                                                                       (collect [left right]))))))
-                        ['(Object) ()])) "should not contain 1")
-    (is (= (set
-            (call-with-collector (fn [collect]
-                                   (gns/map-type-partitions ['Long 'Integer 'Object]
-                                                        (fn [left right]
-                                                          (collect [left right]))))))
-           #{[() '(Object)]
-             ['(Integer) ()]
-             ['(Long) ()]
-             ['(Object) '(Integer Long)]})
-        "expected content"
-)))
-
 (deftest t-disjoint-member
   (testing "disjoint member"
     (is (gns/disjoint? '(member 1 2 3) '(member 5 6 ) false) "line 139")

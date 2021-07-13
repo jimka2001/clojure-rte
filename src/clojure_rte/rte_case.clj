@@ -21,6 +21,7 @@
 
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
+            [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [defn-memoized member]]
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
@@ -106,122 +107,117 @@
     (:cat ...) -- if the given lambda list only has required parametes."
   [lambda-list types-map]
   (assert (map? types-map))
-  (letfn [(pretty-and [a b]
-            (cond
-              (= :sigma a)  b
-              (= :sigma b)  a
-              (= a b)       a
-              :else         (list 'and a b)))]
-    (loop [required lambda-list
-           others ()
-           prefix-rte []
-           suffix-rte []
-           parsed []]
-      (cond (and (empty? required)
-                 (empty? others))
-            ;; finished parsing
-            (if (empty? suffix-rte)
-              `(:cat ~@prefix-rte)
-              `(:cat ~@prefix-rte ~@suffix-rte))
+  
+  (loop [required lambda-list
+         others ()
+         prefix-rte []
+         suffix-rte []
+         parsed []]
+    (cond (and (empty? required)
+               (empty? others))
+          ;; finished parsing
+          (if (empty? suffix-rte)
+            `(:cat ~@prefix-rte)
+            `(:cat ~@prefix-rte ~@suffix-rte))
 
-            (and (not-empty required)
-                 (= '& (first required)))
-            ;; found & in the correct place
-            (recur nil ; required
-                   (rest required) ; rest
-                   prefix-rte ; prefix-rte
-                   suffix-rte ; suffix-rte
-                   (conj parsed '&))
+          (and (not-empty required)
+               (= '& (first required)))
+          ;; found & in the correct place
+          (recur nil ; required
+                 (rest required) ; rest
+                 prefix-rte ; prefix-rte
+                 suffix-rte ; suffix-rte
+                 (conj parsed '&))
 
-            (and (not-empty others)
-                 (map? (first others)))
-            (letfn [(make-keyword-matcher-rte [var]
-                      (let [k (keyword var)
-                            default-given (contains? (get (first others) :or {}) var)
-                            term-1 (template (:* (:cat (:not (= ~k)) :sigma)))
-                            td (pretty-and (get (meta var) :tag :sigma)
-                                           (get types-map var :sigma))
-                            term-2 (template (:cat (:* (:cat :sigma :sigma))
-                                                   (:cat (= ~k) ~td)
-                                                   (:* (:cat (:not (= ~k)) :sigma))))]
-                        (list (if default-given
-                                (template (:or ~term-1
-                                               ~term-2
-                                               ))
-                                term-2))))]
-              
-              (assert (vector? (get (first others) :keys))
-                      (cl-format false "parsing ~A expecting a vector specified for :keys, not ~A"
-                                 lambda-list
-                                 (get (first others) :keys)))
-              
-              (let [given-keys (get (first others) :keys)
-                    allow-other-keys  (get (first others) :allow-other-keys false)
-                    valid-key (if allow-other-keys
-                                (template (satisfies keyword?))
-                                (template (member ~@(map keyword given-keys))))]
-
-                (recur required
-                       (rest others)
-                       prefix-rte
-                       (conj suffix-rte
-                             ;; enforce keyword :sigma pairs
-                             ;; and simultaneously a constraint for each key specified
-                             (template (:and (:* (:cat ~valid-key :sigma))
-                                             ~@(mapcat make-keyword-matcher-rte (:keys (first others))))))
-                       (conj parsed (first others)))))
+          (and (not-empty others)
+               (map? (first others)))
+          (letfn [(make-keyword-matcher-rte [var]
+                    (let [k (keyword var)
+                          default-given (contains? (get (first others) :or {}) var)
+                          term-1 (template (:* (:cat (:not (= ~k)) :sigma)))
+                          td (gns/create-and [(get (meta var) :tag :sigma)
+                                              (get types-map var :sigma)])
+                          term-2 (template (:cat (:* (:cat :sigma :sigma))
+                                                 (:cat (= ~k) ~td)
+                                                 (:* (:cat (:not (= ~k)) :sigma))))]
+                      (list (if default-given
+                              (template (:or ~term-1
+                                             ~term-2
+                                             ))
+                              term-2))))]
             
-            (not-empty required)
-            (let [var (first required)]
-              (recur (rest required)
-                     others
-                     (conj prefix-rte
-                           (cond (symbol? var)
-                                 ;; parsing required section, found a var
-                                 (pretty-and (get (meta var) :tag :sigma)
-                                             (get types-map var :sigma))
-                                 (vector? var)
-                                 ;; parsing required section, found a vector
-                                 (list 'rte
-                                       (lambda-list-to-rte (first required) types-map))
+            (assert (vector? (get (first others) :keys))
+                    (cl-format false "parsing ~A expecting a vector specified for :keys, not ~A"
+                               lambda-list
+                               (get (first others) :keys)))
+            
+            (let [given-keys (get (first others) :keys)
+                  allow-other-keys  (get (first others) :allow-other-keys false)
+                  valid-key (if allow-other-keys
+                              (template (satisfies keyword?))
+                              (template (member ~@(map keyword given-keys))))]
 
-                                 :else ;; found non-symbol non-vector
-                                 (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
-                                                            lambda-list required)
-                                                 {:error-type "cannot parse prefix"
-                                                  :lambda-list lambda-list
-                                                  :parsed parsed
-                                                  :unparsed required}))))
-                     suffix-rte
-                     (conj parsed var)))
-
-            (and (not-empty others)
-                 (not-empty suffix-rte))
-            (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
-                                       lambda-list others)
-                            {:error-type "cannot parse suffix"
-                             :lambda-list lambda-list
-                             :parsed parsed
-                             :unparsed others}))
-
-            (and (not-empty others)
-                 (symbol? (first others)))
-            (let [var (first others)]
               (recur required
                      (rest others)
                      prefix-rte
                      (conj suffix-rte
-                           (template (:* ~(pretty-and (get (meta var) :tag :sigma)
-                                                      (get types-map var :sigma)))))
-                     (conj parsed var)))
+                           ;; enforce keyword :sigma pairs
+                           ;; and simultaneously a constraint for each key specified
+                           (template (:and (:* (:cat ~valid-key :sigma))
+                                           ~@(mapcat make-keyword-matcher-rte (:keys (first others))))))
+                     (conj parsed (first others)))))
+          
+          (not-empty required)
+          (let [var (first required)]
+            (recur (rest required)
+                   others
+                   (conj prefix-rte
+                         (cond (symbol? var)
+                               ;; parsing required section, found a var
+                               (gns/create-and [(get (meta var) :tag :sigma)
+                                                (get types-map var :sigma)])
+                               (vector? var)
+                               ;; parsing required section, found a vector
+                               (list 'rte
+                                     (lambda-list-to-rte (first required) types-map))
 
-            (not-empty others)
-            (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
-                                       lambda-list others)
-                            {:error-type "cannot parse suffix"
-                             :lambda-list lambda-list
-                             :parsed parsed
-                             :unparsed others}))))))
+                               :else ;; found non-symbol non-vector
+                               (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
+                                                          lambda-list required)
+                                               {:error-type "cannot parse prefix"
+                                                :lambda-list lambda-list
+                                                :parsed parsed
+                                                :unparsed required}))))
+                   suffix-rte
+                   (conj parsed var)))
+
+          (and (not-empty others)
+               (not-empty suffix-rte))
+          (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
+                                     lambda-list others)
+                          {:error-type "cannot parse suffix"
+                           :lambda-list lambda-list
+                           :parsed parsed
+                           :unparsed others}))
+
+          (and (not-empty others)
+               (symbol? (first others)))
+          (let [var (first others)]
+            (recur required
+                   (rest others)
+                   prefix-rte
+                   (conj suffix-rte
+                         (template (:* ~(gns/create-and [(get (meta var) :tag :sigma)
+                                                         (get types-map var :sigma)]))))
+                   (conj parsed var)))
+
+          (not-empty others)
+          (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
+                                     lambda-list others)
+                          {:error-type "cannot parse suffix"
+                           :lambda-list lambda-list
+                           :parsed parsed
+                           :unparsed others})))))
 
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return value

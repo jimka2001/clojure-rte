@@ -25,7 +25,8 @@
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.genus :as gns]
             ;; [clojure-rte.dot :as dot]
-            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable?
+            [clojure-rte.rte-extract :refer [dfa-to-rte]]
+            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa  nullable?
                                                canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
             ))
 

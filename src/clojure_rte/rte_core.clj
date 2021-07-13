@@ -22,6 +22,7 @@
 (ns clojure-rte.rte-core
   (:require [clojure-rte.rte-construct]
             [clojure-rte.rte-case]
+            [clojure-rte.rte-extract]
             [clojure-rte.genus-spec]
             [clojure-rte.typecase]
             ))

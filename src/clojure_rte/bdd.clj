@@ -52,35 +52,14 @@
   (case bdd
     (true) :sigma
     (false) :empty-set
-    (letfn [(pretty-not [arg]
-              (case arg
-                (:sigma) :empty-set
-                (:empty-set) :sigma
-                (list 'not arg)))
-            (pretty-or [a b]
-              (cond
-                (= a :sigma) :sigma
-                (= b :sigma) :sigma
-                (= a :empty-set) b
-                (= b :empty-set) a
-                (= a b) a
-                :else (list 'or a b)))
-            (pretty-and [a b]
-              (cond
-                (= a :sigma) b
-                (= b :sigma) a
-                (= a :empty-set) :empty-set
-                (= b :empty-set) :empty-set
-                (= a b) a
-                :else (list 'and a b)))]
-      
-      (let [l (:label bdd)
-            p (itenf (:positive bdd))
-            n (itenf (:negative bdd))]
-        (assert (not= nil p))
-        (assert (not= nil n))
-        (pretty-or (pretty-and l p)
-                   (pretty-and (pretty-not l) n))))))
+    
+    (let [l (:label bdd)
+          p (itenf (:positive bdd))
+          n (itenf (:negative bdd))]
+      (assert (not= nil p))
+      (assert (not= nil n))
+      (gns/create-or [(gns/create-and [l p])
+                      (gns/create-and [(gns/create-not l) n])]))))
 
 (defn dnf
   "Serialize a Bdd to dnf disjunctive normal form.
@@ -89,17 +68,7 @@
   (gns/subtype? a b false).  
   "
   [bdd]
-  (letfn [(pretty-and [args]
-            (cond
-              (empty? args) :sigma
-              (empty? (rest args)) (first args)
-              :else (cons 'and args)))
-          (pretty-or [args]
-            (cond
-              (empty? args) :empty-set
-              (empty? (rest args)) (first args)
-              :else (cons 'or args)))
-          (supertypes [sub types]
+  (letfn [(supertypes [sub types]
             (filter (fn [super]
                       (c/and (not= sub super)
                              (gns/subtype? sub super false))) types))
@@ -121,7 +90,7 @@
                           (non-empty? (supertypes sub args)))
                         args))))]
 
-    (pretty-or
+    (gns/create-or
      (check-supers
       (call-with-collector
        (fn [collect]
@@ -152,7 +121,7 @@
                                                             (rest tail))]
                                         (recur keeping
                                                (cons (first tail) done)))))]
-                         (collect (pretty-and term)))
+                         (collect (gns/create-and term)))
                        
                        (= false node) ; case #2
                        nil ;; do not collect, and prune recursion

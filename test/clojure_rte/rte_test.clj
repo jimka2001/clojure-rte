@@ -24,13 +24,14 @@
             [clojure-rte.rte-construct :as rte
              :refer [nullable? first-types
                      canonicalize-pattern canonicalize-pattern-once
-                     derivative rte-to-dfa
+                     derivative
                      with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
-                     rte-combine-labels dfa-to-rte
+                     rte-combine-labels
                      with-rte]]
+            [clojure-rte.rte-extract :refer [dfa-to-rte]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.util :refer [member count-if-not]]
+            [clojure-rte.util :refer [member count-if-not print-vals]]
             [clojure-rte.genus :as gns]
             [clojure-rte.rte-tester :refer [gen-rte]]
             [backtick :refer [template]]
@@ -1223,15 +1224,17 @@
 (deftest t-circular-dfa-rte-flow
   (testing "circular dfa rte flow"
     (let [null-dfa (rte-to-dfa :empty-set)]
-      (doseq [depth (range 4)
-              rep (range 100)
-              rte-1 (gen-rte depth gns/*test-types*)
-              :let [dfa (xym/minimize (xym/trim (rte-to-dfa rte-1)))
-                    rte-2 (get (rte/dfa-to-rte dfa) true)
+      (doseq [depth (range 1)
+              rep (range 10)
+              :let [rte-1 (gen-rte depth gns/*test-types*)
+                    dfa (xym/minimize (xym/trim (rte-to-dfa rte-1)))
+                    ret-val-map (dfa-to-rte dfa)
+                    rte-2 (or (get ret-val-map true)
+                              :empty-set)
                     rte-1-2 (template (:and ~rte-1 (:not ~rte-2)))
                     rte-2-1 (template (:and ~rte-2 (:not ~rte-1)))
-                    dfa-2-1 (xym/minimize (xym/trim rte-1-2))
-                    dfa-1-2 (xym/minimize (xym/trim rte-2-1))]]
+                    dfa-2-1 (xym/minimize (xym/trim (rte-to-dfa rte-1-2)))
+                    dfa-1-2 (xym/minimize (xym/trim (rte-to-dfa rte-2-1)))]]
         (is (xym/dfa-equivalent dfa-2-1 null-dfa)
             800)
         (is (xym/dfa-equivalent dfa-1-2 null-dfa)
@@ -1239,5 +1242,6 @@
             
 
 (defn -main []
+  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))

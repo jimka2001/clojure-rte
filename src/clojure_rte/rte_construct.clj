@@ -1931,14 +1931,7 @@
 
 (defn rte-combine-labels ""
   [label1 label2]
-  (cond
-    (and (gns/or? label1)
-         (gns/or? label2)) `(~@label1 ~@(rest label2))
-    (and (gns/or? label1)
-         (not (gns/or? label2))) `(~@label1 ~label2)
-    (and (not (gns/or? label1))
-         (gns/or? label2)) `(~(first label2) ~label1 ~@(rest label2))
-    :else `(~'or ~label1 ~label2)))
+  (canonicalize-pattern (rte/create-or [label1 label2])))
 
 (defn-memoized [rte/compile rte-to-dfa]
   "Use the Brzozowski derivative aproach to compute a finite automaton
@@ -1947,7 +1940,6 @@
   ([pattern]
    (rte-to-dfa pattern true))
   ([pattern exit-value]
-
    (let [given-pattern pattern
          pattern (canonicalize-pattern pattern)
          [triples derivatives] (find-all-derivatives pattern)
@@ -1982,17 +1974,6 @@
                                          :pattern deriv
                                          :transitions transitions})]))
                    derivatives (range (count derivatives))))})))))
-
-(defn dfa-to-rte
-  "Accepts an object of type Dfa, and returns a map which associates
-  exit values of the dfa with canonicalized rte patterns of the accepting
-  langauge.  If there are no accepting states in the Dfa, an empty map {}
-  is returned."
-  [dfa]
-  (assert (instance? (xym/record-name) dfa)
-          (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
-  (xym/extract-rte dfa canonicalize-pattern))
-
 
 (defn dispatch [obj caller]
   (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
