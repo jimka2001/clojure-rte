@@ -181,13 +181,13 @@
               (cl-format false
                          "dfa not equivalent with self rte=~A" rte))
 
-      (assert (xym/dfa-equivalent dfa-not-rte
-                                  dfa-not-rte)
+      (assert (xym/dfa-equivalent? dfa-not-rte
+                                   dfa-not-rte)
               (cl-format false
                          "dfa of :not, not equivalent with self rte=~A" (list :not rte)))
 
-      (assert (xym/dfa-equivalent dfa-complement
-                                  dfa-not-rte)
+      (assert (xym/dfa-equivalent? dfa-complement
+                                   dfa-not-rte)
               (cl-format false
                          "!dfa != (dfa (not rte)), when rte=~A" rte))
 
@@ -196,13 +196,13 @@
             dfa-not (rte-to-dfa (list :not extracted-rte))
             ]
         
-        (assert (xym/dfa-equivalent dfa dfa-not)
+        (assert (xym/dfa-equivalent? dfa dfa-not)
                 (cl-format false
                            "(rte (dfa (not rte))) != dfa, when rte=~A" rte))
         ))))
 
 (defn test-rte-not
-  "Testing several functions, xym/complement, dfa-to-rte, dfa-equivalent"
+  "Testing several functions, xym/complement, dfa-to-rte, dfa-equivalent?"
   [num-tries size verbose]
   (tester/random-test num-tries
                       test-rte-not-1

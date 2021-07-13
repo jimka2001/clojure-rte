@@ -24,7 +24,7 @@
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-by-mapped defn-memoized]]
+            [clojure-rte.util :refer [fixed-point member group-by-mapped defn-memoized print-vals]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
@@ -803,8 +803,9 @@
                           ((:exit-map dfa-1)
                            (:index q1)))))
 
-(defn dfa-equivalent
+(defn dfa-equivalent?
   "Returns a Boolean indicating whether the two given Dfas
   recognize the same language."
   [dfa-1 dfa-2]
   (every? (comp not :accepting) (states-as-seq (synchronized-xor dfa-1 dfa-2))))
+
