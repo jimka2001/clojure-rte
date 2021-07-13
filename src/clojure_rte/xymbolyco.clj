@@ -653,7 +653,7 @@
   langauge. If there are no accepting states in the Dfa, an empty map {}
   is returned."
   [dfa' canonicalize-pattern]
-  ;; TODO - this can be done easiser
+  ;; TODO - this can be done easier
   ;;    1. minimize and trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
   ;;    3. add transitions from extra-state-I to all initial states with :epsilon transition

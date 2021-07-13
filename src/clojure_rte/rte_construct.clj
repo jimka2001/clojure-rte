@@ -1881,14 +1881,21 @@
   respect to all of their first-types.  Continue this process until no
   more derivatives can be found.  Warning, the given pattern might not
   be an element of the return value.  I.e., the 0'th derivative is not
-  guaranteed to be among the values returned."
+  guaranteed to be among the values returned.
+  This function returns a pair [triples done]
+  triples: a sequence of triples, where each triple is [rte-1 td rte-2]
+      rte-2 = derivative of rte-1 with respect to td
+              (derivative rte-1 td) --> rte-2
+  done: a sequence of all rte-2 values
+      which might or might not include rte-1
+  "
   [pattern]
   (loop [to-do-patterns (list pattern)
          done #{}
          triples [] 
          ]
     (if (empty? to-do-patterns)
-      [ triples (seq done)]
+      [ triples (seq done)] ;; The return value of find-all-derivatives
       (let [[pattern & to-do-patterns] to-do-patterns]
         (if (done pattern)
           (recur to-do-patterns done triples)
@@ -1906,6 +1913,21 @@
               (recur (concat new-derivatives to-do-patterns)
                      (conj done pattern)
                      (concat triples new-triples)))))))))
+
+(defn human-readable-find-all-derivatives
+  "Similar to find-all-derivatives but returns a value which is easier for the
+  human to understand. The return value is a map (key/value pairs)
+  Each key is an rte, either the given pattern or some n'th derivative thereof.
+  Each value is is a map of key/value pairs.
+     Each key is a potential first-type of the rte,
+     Each value is the derivative of the rte wrt that first-type."
+  [pattern]
+  (into {} (map (fn [[k seq-of-triples]]
+                  [k 
+                   (into {} (map (fn [pair] [(first pair) (second pair)])
+                                 (map rest seq-of-triples)))])
+                (group-by first
+                          (first (rte/find-all-derivatives '(:* (:cat Number Long (not (= 0))))))))))
 
 (defn rte-combine-labels ""
   [label1 label2]
