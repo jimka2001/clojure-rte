@@ -147,3 +147,9 @@
     (if (= {} ret-val-rte)
       {true :empty-set}
       ret-val-rte)))
+
+(defn rte-equivalent?
+  "Compare two rte patterns build comparing their constructed Dfa's."
+  [rte-1 rte-2]
+  (xym/dfa-equivalent? (rte/rte-to-dfa rte-1)
+                       (rte/rte-to-dfa rte-2)))
