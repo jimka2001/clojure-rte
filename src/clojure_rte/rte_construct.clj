@@ -1146,7 +1146,7 @@
 
                               (and (rte/and? self)
                                    (rte/*? r)
-                                   (member r stars))
+                                   (member (operand r) (operands self)))
                               []
 
                               :else
@@ -1417,7 +1417,8 @@
         self
 
         (exists [r (operands self)]
-                (and (gns/valid-type? r)
+                (and (not= :sigma r)
+                     (gns/valid-type? r)
                      (gns/inhabited? r false)))
         (create self (remove-element :sigma (operands self)))
 
