@@ -957,6 +957,14 @@
            '(and (and) (or)))
         941)))
 
+(deftest t-mdtd
+  (testing "mdtd"
+    (with-compile-env ()
+      (is (= (set (gns/mdtd #{'java.lang.Exception 'clojure.lang.ExceptionInfo}))
+             #{`(~'not java.lang.Exception)
+               `(~'and java.lang.Exception (~'not clojure.lang.ExceptionInfo))
+               'clojure.lang.ExceptionInfo})))))
+
 (deftest t-type-membership
   (testing "random type membership"
     

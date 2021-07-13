@@ -259,14 +259,6 @@
       (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:? :epsilon :epsilon))))
       (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:+ :epsilon :epsilon)))))))
 
-(deftest t-mdtd
-  (testing "mdtd"
-    (with-compile-env ()
-      (is (= (set (mdtd #{:sigma 'java.lang.Exception 'clojure.lang.ExceptionInfo}))
-             #{`(~'not java.lang.Exception)
-               `(~'and java.lang.Exception (~'not clojure.lang.ExceptionInfo))
-               'clojure.lang.ExceptionInfo})))))
-
 (deftest t-boolean-types
   (testing "rte/match with Boolean types"
     (with-compile-env []

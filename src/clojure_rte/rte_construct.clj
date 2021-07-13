@@ -1874,76 +1874,6 @@
                                 :* (fn [operand _functions]
                                      `(:cat ~(derivative operand wrt) (:* ~operand)))))))))
 
-(defn mdtd 
-  "Given a set of type designators, return a newly computed list of type
-  designators which implement the Maximal Disjoint Type Decomposition.
-  I.e., the computed list designates a set whose union is the same as
-  the given set, but all the elements are mutually disjoint."
-  [type-set]
-  ;; find a disjoint type
-  (letfn [(independent? [t1]
-            (every? (fn [t2]
-                      (or (= t1 t2)
-                          (disjoint?-false-warn t1 t2))) type-set))
-          (count-if [pred items]
-            (reduce (fn [acc item]
-                      (if (pred item)
-                        (inc acc)
-                        acc)) 0 items))
-          (collect-left-right [collect left right]
-            (cond
-              (and (empty? right)
-                   (= 1 (count left)))
-              (collect (first left))
-
-              (and (empty? left)
-                   (= 1 (count right)))
-              (collect (list 'not (first right)))
-
-              (and (empty? right)
-                   (empty? left))
-              :sigma
-
-              (> (+ (count-if rte? left)
-                    (count-if rte? right)) 1)
-              (let [[left-rtes left] (partition-by-pred rte? left)
-                    [right-rtes right] (partition-by-pred rte? right)
-                    left-patterns (map second left-rtes)
-                    right-patterns (map second right-rtes)]
-                (cond (empty? left-rtes)
-                      (let [new-rte (canonicalize-pattern `(:or ~@right-patterns))]
-                        (collect-left-right collect
-                                            left
-                                            (cons (list 'rte new-rte) right)))
-
-                      (empty? right-rtes)
-                      (let [new-rte (canonicalize-pattern `(:and ~@left-patterns))]
-                        (collect-left-right collect
-                                            (cons (list 'rte new-rte) left)
-                                            right))
-
-                      :else
-                      (let [new-rte (canonicalize-pattern
-                                     `(:and ~@left-patterns
-                                            (:not (:or ~@right-patterns))))]
-                        (collect-left-right collect
-                                            (cons (list 'rte new-rte) left)
-                                            right))))
-
-              :else
-              (let [right (map (fn [x]
-                                 (list 'not x)) right)]
-                (collect (template (and ~@left ~@right))))))]
-
-    (let [independent (filter independent? type-set)
-          dependent (remove (set independent) type-set)]
-      (concat independent (call-with-collector
-                           (fn [collect]
-                             (gns/map-type-partitions
-                              (seq dependent)
-                              (fn [left right]
-                                (collect-left-right collect left right)))))))))
-
 (defn find-all-derivatives 
   "Start with the given rte pattern, and compute its derivative with
   respect to all the values returned by first-types.  Continue
@@ -1971,7 +1901,7 @@
                       )
                     )]
             (let [firsts (first-types pattern)
-                  disjoined (mdtd (conj firsts :sigma))
+                  disjoined (gns/mdtd firsts)
                   [new-triples new-derivatives] (reduce xx [[] ()] disjoined)]
               (recur (concat new-derivatives to-do-patterns)
                      (conj done pattern)

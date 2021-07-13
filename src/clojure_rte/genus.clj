@@ -2237,3 +2237,37 @@
     true
     :dont-know))
 
+(defn mdtd 
+  "Given a set of type designators, return a newly computed list of type
+  designators which implement the Maximal Disjoint Type Decomposition.
+  I.e., the computed list designates a set whose union is the universe,
+  and all the elements are mutually disjoint.
+  Every set, x, in the return value has the property that if y is in
+  the given type-set, then either x and y are disjoint, or x is a subset of y."
+  [type-set]
+  (loop [decomposition [:sigma]
+         type-set (disj type-set :sigma)]
+    (if (empty? type-set)
+      decomposition
+      (let [td (first type-set) ;; take any element, doesn't matter which
+            n (canonicalize-type (gns/create-not td) :dnf)
+            f (fn [td-1]
+                (let [a (delay (canonicalize-type (gns/create-and [td td-1]) :dnf))
+                      b (delay (canonicalize-type (gns/create-and [n td-1]) :dnf))]
+                  (cond (disjoint? td td-1 false)
+                        [td-1]
+                        
+                        (disjoint? n td-1 false)
+                        [td-1]
+                        
+                        (not (inhabited? @a true))
+                        [td-1]
+                        
+                        (not (inhabited? @b true))
+                        [td-1]
+                        
+                        :else
+                        [@a @b])))]
+        (recur (mapcat f decomposition)
+               (disj type-set td))))))
+
