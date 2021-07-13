@@ -2123,7 +2123,7 @@
     true
     :dont-know))
 
-(defn mdtd 
+(defn mdtd
   "Given a set of type designators, return a newly computed list of type
   designators which implement the Maximal Disjoint Type Decomposition.
   I.e., the computed list designates a set whose union is the universe,
