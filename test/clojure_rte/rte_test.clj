@@ -29,11 +29,13 @@
                      rte-inhabited? rte-vacuous? rte-to-dfa
                      rte-combine-labels
                      with-rte]]
-            [clojure-rte.rte-extract :refer [dfa-to-rte]]
+            [clojure.pprint :refer [cl-format]]
+            [clojure-rte.rte-extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [member count-if-not print-vals]]
             [clojure-rte.genus :as gns]
             [clojure-rte.rte-tester :refer [gen-rte]]
+            [clojure-rte.dot :as dot]
             [backtick :refer [template]]
             [clojure-rte.xymbolyco :as xym]))
 
@@ -859,7 +861,9 @@
     (is (= (rte/conversion-combo-7 '(:or a b (:* b) c))
            '(:or a (:* b) c)))
     (is (= (rte/conversion-combo-7 '(:and a b (:* b) c))
-           '(:and a b c)))))
+           '(:and a b c)))
+    (is (not= (rte/conversion-combo-7 '(:and (:* (:contains-any)) (:not :epsilon)))
+              '(:not :epsilon)))))
 
 (deftest t-conversion-combo-11
   (testing "conversion combo 11"
@@ -1032,7 +1036,9 @@
     (is (= (rte/conversion-and-13 '(:and (= 1) :sigma (= 2) :sigma))
            '(:and (= 1) (= 2))))
     (is (= (rte/conversion-and-13 '(:and a b c))
-           '(:and a b c)))))
+           '(:and a b c)))
+    (is (not= (rte/conversion-and-13 '(:and :sigma (:not (:or :epsilon :sigma))))
+              '(:not (:or :epsilon :sigma))))))
 
 (deftest t-conversion-and-17
   (testing "conversion and 17"
@@ -1221,25 +1227,64 @@
            '(:or (member 11 2 3) (:not (member 11 21))))
         801)))
 
+(defn test-circular-dfa-rte-flow
+  [rte-1]
+  (let [dfa (xym/minimize (xym/trim (rte-to-dfa rte-1)))
+        rte-2 (get (dfa-to-rte dfa) true)
+        rte-1-2 (template (:and ~rte-1 (:not ~rte-2)))
+        rte-2-1 (template (:and ~rte-2 (:not ~rte-1)))
+        dfa-2-1 (xym/minimize (xym/trim (rte-to-dfa rte-1-2)))
+        dfa-1-2 (xym/minimize (xym/trim (rte-to-dfa rte-2-1)))
+        rte-2-1b (get (dfa-to-rte dfa-2-1) true)
+        rte-1-2b (get (dfa-to-rte dfa-1-2) true)
+        null-dfa (rte-to-dfa :empty-set)]
+    (if (xym/dfa-equivalent? dfa-2-1 null-dfa)
+      true
+      (do
+        (dot/dfa-to-dot null-dfa :title "null" :view true)
+        (dot/dfa-to-dot dfa-2-1 :title "800" :view true)
+        (is (xym/dfa-equivalent? dfa-2-1 null-dfa)
+            (cl-format false "800: ~%rte-1=~A~%     =~A~%rte-2=~A~%2-1=~A"
+                       rte-1 (canonicalize-pattern rte-1) rte-2
+                       rte-2-1b))))
+    (if (xym/dfa-equivalent? dfa-1-2 null-dfa)
+      true
+      (do (dot/dfa-to-dot null-dfa :title "null" :view true)
+          (dot/dfa-to-dot dfa-1-2 :title "802" :view true)
+          (is (xym/dfa-equivalent? dfa-1-2 null-dfa)
+              (cl-format false "802: ~%rte-1=~A~%     =~A~%rte-2=~A~%1-2=~A"
+                         rte-1 (canonicalize-pattern rte-1) rte-2
+                         rte-1-2b))))))
+
 (deftest t-circular-dfa-rte-flow
   (testing "circular dfa rte flow"
-    (let [null-dfa (rte-to-dfa :empty-set)]
-      (doseq [depth (range 1)
-              rep (range 10)
-              :let [rte-1 (gen-rte depth gns/*test-types*)
-                    dfa (xym/minimize (xym/trim (rte-to-dfa rte-1)))
-                    ret-val-map (dfa-to-rte dfa)
-                    rte-2 (or (get ret-val-map true)
-                              :empty-set)
-                    rte-1-2 (template (:and ~rte-1 (:not ~rte-2)))
-                    rte-2-1 (template (:and ~rte-2 (:not ~rte-1)))
-                    dfa-2-1 (xym/minimize (xym/trim (rte-to-dfa rte-1-2)))
-                    dfa-1-2 (xym/minimize (xym/trim (rte-to-dfa rte-2-1)))]]
-        (is (xym/dfa-equivalent dfa-2-1 null-dfa)
-            800)
-        (is (xym/dfa-equivalent dfa-1-2 null-dfa)
-            802)))))
-            
+    (doseq [depth (range 1)
+              rep (range 10)]
+        (test-circular-dfa-rte-flow (gen-rte depth gns/*test-types*)))))
+
+(deftest t-discovered-case-1261
+  (test-circular-dfa-rte-flow '(:* (:contains-any))))
+
+(deftest t-discovered-case-1262
+  (test-circular-dfa-rte-flow '(:? :sigma)))
+
+(deftest t-discovered-case-1260
+  (testing "test 1260"
+    (let [rte-1 '(:+ (:cat))
+          rte-2 :epsilon
+          dfa-1 (rte-to-dfa rte-1)
+          dfa-2 (rte-to-dfa rte-2)]
+      (is (xym/dfa-equivalent? dfa-1 dfa-2)
+          800)
+      (is (rte-equivalent? (get (dfa-to-rte dfa-1) true)
+                           (get (dfa-to-rte dfa-2) true))
+          801))))
+
+
+(deftest t-discovered-case-1263
+  (testing "test 1263"
+    (is (= (rte/canonicalize-pattern '(:and (:or :epsilon :sigma) (:not (:or :epsilon :sigma))))
+           :empty-set))))
 
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
