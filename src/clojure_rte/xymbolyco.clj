@@ -24,7 +24,9 @@
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-by-mapped defn-memoized print-vals]]
+            [clojure-rte.util :refer [fixed-point member group-by-mapped
+                                      defn-memoized print-vals
+                                      exists setof]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
@@ -803,9 +805,33 @@
                           ((:exit-map dfa-1)
                            (:index q1)))))
 
+(defn paths-to-accepting
+  [dfa]
+  (defn extend-path-1 [path]
+    (for [[type next-state-id] (:transitions (first path))
+          :when (not (exists [st path]
+                             (= next-state-id (:index st))))]
+      (cons (state-by-index dfa next-state-id) path)))
+    
+  (defn extend-paths-1 [paths]
+    (mapcat extend-path-1 paths))
+  
+  (defn extend-paths
+    [paths]
+    (if (empty? paths)
+      paths
+      (concat (setof [p paths]
+                     (:accepting (first p)))
+              (extend-paths (extend-paths-1 paths)))))
+  
+  (let [initials (filter :initial (states-as-seq dfa))]
+    (extend-paths (map list initials))))    
+
 (defn dfa-equivalent?
   "Returns a Boolean indicating whether the two given Dfas
   recognize the same language."
   [dfa-1 dfa-2]
-  (every? (comp not :accepting) (states-as-seq (synchronized-xor dfa-1 dfa-2))))
-
+  (let [xor (synchronized-xor dfa-1 dfa-2)]
+    (or (every? (comp not :accepting) (states-as-seq xor))
+        ;; in case there is a non-accessiable accepting state
+        (empty? (paths-to-accepting xor)))))
