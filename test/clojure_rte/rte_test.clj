@@ -28,7 +28,7 @@
                      with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
                      rte-combine-labels dfa-to-rte
-                     mdtd with-rte reduce-redundant-or]]
+                     with-rte]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [member count-if-not]]
             [clojure-rte.genus :as gns]
@@ -679,22 +679,6 @@
     (testing "canonicalize-pattern large special case"
       (canonicalize-pattern
        pattern-714)))
-
-(deftest t-reduce-redundant-or
-  (testing "reduce-redundant-or"
-    (is (= (reduce-redundant-or '((:and :epsilon :epsilon) (:and :sigma :epsilon)))
-           '((:and :epsilon :epsilon))))
-    (is (= (reduce-redundant-or '(:sigma :epsilon (:and :sigma :epsilon)))
-           '(:sigma :epsilon)))
-    (is (= (reduce-redundant-or '(X (:and A X B)))
-           '(X)))
-    (is (= (reduce-redundant-or '((:and X) (:and A X B)))
-           '((:and X))))
-    (is (= (reduce-redundant-or '((:and A B C) (:and X Y Z)))
-           '((:and A B C) (:and X Y Z))))
-    (is (= (reduce-redundant-or '((:and A X C) (:and A Y C)))
-           '((:and A X C) (:and A Y C))))))
-
 
 (deftest t-conversion-*1
   (testing "conversion *1"
