@@ -220,20 +220,27 @@
   Once a simplifier has _simplified_ an object, find-simplifier returns
   the newly generated object, and the remaining simplifiers are silently
   ignored."
-  [obj simplifiers]
-  (if (empty? simplifiers)
-    obj
-    (loop [[f & fs] simplifiers]
-      (let [new-obj (f obj)]
-        (cond
-          (not= new-obj obj)
-          new-obj
+  ([obj simplifiers]
+   (find-simplifier obj simplifiers false))
+  ([obj simplifiers verbose]
+   ;;(cl-format true "~A ~A~%" (stacksize) obj)
+   (if (empty? simplifiers)
+     obj
+     (loop [[f & fs] simplifiers
+            i 0]
+       (let [new-obj (f obj)]
+         (cond
+           (not= new-obj obj)
+           (do
+             (if verbose
+               (cl-format true "[~A] ~A~%   --> ~A~%" i obj new-obj))
+             new-obj)
 
-          (empty? fs)
-          obj
+           (empty? fs)
+           obj
 
-          :else
-          (recur fs))))))
+           :else
+           (recur fs (inc i))))))))
 
 (defn fixed-point
   "Find the fixed point of the given function starting at the given value.
