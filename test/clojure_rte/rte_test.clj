@@ -32,7 +32,8 @@
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [member count-if-not]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.rte-tester :refer []]
+            [clojure-rte.rte-tester :refer [gen-rte]]
+            [backtick :refer [template]]
             [clojure-rte.xymbolyco :as xym]))
 
 (defn -main []
@@ -1234,6 +1235,24 @@
     (is (= (rte/conversion-dual-16b '(:or (member 11 2 3) (member 10 20) (:not (member 11 21))))
            '(:or (member 11 2 3) (:not (member 11 21))))
         801)))
+
+(deftest t-circular-dfa-rte-flow
+  (testing "circular dfa rte flow"
+    (let [null-dfa (rte-to-dfa :empty-set)]
+      (doseq [depth (range 4)
+              rep (range 100)
+              rte-1 (gen-rte depth gns/*test-types*)
+              :let [dfa (xym/minimize (xym/trim (rte-to-dfa rte-1)))
+                    rte-2 (get (rte/dfa-to-rte dfa) true)
+                    rte-1-2 (template (:and ~rte-1 (:not ~rte-2)))
+                    rte-2-1 (template (:and ~rte-2 (:not ~rte-1)))
+                    dfa-2-1 (xym/minimize (xym/trim rte-1-2))
+                    dfa-1-2 (xym/minimize (xym/trim rte-2-1))]]
+        (is (xym/dfa-equivalent dfa-2-1 null-dfa)
+            800)
+        (is (xym/dfa-equivalent dfa-1-2 null-dfa)
+            802)))))
+            
 
 (defn -main []
   (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
