@@ -176,7 +176,7 @@
       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
       ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
       
-      (assert (xym/dfa-equivalent dfa
+      (assert (xym/dfa-equivalent? dfa
                                   dfa)
               (cl-format false
                          "dfa not equivalent with self rte=~A" rte))
