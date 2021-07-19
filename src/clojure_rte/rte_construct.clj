@@ -1949,8 +1949,8 @@
          triples (map (fn [[primative wrt deriv]]
                         [(index-map primative) wrt (index-map deriv)]
                         ) triples)
-         grouped (group-by (fn [trip]
-                             (trip 0)) triples)]
+         grouped-by-src (group-by first triples)]
+
      (xym/extend-with-sink-state
       (xym/map->Dfa
        {:pattern given-pattern
@@ -1960,14 +1960,24 @@
         :states
         (into {}
               (map (fn [deriv index]
-                     (let [transitions (if (and (grouped index)
-                                                (apply = (map (fn [[_src _wrt dst]]
-                                                                dst) (grouped index))))
-                                         ;; if all transitions have same dst, then don't draw
-                                         ;; multiple transitions, just draw with with label = :sigma
-                                         (list [:sigma ((first (grouped index)) 2)])
-                                         (map (fn [[_src wrt dst]]
-                                                [wrt dst]) (grouped index)))]
+                     (let [from-src (map rest (grouped-by-src index))
+                           grouped-by-dst (group-by second from-src)
+                           ;; grouped-by-dst is of the form
+                           ;;  { dst-id-1 [(td-a dst-id-1)
+                           ;;              (td-b dst-id-1)
+                           ;;              (td-c dst-id-2)...],
+                           ;;    dst-id-2 [(td-d dst-id-2)
+                           ;;              (td-e dst-id-2) ...] ...
+                           ;;  }
+                           ;; derive transitions of the form
+                           ;; [[td-x dst-id-1] [td-y dst-id-2] ...]
+                           ;; where td-x is (or td-a td-b td-c ...) canonicalized
+                           ;;   and td-y is (or td-d td-e ...) canonicalized
+                           transitions (map (fn [[dst pairs]]
+                                                [(gns/canonicalize-type
+                                                  (gns/create-or (map first pairs)) :dnf) dst])
+                                              grouped-by-dst)
+                           ]
                        [index
                         (xym/map->State {:index index
                                          :initial (= 0 index)

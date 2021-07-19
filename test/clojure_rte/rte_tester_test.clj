@@ -21,6 +21,8 @@
 
 (ns clojure-rte.rte-tester-test
   (:require [clojure-rte.rte-core ]
+            [clojure-rte.rte-construct :as rte ]
+            [clojure-rte.xymbolyco :as xym]
             [clojure-rte.rte-construct :refer [canonicalize-pattern]]
             [clojure-rte.rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
                                             test-canonicalize-pattern
@@ -87,6 +89,26 @@
                                     false ;verbose
                                     )))
 
+(deftest t-discovered-case-390
+  (testing "discovered case 390"
+    (let [rte-1 '(:or (= -1) 
+                       (:not (:? (satisfies keyword?)))
+                       (= a))
+          ;; rte-2 reduces to (:or :epsilon clojure.lang.Keyword)
+          rte-2 (rte/create-not rte-1)
+          rte-1-complement (xym/complement (rte/rte-to-dfa rte-1))
+          ]
+      (is (rte/match rte-2 []))
+      (is (rte/match rte-2 [:x]))
+      (is (not (rte/match rte-1 [])))
+      (is (not (rte/match rte-1 [:x])))
+      (is (rte/match rte-1 [1 2 3]))
+      (is (not (rte/match rte-2 [1 2 3])))
+
+      (is (rte/match rte-1-complement []))
+      (is (rte/match rte-1-complement [:x]))
+      (is (not (rte/match rte-1-complement [1 2 3]))))))
+
 (deftest t-rte-not-random
   (testing ":not random"
     (doseq [rte '(:sigma
@@ -108,10 +130,39 @@
                                                      (:and (member (1 2 3) (2 1 3)))))
                                  :epsilon 
                                  (satisfies seq?))
+                  (:contains-every (:+ (= 1))
+                                   (:+ (= 2)))
+                  (:contains-every
+                   (:+ (:+ (member 4.5 6.5)))
+                   :epsilon
+                   (:+ :epsilon)
+                   (:+ (:and
+                        (:contains-every (:contains-none))
+                        (member 2 3 4))))
+                  (:or (= -1) 
+                       (:not (:? (satisfies keyword?)))
+                       (= a))
+                  (:or (= -1)
+                       (:not (:? (satisfies keyword?)))
+                       (member a b c a b c)
+                       (:+ :empty-set))
+                  (:or (:or (:or (:not :sigma) (= -1))
+                            (:not (:? (satisfies keyword?))))
+                       (member a b c a b c)
+                       (:cat (:+ (:cat (:not (:* (:and)))))
+                             (:+ (:and :empty-set))))
 
+                  (:or (:or (:or (:not :sigma) (= -1))
+                            (:not (:? (satisfies keyword?)))
+                            (:* (:and :empty-set)))
+                       (:+ (:+ (:and (:contains-any))))
+                       (member a b c a b c)
+                       (:cat (:+ (:cat (:not (:* (:and)))))
+                             (:+ (:and :empty-set))
+                             (:or (:+ (:and)) (:and (:+ (:or))))))
                   )]
       (println [:rte rte])
-      (clojure-rte.rte-tester/test-rte-not-1 rte))
+      (clojure-rte.rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))
 
 
     (test-rte-not 1000 4

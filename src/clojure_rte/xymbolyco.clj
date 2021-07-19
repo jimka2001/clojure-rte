@@ -444,10 +444,8 @@
                           [(:index q)
                            (if (member q incomplete)
                              (let [existing-labels (map first (:transitions q))
-                                   new-label (if (empty? existing-labels)
-                                               :sigma
-                                               (bdd/canonicalize-type
-                                                (template (and :sigma (not (or ~@existing-labels))))))]
+                                   new-label (gns/canonicalize-type
+                                              (template (and :sigma (not (or ~@existing-labels)))) :dnf)]
                                (if (= :empty-set new-label)
                                  q
                                  (assoc q

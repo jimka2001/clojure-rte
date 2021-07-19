@@ -24,7 +24,7 @@
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.genus :as gns]
-            ;; [clojure-rte.dot :as dot]
+            [clojure-rte.dot :as dot]
             [clojure-rte.rte-extract :refer [dfa-to-rte]]
             [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa  nullable?
                                                canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
@@ -165,41 +165,48 @@
 (defn test-rte-not-1
   "Assert that the same result occurs from complementing a dfa
   or building a Dfa from a complemented rte."
-  [rte]
-  (with-compile-env []
-    ;; is (not rte) equivalent to (complement dfa) ?
-    (let [dfa (rte-to-dfa rte)
-          dfa-complement (xym/complement dfa)
-          dfa-not-rte (rte-to-dfa (list :not rte))
-          ]
-      ;;(dot/dfa-to-dot dfa :view true :title "dfa")
-      ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
-      ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
-      
-      (assert (xym/dfa-equivalent? dfa
-                                  dfa)
+  ([rte] (test-rte-not-1 rte (fn [expr msg]
+                               (assert expr msg))))
+  ([rte is-fn]
+   (with-compile-env []
+     ;; is (not rte) equivalent to (complement dfa) ?
+     (let [dfa (rte-to-dfa rte)
+           dfa-complete (xym/complete dfa)
+           dfa-complement (xym/complement dfa)
+           dfa-not-rte (rte-to-dfa (list :not rte))
+           ]
+       ;;(dot/dfa-to-dot dfa :view true :title "dfa" :state-legend false)
+       ;;(dot/dfa-to-dot dfa-complete :view true :title "dfa-complete" :state-legend false)
+       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement" :state-legend false)
+       ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte" :state-legend false)
+       
+       (is-fn (xym/dfa-equivalent? dfa
+                                   dfa)
               (cl-format false
                          "dfa not equivalent with self rte=~A" rte))
 
-      (assert (xym/dfa-equivalent? dfa-not-rte
+       (is-fn (xym/dfa-equivalent? dfa-not-rte
                                    dfa-not-rte)
               (cl-format false
                          "dfa of :not, not equivalent with self rte=~A" (list :not rte)))
 
-      (assert (xym/dfa-equivalent? dfa-complement
+       
+       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
+       ;; (dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
+       (is-fn (xym/dfa-equivalent? dfa-complement
                                    dfa-not-rte)
               (cl-format false
                          "!dfa != (dfa (not rte)), when rte=~A" rte))
 
-      (let [extracted-rte-map (dfa-to-rte dfa-complement)
-            extracted-rte (get extracted-rte-map true :empty-set)
-            dfa-not (rte-to-dfa (list :not extracted-rte))
-            ]
-        
-        (assert (xym/dfa-equivalent? dfa dfa-not)
+       (let [extracted-rte-map (dfa-to-rte dfa-complement)
+             extracted-rte (get extracted-rte-map true :empty-set)
+             dfa-not (rte-to-dfa (list :not extracted-rte))
+             ]
+         
+         (is-fn (xym/dfa-equivalent? dfa dfa-not)
                 (cl-format false
                            "(rte (dfa (not rte))) != dfa, when rte=~A" rte))
-        ))))
+         )))))
 
 (defn test-rte-not
   "Testing several functions, xym/complement, dfa-to-rte, dfa-equivalent?"

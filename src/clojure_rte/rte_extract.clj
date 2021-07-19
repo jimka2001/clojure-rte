@@ -56,8 +56,9 @@
                                 ;; we designate new final states each as [:F some-exit-value]
                                 [(:index q) :epsilon [:F ((:exit-map dfa) (:index q))]])]
     (letfn [          ;; local function
-            (combine-labels [operands]
-              (reduce (:combine-labels dfa) (cons :empty-set operands)))
+            (combine-parallel-labels [operands]
+              (rte/canonicalize-pattern
+               (rte/create-or operands)))
 
             ;; local function
             (extract-labels [triples]
@@ -74,7 +75,7 @@
               ;;   creating NxM new triples.   This reduces N and M by eliminating parallel
               ;;   transitions.
               (for [[[from to] triples] (group-by (fn [[from _ to]] [from to]) triples)
-                    :let [label (combine-labels (extract-labels triples))]
+                    :let [label (combine-parallel-labels (extract-labels triples))]
                     ]
                 [from label to]))
 
@@ -105,7 +106,7 @@
                             transition-triples)
 
                     ;; #7
-                    self-loop-label (combine-labels (extract-labels q-to-q))
+                    self-loop-label (combine-parallel-labels (extract-labels q-to-q))
                     ;; #8
                     new-triples (for [[src pre-label _] (combine-parallel x-to-q)
                                       [_ post-label dst] (combine-parallel q-to-x)]
@@ -129,11 +130,11 @@
         (into {}
               (doall 
                (for [[exit-value triples] grouped
-                     :let [pretty (combine-labels (extract-labels triples))]
+                     :let [pretty (combine-parallel-labels (extract-labels triples))]
                      ]
                  ;; one label per return value
                  ;; #10
-                 [exit-value (rte/canonicalize-pattern pretty)])))))))
+                 [exit-value pretty])))))))
 
 (defn dfa-to-rte
   "Accepts an object of type Dfa, and returns a map which associates

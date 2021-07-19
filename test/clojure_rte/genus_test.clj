@@ -31,6 +31,14 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
 
+(deftest t-discovered-case-134
+  (testing "discovered case 134"
+    ;;disjoint? cannot decide (and (not (member 1 2 3 a b c)) (not BigDecimal)) vs java.lang.Object -- assuming not disjoint
+    (is (= (gns/disjoint? '(and (not (member 1 2 3 a b c)) (not BigDecimal))
+                          'java.lang.Object
+                          :dont-know)
+           false))))
+
 (deftest t-disjoint?
   (when (and (resolve 'java.lang.CharSequence)
              (resolve 'java.io.Serializable)
