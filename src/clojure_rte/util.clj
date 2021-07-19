@@ -544,3 +544,8 @@
 
 (defn count-if-not [pred xs]
   (count-if (fn [x] (not (pred x))) xs))
+
+(defn assert-debug "call the assertion function as side effect, and return the given value."
+  [expr assertion]
+  (assertion expr)
+  expr)
