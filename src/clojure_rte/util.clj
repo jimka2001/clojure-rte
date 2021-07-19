@@ -206,6 +206,15 @@
           [[] []]
           items))
 
+(defn stacksize
+  "return the depth of the stack.  This function is useful for debugging
+  to detect if two recursive calls are at the same depth."
+  ;; This code is copied from https://gist.github.com/devth/8865799
+  ;; Thanks to https://gist.github.com/devth
+  []
+  (try (throw (Exception. ""))
+       (catch Exception e (count (.getStackTrace e)))))
+
 (defn find-simplifier
   "Iterate through a sequence of so-called simplifies.  Each simplifier
   is a unary function which accepts the given obj as arguments.  Each
