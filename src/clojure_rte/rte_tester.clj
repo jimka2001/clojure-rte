@@ -23,6 +23,7 @@
   (:require [clojure-rte.tester  :as tester]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
+            [clojure-rte.util :refer [print-vals]]
             [clojure-rte.genus :as gns]
             [clojure-rte.dot :as dot]
             [clojure-rte.rte-extract :refer [dfa-to-rte]]
@@ -175,37 +176,38 @@
            dfa-complement (xym/complement dfa)
            dfa-not-rte (rte-to-dfa (list :not rte))
            ]
-       ;;(dot/dfa-to-dot dfa :view true :title "dfa" :state-legend false)
        ;;(dot/dfa-to-dot dfa-complete :view true :title "dfa-complete" :state-legend false)
        ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement" :state-legend false)
        ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte" :state-legend false)
-       
+       ;;(dot/dfa-to-dot (xym/synchronized-xor dfa dfa) :view true :title "182 dfa xor dfa" :state-legend false) 
+       ;;(dot/dfa-to-dot dfa :view true :title "183 dfa" :state-legend false)
+
        (is-fn (xym/dfa-equivalent? dfa
                                    dfa)
               (cl-format false
-                         "dfa not equivalent with self rte=~A" rte))
+                         "187: dfa not equivalent with self rte=~A" rte))
 
        (is-fn (xym/dfa-equivalent? dfa-not-rte
                                    dfa-not-rte)
               (cl-format false
-                         "dfa of :not, not equivalent with self rte=~A" (list :not rte)))
+                         "192: dfa of :not, not equivalent with self rte=~A" (list :not rte)))
 
-       
        ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
        ;; (dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
        (is-fn (xym/dfa-equivalent? dfa-complement
                                    dfa-not-rte)
               (cl-format false
-                         "!dfa != (dfa (not rte)), when rte=~A" rte))
+                         "202: !dfa != (dfa (not rte)), when rte=~A" rte))
 
        (let [extracted-rte-map (dfa-to-rte dfa-complement)
              extracted-rte (get extracted-rte-map true :empty-set)
              dfa-not (rte-to-dfa (list :not extracted-rte))
              ]
-         
+         ;;(dot/dfa-to-dot dfa-not :view true :title "dfa-not" :state-legend false)
+         ;;(print-vals (dfa-to-rte (xym/synchronized-xor dfa dfa-not)))
          (is-fn (xym/dfa-equivalent? dfa dfa-not)
                 (cl-format false
-                           "(rte (dfa (not rte))) != dfa, when rte=~A" rte))
+                           "211: (rte (dfa (not rte))) != dfa, when rte=~A" rte))
          )))))
 
 (defn test-rte-not

@@ -130,6 +130,22 @@
                                                      (:and (member (1 2 3) (2 1 3)))))
                                  :epsilon 
                                  (satisfies seq?))
+                  (:cat (:* Long)
+                        (member a 1) 
+                        (:not  :sigma))
+                  (:cat (:* (satisfies integer?))
+                        (member a 1) 
+                        (:not  :sigma))
+                  (:cat (:* (:*
+                             (:* (satisfies integer?))))
+                        (:contains-every (:? :epsilon)
+                                         (:not
+                                          (:or (:or))) (member 1 a))
+                        (:contains-any (:contains-any
+                                        (:contains-any (:+ (:cat))) (:contains-any (:contains-none)))
+                                       :sigma (:or (:or (:contains-every)) (member 1.5 3.5)))
+                        (:contains-none :sigma (:cat (satisfies symbol?) (:* (:cat)))
+                                        :sigma))
                   (:contains-every (:+ (= 1))
                                    (:+ (= 2)))
                   (:contains-every
