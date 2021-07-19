@@ -30,11 +30,8 @@
             [backtick :refer [template]]
             [clojure.test :as t]))
 
-(def odd-int? (every-pred int? odd?))
-(def even-int? (every-pred int? even?))
-
-(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even-int?)  
-                                 :2  (s/cat :5 odd-int? :6 pos?))))
+(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 pos-int?)  
+                                 :2  (s/cat :5 pos? :6 neg-int?))))
 
 (defmacro testing
   [string & body]
@@ -143,25 +140,25 @@
                  (:or
                   (:cat
                    (satisfies clojure.core/neg?)
-                   (satisfies clojure.core/even?))
+                   (satisfies clojure.core/pos-int?))
                   (:cat
-                   (satisfies clojure.core/odd?)
-                   (satisfies clojure.core/pos?)))))]
+                   (satisfies clojure.core/pos?)
+                   (satisfies clojure.core/neg-int?)))))]
 
       (doseq [rte2 [rte
-                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even-int?)  
-                                                 :y  (s/cat :c odd-int? :d pos?)))))
+                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b pos-int?)
+                                                 :y  (s/cat :c pos? :d neg-int?)))))
                     '(spec ::test-spec-1)
-                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b even-int?  )
-                                       :y  (s/cat :c odd-int? :d pos?))))
+                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b pos-int?  )
+                                       :y  (s/cat :c pos? :d neg-int?))))
                     ]
               seq [[]
                    [-1 2]
-                   [-1 2 3 1]
-                   [-1 2 3 1 -3 1 -1 4]]
+                   [-1 2 -3 1]
+                   [-1 2 -3 1 3 -1 -1 4]]
               ]
-        (t/is (= false (rte/match rte2 seq)) "test 105")
-        (t/is (= true (rte/match rte2 [seq])) "test 106")
+        (t/is (= false (rte/match rte2 seq)) (cl-format false "test 105: seq=~A rte2=~A" seq rte2))
+        (t/is (= true (rte/match rte2 [seq])) (cl-format false "test 106: seq=~A rte2=~A" seq rte2))
         ))))
 
 ;; cat - concatenation of predicates/patterns
