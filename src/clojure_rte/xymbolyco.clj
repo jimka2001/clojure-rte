@@ -531,7 +531,10 @@
                          [id (map->State
                               {:index id
                                :initial (= 0 id)
-                               :pattern (reduce (:combine-labels dfa) (map :pattern (partitions-map id)))
+                               ;; if any of (partitions-map id) has a :pattern, use that one,
+                               ;;   it is as good as any.  Important to note here is that we
+                               ;;   MUST NOT attempt to combine the patterns.
+                               :pattern (some :pattern (partitions-map id))
                                :accepting (member id new-fids)
                                :transitions new-transitions})])
             ]
