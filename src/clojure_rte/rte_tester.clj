@@ -95,7 +95,7 @@
                                         (cl-format false
                                                    "rte ~A is nullable but its complement (:not ...) is not nullable"
                                                    rte))
-                                (assert (not (nullable? rte-can))
+                                (assert (nullable? rte-can)
                                         (cl-format false
                                                    "rte ~A is nullable but its canonicalization is not: ~A"
                                                    rte rte-can)))
@@ -104,7 +104,7 @@
                                       (cl-format false
                                                  "rte ~A is not nullable but its complement (:not ...) is nullable"
                                                  rte))
-                              (assert (nullable? rte-can)
+                              (assert (not (nullable? rte-can))
                                       (cl-format false
                                                  "rte ~A is non-nullable but its canonicalization is nullable: ~A"
                                                  rte rte-can))))))
