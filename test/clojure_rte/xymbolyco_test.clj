@@ -238,10 +238,10 @@
           dfa-2 (rte-to-dfa  '(:cat (:* String) Long)
                              2)
           dfa-sxp (synchronized-product dfa-1 dfa-2 
-                                        (fn [a b]
-                                          (and a b))
-                                        (fn [q1 _q2]
-                                          ((:exit-map dfa-1) (:index q1))))
+                                         (fn [a b]
+                                           (and a b))
+                                         (fn [q1 _q2]
+                                           ((:exit-map dfa-1) (:index q1))))
           dfa-sxp-trim (trim dfa-sxp)
           dfa-sxp-min (minimize dfa-sxp)
           _dfa-sxp-trim-min (minimize dfa-sxp-trim)
@@ -263,10 +263,10 @@
               :let [m-1 (rte/match dfa-1 s)
                     m-2 (rte/match dfa-2 s)
                     m-dfa-sxp (rte/match dfa-sxp s)]]
-        (assert (= (boolean (and m-1 m-2))
-                   (boolean m-dfa-sxp))
-                (format "dfa-1 => %s and dfa-2 => %s but dfa-sxp => %s, on sequence %s"
-                        m-1 m-2 m-dfa-sxp s))))))
+        (is (= (boolean (and m-1 m-2))
+               (boolean m-dfa-sxp))
+            (format "dfa-1 => %s and dfa-2 => %s but dfa-sxp => %s, on sequence %s"
+                    m-1 m-2 m-dfa-sxp s))))))
 
 (deftest t-test-2
  (testing "particular case 2 which was failing"
