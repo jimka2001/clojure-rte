@@ -632,7 +632,7 @@
 (defn intersect-labels
   ""
   [label-1 label-2]
-  (bdd/canonicalize-type (list 'and label-1 label-2)))
+  (gns/canonicalize-type (list 'and label-1 label-2)))
 
 (defn cross-intersection
   "Compute a sequence of type designators corresponding to all the
@@ -666,6 +666,7 @@
                   [label-2 dst-2] (:transitions state-2)
                   :when (not (bdd/type-disjoint? label-1 label-2))
                   :let [label-sxp (intersect-labels label-1 label-2)]
+                  :when (gns/inhabited? label-sxp true)
                   ]
               [label-sxp (state-ident-map [dst-1 dst-2])]))
           (accumulate-states [initial-id-pair state-ident-map ident-state-map]
