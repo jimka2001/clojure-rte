@@ -1931,8 +1931,8 @@
                           (first (rte/find-all-derivatives '(:* (:cat Number Long (not (= 0))))))))))
 
 (defn rte-combine-labels ""
-  [label1 label2]
-  (canonicalize-pattern (rte/create-or [label1 label2])))
+  [label-1 label-2]
+  (gns/canonicalize-type (gns/create-or [label-1 label-2])))
 
 (defn-memoized [rte/compile rte-to-dfa]
   "Use the Brzozowski derivative aproach to compute a finite automaton
