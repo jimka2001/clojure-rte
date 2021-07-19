@@ -807,26 +807,37 @@
                            (:index q1)))))
 
 (defn paths-to-accepting
+  "Generate a lazy list of sequences, each sequence being a list of states
+  starting at a final/accepting state of the given Dfa, and ending at the
+  inital state.  Each is a path, the reverse of which represents an accepting
+  computation through the dfa.  Between consecutive states there is a type
+  designators (not given in the return value, but which can be found in the Dfa)
+  No state appears twice in the same path, thus no loops.
+  Each type designator is either is known to be non-inhabited; i.e., one (or more)
+  such types might respond :dont-know to the gns/inhabited? predicate, but never
+  responds false."
   [dfa]
-  (defn extend-path-1 [path]
-    (for [[type next-state-id] (:transitions (first path))
-          :when (not (exists [st path]
-                             (= next-state-id (:index st))))]
-      (cons (state-by-index dfa next-state-id) path)))
+  (letfn [(extend-path-1 [path]
+            (for [[type-designator next-state-id] (:transitions (first path))
+                  :when (not (exists [st path]
+                                     (= next-state-id (:index st))))
+                  :when (gns/inhabited? type-designator true) ;; include paths where inhabited? returns :dont-know
+                  ]
+              (cons (state-by-index dfa next-state-id) path)))
     
-  (defn extend-paths-1 [paths]
-    (mapcat extend-path-1 paths))
+          (extend-paths-1 [paths]
+            (mapcat extend-path-1 paths))
   
-  (defn extend-paths
-    [paths]
-    (if (empty? paths)
-      paths
-      (concat (setof [p paths]
-                     (:accepting (first p)))
-              (extend-paths (extend-paths-1 paths)))))
+          (extend-paths
+            [paths]
+            (if (empty? paths)
+              paths
+              (concat (setof [p paths]
+                             (:accepting (first p)))
+                      (extend-paths (extend-paths-1 paths)))))]
   
   (let [initials (filter :initial (states-as-seq dfa))]
-    (extend-paths (map list initials))))    
+    (extend-paths (map list initials)))))
 
 (defn dfa-equivalent?
   "Returns a Boolean indicating whether the two given Dfas
