@@ -564,8 +564,17 @@
    (canonicalize-type type-designator :dnf))
   ([type-designator nf]
    (if (contains? @canonicalize-type-atom [type-designator nf])
+     ;; this means type-designator was a value previously returned from
+     ;; canonicalize-type, so if we ever tried to canonicalize it again
+     ;; we'd get the same value back. i.e., canonicalize-type is idempotent.
+     ;; So, don't try to canonicalize it now, just return it as itself.
      type-designator
+     ;; otherwise, we call the canonicalize-memoized to perhaps do
+     ;;   a potentially time comsuming computation, or perhaps
+     ;;   return a memoized value.
      (let [canonicalized (canonicalize-memoized type-designator nf)]
+       ;; save the return value, so as to avoid trying to canonicalize
+       ;;   a canonicalized value.
        (swap! canonicalize-type-atom conj canonicalized)
        canonicalized))))
 
@@ -582,7 +591,7 @@
 
 (defmethod -canonicalize-type :default
   [type-designator nf]
-  (cond   
+  (cond
     (class-designator? type-designator)
     type-designator
     
@@ -590,13 +599,13 @@
     type-designator
 
     (not (sequential? type-designator))
-    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
+    (throw (ex-info (format "-canonicalize-type: warning unrecognized type-designator %s" type-designator)
                     {:error-type :not-a-sequence
                      :normal-form nf
                      :type-designator type-designator }))
 
     (not (valid-type? type-designator))
-    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
+    (throw (ex-info (format "-canonicalize-type: warning unrecognized type-designator %s" type-designator)
                     {:error-type :unknown-type
                      :normal-form nf
                      :type (type type-designator)
