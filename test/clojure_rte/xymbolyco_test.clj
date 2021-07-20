@@ -28,6 +28,7 @@
                                            extend-with-sink-state synchronized-product synchronized-union
                                            cross-intersection
                                            trim complete minimize]]
+            [clojure-rte.dot :as dot]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
@@ -72,13 +73,12 @@
 
 (deftest t-minimize
   (testing "minimize"
-    ;; first example, a dfa already minimum
     (let [dfa1 (rte-to-dfa '(:or (:* Number)
                                  (:cat String Number)
                                  (:* Double)))
           dfa2 (minimize dfa1)]
-      (is (= 6 (count (states-as-seq dfa1))))
-      (is (= 6 (count (states-as-seq dfa2)))))))
+      (is (= 6 (count (states-as-seq dfa1))) 80)
+      (is (= 5 (count (states-as-seq dfa2))) 81))))
 
 (deftest t-minimize-runs
   (testing "that minimize runs"

@@ -492,7 +492,7 @@
                                       transitions)]
                 
                 (map (fn [[[from to] transitions]]
-                       [from (gns/create-or (map second transitions)) to])
+                       [from (gns/canonicalize-type (gns/create-or (map second transitions)) :dnf) to])
                      grouped)))
             (new-id [state]
               (assert (instance? State state))

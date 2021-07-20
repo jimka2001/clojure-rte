@@ -49,24 +49,25 @@
     (let [rte '(rte
                 (:*
                  (:or
-                  (:cat (spec clojure.core/neg?) (spec clojure.core/even?))
-                  (:cat (spec clojure.core/odd?) (spec clojure.core/pos?)))))]
-      (t/is (= (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                   :y  (s/cat :c odd? :d pos?)))))
+                  (:cat (spec clojure.core/neg?) (spec clojure.core/pos-int?))
+                  (:cat (spec clojure.core/pos?) (spec clojure.core/neg-int?)))))]
+      (t/is (= (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                                   :y  (s/cat :c pos? :d neg-int?)))))
                rte) "test x43")
       
       (t/is (= (binding [*ns* (find-ns 'user)]
-                 (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                     :y  (s/cat :c odd? :d pos?))))))
+                 (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                                     :y  (s/cat :c pos? :d neg-int?))))))
                rte) "test x43")
 
 
-      (t/is (= (gs/spec-to-rte `(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                            :y  (s/cat :c odd? :d pos?))))
+      (t/is (= (gs/spec-to-rte `(s/* (s/alt :x  (s/cat :a neg? :b pos-int?)
+                                            :y  (s/cat :c pos? :d neg-int?))))
                rte) "test x48")
 
       (t/is (= (gs/spec-to-rte (s/form ::test-spec-1))
                rte) "test x51")
+
       )))
 
 (t/deftest t-canonicalize-rte-type
