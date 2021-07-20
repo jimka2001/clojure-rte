@@ -1691,7 +1691,7 @@
                          (operands self)))))
 
 (defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
-  "Rewrite the given rte patter to a canonical form.
+  "Rewrite the given rte pattern to a canonical form.
   This involves recursive re-writing steps for each sub form,
   including searches for syntatical and semantical reductions.
   The API for canonicalizing a pattern is canonicalize-pattern,
