@@ -443,10 +443,23 @@
 
     (with-rte [::x (:+ String)
                ::y (:+ Double)]
-
+      (cl-format true "-------- with-rte -----------~%")
+      (is (= (rte/canonicalize-pattern ::x)
+             '(:cat String (:* String)))
+          "449 canonicalize-pattern got wrong memoized value")
+      ;; (clojure.core.memoize/memo-clear! rte/canonicalize-pattern) ;; I though clearing the cache would solve the problem, but it doesn't
+      (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
+             '(:cat String (:* String) Double (:* Double)))
+          "452 canonicalize-pattern got wrong memoized value")
       (let [pat (rte/compile '(:cat ::x  ::y))]
-        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
+        ;; the same as (rte/compile '(:cat (:+ String) (:+ Double)))
+        ;; TODO; this currently fails because of memoization.
+        ;;  not yet sure how to fix it.
+        (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
+               '(:cat String (:* String) Double (:* Double)))
+            "canonicalize-pattern got wrong memoized value")
         (is (rte/match pat ["1" "2" "3" 1.2 3.4 5.6 7.8]))
+
         (is (not (rte/match pat [["1" "2" "3"] [1.2 3.4 5.6 7.8]])))
         ))
     
