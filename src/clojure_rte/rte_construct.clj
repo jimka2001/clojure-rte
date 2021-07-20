@@ -22,8 +22,8 @@
 (ns clojure-rte.rte-construct
   (:require [clojure-rte.genus :as gns]
             [clojure-rte.util :refer [member exists setof exists-pair forall
-                                      call-with-collector defn-memoized
-                                      visit-permutations fixed-point
+                                      call-with-collector defn-memoized defmulti-memoized defmethod-memoized
+                                      visit-permutations fixed-point stacksize
                                       sort-operands with-first-match
                                       partition-by-pred seq-matcher
                                       rte-identity rte-constantly
@@ -45,9 +45,11 @@
 
 (declare traverse-pattern)
 (declare canonicalize-pattern)
+(declare -canonicalize-pattern)
 (declare match)
 (declare compile)
 (declare rte-inhabited?)
+(declare -rte-inhabited?)
 (declare rte-vacuous?)
 (declare rte-to-dfa)
 (declare canonicalize-pattern-once)
@@ -70,7 +72,11 @@
 (defn call-with-compile-env [thunk]
   (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
             canonicalize-pattern-once (gc-friendly-memoize -canonicalize-pattern-once)
+            canonicalize-pattern (gc-friendly-memoize -canonicalize-pattern)
+            rte-inhabited? (gc-friendly-memoize -rte-inhabited?)
             gns/check-disjoint (gc-friendly-memoize gns/-check-disjoint)
+            gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
+            gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
             ]
     (thunk)))
 
@@ -108,7 +114,8 @@
    Any patterns compiled within the dynamic extend are abandoned when
    the dynamic extend ends."
   [bindings & body]
-  `(call-with-rte '~bindings (fn [] ~@body)))
+  `(with-compile-env []
+     (call-with-rte '~bindings (fn [] ~@body))))
 
 (defn rte? [t]
   (and (sequential? t)
@@ -1778,7 +1785,7 @@
                                                    conversion-combo-99
                                                    conversion-combo-5])))))
 
-(defn canonicalize-pattern 
+(defn-memoized [canonicalize-pattern -canonicalize-pattern]
   "find the fixed point of canonicalize-pattern-once"
   [pattern]
   (fixed-point pattern canonicalize-pattern-once =))
@@ -2018,14 +2025,15 @@
               )]
       (recurring 0 [] ()))))
 
-(defmulti rte-inhabited?
+(defmulti-memoized [rte-inhabited? -rte-inhabited?]
+  "Interface to determine whether the language of an rte is non-vacuous"
   (fn [rte]
     (dispatch rte 'rte-inhabited?)))
 
-(defmethod rte-inhabited? :pattern [pattern]
+(defmethod-memoized rte-inhabited? :pattern [pattern]
   (rte-inhabited? (rte/compile pattern)))
 
-(defmethod rte-inhabited? :Dfa [dfa]
+(defmethod-memoized rte-inhabited? :Dfa [dfa]
   (some :accepting (xym/states-as-seq dfa)))
 
 (defn rte-vacuous? [dfa]

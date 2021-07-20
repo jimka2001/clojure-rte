@@ -551,11 +551,16 @@
 ;; implementation of canonicalize-typef and the methods of -canonicalize-type
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def canonicalize-memoized (gc-friendly-memoize (fn [type-designator nf]
-                                                  (fixed-point type-designator
-                                                               (fn [td]
-                                                                 (-canonicalize-type td nf))
-                                                               =))))
+(defn-memoized [canonicalize-type-2-arg canonicalize-type-2-arg-impl]
+  "We cannot memoize canonicalize-type because its return value depends
+  on the value of the dynamic variable, so  canonicalize-type calls
+  canonicalize-type-2-arg with that value as 2nd argument.  This
+  function is a fixed-point wrapper around -canonicalize-type."
+  [type-designator nf]
+  (fixed-point type-designator
+               (fn [td]
+                 (-canonicalize-type td nf))
+               =))
 
 (def canonicalize-type-atom (atom #{}))
 (defn canonicalize-type
@@ -572,10 +577,10 @@
      ;; otherwise, we call the canonicalize-memoized to perhaps do
      ;;   a potentially time comsuming computation, or perhaps
      ;;   return a memoized value.
-     (let [canonicalized (canonicalize-memoized type-designator nf)]
+     (let [canonicalized (canonicalize-type-2-arg type-designator nf)]
        ;; save the return value, so as to avoid trying to canonicalize
        ;;   a canonicalized value.
-       (swap! canonicalize-type-atom conj canonicalized)
+       (swap! canonicalize-type-atom conj [canonicalized nf])
        canonicalized))))
 
 (defmulti -canonicalize-type
@@ -1405,31 +1410,30 @@
 ;; implementation of disjoint? and -disjoint?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def disjoint?
+(defn-memoized [disjoint? disjoint?-impl]
   "Predicate to determine whether the two types overlap.
   If it cannot be determined whether the two designated types
   are disjoint, then the default value is returned."
-  (gc-friendly-memoize
-   (fn [t1 t2 default]
-     {:pre [(member default '(true false :dont-know))]
-      :post [(member % '(true false :dont-know))]}
-     (cond
-       (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-       true
+  [t1 t2 default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (cond
+    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+    true
 
-       (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-       true
+    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+    true
 
-       :else
-       (let [try1 (check-disjoint t1 t2 :dont-know)]
-         (if (not= :dont-know try1)
-           try1
-           (let [t1-simple (canonicalize-type t1 :dnf)
-                 t2-simple (canonicalize-type t2 :dnf)]
-             (if (and (= t1-simple t1)
-                      (= t2-simple t2))
-               default
-               (check-disjoint t1-simple t2-simple default)))))))))
+    :else
+    (let [try1 (check-disjoint t1 t2 :dont-know)]
+      (if (not= :dont-know try1)
+        try1
+        (let [t1-simple (canonicalize-type t1 :dnf)
+              t2-simple (canonicalize-type t2 :dnf)]
+          (if (and (= t1-simple t1)
+                   (= t2-simple t2))
+            default
+            (check-disjoint t1-simple t2-simple default)))))))
 
 (defn-memoized [check-disjoint -check-disjoint]
   "Internal function used in top level disjoint? implementation."
