@@ -205,9 +205,9 @@
              '(spec ::test-spec-2)))))
 
 (s/def ::test-spec-3 (s/or :1 string?
-                           :2 (s/and int? #(even? %))))
+                           :2 (s/and int? #(pos-int? %))))
 (s/def ::test-spec-4 (s/or :1 (s/and string? #(even? (count %)))
-                           :2 (s/and int? #(even? %))))
+                           :2 (s/and int? #(pos-int? %))))
 
 (t/deftest t-canonicalize-spec-type
   (testing "canonicalize spec non-sequence types"
@@ -217,9 +217,9 @@
                           (spec ::test-spec-3)
                           (spec ~(s/or :1 int? :2 ::test-spec-3))
                           (spec ~(s/and int? ::test-spec-3))
-                          (spec ~(s/or :1 (s/and int? odd?)
+                          (spec ~(s/or :1 (s/and int? neg-int?)
                                        :2 string?))
-                          (spec ~(s/or :1 (s/and int? odd?)
+                          (spec ~(s/or :1 (s/and int? pos-int?)
                                        :2 string?))))
             :let [t2 (gns/canonicalize-type t1)]
             v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5
