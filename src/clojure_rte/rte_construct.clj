@@ -27,6 +27,7 @@
                                       sort-operands with-first-match
                                       partition-by-pred seq-matcher
                                       rte-identity rte-constantly
+                                      gc-friendly-memoize
                                       search-replace remove-element uniquify print-vals
                                       non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
@@ -67,9 +68,9 @@
    })
 
 (defn call-with-compile-env [thunk]
-  (binding [rte/compile (memoize rte-to-dfa)
-            canonicalize-pattern-once (memoize -canonicalize-pattern-once)
-            gns/check-disjoint (memoize gns/-check-disjoint)
+  (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
+            canonicalize-pattern-once (gc-friendly-memoize -canonicalize-pattern-once)
+            gns/check-disjoint (gc-friendly-memoize gns/-check-disjoint)
             ]
     (thunk)))
 
