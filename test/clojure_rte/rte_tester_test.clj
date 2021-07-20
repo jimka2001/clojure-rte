@@ -39,7 +39,8 @@
 
 (defmacro testing
   [string & body]
-  `(do (println [:testing ~string :starting (java.util.Date.)])
+  `(rte/with-compile-env []
+     (println [:testing ~string :starting (java.util.Date.)])
        (clojure.test/testing ~string ~@body)
        (println [:finished  ~string (java.util.Date.)])
        ))

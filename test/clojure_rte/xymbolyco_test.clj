@@ -22,7 +22,7 @@
 (ns clojure-rte.xymbolyco-test
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.rte-core ]
-            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa]]
+            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
             [clojure-rte.xymbolyco :refer [find-eqv-class split-eqv-class
                                            states-as-seq find-incomplete-states
                                            extend-with-sink-state synchronized-product synchronized-union
@@ -38,10 +38,11 @@
 
 (defmacro testing
   [string & body]
-  `(do (println [:testing ~string :starting (java.util.Date.)])
-       (clojure.test/testing ~string ~@body)
-       (println [:finished  (java.util.Date.)])
-       ))
+  `(with-compile-env []
+     (println [:testing ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished  (java.util.Date.)])
+     ))
 
 
 (deftest t-split-eqv-class

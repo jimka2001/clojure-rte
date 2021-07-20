@@ -45,10 +45,11 @@
 
 (defmacro testing
   [string & body]
-  `(do (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
-       (clojure.test/testing ~string ~@body)
-       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
-       ))
+  `(with-compile-env []
+     (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
+     ))
 
 (deftest t-nullable
   (testing "nullable"
@@ -245,7 +246,6 @@
 
 
 (deftest t-rte-to-dfa
-
   (testing "rte-to-dfa"
     (is (get (methods gns/-disjoint?) 'rte) "test 367")
     (with-compile-env ()
