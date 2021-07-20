@@ -48,7 +48,7 @@
 
 (deftest t-test-canonicalize-pattern
   (testing "test-canonicalize-pattern"
-    (test-canonicalize-pattern 10 4 false)))
+    (test-canonicalize-pattern 10 4 false (fn [expr msg] (is expr msg)))))
 
 (deftest t-rte-keywords
   (testing "rte-keywords"
@@ -65,13 +65,14 @@
     (test-rte-to-dfa 30 ; num-tries
                      5 ; size
                      false ; verbose
-                     )))
+                     (fn [expr msg]
+                       (is expr msg)))))
 
 (deftest t-rte-nullable-not-random
   (testing "nullability of :not"
     ;; if an rte is nullable, then (:not rte) is not nullable
     ;; if an rte is not nullable, then (:not rte) is nullable
-    (test-rte-not-nullable 100000 7 false)))
+    (test-rte-not-nullable 100000 7 false (fn [expr msg] (is expr msg)))))
 
 (deftest t-rte-nullable-canonicalize-random
   (testing "canonicalize of :not"
@@ -88,6 +89,7 @@
     (test-rte-canonicalize-nullable 500 ; num-tries
                                     4 ; size
                                     false ;verbose
+                                    (fn [expr msg] (is expr msg))
                                     )))
 
 (deftest t-discovered-case-390

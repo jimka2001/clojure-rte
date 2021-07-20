@@ -1239,7 +1239,7 @@
         rte-1-2b (get (dfa-to-rte dfa-1-2) true)
         null-dfa (rte-to-dfa :empty-set)]
     (if (xym/dfa-equivalent? dfa-2-1 null-dfa)
-      true
+      (is true)
       (do
         (dot/dfa-to-dot null-dfa :title "null" :view true)
         (dot/dfa-to-dot dfa-2-1 :title "800" :view true)
@@ -1248,7 +1248,7 @@
                        rte-1 (canonicalize-pattern rte-1) rte-2
                        rte-2-1b))))
     (if (xym/dfa-equivalent? dfa-1-2 null-dfa)
-      true
+      (is true)
       (do (dot/dfa-to-dot null-dfa :title "null" :view true)
           (dot/dfa-to-dot dfa-1-2 :title "802" :view true)
           (is (xym/dfa-equivalent? dfa-1-2 null-dfa)

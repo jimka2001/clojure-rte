@@ -70,16 +70,18 @@
                                                           (range size)))
      (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
 
-(defn test-rte-to-dfa [num-tries size verbose]
+(defn test-rte-to-dfa [num-tries size verbose is-fn]
   (tester/random-test num-tries (fn [rte]
                                   (with-compile-env []
-                                    (rte-to-dfa rte)))
+                                    (is-fn (rte-to-dfa rte)
+                                           (cl-format false "rte-to-dfa failed on ~A" rte))))
                       (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))
 
-(defn test-canonicalize-pattern [num-tries size verbose]
-  (tester/random-test num-tries canonicalize-pattern
+(defn test-canonicalize-pattern [num-tries size verbose is-fn]
+  (tester/random-test num-tries (fn [rte] (is-fn (canonicalize-pattern rte)
+                                                 (cl-format false "canonicalize-pattern failed on ~A" rte)))
                       (fn [] (gen-rte size gns/*test-types*))
                       rte-components verbose))
 
@@ -87,31 +89,37 @@
 (defn test-rte-not-nullable
   "Run some tests to assure that if an rte r is nullable if and only
   if (:not r) is not nullable."
-  [num-tries size verbose]
-  (tester/random-test num-tries
-                      (fn [rte]
-                        (let [rte-can (canonicalize-pattern rte)]
-                          (if (nullable? rte)
-                            (do (assert (not (nullable? (list :not rte)))
-                                        (cl-format false
-                                                   "rte ~A is nullable but its complement (:not ...) is not nullable"
-                                                   rte))
-                                (assert (nullable? rte-can)
-                                        (cl-format false
-                                                   "rte ~A is nullable but its canonicalization is not: ~A"
-                                                   rte rte-can)))
-                            (do
-                              (assert (nullable? (list :not rte))
-                                      (cl-format false
-                                                 "rte ~A is not nullable but its complement (:not ...) is nullable"
-                                                 rte))
-                              (assert (not (nullable? rte-can))
-                                      (cl-format false
-                                                 "rte ~A is non-nullable but its canonicalization is nullable: ~A"
-                                                 rte rte-can))))))
-                      (fn [] (gen-rte size gns/*test-types*))
-                      rte-components
-                      verbose))
+  ([num-tries size verbose]
+   (test-rte-not-nullable num-tries
+                          size
+                          verbose
+                          (fn [expr msg]
+                            (assert expr msg))))
+  ([num-tries size verbose is-fn]
+   (tester/random-test num-tries
+                       (fn [rte]
+                         (let [rte-can (canonicalize-pattern rte)]
+                           (if (nullable? rte)
+                             (do (is-fn (not (nullable? (list :not rte)))
+                                         (cl-format false
+                                                    "rte ~A is nullable but its complement (:not ...) is not nullable"
+                                                    rte))
+                                 (is-fn (nullable? rte-can)
+                                         (cl-format false
+                                                    "rte ~A is nullable but its canonicalization is not: ~A"
+                                                    rte rte-can)))
+                             (do
+                               (is-fn (nullable? (list :not rte))
+                                       (cl-format false
+                                                  "rte ~A is not nullable but its complement (:not ...) is nullable"
+                                                  rte))
+                               (is-fn (not (nullable? rte-can))
+                                       (cl-format false
+                                                  "rte ~A is non-nullable but its canonicalization is nullable: ~A"
+                                                  rte rte-can))))))
+                       (fn [] (gen-rte size gns/*test-types*))
+                       rte-components
+                       verbose)))
 
 ;; this test is not yet correctly implemented,
 ;;    need a good way to compare two rtes for equivalence
@@ -136,7 +144,7 @@
 ;;    verbose))
 
 
-(defn test-rte-canonicalize-nullable-1 [rte]
+(defn test-rte-canonicalize-nullable-1 [rte is-fn]
   (with-compile-env []
     ;;(cl-format true "canonicalizing:~%")
     ;; TODO doall this lazy seq
@@ -144,11 +152,11 @@
       (let [can (canonicalize-pattern rte)]
         ;;(cl-format true "canonicalized: ~A~%" can)
         (if (nullable? rte)
-          (assert (nullable? can)
+          (is-fn (nullable? can)
                   (cl-format false
                              "rte ~A is nullable but its canonicalization ~A is not"
                              rte can))
-          (assert (not (nullable? can))
+          (is-fn (not (nullable? can))
                   (cl-format false
                              "rte ~A is not nullable but its canonicalization ~A is nullable"
                              rte can)))))))
@@ -156,12 +164,15 @@
 (defn test-rte-canonicalize-nullable
   "Run some tests to assure that if an rte r is nullable if and only
   if (canonicalize-pattern r) is also nullable."
-  [num-tries size verbose]
-  (tester/random-test num-tries
-                      test-rte-canonicalize-nullable-1
-                      (fn [] (gen-rte size gns/*test-types*))
-                      rte-components
-                      verbose))
+  ([num-tries size verbose]
+   (test-rte-canonicalize-nullable num-tries size verbose (fn [expr msg] (assert expr msg))))
+  ([num-tries size verbose is-fn]
+   (tester/random-test num-tries
+                       (fn [rte] (test-rte-canonicalize-nullable-1 rte is-fn))
+                       (fn [] (gen-rte size gns/*test-types*))
+                       rte-components
+                       verbose
+                       )))
 
 (defn test-rte-not-1
   "Assert that the same result occurs from complementing a dfa
