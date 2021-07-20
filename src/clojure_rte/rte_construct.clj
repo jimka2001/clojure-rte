@@ -884,7 +884,7 @@
                          t1 t2)
               false)))))
 
-(defn conversion-*1
+(defn conversion-*-1
   [self]
   (let [op (operand self)]
     (cond (= :epsilon op)
@@ -899,7 +899,7 @@
           :default
           self)))
 
-(defn conversion-*2
+(defn conversion-*-2
   [self]
   (if (not (rte/cat? (operand self)))
     self
@@ -936,7 +936,7 @@
         self))))
              
 
-(defn conversion-*3
+(defn conversion-*-3
   [self]
   (if (not (rte/cat? (operand self)))
     self
@@ -972,7 +972,7 @@
         :else
         self))))
 
-(defn conversion-*99
+(defn conversion-*-99
   [self]
   (template (:* ~(canonicalize-pattern-once (operand self)))))
 
@@ -1708,10 +1708,10 @@
                            :sigma rte-identity
                            :* (fn [operand _functions]
                                 (find-simplifier (list :* operand)
-                                                 [conversion-*1
-                                                  conversion-*2
-                                                  conversion-*3
-                                                  conversion-*99]))
+                                                 [conversion-*-1
+                                                  conversion-*-2
+                                                  conversion-*-3
+                                                  conversion-*-99]))
                            :cat (fn [operands _functions]
                                   (find-simplifier (cons :cat operands)
                                                    [conversion-cat-1

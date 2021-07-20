@@ -696,45 +696,45 @@
       (canonicalize-pattern
        pattern-714)))
 
-(deftest t-conversion-*1
+(deftest t-conversion-*-1
   (testing "conversion *1"
-    (is (= (rte/conversion-*1 '(:* :epsilon))
+    (is (= (rte/conversion-*-1 '(:* :epsilon))
            :epsilon))
-    (is (= (rte/conversion-*1 '(:* :empty-set))
+    (is (= (rte/conversion-*-1 '(:* :empty-set))
            :epsilon))
-    (is (= (rte/conversion-*1 '(:* (:* x)))
+    (is (= (rte/conversion-*-1 '(:* (:* x)))
            '(:* x)))))
 
-(deftest t-conversion-*2
+(deftest t-conversion-*-2
   (testing "conversion *2"
     ;; Star(Cat(x,Star(x))) -> Star(x)
-    (is (= (rte/conversion-*2 '(:* (:cat x (:* x))))
+    (is (= (rte/conversion-*-2 '(:* (:cat x (:* x))))
            '(:* x)))
     ;; Star(Cat(Star(x),x)) -> Star(x)
-    (is (= (rte/conversion-*2 '(:* (:cat (:* x) x)))
+    (is (= (rte/conversion-*-2 '(:* (:cat (:* x) x)))
            '(:* x)))
     ;; Star(Cat(Star(x),x,Star(x))) -> Star(x)
-    (is (= (rte/conversion-*2 '(:* (:cat (:* x) x (:* x))))
+    (is (= (rte/conversion-*-2 '(:* (:cat (:* x) x (:* x))))
            '(:* x)))))
 
-(deftest t-conversion-*3
+(deftest t-conversion-*-3
   (testing "conversion *3"
     
     ;; Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
     ;;    -->    Star(Cat(X, Y, Z))
-    (is (= (rte/conversion-*3 '(:* (:cat x y z (:* (:cat x y z)))))
+    (is (= (rte/conversion-*-3 '(:* (:cat x y z (:* (:cat x y z)))))
            '(:* (:cat x y z)))
         860)
     
     ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
     ;;   -->    Star(Cat(X, Y, Z))
-    (is (= (rte/conversion-*3 '(:* (:cat (:* (:cat x y z)) x y z)))
+    (is (= (rte/conversion-*-3 '(:* (:cat (:* (:cat x y z)) x y z)))
            '(:* (:cat x y z)))
         861)
         
     ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
     ;;   -->    Star(Cat(X, Y, Z))
-    (is (= (rte/conversion-*3 '(:* (:cat (:* (:cat x y z))
+    (is (= (rte/conversion-*-3 '(:* (:cat (:* (:cat x y z))
                                          x y z
                                          (:* (:cat x y z)))))
            '(:* (:cat x y z)))
