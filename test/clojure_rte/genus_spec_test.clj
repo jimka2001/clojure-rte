@@ -76,25 +76,25 @@
                  (:or
                   (:cat
                    (satisfies clojure.core/neg?)
-                   (satisfies clojure.core/even?))
+                   (satisfies clojure.core/pos-int?))
                   (:cat
-                   (satisfies clojure.core/odd?)
-                   (satisfies clojure.core/pos?)))))]
+                   (satisfies clojure.core/pos?)
+                   (satisfies clojure.core/neg-int?)))))]
 
-      (t/is (= (gns/canonicalize-type (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                                   :y  (s/cat :c odd? :d pos?))))))
+      (t/is (= (gns/canonicalize-type (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                                                   :y  (s/cat :c pos? :d neg-int?))))))
                rte) "test x68")
 
       (t/is (= (gns/canonicalize-type '(spec ::test-spec-1))
                rte) "test x71")
 
-      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)
-                                                         :y  (s/cat :c odd? :d pos?)))))
+      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)
+                                                         :y  (s/cat :c pos? :d neg-int?)))))
                '(rte
                  (:*
                   (:or
-                   (:cat (satisfies neg?) (satisfies even?))
-                   (:cat (satisfies odd?) (satisfies pos?))))))
+                   (:cat (satisfies neg?) (satisfies pos-int?))
+                   (:cat (satisfies pos?) (satisfies neg-int?))))))
             "test x80")
       )))
 

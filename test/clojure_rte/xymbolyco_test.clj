@@ -303,9 +303,9 @@
       (is (member 'Long cx)
           (cl-format false "cx=~a, expecting to contain Long" cx))
       (is (member 'Boolean cx)
-          (cl-format false "cx=~a, expecting to contain (and (not Long) Boolean)" cx))
-      (is (member '(and (not Long) (not Boolean)) cx)
-          (cl-format false "cx=~a, expecting to contain (and (not Long) (not Boolean))" cx)))))
+          (cl-format false "cx=~a, expecting to contain Boolean" cx))
+      (is (member '(and (not Boolean) (not Long)) cx)
+          (cl-format false "cx=~a, expecting to contain (and (not Boolean) (not Long))" cx)))))
 
 (deftest t-missing-final
   (testing "missing final?"
