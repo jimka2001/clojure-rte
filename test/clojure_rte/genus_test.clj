@@ -33,11 +33,15 @@
 
 (deftest t-discovered-case-134
   (testing "discovered case 134"
+    (is (= (gns/inhabited? '(and (not (member 1 2 3 a b c)) (not BigDecimal)) :dont-know)
+           true)
+        "134/38")
     ;;disjoint? cannot decide (and (not (member 1 2 3 a b c)) (not BigDecimal)) vs java.lang.Object -- assuming not disjoint
     (is (= (gns/disjoint? '(and (not (member 1 2 3 a b c)) (not BigDecimal))
                           'java.lang.Object
                           :dont-know)
-           false))))
+           false)
+        "134/44")))
 
 (deftest t-disjoint?
   (when (and (resolve 'java.lang.CharSequence)

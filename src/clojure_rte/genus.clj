@@ -2109,6 +2109,15 @@
                      (disjoint? ta tb false))
         false
 
+        ;; in the special case of (and A B) if A and B are NOT disjoint,
+        ;;   then the intersection is inhabited.  This does not generalize
+        ;;   to (and A B C...), because even if not(A||B), not(B||C), and not(A||C),
+        ;;   the intersection might still be empty.
+        ;; E.g., (and (member 1 2) (member 2 3) (member 1 3)) is empty yet no pair is disjoint.
+        (and (= 2 n)
+             (not (disjoint? (first t1-operands) (second t1-operands) true)))
+        true       
+        
         :else
         :dont-know))))
 
