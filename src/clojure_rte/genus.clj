@@ -597,6 +597,9 @@
 (defmethod -canonicalize-type :default
   [type-designator nf]
   (cond
+    (= 'java.lang.Object type-designator)
+    :sigma
+       
     (class-designator? type-designator)
     type-designator
     
