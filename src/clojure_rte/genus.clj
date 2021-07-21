@@ -1578,16 +1578,17 @@
 (defmethod -disjoint? 'and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 false))
         inhabited-t2 (delay (inhabited? t2 false))]
-    (cond (not (gns/and? t1))
-          :dont-know
-
-          (exists [t (rest t1)]
+    (if (not (gns/and? t1))
+      :dont-know
+      (let [t1-operands (operands t1)]
+        (cond 
+          (exists [t t1-operands]
                   (disjoint? t2 t false))
           ;; (disjoint? (and A B C) X)
           true
 
           ;; (disjoint? (and A B C) B)
-          (and (member t2 (rest t1))
+          (and (member t2 t1-operands)
                @inhabited-t2
                @inhabited-t1)
           false
@@ -1596,7 +1597,7 @@
           ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
           (and @inhabited-t2
                @inhabited-t1
-               (exists [t1' (rest t1)]
+               (exists [t1' t1-operands]
                        (or (subtype? t1' t2 false)
                            (subtype? t2 t1' false)
                            )))
@@ -1604,13 +1605,13 @@
 
           (and (class-designator? t2)
                (= (find-class t2) java.lang.Object)
-               (some class-designator? (rest t1)))
+               (some class-designator? t1-operands))
           false
 
           ;; (disjoint? (and A B C) X)
           (and (class-designator? t2)
-               (every? class-designator? (rest t1)))
-          (not (forall-pairs [[a b] (conj (rest t1) t2)]
+               (every? class-designator? t1-operands))
+          (not (forall-pairs [[a b] (conj t1-operands t2)]
                              (or (isa? (find-class a) (find-class b))
                                  (isa? (find-class b) (find-class a))
                                  ;; TODO isn't this wrong? because () is not false
@@ -1624,7 +1625,7 @@
           ;; If B < A and A !< B    and A < C and C !< A
           ;;   then (and A !B) is NOT disjoint from C
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (gns/not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (gns/not? (first (rest t1-operands)))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1
                      C t2]
                  (and (subtype? B A false)
@@ -1644,7 +1645,7 @@
           (disjoint? (second t1) t2 :dont-know)
 
           :else
-          :dont-know)))
+          :dont-know)))))
 
 (defmethod -disjoint? '= [t1 t2]
   (cond (gns/=? t1)
@@ -1680,88 +1681,88 @@
         :dont-know))
 
 (defmethod -disjoint? 'not [t1 t2]
-  (cond
-    (not (gns/not? t1))
+  (if (not (gns/not? t1))
     :dont-know
-    
-    ;; (disjoint? (not Object) X)
-    (and (class-designator? (second t1))
-         (isa? Object (find-class (second t1))))
-    true
+    (let [t1-operand (operand t1)]
+      (cond
+        ;; (disjoint? (not Object) X)
+        (and (class-designator? t1-operand)
+             (isa? Object (find-class t1-operand)))
+        true
 
-    ;; (disjoint? (not X) X)
-    (= t2 (second t1))
-    true
-    
-    ;; (disjoint? (not B) A)
-    ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
-    (and (class-designator? (second t1))
-         (class-designator? t2)
-         (subtype? t2 (second t1) false))
-    true
+        ;; (disjoint? (not X) X)
+        (= t2 t1-operand)
+        true
+        
+        ;; (disjoint? (not B) A)
+        ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
+        (and (class-designator? t1-operand)
+             (class-designator? t2)
+             (subtype? t2 t1-operand false))
+        true
 
-    ;; (disjoint? (not B) A) ;; when A and B are disjoint
-    (disjoint? t2 (second t1) false)
-    false
+        ;; (disjoint? (not B) A) ;; when A and B are disjoint
+        (disjoint? t2 t1-operand false)
+        false
 
-    ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
-    ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (or (= :interface (class-primary-flag (second t1)))
-             (= :interface (class-primary-flag t2)))
-         (empty? (find-incompatible-members (second t1) t2)))
-    false
+        ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
+        ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
+        (and (class-designator? t2)
+             (class-designator? t1-operand)
+             (or (= :interface (class-primary-flag t1-operand))
+                 (= :interface (class-primary-flag t2)))
+             (empty? (find-incompatible-members t1-operand t2)))
+        false
 
-    ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
-    ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (member (class-primary-flag t2) '(:abstract :interface))
-         (member (class-primary-flag (second t1)) '(:abstract :interface))
-         (not (= (find-class t2) (find-class (second t1)))))
-    false
+        ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
+        ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
+        (and (class-designator? t2)
+             (class-designator? t1-operand)
+             (member (class-primary-flag t2) '(:abstract :interface))
+             (member (class-primary-flag t1-operand) '(:abstract :interface))
+             (not (= (find-class t2) (find-class t1-operand))))
+        false
 
-    ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
-    (and (gns/not? t2)
-         (class-designator? (second t1))
-         (class-designator? (second t2)))
-    false
-    
-    ;; if t2 < t1, then t2 disjoint from (not t1)
-    ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
-    (and (subtype? t2 (second t1) false)
-         (not (subtype? (second t1) t2 true)))
-    true
+        ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
+        (and (gns/not? t2)
+             (class-designator? t1-operand)
+             (class-designator? (second t2)))
+        false
+        
+        ;; if t2 < t1, then t2 disjoint from (not t1)
+        ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
+        (and (subtype? t2 t1-operand false)
+             (not (subtype? t1-operand t2 true)))
+        true
 
-    ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
-    (and (subtype? (second t1) t2 false)
-         (not (subtype? t2 (second t1) true)))
-    false
+        ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
+        (and (subtype? t1-operand t2 false)
+             (not (subtype? t2 t1-operand true)))
+        false
 
-    ;; (disjoint? '(not Long) 'Number)
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (not (= (find-class (second t1)) (find-class t2)))
-         (isa? (find-class (second t1)) (find-class t2)))
-    false
+        ;; (disjoint? '(not Long) 'Number)
+        (and (class-designator? t2)
+             (class-designator? t1-operand)
+             (not (= (find-class t1-operand) (find-class t2)))
+             (isa? (find-class t1-operand) (find-class t2)))
+        false
 
-    ;; (disjoint? '(not Boolean) '(not Long))
-    ;; (disjoint? '(not A) '(not B))
-    ;; if disjoint classes A and B
-    (and (gns/not? t2)
-         ;;(class-designator? (second t1))
-         ;;(class-designator? (second t2))
-         (disjoint? (second t1) (second t2) false))
-    false
+        ;; (disjoint? '(not Boolean) '(not Long))
+        ;; (disjoint? '(not A) '(not B))
+        ;; if disjoint classes A and B
+        (and (gns/not? t2)
+             ;;(class-designator? t1-operand)
+             ;;(class-designator? (second t2))
+             (disjoint? t1-operand (second t2) false))
+        false
 
-    ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
-    (and (gns/not? t2)
-         (not (disjoint? (second t1) (second t2) true)))
-    false         
+        ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
+        (and (gns/not? t2)
+             (not (disjoint? t1-operand (second t2) true)))
+        false         
 
-    :else
-    :dont-know))
+        :else
+        :dont-know))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of subtype? and -subtype?
@@ -2057,58 +2058,59 @@
             :dont-know))))
 
 (defmethod -inhabited? 'and [t1]
-  (cond
-    (not (gns/and? t1))
+  (if (not (gns/and? t1))
     :dont-know
+    (let [t1-operands (operands t1)
+          n (count t1-operands)]
+      (cond
+        (and (< 1 n)
+             (forall-pairs [[a b] t1-operands]
+                           (and (or (class-designator? a)
+                                    (and (gns/not? a)
+                                         (class-designator? (second a))))
+                                (or (class-designator? b)
+                                    (and (gns/not? b)
+                                         (class-designator? (second b))))
+                                (not (disjoint? a b true)))))
+        true
 
-    (and (< 2 (count t1))
-         (forall-pairs [[a b] (rest t1)]
-                       (and (or (class-designator? a)
-                                (and (gns/not? a)
-                                     (class-designator? (second a))))
-                            (or (class-designator? b)
-                                (and (gns/not? b)
-                                     (class-designator? (second b))))
-                            (not (disjoint? a b true)))))
-    true
+        (exists-pair [[a b] t1-operands]
+                     (and (or (class-designator? a)
+                              (and (gns/not? a)
+                                   (class-designator? (second a))))
+                          (or (class-designator? b)
+                              (and (gns/not? b)
+                                   (class-designator? (second b))))
+                          (disjoint? a b false)))
+        false
+        
+        ;; if any of the types are empty, the intersection is empty,
+        ;;   even if others are unknown.  (or A B empty D E).
+        ;;   Careful, the computation here depends on laziness of map.
+        ;;   Once a false is found, we don't call inhabited? on the remaining
+        ;;   part of t1-operands.
+        (some false? (map (fn [t] (inhabited? t :dont-know))
+                          (unchunk t1-operands)))
+        false
+        
+        ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
-    (exists-pair [[a b] (rest t1)]
-                 (and (or (class-designator? a)
-                          (and (gns/not? a)
-                               (class-designator? (second a))))
-                      (or (class-designator? b)
-                          (and (gns/not? b)
-                               (class-designator? (second b))))
-                      (disjoint? a b false)))
-    false
-    
-    ;; if any of the types are empty, the intersection is empty,
-    ;;   even if others are unknown.  (or A B empty D E).
-    ;;   Careful, the computation here depends on laziness of map.
-    ;;   Once a false is found, we don't call inhabited? on the remaining
-    ;;   part of (rest t1).
-    (some false? (map (fn [t] (inhabited? t :dont-know))
-                      (unchunk (rest t1))))
-    false
-    
-    ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
+        (and (not-empty (filter class-designator? t1-operands))
+             (= 1 (count (filter gns/not-member-or-=?
+                                 t1-operands)))
+             (let [t2 (canonicalize-type (cons 'and
+                                               (remove gns/not-member-or-=?
+                                                       t1-operands)))]
+               (inhabited? t2 false)))
+        true
 
-    (and (not-empty (filter class-designator? (rest t1)))
-         (= 1 (count (filter gns/not-member-or-=?
-                             (rest t1))))
-         (let [t2 (canonicalize-type (cons 'and
-                                           (remove gns/not-member-or-=?
-                                                   (rest t1))))]
-           (inhabited? t2 false)))
-    true
+        ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
+        (exists-pair [[ta tb] t1-operands]
+                     (disjoint? ta tb false))
+        false
 
-    ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
-    (exists-pair [[ta tb] (rest t1)]
-                 (disjoint? ta tb false))
-    false
-
-    :else
-    :dont-know))
+        :else
+        :dont-know))))
 
 (defmethod -inhabited? 'not [t1]
   (cond (not (gns/not? t1))
