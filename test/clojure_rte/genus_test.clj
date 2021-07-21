@@ -531,6 +531,19 @@
           (check-subtype rt-not-or 
                          rt-and-not "rt-not-or < rt-and-not"))))))
 
+(deftest t-disjoint-commutative
+  (testing "commutativity of disjoint?"
+      (doseq [_ (range 200 )
+              n (range 5)
+              :let [td-1 (gns/gen-type n)
+                    td-2 (gns/gen-type n)
+                    d12 (gns/disjoint? td-1 td-2 :dont-know)
+                    d21 (gns/disjoint? td-2 td-1 :dont-know)]]
+        (is (= d12 d21)
+            (cl-format false "~%td-1=~A~%td-2=~A~%disjoint? td-1 td2 = ~A~%disjoint? td-1 td2 = ~A~%"
+                       td-1 td-2
+                       d12 d21)))))
+    
 (deftest t-intersection-union-subtype
   (testing "intersection-union-subtype"
     (letfn [(check-subtype [rt-1 rt-2 comment]
