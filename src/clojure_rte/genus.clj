@@ -1735,7 +1735,7 @@
              (not (subtype? t1-operand t2 true)))
         true
 
-        ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
+        ;; (disjoint? '(not (member 1 2 3)) '(member a b c 1 2 3) )
         (and (subtype? t1-operand t2 false)
              (not (subtype? t2 t1-operand true)))
         false
