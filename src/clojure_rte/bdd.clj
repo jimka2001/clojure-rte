@@ -22,7 +22,7 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty?]]
+  (:require [clojure-rte.util :refer [call-with-collector non-empty? print-vals forall]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))
@@ -160,6 +160,30 @@
                            (walk (:negative node)
                                  (cons (list 'not (:label node)) parents))))))]
            (walk bdd '()))))))))
+
+(defn satisfying-type-designators
+  "Create a lazy list of type designators which satisfy the Bdd.  I.e.,
+  one element of the list for each type corresponding to the nodes
+  from the top of the Bdd to the true leaf."
+  [bdd]
+  (assert (clojure.core/or (instance? Boolean bdd)
+                           (instance? Bdd bdd)))
+  (letfn [(satisfying [node lineage]
+            (let [td (delay (gns/canonicalize-type lineage :dnf))]
+              (if (= :empty-set td)
+                ;; if the lineage has an empty intersection, then we prune this recursion
+                []
+                (case node
+                  (true) [@td]
+                  (false) []
+                  ;; otherwise, we generate a lazy conatenation of the left and right traversals
+                  (concat (satisfying (:positive node)
+                                      (gns/create-and [@td
+                                                       (:label node)]))
+                          (satisfying (:negative node)
+                                      (gns/create-and [@td
+                                                       (gns/create-not (:label node))])))))))]
+    (satisfying bdd :sigma)))
 
 (def ^:dynamic *hash*
   "Hash table storing Bdd instances which have been allocated.   The idea
@@ -448,11 +472,21 @@
        (bdd/canonicalize-type (list 'and type-designator-1 type-designator-2)))))
 
 (defn type-subtype?
-  "given two type designators, use bdds to determine whether one is a subtype of the other.
+  "Given two type designators, use bdds to determine whether one is a subtype of the other.
   if it cannot be proven, false is returned."
   [subtype-designator supertype-designator]
   (with-hash []
     (let [bdd-sub (bdd subtype-designator)
-          bdd-sup (bdd supertype-designator)]
-      (= :empty-set
-         (dnf (bdd/and-not bdd-sub bdd-sup))))))
+          bdd-sup (bdd supertype-designator)
+          bdd-diff (bdd/and-not bdd-sub bdd-sup)
+          satisfying (satisfying-type-designators bdd-diff)]
+      (cond (= false bdd-diff)
+            true
+            :else
+            ;; in the case the bdd is not explicitly false, some branch(s)
+            ;;   from the root to the true-leaf might designate a list of
+            ;;   types whose intersection is empty.
+            ;;   The two given types are in a sub/super relation ONLY
+            ;;   if all such intersections are empty.
+            (forall [td satisfying]
+                    (= :empty-set (gns/canonicalize-type td)))))))
