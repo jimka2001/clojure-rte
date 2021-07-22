@@ -370,8 +370,10 @@
                   t2-can (gns/canonicalize-type t2)]]
       (is (not= true (bdd/type-subtype? t1 (gns/create-not t1)))
           (cl-format false
-                     "~%found type which is subtype of its complement~%t1=~A"
-                     t1)))))
+                     "~%found type which is subtype of its complement~%t1=~A~%depth=~A~%reps=~A"
+                     t1
+                     depth
+                     reps)))))
 
 (deftest t-type-subtypep-randomized-2
   (testing "type subtype of union"
@@ -383,8 +385,9 @@
                   t2-can (gns/canonicalize-type t2)]]
       (is (= true (bdd/type-subtype? t1 (gns/create-or [t1 t2])))
           (cl-format false
-                     "~%expecting t1 <: (or t1 t2)~%t1=~A~%t2=~A"
-                     t1 t2)))))
+                     "~%expecting t1 <: (or t1 t2)~%t1=~A~%t2=~A~%depth=~A~%reps=~A"
+                     t1 t2
+                     depth reps)))))
 
 (deftest t-type-subtypep-randomized-3
   (testing "intersection subtype of type"
@@ -397,8 +400,9 @@
       
       (is (= true (bdd/type-subtype? (gns/create-and [t1 t2]) t1))
           (cl-format false
-                     "~%expecting (and t1 t2) <: t1~%t1=~A~%t2=~A"
-                     t1 t2)))))
+                     "~%expecting (and t1 t2) <: t1~%t1=~A~%t2=~A~%depth=~A~%reps=~A"
+                     t1 t2
+                     depth reps)))))
 
 (deftest t-type-subtypep-randomized-4
   (testing "bdd/type-subtypep ? vs canonicalized form"
@@ -412,12 +416,8 @@
       (is (= (bdd/type-subtype? t1 t2)
              (bdd/type-subtype? t1-can t2-can))
           (cl-format false
-                     "~%different values from bdd/type-subtype?~%lhs=~Arhs=~A~%t1=~A~%t2=~A"
+                     "~%different values from bdd/type-subtype?~%lhs=~Arhs=~A~%t1=~A~%t2=~A~%depth=~A~%reps=~A"
                      (bdd/type-subtype? t1 t2)
                      (bdd/type-subtype? t1-can t2-can)
-                     t1 t2)))))
-
-          
-            
-                  
-
+                     t1 t2
+                     depth reps)))))

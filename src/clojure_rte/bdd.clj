@@ -161,7 +161,7 @@
                                  (cons (list 'not (:label node)) parents))))))]
            (walk bdd '()))))))))
 
-(defn satisfying-type-designators
+(defn satisfying-type-designators-old
   "Create a lazy list of type designators which satisfy the Bdd.  I.e.,
   one element of the list for each type corresponding to the nodes
   from the top of the Bdd to the true leaf."
@@ -183,6 +183,36 @@
                           (satisfying (:negative node)
                                       (gns/create-and [@td
                                                        (gns/create-not (:label node))])))))))]
+    (satisfying bdd :sigma)))
+
+
+(defn satisfying-type-designators
+  "Create a lazy list of type designators which satisfy the Bdd.  I.e.,
+  one element of the list for each type corresponding to the nodes
+  from the top of the Bdd to the true leaf."
+  [bdd]
+  (assert (clojure.core/or (instance? Boolean bdd)
+                           (instance? Bdd bdd)))
+  (letfn [(satisfying [node lineage]
+            (if (= false node)
+              []  ;; if reached a false leaf-node
+              (let [td (gns/canonicalize-type lineage :dnf)]
+                (cond (= :empty-set td)
+                      ;; if the lineage canonicalizes to an empty intersection, then we prune this recursion
+                      [] 
+
+                      (= true node)
+                      ;; if reached a true leaf-node
+                      [td] 
+
+                      :else
+                      ;; otherwise, we generate a lazy conatenation of the left and right traversals
+                      (concat (satisfying (:positive node)
+                                          (gns/create-and [td
+                                                           (:label node)]))
+                              (satisfying (:negative node)
+                                          (gns/create-and [td
+                                                           (gns/create-not (:label node))])))))))]
     (satisfying bdd :sigma)))
 
 (def ^:dynamic *hash*
