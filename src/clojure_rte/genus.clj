@@ -1700,12 +1700,6 @@
         (= t2 t1-operand)
         true
         
-        ;; (disjoint? (not B) A)
-        ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
-        (and (class-designator? t1-operand)
-             (class-designator? t2)
-             (subtype? t2 t1-operand false))
-        true
 
         ;; (disjoint? (not B) A) ;; when A and B are disjoint, provided that A is inhabited
         ;; (disjoint? (not B) SEmpty) does not apply because SEmpty is not inhabited.
@@ -1713,25 +1707,38 @@
              (inhabited? t2 false))
         false
 
+        ;; (disjoint? (not B) A)
+        ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
         ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
         ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
-        (and (class-designator? t2)
-             (class-designator? t1-operand)
-             (or (= :interface (class-primary-flag t1-operand))
-                 (= :interface (class-primary-flag t2)))
-             (empty? (find-incompatible-members t1-operand t2)))
-        false
-
         ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
         ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
-        (and (class-designator? t2)
-             (class-designator? t1-operand)
-             (member (class-primary-flag t2) '(:abstract :interface))
-             (member (class-primary-flag t1-operand) '(:abstract :interface))
-             (not (= (find-class t2) (find-class t1-operand))))
-        false
+        ;; (disjoint? '(not Long) 'Number)
+        ;; To compute (disjoint? (not B) A) we need to identify one
+        ;;   case, every other case returns false.
+        ;;   If A is a subtype of B, strict or otherwise, then (not B) and A are disjoint.
+        ;;   However, if we cannot determine whether A is a subtype of B (:dont-know) we must return :dont-know
+        ;;   Notice that this relation is true, regardless of the habitation of A, B, (not A), and (not B).
+        ;;
+        ;;    A            B      | A <: B   !B // A
+        ;; -----------------------+----------------
+        ;; empty-set    dont-care | true      true
+        ;; empty-set    empty-set | true      true
+        ;; != empty-set empty-set | false     false
+        ;; != empty-set    T      | true      true
+        ;;
+        ;; Here we make this check only if A and B are classes.  The relation is true
+        ;; in general.  However, we cannot apply the check programmatically because it
+        ;; would cause an infinite loop. In general to check (subtype? A B) we have to
+        ;; ask questions about the disjoint-ness of A and (not B), whould would
+        ;; cause infinite recursion.
+        (and (class-designator? t1-operand) ;; B
+             (class-designator? t2)) ;; A
+        (subtype? t2 t1-operand :dont-know) ;; A <: B  iff !B // A
 
         ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
+        ;; (disjoint? '(not Boolean) '(not Long))
+        ;; (disjoint? '(not A) '(not B))
         (and (gns/not? t2)
              (class-designator? t1-operand)
              (class-designator? (operand t2)))
@@ -1746,20 +1753,6 @@
         ;; (disjoint? '(not (member 1 2 3)) '(member a b c 1 2 3) )
         (and (subtype? t1-operand t2 false)
              (not (subtype? t2 t1-operand true)))
-        false
-
-        ;; (disjoint? '(not Long) 'Number)
-        (and (class-designator? t2)
-             (class-designator? t1-operand)
-             (not (= (find-class t1-operand) (find-class t2)))
-             (isa? (find-class t1-operand) (find-class t2)))
-        false
-
-        ;; (disjoint? '(not Boolean) '(not Long))
-        ;; (disjoint? '(not A) '(not B))
-        (and (gns/not? t2)
-             (class-designator? t1-operand)
-             (class-designator? (operand t2)))
         false
 
         ;; (disjoint? '(not Long) '(not (member 1 2 3)))
