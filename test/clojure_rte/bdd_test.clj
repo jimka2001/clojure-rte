@@ -364,10 +364,7 @@
   (testing "type not subtype of its complement"
     (doseq [depth (range 5)
             reps (range 200)
-            :let [t1 (gns/gen-type depth)
-                  t2 (gns/gen-type depth)
-                  t1-can (gns/canonicalize-type t1)
-                  t2-can (gns/canonicalize-type t2)]]
+            :let [t1 (gns/gen-type depth)]]
       (is (not= true (bdd/type-subtype? t1 (gns/create-not t1)))
           (cl-format false
                      "~%found type which is subtype of its complement~%t1=~A~%depth=~A~%reps=~A"
@@ -380,9 +377,7 @@
     (doseq [depth (range 5)
             reps (range 200)
             :let [t1 (gns/gen-type depth)
-                  t2 (gns/gen-type depth)
-                  t1-can (gns/canonicalize-type t1)
-                  t2-can (gns/canonicalize-type t2)]]
+                  t2 (gns/gen-type depth)]]
       (is (= true (bdd/type-subtype? t1 (gns/create-or [t1 t2])))
           (cl-format false
                      "~%expecting t1 <: (or t1 t2)~%t1=~A~%t2=~A~%depth=~A~%reps=~A"
@@ -394,9 +389,7 @@
     (doseq [depth (range 5)
             reps (range 200)
             :let [t1 (gns/gen-type depth)
-                  t2 (gns/gen-type depth)
-                  t1-can (gns/canonicalize-type t1)
-                  t2-can (gns/canonicalize-type t2)]]
+                  t2 (gns/gen-type depth)]]
       
       (is (= true (bdd/type-subtype? (gns/create-and [t1 t2]) t1))
           (cl-format false
