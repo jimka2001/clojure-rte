@@ -1734,7 +1734,7 @@
         ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
         (and (gns/not? t2)
              (class-designator? t1-operand)
-             (class-designator? (second t2)))
+             (class-designator? (operand t2)))
         false
         
         ;; if t2 < t1, then t2 disjoint from (not t1)
