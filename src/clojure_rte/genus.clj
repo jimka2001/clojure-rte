@@ -1707,8 +1707,10 @@
              (subtype? t2 t1-operand false))
         true
 
-        ;; (disjoint? (not B) A) ;; when A and B are disjoint
-        (disjoint? t2 t1-operand false)
+        ;; (disjoint? (not B) A) ;; when A and B are disjoint, provided that A is inhabited
+        ;; (disjoint? (not B) SEmpty) does not apply because SEmpty is not inhabited.
+        (and (disjoint? t2 t1-operand false)
+             (inhabited? t2 false))
         false
 
         ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
