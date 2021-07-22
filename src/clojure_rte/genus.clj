@@ -1757,17 +1757,34 @@
 
         ;; (disjoint? '(not Boolean) '(not Long))
         ;; (disjoint? '(not A) '(not B))
-        ;; if disjoint classes A and B
         (and (gns/not? t2)
-             ;;(class-designator? t1-operand)
-             ;;(class-designator? (second t2))
-             (disjoint? t1-operand (second t2) false))
+             (class-designator? t1-operand)
+             (class-designator? (operand t2)))
         false
 
-        ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
+        ;; (disjoint? '(not Long) '(not (member 1 2 3)))
+        ;;   we've already assures the first argument is inhabited.
         (and (gns/not? t2)
-             (not (disjoint? t1-operand (second t2) true)))
-        false         
+             (class-designator? (operand t2))
+             (member-or-=? t1-operand))
+        false
+        
+        ;; ;; TODO something is wrong here because this seems to mean as long
+        ;; ;;   as disjoint? does not return :dont-know, then return FALSE!!!
+        
+        ;; ;; (disjoint? '(not Boolean) '(not Long))
+        ;; ;; (disjoint? '(not A) '(not B))
+        ;; ;; if disjoint classes A and B
+        ;; (and (gns/not? t2)
+        ;;      ;;(class-designator? t1-operand)
+        ;;      ;;(class-designator? (operand t2))
+        ;;      (disjoint? t1-operand (operand t2) false))
+        ;; false
+
+        ;; ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
+        ;; (and (gns/not? t2)
+        ;;      (not (disjoint? t1-operand (operand t2) true)))
+        ;; false
 
         :else
         :dont-know))))
