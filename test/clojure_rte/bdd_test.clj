@@ -364,7 +364,10 @@
   (testing "type not subtype of its complement"
     (doseq [depth (range 5)
             reps (range 200)
-            :let [t1 (gns/gen-type depth)]]
+            :let [t1 (gns/gen-type depth)]
+            :when (gns/inhabited? t1 false)]
+      ;; :empty-set is a subtype of (not :empty-set)
+      ;; but otherwise x is not a subtype of (not x)
       (is (not= true (bdd/type-subtype? t1 (gns/create-not t1)))
           (cl-format false
                      "~%found type which is subtype of its complement~%t1=~A~%depth=~A~%reps=~A"
