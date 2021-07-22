@@ -26,6 +26,7 @@
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
+            [clojure-rte.dot :as dot]
             [clojure.test :refer [deftest is testing]])
   ;; this imports the name of the Bdd record, which is otherwise not imported by :require
   ;;(:import [clojure_rte.bdd Bdd])
@@ -345,6 +346,78 @@
           t2 '(or (not (member -1 0 1))
                   (and (member -1 0 1)
                        (not (member 0 2 4 6))))]
+      ;; (bdd/with-hash []
+      ;;   (let [bdd-t1 (bdd/bdd t1)
+      ;;         bdd-t2 (bdd/bdd t2)
+      ;;         bdd-3 (bdd/and-not bdd-t1 bdd-t2)]
+      ;;     (dot/bdd-to-dot bdd-t1 :title "t1" :draw-false-leaf true :view true)
+      ;;     (dot/bdd-to-dot bdd-t2 :title "t2" :draw-false-leaf true :view true)
+      ;;     (dot/bdd-to-dot (bdd/bdd (gns/canonicalize-type t1)) :title "t1-canonical" :draw-false-leaf true :view true)
+      ;;     (dot/bdd-to-dot (bdd/bdd (gns/canonicalize-type t2)) :title "t2-canonical" :draw-false-leaf true :view true)
+      ;;     (dot/bdd-to-dot bdd-3 :title "t1 and not t2" :draw-false-leaf true :view true)))
+
       (is (= (bdd/type-subtype? t1 t2)
              (bdd/type-subtype? (gns/canonicalize-type t1)
                                 (gns/canonicalize-type t2))) "line 349"))))
+
+(deftest t-type-subtypep-randomized-1
+  (testing "type not subtype of its complement"
+    (doseq [depth (range 5)
+            reps (range 200)
+            :let [t1 (gns/gen-type depth)
+                  t2 (gns/gen-type depth)
+                  t1-can (gns/canonicalize-type t1)
+                  t2-can (gns/canonicalize-type t2)]]
+      (is (not= true (bdd/type-subtype? t1 (gns/create-not t1)))
+          (cl-format false
+                     "~%found type which is subtype of its complement~%t1=~A"
+                     t1)))))
+
+(deftest t-type-subtypep-randomized-2
+  (testing "type subtype of union"
+    (doseq [depth (range 5)
+            reps (range 200)
+            :let [t1 (gns/gen-type depth)
+                  t2 (gns/gen-type depth)
+                  t1-can (gns/canonicalize-type t1)
+                  t2-can (gns/canonicalize-type t2)]]
+      (is (= true (bdd/type-subtype? t1 (gns/create-or [t1 t2])))
+          (cl-format false
+                     "~%expecting t1 <: (or t1 t2)~%t1=~A~%t2=~A"
+                     t1 t2)))))
+
+(deftest t-type-subtypep-randomized-3
+  (testing "intersection subtype of type"
+    (doseq [depth (range 5)
+            reps (range 200)
+            :let [t1 (gns/gen-type depth)
+                  t2 (gns/gen-type depth)
+                  t1-can (gns/canonicalize-type t1)
+                  t2-can (gns/canonicalize-type t2)]]
+      
+      (is (= true (bdd/type-subtype? (gns/create-and [t1 t2]) t1))
+          (cl-format false
+                     "~%expecting (and t1 t2) <: t1~%t1=~A~%t2=~A"
+                     t1 t2)))))
+
+(deftest t-type-subtypep-randomized-4
+  (testing "bdd/type-subtypep ? vs canonicalized form"
+    (doseq [depth (range 5)
+            reps (range 200)
+            :let [t1 (gns/gen-type depth)
+                  t2 (gns/gen-type depth)
+                  t1-can (gns/canonicalize-type t1)
+                  t2-can (gns/canonicalize-type t2)]]
+      
+      (is (= (bdd/type-subtype? t1 t2)
+             (bdd/type-subtype? t1-can t2-can))
+          (cl-format false
+                     "~%different values from bdd/type-subtype?~%lhs=~Arhs=~A~%t1=~A~%t2=~A"
+                     (bdd/type-subtype? t1 t2)
+                     (bdd/type-subtype? t1-can t2-can)
+                     t1 t2)))))
+
+          
+            
+                  
+
