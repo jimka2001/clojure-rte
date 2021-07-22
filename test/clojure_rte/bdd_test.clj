@@ -383,7 +383,12 @@
                   t2 (gns/gen-type depth)]]
       (is (= true (bdd/type-subtype? t1 (gns/create-or [t1 t2])))
           (cl-format false
-                     "~%expecting t1 <: (or t1 t2)~%t1=~A~%t2=~A~%depth=~A~%reps=~A"
+                     "~&
+                      expecting t1 <: (or t1 t2)~@
+                      t1=~A~@
+                      t2=~A~@
+                      depth=~A~@
+                      reps=~A"
                      t1 t2
                      depth reps)))))
 
