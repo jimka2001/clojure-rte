@@ -1690,6 +1690,12 @@
              (isa? Object (find-class t1-operand)))
         true
 
+        ;; (disjoint? (not X) (not Object)) --> true, everything is disjoint with empty-set
+        (and (gns/not? t2)
+             (class-designator? (operand t2))
+             (isa? Object (find-class (operand t2))))
+        true        
+        
         ;; (disjoint? (not X) X)
         (= t2 t1-operand)
         true
