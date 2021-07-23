@@ -206,6 +206,15 @@
           [[] []]
           items))
 
+(defn stacksize
+  "return the depth of the stack.  This function is useful for debugging
+  to detect if two recursive calls are at the same depth."
+  ;; This code is copied from https://gist.github.com/devth/8865799
+  ;; Thanks to https://gist.github.com/devth
+  []
+  (try (throw (Exception. ""))
+       (catch Exception e (count (.getStackTrace e)))))
+
 (defn find-simplifier
   "Iterate through a sequence of so-called simplifies.  Each simplifier
   is a unary function which accepts the given obj as arguments.  Each
@@ -220,20 +229,27 @@
   Once a simplifier has _simplified_ an object, find-simplifier returns
   the newly generated object, and the remaining simplifiers are silently
   ignored."
-  [obj simplifiers]
-  (if (empty? simplifiers)
-    obj
-    (loop [[f & fs] simplifiers]
-      (let [new-obj (f obj)]
-        (cond
-          (not= new-obj obj)
-          new-obj
+  ([obj simplifiers]
+   (find-simplifier obj simplifiers false))
+  ([obj simplifiers verbose]
+   ;;(cl-format true "~A ~A~%" (stacksize) obj)
+   (if (empty? simplifiers)
+     obj
+     (loop [[f & fs] simplifiers
+            i 0]
+       (let [new-obj (f obj)]
+         (cond
+           (not= new-obj obj)
+           (do
+             (if verbose
+               (cl-format true "[~A] ~A~%   --> ~A~%" i obj new-obj))
+             new-obj)
 
-          (empty? fs)
-          obj
+           (empty? fs)
+           obj
 
-          :else
-          (recur fs))))))
+           :else
+           (recur fs (inc i))))))))
 
 (defn fixed-point
   "Find the fixed point of the given function starting at the given value.
@@ -299,18 +315,42 @@
                      :actual-type (type value)
                      :value value}))))
 
+(defn gc-friendly-memoize
+  [g]
+  (m/memoizer g (c/soft-cache-factory {})))
+
 (defmacro defn-memoized
   [[public-name internal-name] docstring & body]
   (assert (string? docstring))
   `(let []
      (declare ~public-name) ;; so that the internal function can call the public function if necessary
      (defn ~internal-name ~@body)
-     (def ~(with-meta public-name {:dynamic true}) ~docstring (memoize ~internal-name))
+     (def ~(with-meta public-name {:dynamic true}) ~docstring (gc-friendly-memoize ~internal-name))
      ))
 
-(defn gc-friendly-memoize
-  [g]
-  (m/memoizer g (c/soft-cache-factory {})))
+(def memoized-multis (atom {}))
+(defmacro defmulti-memoized
+  [[public-name internal-name] docstring dispatch-fn]
+  "Define a multimethod on an internal name, and a memoized function implemented
+   as a dynamic variable.  Methods must be defined using defmethod-memoized, using
+   the public-name."
+  (assert (string? docstring))
+  `(let []
+     (declare ~public-name) ;; so that the methods can call the public function if necessary
+     (defmulti ~internal-name ~dispatch-fn)
+     (def ~(with-meta public-name {:dynamic true})
+       ~docstring
+       (gc-friendly-memoize ~internal-name))
+     (swap! memoized-multis assoc '~public-name '~internal-name)))
+
+(defmacro defmethod-memoized
+  [public-name dispatch-val & fn-tail]
+  "Wrapper around defmethod which defines a method using the internal name of the given
+  public name.  The pairing was presumably made in a previous call to defmulti-memoized."
+  (assert (get @memoized-multis public-name)
+          (cl-format false "~A does not name a multimethod defined by defmulti-memoized"
+                     public-name))
+  `(defmethod ~(get @memoized-multis public-name) ~dispatch-val ~@fn-tail))
 
 (defn map-eagerly 
   "Like map, but forces non-lazy behavior"
@@ -531,3 +571,14 @@
   "Search for all occurances of search-for in xs and replace with replace-with"
   [xs search-for replace-with]
   (search-replace-splice xs search-for [replace-with]))
+
+(defn count-if [pred xs]
+  (count (filter pred xs)))
+
+(defn count-if-not [pred xs]
+  (count-if (fn [x] (not (pred x))) xs))
+
+(defn assert-debug "call the assertion function as side effect, and return the given value."
+  [expr assertion]
+  (assertion expr)
+  expr)

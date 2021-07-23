@@ -22,7 +22,7 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty?]]
+  (:require [clojure-rte.util :refer [call-with-collector non-empty? print-vals forall]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))
@@ -52,35 +52,14 @@
   (case bdd
     (true) :sigma
     (false) :empty-set
-    (letfn [(pretty-not [arg]
-              (case arg
-                (:sigma) :empty-set
-                (:empty-set) :sigma
-                (list 'not arg)))
-            (pretty-or [a b]
-              (cond
-                (= a :sigma) :sigma
-                (= b :sigma) :sigma
-                (= a :empty-set) b
-                (= b :empty-set) a
-                (= a b) a
-                :else (list 'or a b)))
-            (pretty-and [a b]
-              (cond
-                (= a :sigma) b
-                (= b :sigma) a
-                (= a :empty-set) :empty-set
-                (= b :empty-set) :empty-set
-                (= a b) a
-                :else (list 'and a b)))]
-      
-      (let [l (:label bdd)
-            p (itenf (:positive bdd))
-            n (itenf (:negative bdd))]
-        (assert (not= nil p))
-        (assert (not= nil n))
-        (pretty-or (pretty-and l p)
-                   (pretty-and (pretty-not l) n))))))
+    
+    (let [l (:label bdd)
+          p (itenf (:positive bdd))
+          n (itenf (:negative bdd))]
+      (assert (not= nil p))
+      (assert (not= nil n))
+      (gns/create-or [(gns/create-and [l p])
+                      (gns/create-and [(gns/create-not l) n])]))))
 
 (defn dnf
   "Serialize a Bdd to dnf disjunctive normal form.
@@ -89,17 +68,7 @@
   (gns/subtype? a b false).  
   "
   [bdd]
-  (letfn [(pretty-and [args]
-            (cond
-              (empty? args) :sigma
-              (empty? (rest args)) (first args)
-              :else (cons 'and args)))
-          (pretty-or [args]
-            (cond
-              (empty? args) :empty-set
-              (empty? (rest args)) (first args)
-              :else (cons 'or args)))
-          (supertypes [sub types]
+  (letfn [(supertypes [sub types]
             (filter (fn [super]
                       (c/and (not= sub super)
                              (gns/subtype? sub super false))) types))
@@ -121,7 +90,7 @@
                           (non-empty? (supertypes sub args)))
                         args))))]
 
-    (pretty-or
+    (gns/create-or
      (check-supers
       (call-with-collector
        (fn [collect]
@@ -152,7 +121,7 @@
                                                             (rest tail))]
                                         (recur keeping
                                                (cons (first tail) done)))))]
-                         (collect (pretty-and term)))
+                         (collect (gns/create-and term)))
                        
                        (= false node) ; case #2
                        nil ;; do not collect, and prune recursion
@@ -191,6 +160,60 @@
                            (walk (:negative node)
                                  (cons (list 'not (:label node)) parents))))))]
            (walk bdd '()))))))))
+
+(defn satisfying-type-designators-old
+  "Create a lazy list of type designators which satisfy the Bdd.  I.e.,
+  one element of the list for each type corresponding to the nodes
+  from the top of the Bdd to the true leaf."
+  [bdd]
+  (assert (clojure.core/or (instance? Boolean bdd)
+                           (instance? Bdd bdd)))
+  (letfn [(satisfying [node lineage]
+            (let [td (delay (gns/canonicalize-type lineage :dnf))]
+              (if (= :empty-set td)
+                ;; if the lineage has an empty intersection, then we prune this recursion
+                []
+                (case node
+                  (true) [@td]
+                  (false) []
+                  ;; otherwise, we generate a lazy conatenation of the left and right traversals
+                  (concat (satisfying (:positive node)
+                                      (gns/create-and [@td
+                                                       (:label node)]))
+                          (satisfying (:negative node)
+                                      (gns/create-and [@td
+                                                       (gns/create-not (:label node))])))))))]
+    (satisfying bdd :sigma)))
+
+
+(defn satisfying-type-designators
+  "Create a lazy list of type designators which satisfy the Bdd.  I.e.,
+  one element of the list for each type corresponding to the nodes
+  from the top of the Bdd to the true leaf."
+  [bdd]
+  (assert (clojure.core/or (instance? Boolean bdd)
+                           (instance? Bdd bdd)))
+  (letfn [(satisfying [node lineage]
+            (if (= false node)
+              []  ;; if reached a false leaf-node
+              (let [td (gns/canonicalize-type lineage :dnf)]
+                (cond (= :empty-set td)
+                      ;; if the lineage canonicalizes to an empty intersection, then we prune this recursion
+                      [] 
+
+                      (= true node)
+                      ;; if reached a true leaf-node
+                      [td] 
+
+                      :else
+                      ;; otherwise, we generate a lazy conatenation of the left and right traversals
+                      (concat (satisfying (:positive node)
+                                          (gns/create-and [td
+                                                           (:label node)]))
+                              (satisfying (:negative node)
+                                          (gns/create-and [td
+                                                           (gns/create-not (:label node))])))))))]
+    (satisfying bdd :sigma)))
 
 (def ^:dynamic *hash*
   "Hash table storing Bdd instances which have been allocated.   The idea
@@ -479,11 +502,21 @@
        (bdd/canonicalize-type (list 'and type-designator-1 type-designator-2)))))
 
 (defn type-subtype?
-  "given two type designators, use bdds to determine whether one is a subtype of the other.
+  "Given two type designators, use bdds to determine whether one is a subtype of the other.
   if it cannot be proven, false is returned."
   [subtype-designator supertype-designator]
   (with-hash []
     (let [bdd-sub (bdd subtype-designator)
-          bdd-sup (bdd supertype-designator)]
-      (= :empty-set
-         (dnf (bdd/and-not bdd-sub bdd-sup))))))
+          bdd-sup (bdd supertype-designator)
+          bdd-diff (bdd/and-not bdd-sub bdd-sup)
+          satisfying (satisfying-type-designators bdd-diff)]
+      (cond (= false bdd-diff)
+            true
+            :else
+            ;; in the case the bdd is not explicitly false, some branch(s)
+            ;;   from the root to the true-leaf might designate a list of
+            ;;   types whose intersection is empty.
+            ;;   The two given types are in a sub/super relation ONLY
+            ;;   if all such intersections are empty.
+            (forall [td satisfying]
+                    (= :empty-set (gns/canonicalize-type td)))))))

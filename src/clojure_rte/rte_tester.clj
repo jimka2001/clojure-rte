@@ -23,10 +23,12 @@
   (:require [clojure-rte.tester  :as tester]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
+            [clojure-rte.util :refer [print-vals]]
             [clojure-rte.genus :as gns]
-            ;; [clojure-rte.dot :as dot]
-            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa dfa-to-rte nullable
-                                               canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
+            [clojure-rte.dot :as dot]
+            [clojure-rte.rte-extract :refer [dfa-to-rte]]
+            [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa  nullable?
+                                               canonicalize-pattern canonicalize-pattern-once canonicalize-pattern-once-impl]]
             ))
 
 (defn rte-components [pattern]
@@ -68,16 +70,18 @@
                                                           (range size)))
      (:? :+ :* :not) (list key (gen-rte (dec size) types)))))
 
-(defn test-rte-to-dfa [num-tries size verbose]
+(defn test-rte-to-dfa [num-tries size verbose is-fn]
   (tester/random-test num-tries (fn [rte]
                                   (with-compile-env []
-                                    (rte-to-dfa rte)))
+                                    (is-fn (rte-to-dfa rte)
+                                           (cl-format false "rte-to-dfa failed on ~A" rte))))
                       (fn [] (gen-rte size gns/*test-types*))
                       rte-components
                       verbose))
 
-(defn test-canonicalize-pattern [num-tries size verbose]
-  (tester/random-test num-tries canonicalize-pattern
+(defn test-canonicalize-pattern [num-tries size verbose is-fn]
+  (tester/random-test num-tries (fn [rte] (is-fn (canonicalize-pattern rte)
+                                                 (cl-format false "canonicalize-pattern failed on ~A" rte)))
                       (fn [] (gen-rte size gns/*test-types*))
                       rte-components verbose))
 
@@ -85,31 +89,37 @@
 (defn test-rte-not-nullable
   "Run some tests to assure that if an rte r is nullable if and only
   if (:not r) is not nullable."
-  [num-tries size verbose]
-  (tester/random-test num-tries
-                      (fn [rte]
-                        (let [rte-can (canonicalize-pattern rte)]
-                          (if (nullable rte)
-                            (do (assert (not (nullable (list :not rte)))
-                                        (cl-format false
-                                                   "rte ~A is nullable but its complement (:not ...) is not nullable"
-                                                   rte))
-                                (assert (not (nullable rte-can))
-                                        (cl-format false
-                                                   "rte ~A is nullable but its canonicalization is not: ~A"
-                                                   rte rte-can)))
-                            (do
-                              (assert (nullable (list :not rte))
-                                      (cl-format false
-                                                 "rte ~A is not nullable but its complement (:not ...) is nullable"
-                                                 rte))
-                              (assert (nullable rte-can)
-                                      (cl-format false
-                                                 "rte ~A is non-nullable but its canonicalization is nullable: ~A"
-                                                 rte rte-can))))))
-                      (fn [] (gen-rte size gns/*test-types*))
-                      rte-components
-                      verbose))
+  ([num-tries size verbose]
+   (test-rte-not-nullable num-tries
+                          size
+                          verbose
+                          (fn [expr msg]
+                            (assert expr msg))))
+  ([num-tries size verbose is-fn]
+   (tester/random-test num-tries
+                       (fn [rte]
+                         (let [rte-can (canonicalize-pattern rte)]
+                           (if (nullable? rte)
+                             (do (is-fn (not (nullable? (list :not rte)))
+                                         (cl-format false
+                                                    "rte ~A is nullable but its complement (:not ...) is not nullable"
+                                                    rte))
+                                 (is-fn (nullable? rte-can)
+                                         (cl-format false
+                                                    "rte ~A is nullable but its canonicalization is not: ~A"
+                                                    rte rte-can)))
+                             (do
+                               (is-fn (nullable? (list :not rte))
+                                       (cl-format false
+                                                  "rte ~A is not nullable but its complement (:not ...) is nullable"
+                                                  rte))
+                               (is-fn (not (nullable? rte-can))
+                                       (cl-format false
+                                                  "rte ~A is non-nullable but its canonicalization is nullable: ~A"
+                                                  rte rte-can))))))
+                       (fn [] (gen-rte size gns/*test-types*))
+                       rte-components
+                       verbose)))
 
 ;; this test is not yet correctly implemented,
 ;;    need a good way to compare two rtes for equivalence
@@ -134,19 +144,19 @@
 ;;    verbose))
 
 
-(defn test-rte-canonicalize-nullable-1 [rte]
+(defn test-rte-canonicalize-nullable-1 [rte is-fn]
   (with-compile-env []
     ;;(cl-format true "canonicalizing:~%")
     ;; TODO doall this lazy seq
-    (binding [canonicalize-pattern-once (memoize -canonicalize-pattern-once)]
+    (binding [canonicalize-pattern-once (memoize canonicalize-pattern-once-impl)]
       (let [can (canonicalize-pattern rte)]
         ;;(cl-format true "canonicalized: ~A~%" can)
-        (if (nullable rte)
-          (assert (nullable can)
+        (if (nullable? rte)
+          (is-fn (nullable? can)
                   (cl-format false
                              "rte ~A is nullable but its canonicalization ~A is not"
                              rte can))
-          (assert (not (nullable can))
+          (is-fn (not (nullable? can))
                   (cl-format false
                              "rte ~A is not nullable but its canonicalization ~A is nullable"
                              rte can)))))))
@@ -154,54 +164,65 @@
 (defn test-rte-canonicalize-nullable
   "Run some tests to assure that if an rte r is nullable if and only
   if (canonicalize-pattern r) is also nullable."
-  [num-tries size verbose]
-  (tester/random-test num-tries
-                      test-rte-canonicalize-nullable-1
-                      (fn [] (gen-rte size gns/*test-types*))
-                      rte-components
-                      verbose))
+  ([num-tries size verbose]
+   (test-rte-canonicalize-nullable num-tries size verbose (fn [expr msg] (assert expr msg))))
+  ([num-tries size verbose is-fn]
+   (tester/random-test num-tries
+                       (fn [rte] (test-rte-canonicalize-nullable-1 rte is-fn))
+                       (fn [] (gen-rte size gns/*test-types*))
+                       rte-components
+                       verbose
+                       )))
 
 (defn test-rte-not-1
   "Assert that the same result occurs from complementing a dfa
   or building a Dfa from a complemented rte."
-  [rte]
-  (with-compile-env []
-    ;; is (not rte) equivalent to (complement dfa) ?
-    (let [dfa (rte-to-dfa rte)
-          dfa-complement (xym/complement dfa)
-          dfa-not-rte (rte-to-dfa (list :not rte))
-          ]
-      ;;(dot/dfa-to-dot dfa :view true :title "dfa")
-      ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
-      ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
-      
-      (assert (xym/dfa-equivalent dfa
-                                  dfa)
-              (cl-format false
-                         "dfa not equivalent with self rte=~A" rte))
+  ([rte] (test-rte-not-1 rte (fn [expr msg]
+                               (assert expr msg))))
+  ([rte is-fn]
+   (with-compile-env []
+     ;; is (not rte) equivalent to (complement dfa) ?
+     (let [dfa (rte-to-dfa rte)
+           dfa-complete (xym/complete dfa)
+           dfa-complement (xym/complement dfa)
+           dfa-not-rte (rte-to-dfa (list :not rte))
+           ]
+       ;;(dot/dfa-to-dot dfa-complete :view true :title "dfa-complete" :state-legend false)
+       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement" :state-legend false)
+       ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte" :state-legend false)
+       ;;(dot/dfa-to-dot (xym/synchronized-xor dfa dfa) :view true :title "182 dfa xor dfa" :state-legend false) 
+       ;;(dot/dfa-to-dot dfa :view true :title "183 dfa" :state-legend false)
 
-      (assert (xym/dfa-equivalent dfa-not-rte
-                                  dfa-not-rte)
+       (is-fn (xym/dfa-equivalent? dfa
+                                   dfa)
               (cl-format false
-                         "dfa of :not, not equivalent with self rte=~A" (list :not rte)))
+                         "187: dfa not equivalent with self rte=~A" rte))
 
-      (assert (xym/dfa-equivalent dfa-complement
-                                  dfa-not-rte)
+       (is-fn (xym/dfa-equivalent? dfa-not-rte
+                                   dfa-not-rte)
               (cl-format false
-                         "!dfa != (dfa (not rte)), when rte=~A" rte))
+                         "192: dfa of :not, not equivalent with self rte=~A" (list :not rte)))
 
-      (let [extracted-rte-map (dfa-to-rte dfa-complement)
-            extracted-rte (get extracted-rte-map true :empty-set)
-            dfa-not (rte-to-dfa (list :not extracted-rte))
-            ]
-        
-        (assert (xym/dfa-equivalent dfa dfa-not)
+       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement")
+       ;; (dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte")
+       (is-fn (xym/dfa-equivalent? dfa-complement
+                                   dfa-not-rte)
+              (cl-format false
+                         "202: !dfa != (dfa (not rte)), when rte=~A" rte))
+
+       (let [extracted-rte-map (dfa-to-rte dfa-complement)
+             extracted-rte (get extracted-rte-map true :empty-set)
+             dfa-not (rte-to-dfa (list :not extracted-rte))
+             ]
+         ;;(dot/dfa-to-dot dfa-not :view true :title "dfa-not" :state-legend false)
+         ;;(print-vals (dfa-to-rte (xym/synchronized-xor dfa dfa-not)))
+         (is-fn (xym/dfa-equivalent? dfa dfa-not)
                 (cl-format false
-                           "(rte (dfa (not rte))) != dfa, when rte=~A" rte))
-        ))))
+                           "211: (rte (dfa (not rte))) != dfa, when rte=~A" rte))
+         )))))
 
 (defn test-rte-not
-  "Testing several functions, xym/complement, dfa-to-rte, dfa-equivalent"
+  "Testing several functions, xym/complement, dfa-to-rte, dfa-equivalent?"
   [num-tries size verbose]
   (tester/random-test num-tries
                       test-rte-not-1

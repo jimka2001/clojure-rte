@@ -28,6 +28,7 @@
                                       partition-by-pred remove-element uniquify
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
+                                      defn-memoized
                                       unchunk gc-friendly-memoize forall
                                       print-vals]]
             [clojure-rte.cl-compat :as cl]
@@ -38,18 +39,17 @@
 ;; allow gns/ prefix even in this file.
 (alias 'gns 'clojure-rte.genus)
 
+(declare ^:dynamic canonicalize-type -canonicalize-type)
+(declare ^:dynamic inhabited? -inhabited?)
+(declare ^:dynamic disjoint? disjoint?-impl -disjoint?)
+
+
 (declare annihilator)
-(declare canonicalize-type)
-(declare -canonicalize-type)
-(declare check-disjoint)
+(declare check-disjoint check-disjoint-impl)
 (declare combinator)
 (declare combo-filter)
-(declare disjoint?)
-(declare -disjoint?)
 (declare dual-combinator)
 (declare expand-satisfies)
-(declare inhabited?)
-(declare -inhabited?)
 (declare operand)
 (declare operands)
 (declare subtype?)
@@ -207,14 +207,14 @@
   for the purse of valid-type?"
   ())
 
-(defn-memoized [sort-method-keys -sort-method-keys]
+(defn-memoized [sort-method-keys sort-method-keys-impl]
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
   method has been filtered away."
   [f]
   (cons :primary (remove #{:primary :default} (keys (methods f)))))
 
-(defn-memoized [class-primary-flag -class-primary-flag]
+(defn-memoized [class-primary-flag class-primary-flag-impl]
   "Takes a class-name and returns either :abstract, :interface, :public, or :final,
   or throws an ex-info exception."
   [t]
@@ -369,120 +369,6 @@
       (:else
        type-designator)))))
 
-
-(letfn [(type-min-max [atoms selector]
-          (some (fn [sub]
-                  (when (class-designator? sub)
-                    (let [csub (find-class sub)]
-                      (some (fn [super]
-                              (when (class-designator? super)
-                                (let [csuper (find-class super)]
-                                  (and (not (= csub csuper))
-                                       (isa? csub csuper)
-                                       (selector sub super))))) atoms)))) atoms))]
-  (defn type-min
-    "Find an element of the given sequence which is a subtype
-  of some other type and is not =.  not necessarily the global minimum."
-    [atoms]
-    (type-min-max atoms (fn [sub _] sub)))
-
-  (defn type-max
-    "Find an element of the given sequence which is a supertype
-  of some other type and is not =.  not necessarily the global maximum"
-    [atoms]
-    (type-min-max atoms (fn [_ super] super))))
-
-(defn map-type-partitions
-  "Iterate through all the ways to partition types between a right and left set.
-  Some care is made to prune branches which are provably empty.
-  The given binary-fun will be called on all such pairs [(l1 l2 ... ln) (r1 r2 ... rm)]
-  for which is provable that (and l1 l2 .. ln
-                                  (not r1) (not r2) ... (not rm))
-  is non-empty."
-  [items binary-fun]
-  (letfn [(remove-s*types [types isa]
-            ;; generalization of remove-supertypes and remove-subtypes,
-            ;; caller must either pass isa? or an isa? which reverse the arguments.
-            (let [supers (for [t1 types
-                               :when (class-designator? t1)
-                               :let [c1 (find-class t1)]
-                               t2 types
-                               :when (and (not= t1 t2)
-                                          (class-designator? t2))
-                               :let [c2 (find-class t2)]
-                               :when (and (not (= c1 c2))
-                                          (isa c1 c2))
-                               ]
-                           t2)]
-              (for [x types
-                    :when (not (member x supers))]
-                x)))
-          (remove-supertypes [types]
-            ;; Given a list of symbols designating types, return a new list
-            ;; excluding those which are supertypes of others in the list.
-            (remove-s*types types isa?))
-          (remove-subtypes [types]
-            ;; Given a list of symbols designating types, return a new list
-            ;; excluding those which are subypes of others in the list.
-            (remove-s*types types (fn [c1 c2] (isa? c2 c1))))
-          (type-reduce [left right]
-            (loop [left left
-                   right right]
-              (cond
-                (and (< 1 (count left))
-                     (member :sigma left))
-                (recur (remove #{:sigma} left) right)
-
-                :else [left right])))
-          (recurring [items left right]
-            (cl/cl-cond
-             ((member :sigma right)
-              ;; prune
-              )
-             ((and (member :sigma left)
-                   right)
-              (recurring items (remove #{:sigma} left) right))
-             ((and left
-                   (some (fn [t2]
-                           (disjoint? t2 (first left) false)) (rest left)))
-              ;; prune
-              )
-             ((and (not-empty left) (not-empty right)
-                   ;; exists t2 in right such that t1 < t2
-                   ;; then t1 & !t2 = nil
-                   (exists [t2 right]
-                           (subtype? (first left) t2 false)))
-              ;; prune
-              )
-
-             ((and (not-empty left) (not-empty right)
-                   ;; exists t1 in left such that t1 < t2
-                   ;; then t1 & !t2 = nil
-                   (exists [t1 left]
-                           (subtype? t1 (first right) false)))
-              ;; prune
-              )
-
-             ((empty? items)
-              (let [[left right] (type-reduce (remove-supertypes left) (remove-subtypes right))]
-                (binary-fun left right)))
-             ;; TODO consider subsets A < B
-             ;;    then A and ! B is empty
-             ;;    A & B is A
-             ;;    !A and !B is !B
-
-             (:else
-              (let [new-type (first items)]
-                (case new-type
-                  (nil) (recurring (rest items) left right)
-                  (:sigma) (recurring (rest items) (cons new-type left) right)
-                  (do
-                    (recurring (rest items) (cons new-type left) (remove (fn [t2] (disjoint? t2 new-type false))
-                                                                         right))
-                    (if (some (fn [t2] (disjoint? new-type t2 false)) left)
-                      (recurring (rest items) left right) ;;   Double & !Float, we can omit Float in right
-                      (recurring (rest items) left (cons new-type right)))))))))]
-    (recurring items () ())))
 
 (def ^:dynamic *test-types*
   "Some type designators used for testing"
@@ -665,11 +551,16 @@
 ;; implementation of canonicalize-typef and the methods of -canonicalize-type
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def canonicalize-memoized (gc-friendly-memoize (fn [type-designator nf]
-                                                  (fixed-point type-designator
-                                                               (fn [td]
-                                                                 (-canonicalize-type td nf))
-                                                               =))))
+(defn-memoized [canonicalize-type-2-arg canonicalize-type-2-arg-impl]
+  "We cannot memoize canonicalize-type because its return value depends
+  on the value of the dynamic variable, so  canonicalize-type calls
+  canonicalize-type-2-arg with that value as 2nd argument.  This
+  function is a fixed-point wrapper around -canonicalize-type."
+  [type-designator nf]
+  (fixed-point type-designator
+               (fn [td]
+                 (-canonicalize-type td nf))
+               =))
 
 (def canonicalize-type-atom (atom #{}))
 (defn canonicalize-type
@@ -678,9 +569,18 @@
    (canonicalize-type type-designator :dnf))
   ([type-designator nf]
    (if (contains? @canonicalize-type-atom [type-designator nf])
+     ;; this means type-designator was a value previously returned from
+     ;; canonicalize-type, so if we ever tried to canonicalize it again
+     ;; we'd get the same value back. i.e., canonicalize-type is idempotent.
+     ;; So, don't try to canonicalize it now, just return it as itself.
      type-designator
-     (let [canonicalized (canonicalize-memoized type-designator nf)]
-       (swap! canonicalize-type-atom conj canonicalized)
+     ;; otherwise, we call the canonicalize-memoized to perhaps do
+     ;;   a potentially time comsuming computation, or perhaps
+     ;;   return a memoized value.
+     (let [canonicalized (canonicalize-type-2-arg type-designator nf)]
+       ;; save the return value, so as to avoid trying to canonicalize
+       ;;   a canonicalized value.
+       (swap! canonicalize-type-atom conj [canonicalized nf])
        canonicalized))))
 
 (defmulti -canonicalize-type
@@ -696,7 +596,10 @@
 
 (defmethod -canonicalize-type :default
   [type-designator nf]
-  (cond   
+  (cond
+    (= 'java.lang.Object type-designator)
+    :sigma
+       
     (class-designator? type-designator)
     type-designator
     
@@ -704,13 +607,13 @@
     type-designator
 
     (not (sequential? type-designator))
-    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
+    (throw (ex-info (format "-canonicalize-type: warning unrecognized type-designator %s" type-designator)
                     {:error-type :not-a-sequence
                      :normal-form nf
                      :type-designator type-designator }))
 
     (not (valid-type? type-designator))
-    (throw (ex-info (format "-canonicalize-type: warning unknown type %s" type-designator)
+    (throw (ex-info (format "-canonicalize-type: warning unrecognized type-designator %s" type-designator)
                     {:error-type :unknown-type
                      :normal-form nf
                      :type (type type-designator)
@@ -905,6 +808,12 @@
 (defn create-and
   [operands]
   (create '(and) operands))
+
+(defn create-not
+  [argument]
+  (if (gns/not? argument)
+    (operand argument)
+    (list 'not argument)))
 
 (defmethod create-dual 'or
   [this operands]
@@ -1504,33 +1413,32 @@
 ;; implementation of disjoint? and -disjoint?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def disjoint?
+(defn-memoized [disjoint? disjoint?-impl]
   "Predicate to determine whether the two types overlap.
   If it cannot be determined whether the two designated types
   are disjoint, then the default value is returned."
-  (gc-friendly-memoize
-   (fn [t1 t2 default]
-     {:pre [(member default '(true false :dont-know))]
-      :post [(member % '(true false :dont-know))]}
-     (cond
-       (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-       true
+  [t1 t2 default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (cond
+    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+    true
 
-       (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-       true
+    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+    true
 
-       :else
-       (let [try1 (check-disjoint t1 t2 :dont-know)]
-         (if (not= :dont-know try1)
-           try1
-           (let [t1-simple (canonicalize-type t1 :dnf)
-                 t2-simple (canonicalize-type t2 :dnf)]
-             (if (and (= t1-simple t1)
-                      (= t2-simple t2))
-               default
-               (check-disjoint t1-simple t2-simple default)))))))))
+    :else
+    (let [try1 (check-disjoint t1 t2 :dont-know)]
+      (if (not= :dont-know try1)
+        try1
+        (let [t1-simple (canonicalize-type t1 :dnf)
+              t2-simple (canonicalize-type t2 :dnf)]
+          (if (and (= t1-simple t1)
+                   (= t2-simple t2))
+            default
+            (check-disjoint t1-simple t2-simple default)))))))
 
-(defn-memoized [check-disjoint -check-disjoint]
+(defn-memoized [check-disjoint check-disjoint-impl]
   "Internal function used in top level disjoint? implementation."
   [t1' t2' default]
   (loop [[k & ks] (sort-method-keys -disjoint?)]
@@ -1670,16 +1578,17 @@
 (defmethod -disjoint? 'and [t1 t2]
   (let [inhabited-t1 (delay (inhabited? t1 false))
         inhabited-t2 (delay (inhabited? t2 false))]
-    (cond (not (gns/and? t1))
-          :dont-know
-
-          (exists [t (rest t1)]
+    (if (not (gns/and? t1))
+      :dont-know
+      (let [t1-operands (operands t1)]
+        (cond 
+          (exists [t t1-operands]
                   (disjoint? t2 t false))
           ;; (disjoint? (and A B C) X)
           true
 
           ;; (disjoint? (and A B C) B)
-          (and (member t2 (rest t1))
+          (and (member t2 t1-operands)
                @inhabited-t2
                @inhabited-t1)
           false
@@ -1688,7 +1597,7 @@
           ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
           (and @inhabited-t2
                @inhabited-t1
-               (exists [t1' (rest t1)]
+               (exists [t1' t1-operands]
                        (or (subtype? t1' t2 false)
                            (subtype? t2 t1' false)
                            )))
@@ -1696,13 +1605,13 @@
 
           (and (class-designator? t2)
                (= (find-class t2) java.lang.Object)
-               (some class-designator? (rest t1)))
+               (some class-designator? t1-operands))
           false
 
           ;; (disjoint? (and A B C) X)
           (and (class-designator? t2)
-               (every? class-designator? (rest t1)))
-          (not (forall-pairs [[a b] (conj (rest t1) t2)]
+               (every? class-designator? t1-operands))
+          (not (forall-pairs [[a b] (conj t1-operands t2)]
                              (or (isa? (find-class a) (find-class b))
                                  (isa? (find-class b) (find-class a))
                                  ;; TODO isn't this wrong? because () is not false
@@ -1716,7 +1625,7 @@
           ;; If B < A and A !< B    and A < C and C !< A
           ;;   then (and A !B) is NOT disjoint from C
           (and (= 3 (count t1)) ;; t1 of the form (and x y)
-               (gns/not? (first (rest (rest t1))))  ;; t1 of the form (and x (not y))
+               (gns/not? (first (rest t1-operands)))  ;; t1 of the form (and x (not y))
                (let [[_ A [_ B]] t1
                      C t2]
                  (and (subtype? B A false)
@@ -1736,7 +1645,7 @@
           (disjoint? (second t1) t2 :dont-know)
 
           :else
-          :dont-know)))
+          :dont-know)))))
 
 (defmethod -disjoint? '= [t1 t2]
   (cond (gns/=? t1)
@@ -1772,88 +1681,106 @@
         :dont-know))
 
 (defmethod -disjoint? 'not [t1 t2]
-  (cond
-    (not (gns/not? t1))
+  (if (not (gns/not? t1))
     :dont-know
-    
-    ;; (disjoint? (not Object) X)
-    (and (class-designator? (second t1))
-         (isa? Object (find-class (second t1))))
-    true
+    (let [t1-operand (operand t1)]
+      (cond
+        ;; (disjoint? (not Object) X)
+        (and (class-designator? t1-operand)
+             (isa? Object (find-class t1-operand)))
+        true
 
-    ;; (disjoint? (not X) X)
-    (= t2 (second t1))
-    true
-    
-    ;; (disjoint? (not B) A)
-    ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
-    (and (class-designator? (second t1))
-         (class-designator? t2)
-         (subtype? t2 (second t1) false))
-    true
+        ;; (disjoint? (not X) (not Object)) --> true, everything is disjoint with empty-set
+        (and (gns/not? t2)
+             (class-designator? (operand t2))
+             (isa? Object (find-class (operand t2))))
+        true        
+        
+        ;; (disjoint? (not X) X)
+        (= t2 t1-operand)
+        true
+        
 
-    ;; (disjoint? (not B) A) ;; when A and B are disjoint
-    (disjoint? t2 (second t1) false)
-    false
+        ;; (disjoint? (not B) A) ;; when A and B are disjoint, provided that A is inhabited
+        ;; (disjoint? (not B) SEmpty) does not apply because SEmpty is not inhabited.
+        (and (disjoint? t2 t1-operand false)
+             (inhabited? t2 false))
+        false
 
-    ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
-    ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (or (= :interface (class-primary-flag (second t1)))
-             (= :interface (class-primary-flag t2)))
-         (empty? (find-incompatible-members (second t1) t2)))
-    false
+        ;; (disjoint? (not B) A)
+        ;; (disjoint? '(not java.io.Serializable) 'Number)   as Number is a subclass of java.io.Serializable
+        ;; (disjoint? '(not clojure.lang.IMeta) 'BigDecimal)
+        ;;   we already know BigDecimal is not a subclass of clojure.lang.IMeta from above.
+        ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
+        ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
+        ;; (disjoint? '(not Long) 'Number)
+        ;; To compute (disjoint? (not B) A) we need to identify one
+        ;;   case, every other case returns false.
+        ;;   If A is a subtype of B, strict or otherwise, then (not B) and A are disjoint.
+        ;;   However, if we cannot determine whether A is a subtype of B (:dont-know) we must return :dont-know
+        ;;   Notice that this relation is true, regardless of the habitation of A, B, (not A), and (not B).
+        ;;
+        ;;    A            B      | A <: B   !B // A
+        ;; -----------------------+----------------
+        ;; empty-set    dont-care | true      true
+        ;; empty-set    empty-set | true      true
+        ;; != empty-set empty-set | false     false
+        ;; != empty-set    T      | true      true
+        ;;
+        ;; Here we make this check only if A and B are classes.  The relation is true
+        ;; in general.  However, we cannot apply the check programmatically because it
+        ;; would cause an infinite loop. In general to check (subtype? A B) we have to
+        ;; ask questions about the disjoint-ness of A and (not B), whould would
+        ;; cause infinite recursion.
+        (and (class-designator? t1-operand) ;; B
+             (class-designator? t2)) ;; A
+        (subtype? t2 t1-operand :dont-know) ;; A <: B  iff !B // A
 
-    ;; (disjoint? '(not java.lang.Comparable) 'java.io.Serializable)  ;; i.e., :interface vs :interface
-    ;; (disjoint? '(not java.lang.Number)     'clojure.lang.ISeq) ;; i.e. :interface vs (not :abstract)
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (member (class-primary-flag t2) '(:abstract :interface))
-         (member (class-primary-flag (second t1)) '(:abstract :interface))
-         (not (= (find-class t2) (find-class (second t1)))))
-    false
+        ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
+        ;; (disjoint? '(not Boolean) '(not Long))
+        ;; (disjoint? '(not A) '(not B))
+        (and (gns/not? t2)
+             (class-designator? t1-operand)
+             (class-designator? (operand t2)))
+        false
+        
+        ;; if t2 < t1, then t2 disjoint from (not t1)
+        ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
+        (and (subtype? t2 t1-operand false)
+             (not (subtype? t1-operand t2 true)))
+        true
 
-    ;; (disjoint?   '(not java.io.Serializable) '(not java.lang.Comparable))
-    (and (gns/not? t2)
-         (class-designator? (second t1))
-         (class-designator? (second t2)))
-    false
-    
-    ;; if t2 < t1, then t2 disjoint from (not t1)
-    ;; (disjoint? '(not (member a b c 1 2 3)) '(member 1 2 3) )
-    (and (subtype? t2 (second t1) false)
-         (not (subtype? (second t1) t2 true)))
-    true
+        ;; (disjoint? '(not (member 1 2 3)) '(member a b c 1 2 3) )
+        (and (subtype? t1-operand t2 false)
+             (not (subtype? t2 t1-operand true)))
+        false
 
-    ;; (disjoint?' (not (member 1 2 3)) '(member a b c 1 2 3) )
-    (and (subtype? (second t1) t2 false)
-         (not (subtype? t2 (second t1) true)))
-    false
+        ;; (disjoint? '(not Long) '(not (member 1 2 3)))
+        ;;   we've already assures the first argument is inhabited.
+        (and (gns/not? t2)
+             (class-designator? (operand t2))
+             (member-or-=? t1-operand))
+        false
+        
+        ;; ;; TODO something is wrong here because this seems to mean as long
+        ;; ;;   as disjoint? does not return :dont-know, then return FALSE!!!
+        
+        ;; ;; (disjoint? '(not Boolean) '(not Long))
+        ;; ;; (disjoint? '(not A) '(not B))
+        ;; ;; if disjoint classes A and B
+        ;; (and (gns/not? t2)
+        ;;      ;;(class-designator? t1-operand)
+        ;;      ;;(class-designator? (operand t2))
+        ;;      (disjoint? t1-operand (operand t2) false))
+        ;; false
 
-    ;; (disjoint? '(not Long) 'Number)
-    (and (class-designator? t2)
-         (class-designator? (second t1))
-         (not (= (find-class (second t1)) (find-class t2)))
-         (isa? (find-class (second t1)) (find-class t2)))
-    false
+        ;; ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
+        ;; (and (gns/not? t2)
+        ;;      (not (disjoint? t1-operand (operand t2) true)))
+        ;; false
 
-    ;; (disjoint? '(not Boolean) '(not Long))
-    ;; (disjoint? '(not A) '(not B))
-    ;; if disjoint classes A and B
-    (and (gns/not? t2)
-         ;;(class-designator? (second t1))
-         ;;(class-designator? (second t2))
-         (disjoint? (second t1) (second t2) false))
-    false
-
-    ;; (disjoint? (not Long) (not (member 1 2 3 "a" "b" "c")))
-    (and (gns/not? t2)
-         (not (disjoint? (second t1) (second t2) true)))
-    false         
-
-    :else
-    :dont-know))
+        :else
+        :dont-know))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of subtype? and -subtype?
@@ -2051,32 +1978,31 @@
 ;; implementation of inhabite? and -inhabited?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def inhabited?
+(defn-memoized [inhabited? inhabited?-impl]
   "Given a type-designator, perhaps application specific,
   determine whether the type is inhabited, i.e., not the
   empty type."
-  (gc-friendly-memoize
-   (fn [type-designator default]
-     {:pre [(member default '(true false :dont-know))]
-      :post [(member % '(true false :dont-know))]}
-     (letfn [(calc-inhabited [type-designator default]
-               (loop [[k & ks] (sort-method-keys -inhabited?)]
-                 (case ((k (methods -inhabited?)) type-designator)
-                   (true) true
-                   (false) false
-                   (if ks
-                     (recur ks)
-                     default))))]
-       (let [i (calc-inhabited type-designator :dont-know)
-             td-canon (delay (canonicalize-type type-designator :dnf))]
-         (cond (member i '(true false))
-               i
+  [type-designator default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (letfn [(calc-inhabited [type-designator default]
+              (loop [[k & ks] (sort-method-keys -inhabited?)]
+                (case ((k (methods -inhabited?)) type-designator)
+                  (true) true
+                  (false) false
+                  (if ks
+                    (recur ks)
+                    default))))]
+      (let [i (calc-inhabited type-designator :dont-know)
+            td-canon (delay (canonicalize-type type-designator :dnf))]
+        (cond (member i '(true false))
+              i
 
-               (= @td-canon type-designator)
-               default
-               
-               :else
-               (calc-inhabited @td-canon default)))))))
+              (= @td-canon type-designator)
+              default
+              
+              :else
+              (calc-inhabited @td-canon default)))))
 
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
@@ -2149,58 +2075,68 @@
             :dont-know))))
 
 (defmethod -inhabited? 'and [t1]
-  (cond
-    (not (gns/and? t1))
+  (if (not (gns/and? t1))
     :dont-know
+    (let [t1-operands (operands t1)
+          n (count t1-operands)]
+      (cond
+        (and (< 1 n)
+             (forall-pairs [[a b] t1-operands]
+                           (and (or (class-designator? a)
+                                    (and (gns/not? a)
+                                         (class-designator? (second a))))
+                                (or (class-designator? b)
+                                    (and (gns/not? b)
+                                         (class-designator? (second b))))
+                                (not (disjoint? a b true)))))
+        true
 
-    (and (< 2 (count t1))
-         (forall-pairs [[a b] (rest t1)]
-                       (and (or (class-designator? a)
-                                (and (gns/not? a)
-                                     (class-designator? (second a))))
-                            (or (class-designator? b)
-                                (and (gns/not? b)
-                                     (class-designator? (second b))))
-                            (not (disjoint? a b true)))))
-    true
+        (exists-pair [[a b] t1-operands]
+                     (and (or (class-designator? a)
+                              (and (gns/not? a)
+                                   (class-designator? (second a))))
+                          (or (class-designator? b)
+                              (and (gns/not? b)
+                                   (class-designator? (second b))))
+                          (disjoint? a b false)))
+        false
+        
+        ;; if any of the types are empty, the intersection is empty,
+        ;;   even if others are unknown.  (or A B empty D E).
+        ;;   Careful, the computation here depends on laziness of map.
+        ;;   Once a false is found, we don't call inhabited? on the remaining
+        ;;   part of t1-operands.
+        (some false? (map (fn [t] (inhabited? t :dont-know))
+                          (unchunk t1-operands)))
+        false
+        
+        ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
-    (exists-pair [[a b] (rest t1)]
-                 (and (or (class-designator? a)
-                          (and (gns/not? a)
-                               (class-designator? (second a))))
-                      (or (class-designator? b)
-                          (and (gns/not? b)
-                               (class-designator? (second b))))
-                      (disjoint? a b false)))
-    false
-    
-    ;; if any of the types are empty, the intersection is empty,
-    ;;   even if others are unknown.  (or A B empty D E).
-    ;;   Careful, the computation here depends on laziness of map.
-    ;;   Once a false is found, we don't call inhabited? on the remaining
-    ;;   part of (rest t1).
-    (some false? (map (fn [t] (inhabited? t :dont-know))
-                      (unchunk (rest t1))))
-    false
-    
-    ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
+        (and (not-empty (filter class-designator? t1-operands))
+             (= 1 (count (filter gns/not-member-or-=?
+                                 t1-operands)))
+             (let [t2 (canonicalize-type (cons 'and
+                                               (remove gns/not-member-or-=?
+                                                       t1-operands)))]
+               (inhabited? t2 false)))
+        true
 
-    (and (not-empty (filter class-designator? (rest t1)))
-         (= 1 (count (filter gns/not-member-or-=?
-                             (rest t1))))
-         (let [t2 (canonicalize-type (cons 'and
-                                           (remove gns/not-member-or-=?
-                                                   (rest t1))))]
-           (inhabited? t2 false)))
-    true
+        ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
+        (exists-pair [[ta tb] t1-operands]
+                     (disjoint? ta tb false))
+        false
 
-    ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
-    (exists-pair [[ta tb] (rest t1)]
-                 (disjoint? ta tb false))
-    false
-
-    :else
-    :dont-know))
+        ;; in the special case of (and A B) if A and B are NOT disjoint,
+        ;;   then the intersection is inhabited.  This does not generalize
+        ;;   to (and A B C...), because even if not(A||B), not(B||C), and not(A||C),
+        ;;   the intersection might still be empty.
+        ;; E.g., (and (member 1 2) (member 2 3) (member 1 3)) is empty yet no pair is disjoint.
+        (and (= 2 n)
+             (not (disjoint? (first t1-operands) (second t1-operands) true)))
+        true       
+        
+        :else
+        :dont-know))))
 
 (defmethod -inhabited? 'not [t1]
   (cond (not (gns/not? t1))
@@ -2230,4 +2166,38 @@
   (if (gns/=? t1)
     true
     :dont-know))
+
+(defn mdtd
+  "Given a set of type designators, return a newly computed list of type
+  designators which implement the Maximal Disjoint Type Decomposition.
+  I.e., the computed list designates a set whose union is the universe,
+  and all the elements are mutually disjoint.
+  Every set, x, in the return value has the property that if y is in
+  the given type-set, then either x and y are disjoint, or x is a subset of y."
+  [type-set]
+  (loop [decomposition [:sigma]
+         type-set (disj type-set :sigma)]
+    (if (empty? type-set)
+      decomposition
+      (let [td (first type-set) ;; take any element, doesn't matter which
+            n (canonicalize-type (gns/create-not td) :dnf)
+            f (fn [td-1]
+                (let [a (delay (canonicalize-type (gns/create-and [td td-1]) :dnf))
+                      b (delay (canonicalize-type (gns/create-and [n td-1]) :dnf))]
+                  (cond (disjoint? td td-1 false)
+                        [td-1]
+                        
+                        (disjoint? n td-1 false)
+                        [td-1]
+                        
+                        (not (inhabited? @a true))
+                        [td-1]
+                        
+                        (not (inhabited? @b true))
+                        [td-1]
+                        
+                        :else
+                        [@a @b])))]
+        (recur (mapcat f decomposition)
+               (disj type-set td))))))
 

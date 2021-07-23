@@ -25,7 +25,7 @@
             [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [clojure-rte.rte-case :refer [rte-case destructuring-case
-                                          memoized-rte-case-clauses-to-dfa
+                                          rte-case-clauses-to-dfa rte-case-clauses-to-dfa-impl
                                           dsfn dscase
                                           -destructuring-fn-many destructuring-fn]]
 ))
@@ -35,7 +35,7 @@
 
 (defmacro testing
   [string & body]
-  `(do
+  `(with-compile-env []
      (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)])
      (clojure.test/testing ~string ~@body)
      (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)]))
@@ -269,7 +269,7 @@
             (([(fn [] (let [[a b] v41977] (do 2)))
                (fn [] (let [[a [b c] & d] v41977] (do 1)))
                (fn [] nil)]
-              (let [dfa (memoized-rte-case-clauses-to-dfa
+              (let [dfa (rte-case-clauses-to-dfa
                          '[[0
                             (:and
                              (:cat
@@ -460,7 +460,7 @@
     (is (= 1
            (with-compile-env ()
              (rte/match
-              (memoized-rte-case-clauses-to-dfa
+              (rte-case-clauses-to-dfa
                '[[0
                   (:and (:cat Boolean (or String Boolean))
                         (:not (:or)))]

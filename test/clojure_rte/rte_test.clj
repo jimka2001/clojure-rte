@@ -22,17 +22,21 @@
 (ns clojure-rte.rte-test
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte
-             :refer [nullable first-types
+             :refer [nullable? first-types
                      canonicalize-pattern canonicalize-pattern-once
-                     derivative rte-to-dfa
+                     derivative
                      with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
-                     rte-combine-labels dfa-to-rte
-                     mdtd with-rte reduce-redundant-or]]
+                     rte-combine-labels
+                     with-rte]]
+            [clojure.pprint :refer [cl-format]]
+            [clojure-rte.rte-extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.util :refer [member]]
+            [clojure-rte.util :refer [member count-if-not print-vals]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.rte-tester :refer []]
+            [clojure-rte.rte-tester :refer [gen-rte]]
+            [clojure-rte.dot :as dot]
+            [backtick :refer [template]]
             [clojure-rte.xymbolyco :as xym]))
 
 (defn -main []
@@ -41,28 +45,29 @@
 
 (defmacro testing
   [string & body]
-  `(do (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
-       (clojure.test/testing ~string ~@body)
-       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
-       ))
+  `(with-compile-env []
+     (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
+     ))
 
 (deftest t-nullable
   (testing "nullable"
-    (is (not (nullable :sigma)) "nullable sigma")
-    (is (nullable :epsilon) "14")
-    (is (not (nullable :empty-set)) "13")
-    (is (nullable '(:and :epsilon :epsilon)) "12")
-    (is (nullable '(:or :epsilon :empty-set)) "11")
-    (is (nullable '(:cat :epsilon :epsilon)) "10")
-    (is (not (nullable '(:cat :epsilon :empty-set))) "9")
-    (is (not (nullable '(:cat :empty-set :epsilon))) "8")
-    (is (nullable '(:cat :epsilon (:* :epsilon))) "7")
-    (is (nullable '(:+ :epsilon)) "6")
-    (is (not (nullable '(:cat :empty-set (:* :empty-set)))) "5")
-    (is (not (nullable '(:cat :empty-set :epsilon))) "4")
-    (is (not (nullable :empty-set)) "3")
-    (is (not (nullable '(:+ :empty-set))) "2")
-    (is (nullable '(:? :epsilon)) "1")))
+    (is (not (nullable? :sigma)) "nullable? sigma")
+    (is (nullable? :epsilon) "14")
+    (is (not (nullable? :empty-set)) "13")
+    (is (nullable? '(:and :epsilon :epsilon)) "12")
+    (is (nullable? '(:or :epsilon :empty-set)) "11")
+    (is (nullable? '(:cat :epsilon :epsilon)) "10")
+    (is (not (nullable? '(:cat :epsilon :empty-set))) "9")
+    (is (not (nullable? '(:cat :empty-set :epsilon))) "8")
+    (is (nullable? '(:cat :epsilon (:* :epsilon))) "7")
+    (is (nullable? '(:+ :epsilon)) "6")
+    (is (not (nullable? '(:cat :empty-set (:* :empty-set)))) "5")
+    (is (not (nullable? '(:cat :empty-set :epsilon))) "4")
+    (is (not (nullable? :empty-set)) "3")
+    (is (not (nullable? '(:+ :empty-set))) "2")
+    (is (nullable? '(:? :epsilon)) "1")))
 
 (deftest t-first-types
   (testing "first-types"
@@ -151,133 +156,7 @@
     (is (thrown? clojure.lang.ExceptionInfo (canonicalize-pattern '(:?))))
     (is (thrown? clojure.lang.ExceptionInfo (canonicalize-pattern '(:+))))
 
-    ;; type
-    (is (= 'Number (canonicalize-pattern-once 'Number)) "canonicalize :type")
 
-    ;; :*
-    (is (= (canonicalize-pattern-once '(:* (:* Number)))
-           '(:* Number)) "a** -> a*")
-    (is (= '(:* Number) (canonicalize-pattern-once '(:* Number))) "canonicalize :type *")
-    (is (= :epsilon (canonicalize-pattern-once '(:* :epsilon))) ":epsilon* -> :epsilon")
-    (is (= :epsilon (canonicalize-pattern-once '(:* :empty-set))) ":empty-set* -> :epsilon")
-    (is (= '(:* :sigma) (canonicalize-pattern-once '(:* :sigma))) ":sigma* -> :sigma*")
-    (is (= '(:* :sigma) (canonicalize-pattern-once '(:* (:* :sigma)))) ":sigma** -> :sigma*")
-    (is (= '(:* :sigma) (canonicalize-pattern-once '(:* (:* (:* :sigma))))) ":sigma*** -> :sigma*")
-
-    ;; :cat
-    (is (= (canonicalize-pattern '(:cat)) :epsilon))
-    (is (= 'Number (canonicalize-pattern-once '(:cat Number))) "unary :cat")
-    (is (= '(:cat Number Number) (canonicalize-pattern-once '(:cat Number Number))) "binary :cat")
-    (is (= '(:cat Number Number Number) (canonicalize-pattern-once '(:cat Number Number Number))) "3-ary :cat")
-    (is (= 'Number (canonicalize-pattern-once '(:cat (:cat Number)))) "recursive cat")
-    (is (= '(:cat Number Number) (canonicalize-pattern-once '(:cat (:cat Number) (:cat Number)))) "recursive cat")
-    (is (= '(:cat Number Number) (canonicalize-pattern-once '(:cat Number (:cat Number)))) "recursive cat 2")
-    (is (= '(:cat Number Number) (canonicalize-pattern-once '(:cat (:cat Number) Number))) "recursive cat 3")
-    (is (= '(:cat Number Number Number) (canonicalize-pattern-once '(:cat (:cat Number) (:cat Number) (:cat Number)))) "recursive cat")
-    (is (= 'Long
-           (canonicalize-pattern '(:cat :epsilon Long)))
-        "cat epsilon x")
-    (is (= 'Long
-           (canonicalize-pattern '(:cat Long :epsilon)))
-        "cat x epsilon")
-    (is (= :empty-set
-           (canonicalize-pattern '(:cat :empty-set Long)))
-        "cat epsilon x")
-    (is (= :empty-set
-           (canonicalize-pattern '(:cat Long :empty-set)))
-        "cat x epsilon")
-    (is (= (canonicalize-pattern '(:cat Number (:* :sigma) (:* :sigma) String))
-           '(:cat Number (:* :sigma) String)) "cat sigma* sigma*")
-    (is (= (canonicalize-pattern '(:cat Number (:* String) (:* String) Number))
-           '(:cat Number (:* String)  Number)) "cat (:* x) (:* x)")
-    (is (= (canonicalize-pattern '(:cat Number (:* String) String Number))
-           '(:cat Number (:* String) String Number)) "cat (:* x) x")
-    (is (= (canonicalize-pattern '(:cat Number String (:* String) Number))
-           '(:cat Number String (:* String) Number)) "cat x (:* x)")
-
-    ;; :not
-    (is (= :empty-set (canonicalize-pattern-once '(:not (:* :sigma)))) "not sigma*")
-    (is (= (canonicalize-pattern-once '(:+ :sigma))
-           (canonicalize-pattern-once '(:not :epsilon))) "not epsilon")
-    (is (= '(:* :sigma)
-           (canonicalize-pattern-once '(:not :empty-set))) "not empty-set")
-    (is (= '(:not Number)
-           (canonicalize-pattern-once '(:not Number))) "not type")
-    (is (= 'Number
-           (canonicalize-pattern-once '(:not (:not Number)))) "not no type")
-    (is (= '(:not Number)
-           (canonicalize-pattern-once '(:not (:not (:not Number))))) "not not not type")
-    ;; :not :and
-    (is (= (canonicalize-pattern-once '(:not (:and java.io.Serializable java.lang.Comparable)))
-           (canonicalize-pattern-once '(:not (:and java.lang.Comparable java.io.Serializable)))) "not and 1")
-    (is (= '(:or (:not java.io.Serializable) (:not java.lang.Comparable))
-           (canonicalize-pattern-once '(:not (:and java.lang.Comparable java.io.Serializable)))) "not and 2") ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
-    (is (= '(:or (:not java.io.Serializable) (:not java.lang.Comparable))
-           (canonicalize-pattern-once '(:not (:and java.io.Serializable java.lang.Comparable)))) "not and 3")
-
-    ;; :not :or
-    (is (= (canonicalize-pattern '(:not (:or java.io.Serializable java.lang.Comparable)))
-           (canonicalize-pattern '(:not (:or java.lang.Comparable java.io.Serializable)))) "not or 1")
-    (is (= '(:and (:not java.io.Serializable)
-                  (:not java.lang.Comparable))
-           (canonicalize-pattern '(:not (:or java.lang.Comparable java.io.Serializable)))) "not or 2") ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
-    (is (= '(:and (:not java.io.Serializable)
-                  (:not java.lang.Comparable))
-           (canonicalize-pattern-once '(:not (:or java.io.Serializable java.lang.Comparable)))) "not or 3")
-
-    (is (= '(:not java.io.Serializable)
-           (canonicalize-pattern '(:not (:or java.io.Serializable java.io.Serializable)))) "not or 4")
-
-    ;; :and
-    (is (= (canonicalize-pattern '(:and)) '(:* :sigma)) "(:and)")
-    (is (= (canonicalize-pattern '(:and :epsilon :sigma)) :empty-set) "(:and :epsilon :sigma)")
-    (is (= 'java.io.Serializable
-           (canonicalize-pattern '(:and java.io.Serializable
-                                        java.io.Serializable))) "and remove duplicate 1")
-    (is (= '(:and java.io.Serializable java.lang.Comparable)
-           (canonicalize-pattern-once '(:and java.io.Serializable java.lang.Comparable java.io.Serializable java.lang.Comparable))) "and remove duplicate 2")
-
-    (is (= :empty-set
-           (canonicalize-pattern '(:and  java.io.Serializable :empty-set java.lang.Comparable))) "and empty-set")
-    (is (= '(:and java.io.Serializable java.lang.Comparable)
-           (canonicalize-pattern '(:and  java.io.Serializable (:* :sigma) java.lang.Comparable))) "and sigma*")
-
-    ;; :or
-    (is (= (canonicalize-pattern '(:or)) :empty-set))
-    (is (= 'java.io.Serializable
-           (canonicalize-pattern '(:or java.io.Serializable java.io.Serializable))) "or remove duplicate 1 b")
-    (is (= '(:or java.io.Serializable java.lang.Comparable)
-           (canonicalize-pattern '(:or java.lang.Comparable java.io.Serializable java.lang.Comparable java.io.Serializable java.lang.Comparable))) "or remove duplicate 2 b")
-    (is (= '(:or  java.io.Serializable java.lang.Comparable)
-           (canonicalize-pattern '(:or  java.io.Serializable :empty-set java.lang.Comparable))) "or empty-set")
-    (is (= '(:* :sigma)
-           (canonicalize-pattern '(:or  java.io.Serializable (:* :sigma) java.lang.Comparable))) "or sigma*")
-
-    ;; (:or A :epsilon B (:cat X (:* X)) C)
-    ;;   --> (:or A :epsilon B (:* X) C ) --> (:or A B (:* X) C)
-    (is (= (canonicalize-pattern '(:or :epsilon (:cat Integer (:* Integer))))
-           '(:* Integer))
-        "1: (:or :epsilon :+) -> :*")
-    (is (=
-         (canonicalize-pattern '(:or :epsilon (:cat  (:* Integer) Integer)))
-         '(:* Integer))
-        "2: (:or :epsilon :+) -> :*")
-    (is (= (canonicalize-pattern '(:or String :epsilon Long (:cat Integer (:* Integer)) Boolean))
-           '(:or (:* Integer) Boolean Long String))
-        "3: (:or :epsilon :+) -> :*")
-    (is (=
-         (canonicalize-pattern '(:or String :epsilon Long (:cat  (:* Integer) Integer) Boolean))
-         '(:or (:* Integer) Boolean Long String))
-        "4: (:or :epsilon :+) -> :*")
-    
-    ;; permute
-    (is (= (canonicalize-pattern '(:permute)) :epsilon) "permute 0 arg")
-
-    (is (= (canonicalize-pattern '(:permute java.lang.Comparable))
-           'java.lang.Comparable) "permute 1 arg")
-    (is (= (canonicalize-pattern '(:permute java.lang.Comparable java.io.Serializable))
-           (canonicalize-pattern '(:or (:cat java.lang.Comparable java.io.Serializable)
-                                       (:cat java.io.Serializable java.lang.Comparable)))) "permute 2 args")
     ))
 
 (deftest t-derivative
@@ -367,7 +246,6 @@
 
 
 (deftest t-rte-to-dfa
-
   (testing "rte-to-dfa"
     (is (get (methods gns/-disjoint?) 'rte) "test 367")
     (with-compile-env ()
@@ -384,14 +262,6 @@
       (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:* :epsilon :epsilon))))
       (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:? :epsilon :epsilon))))
       (is (thrown? clojure.lang.ExceptionInfo (rte/compile '(:+ :epsilon :epsilon)))))))
-
-(deftest t-mdtd
-  (testing "mdtd"
-    (with-compile-env ()
-      (is (= (set (mdtd #{:sigma 'java.lang.Exception 'clojure.lang.ExceptionInfo}))
-             #{`(~'not java.lang.Exception)
-               `(~'and java.lang.Exception (~'not clojure.lang.ExceptionInfo))
-               'clojure.lang.ExceptionInfo})))))
 
 (deftest t-boolean-types
   (testing "rte/match with Boolean types"
@@ -560,31 +430,6 @@
       (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
       (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 
-(deftest t-with-rte-5
-  (testing "with-rte 5"
-    (with-rte [::x (:+ Long)
-               ::y (:+ Double)]
-
-      (let [pat (rte/compile '(:cat ::x  ::y))]
-        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
-        (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
-        (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
-        ))
-
-    (with-rte [::x (:+ String)
-               ::y (:+ Double)]
-
-      (let [pat (rte/compile '(:cat ::x  ::y))]
-        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
-        (is (rte/match pat ["1" "2" "3" 1.2 3.4 5.6 7.8]))
-        (is (not (rte/match pat [["1" "2" "3"] [1.2 3.4 5.6 7.8]])))
-        ))
-    
-
-    (let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
-      (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
-      (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
-
 (deftest t-rte-inhabited
   (testing "rte inhabited?"
     (is (get (methods gns/-disjoint?) 'rte) "test 585")
@@ -717,7 +562,7 @@
 
 (deftest t-derivative-2
   (testing "derivative previous failure"
-    (is (nullable (derivative '(:and (:cat (:* :sigma))
+    (is (nullable? (derivative '(:and (:cat (:* :sigma))
                                      (:not (:or (:cat Boolean :sigma (:* :sigma))
                                                 (:cat Boolean :sigma))))
                               '(not Boolean)))
@@ -754,8 +599,8 @@
                               (:+ (:or (:and (:contains-every)) :empty-set))
                               (:not (:* (member [1 2 3] [2 1 3]))))
           rte-canonicalized (canonicalize-pattern rte)]
-      (is (nullable rte) "test 1")
-      (is (nullable rte-canonicalized) "test 2"))))
+      (is (nullable? rte) "test 1")
+      (is (nullable? rte-canonicalized) "test 2"))))
 
 (def pattern-714 '(:or (:and (:not (= 2)) (:not clojure.lang.ISeq) (:not java.lang.Comparable) :sigma)
                     (:and (:not (= 2)) (:not clojure.lang.ISeq) :sigma java.lang.Comparable)
@@ -813,23 +658,609 @@
       (canonicalize-pattern
        pattern-714)))
 
-(deftest t-reduce-redundant-or
-  (testing "reduce-redundant-or"
-    (is (= (reduce-redundant-or '((:and :epsilon :epsilon) (:and :sigma :epsilon)))
-           '((:and :epsilon :epsilon))))
-    (is (= (reduce-redundant-or '(:sigma :epsilon (:and :sigma :epsilon)))
-           '(:sigma :epsilon)))
-    (is (= (reduce-redundant-or '(X (:and A X B)))
-           '(X)))
-    (is (= (reduce-redundant-or '((:and X) (:and A X B)))
-           '((:and X))))
-    (is (= (reduce-redundant-or '((:and A B C) (:and X Y Z)))
-           '((:and A B C) (:and X Y Z))))
-    (is (= (reduce-redundant-or '((:and A X C) (:and A Y C)))
-           '((:and A X C) (:and A Y C))))))
+(deftest t-conversion-*-1
+  (testing "conversion *1"
+    (is (= (rte/conversion-*-1 '(:* :epsilon))
+           :epsilon))
+    (is (= (rte/conversion-*-1 '(:* :empty-set))
+           :epsilon))
+    (is (= (rte/conversion-*-1 '(:* (:* x)))
+           '(:* x)))))
+
+(deftest t-conversion-*-2
+  (testing "conversion *2"
+    ;; Star(Cat(x,Star(x))) -> Star(x)
+    (is (= (rte/conversion-*-2 '(:* (:cat x (:* x))))
+           '(:* x)))
+    ;; Star(Cat(Star(x),x)) -> Star(x)
+    (is (= (rte/conversion-*-2 '(:* (:cat (:* x) x)))
+           '(:* x)))
+    ;; Star(Cat(Star(x),x,Star(x))) -> Star(x)
+    (is (= (rte/conversion-*-2 '(:* (:cat (:* x) x (:* x))))
+           '(:* x)))))
+
+(deftest t-conversion-*-3
+  (testing "conversion *3"
+    
+    ;; Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
+    ;;    -->    Star(Cat(X, Y, Z))
+    (is (= (rte/conversion-*-3 '(:* (:cat x y z (:* (:cat x y z)))))
+           '(:* (:cat x y z)))
+        860)
+    
+    ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
+    ;;   -->    Star(Cat(X, Y, Z))
+    (is (= (rte/conversion-*-3 '(:* (:cat (:* (:cat x y z)) x y z)))
+           '(:* (:cat x y z)))
+        861)
+        
+    ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
+    ;;   -->    Star(Cat(X, Y, Z))
+    (is (= (rte/conversion-*-3 '(:* (:cat (:* (:cat x y z))
+                                         x y z
+                                         (:* (:cat x y z)))))
+           '(:* (:cat x y z)))
+        862)))
+
+(deftest t-conversion-not-1
+  (testing "conversion not 1"
+    (is (= (rte/conversion-not-1 '(:not :sigma))
+           rte/not-sigma))
+    (is (= (rte/conversion-not-1 '(:not (:* :sigma)))
+           :empty-set))
+    (is (= (rte/conversion-not-1 '(:not :epsilon))
+           rte/not-epsilon))
+    (is (= (rte/conversion-not-1 '(:not :empty-set))
+           rte/sigma-*))))
+
+(deftest t-conversion-not-2
+  (testing "conversion not 2"
+    (is (= (rte/conversion-not-2 '(:not x))
+           '(:not x)))
+    (is (= (rte/conversion-not-2 '(:not (:not x)))
+           'x))))
+
+(deftest t-conversion-not-3
+  (testing "conversion not 3"
+    (is (= (rte/conversion-not-3 '(:not (:or x y z)))
+           '(:and (:not x) (:not y) (:not z))))
+    (is (= (rte/conversion-not-3 '(:not (:or (:not x) y z)))
+           '(:and x (:not y) (:not z))))    
+    (is (= (rte/conversion-not-3 '(:not (:and x y z)))
+           '(:or (:not x) (:not y) (:not z))))
+    (is (= (rte/conversion-not-3 '(:not (:and (:not x) y z)))
+           '(:or x (:not y) (:not z))))))
+
+(deftest t-conversion-cat-1
+  (testing "conversion cat 1"
+    (is (= (rte/conversion-cat-1 '(:cat))
+           :epsilon))
+    (is (= (rte/conversion-cat-1 '(:cat x))
+           'x))
+    (is (= (rte/conversion-cat-1 '(:cat x y z))
+           '(:cat x y z)))))
+
+(deftest t-conversion-cat-3
+  (testing "conversion cat 3"
+    (is (= (rte/conversion-cat-3 '(:cat x y :empty-set z))
+           :empty-set))
+    (is (= (rte/conversion-cat-3 '(:cat x y z))
+           '(:cat x y z)))))
+
+(deftest t-conversion-cat-4
+  (testing "conversion cat 4"
+    (is (= (rte/conversion-cat-4 '(:cat (:cat a b) (:cat x y)))
+           '(:cat a b x y)))
+    (is (= (rte/conversion-cat-4 '(:cat (:cat a b) :epsilon (:cat x y) :epsilon))
+           '(:cat a b x y)))))
+
+(deftest t-conversion-cat-5
+  (testing "conversion cat 5"
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) (:* x) y z))
+           '(:cat a b (:* x) y z)))
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) (:* x) (:* x) (:* x) y z))
+           '(:cat a b (:* x) y z)))
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) x (:* x) y z))
+           '(:cat a b (:* x) x y z)))
+    (is (= (rte/conversion-cat-5 '(:cat a b (:* x) x (:* x) (:* x) y z))
+           '(:cat a b (:* x) x y z)))))
 
 
+(deftest t-conversion-cat-6
+  (testing "conversion cat 6"
+    (is (= (rte/conversion-cat-6 '(:cat a b (:* x) x c d))
+           '(:cat a b x (:* x) c d)))
+    (is (= (rte/conversion-cat-6 '(:cat a b (:* x) x x x c d))
+           '(:cat a b x x x (:* x) c d)))))
+    
+    
+(deftest t-discovered-948
+  (testing "discovered test 948"
+    (is (= (rte/nullable? '(member (1 2 3) (1 2) (1) []))
+           (rte/nullable? '(member [] [1] [1 2] [1 2 3]))))))
+            
+(deftest t-conversion-combo-1
+  (testing "conversion combo 1"
+    (is (= (rte/conversion-combo-1 '(:and))
+           '(:* :sigma)))
+    (is (= (rte/conversion-combo-1 '(:or))
+           :empty-set))
+    (is (= (rte/conversion-combo-1 '(:and x))
+           'x))
+    (is (= (rte/conversion-combo-1 '(:or x))
+           'x))
+    (is (= (rte/conversion-combo-1 '(:and x y))
+           '(:and x y)))
+    (is (= (rte/conversion-combo-1 '(:or x y))
+           '(:or x y)))))
+    
+(deftest t-conversion-combo-3
+  (testing "conversion combo 3"
+    (is (= (rte/conversion-combo-3 '(:or x y (:* :sigma) z))
+           '(:* :sigma))
+    (is (= (rte/conversion-combo-3 '(:and x y :empty-set z))
+           :empty-set)))))
+    
+(deftest t-conversion-combo-4
+  (testing "conversion combo 4"
+    (is (= (rte/conversion-combo-4 '(:or x y y x z))
+           '(:or y x z)))
+    (is (= (rte/conversion-combo-4 '(:and x y y x z))
+           '(:and y x z)))))
+    
+(deftest t-conversion-combo-5
+  (testing "conversion combo 5"
+    (is (= (rte/conversion-combo-5 '(:or x y y x z))
+           '(:or x x y y z)))
+    (is (= (rte/conversion-combo-5 '(:and x y y x z))
+           '(:and x x y y z)))))
+    
+(deftest t-conversion-combo-6
+  (testing "conversion combo 6"
+    (is (= (rte/conversion-combo-6 '(:or x y :empty-set z :empty-set))
+           '(:or x y z)))
+    (is (= (rte/conversion-combo-6 '(:and x y (:* :sigma) z (:* :sigma)))
+           '(:and x y z)))
+
+    (is (= (rte/conversion-combo-6 '(:or x (:or a b) (:or y z)))
+           '(:or x a b y z)))
+    (is (= (rte/conversion-combo-6 '(:and x (:and a b) (:and y z)))
+           '(:and x a b y z)))))
+    
+(deftest t-conversion-combo-7
+  (testing "conversion combo 7"
+    ;; (:or A B (:* B) C)
+    ;; --> (:or A (:* B) C)
+    ;; (:and A B (:* B) C)
+    ;; --> (:and A B C)
+    (is (= (rte/conversion-combo-7 '(:or a b (:* b) c))
+           '(:or a (:* b) c)))
+    (is (= (rte/conversion-combo-7 '(:and a b (:* b) c))
+           '(:and a b c)))
+    (is (not= (rte/conversion-combo-7 '(:and (:* (:contains-any)) (:not :epsilon)))
+              '(:not :epsilon)))))
+
+(deftest t-conversion-combo-11
+  (testing "conversion combo 11"
+    ;; And(...,x,Not(x)...) --> EmptySet
+    ;; Or(...x,Not(x)...) --> SigmaStar
+    (is (= (rte/conversion-combo-11 '(:or a b x c (:not x)))
+           '(:* :sigma)))
+    (is (= (rte/conversion-combo-11 '(:and a b x c (:not x)))
+           :empty-set))))
+
+(deftest t-conversion-combo-12
+  (testing "conversion combo 12"
+    ;; Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
+    ;;   --> Or( A, B, ... Not(Singleton(X))
+    (is (= 2 (count-if-not  rte/nullable? '((= 1) (= 1) (:* :sigma))))
+        799)
+    (is (= (rte/conversion-combo-12 '(:or a b (:cat (= 1) (= 1) (:* :sigma)) (:not (= 2))))
+           ;; since (:cat (= 1) (= 1) (:* :sigma)) is already in (:not x))
+           '(:or a b  (:not (= 2))))
+        800)
+    (is (= (rte/conversion-combo-12 '(:or a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+           '(:or a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+        801)
+    (is (= (rte/conversion-combo-12 '(:and a b (:cat (= 1) (= 1) (:* :sigma)) (:not (= 2))))
+           '(:and a b  (:cat (= 1) (= 1) (:* :sigma))))
+        802)
+    (is (= (rte/conversion-combo-12 '(:and a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+           '(:and a b (:cat (= 1) (:* :sigma)) (:not (= 2))))
+        803)))
+
+(deftest t-conversion-combo-14
+  (testing "conversion combo 14"
+    ;; Or(A,Not(B),X) -> Sigma* if B is subtype of A
+    ;; And(A,Not(B),X) -> EmptySet if A is subtype of B
+    (is (= (rte/conversion-combo-14 '(:or (= 1) (:not (member 1 2 3))))
+           '(:or (= 1) (:not (member 1 2 3))))
+        1027)
+    (is (gns/subtype? '(= 1) '(member 1 2 3) false))
+    (is (= (rte/conversion-combo-14 '(:and (= 1) (:not (member 1 2 3))))
+           :empty-set)
+        1028)
+    (is (= (rte/conversion-combo-14 '(:or (:not (= 1)) (member 1 2 3)))
+           '(:* :sigma))
+        1029)
+    (is (= (rte/conversion-combo-14 '(:and (:not (= 1)) (member 1 2 3)))
+           '(:and (:not (= 1)) (member 1 2 3)))
+        1030)))
+
+(deftest t-conversion-combo-15
+  (testing "conversion combo 15"
+    ;; simplify to maximum of one SMember(...) and maximum of one Not(SMember(...))
+    ;; Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+    ;;   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
+    ;;
+    ;; And(<{1,2,3,4}>,<{3,4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+    ;;   --> And(<{3,4}>,Not(<{10,11,12,13,14,15}>))
+    (is (= (rte/conversion-combo-15 '(:or (member 1 2 3 4) (member 3 4 5 6)
+                                          (:not (member 10 11 12 13))
+                                          (:not (member 12 13 14 15))))
+           '(:or (member 1 2 3 4 5 6)
+                 (:not (member 12 13))))
+        800)
+    (is (= (rte/conversion-combo-15 '(:and (member 1 2 3 4) (member 3 4 5 6)
+                                          (:not (member 10 11 12 13))
+                                          (:not (member 12 13 14 15))))
+           '(:and (member 3 4)
+                 (:not (member 10 11 12 13 14 15))))
+        801)))
+
+(deftest t-conversion-combo-16
+  (testing "conversion combo 16"
+    (is (= (rte/conversion-combo-16 '(:or (member 1 2 3) (member 3 4 5) (= 3)))
+           '(:or (member 1 2 3) (member 3 4 5))))
+    (is (= (rte/conversion-combo-16 '(:and (member 1 2 3) (member 3 4 5) (member 1 2 3 4 5 6)))
+           '(:and (member 1 2 3) (member 3 4 5))))))
+    
+
+(deftest t-conversion-combo-17
+  (testing "conversion combo 17"
+    ;; And({1,2,3},Singleton(X),Not(Singleton(Y)))
+    ;;  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
+    ;; --> And({...},Singleton(X),Not(Singleton(Y)))
+    (is (= (rte/conversion-combo-17 '(:and (member -2 -2.5 -1 -1.5 0 1 1.5 2 2.5 3 4 5 6)
+                                           (satisfies pos?)
+                                           (:not (satisfies int?))))
+           '(:and (member 1.5 2.5)
+                  (satisfies pos?)
+                  (:not (satisfies int?))))
+        800)
+
+    ;; Or({1,2,3},Singleton(X),Not(Singleton(Y)))
+    ;;  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
+    ;; --> Or({...},Singleton(X),Not(Singleton(Y)))
+
+    (is (= (rte/conversion-combo-17 '(:or (member -2 -2.5 -1 -1.5 0 1 1.5 2 2.5 3 4 5 6)
+                                           (satisfies pos?)
+                                           (:not (satisfies int?))))
+           '(:or (member -2  -1  0 )
+                  (satisfies pos?)
+                  (:not (satisfies int?))))
+        801)))
+    
+
+(deftest t-conversion-combo-21
+  (testing "conversion combo 21"
+    (is (= (rte/conversion-combo-21 '(:and (member 1 2 3) (member 3 4 5) (member 5 6 7)))
+           :empty-set)
+        800)
+    (is (= (rte/conversion-combo-21 '(:and (member 0 1 2 3) (member 0 3 4 5) (member 0 5 6 7)))
+           '(:and (member 0 1 2 3) (member 0 3 4 5) (member 0 5 6 7)))
+        801)
+    (is (= (rte/conversion-combo-21 '(:or (:not (member 1 2 3)) (:not (member 3 4 5)) (:not (member 5 6 7))))
+           '(:* :sigma))
+        802)
+    (is (= (rte/conversion-combo-21 '(:or (:not (member 0 1 2 3)) (:not (member 0 3 4 5)) (:not (member 0 5 6 7))))
+           '(:or (:not (member 0 1 2 3)) (:not (member 0 3 4 5)) (:not (member 0 5 6 7))))
+        803)
+    (is (= (rte/conversion-combo-21 '(:or (:not (member 1 2 3)) (member 3 4 5) (:not (member 5 6 7))))
+           '(:* :sigma))
+        804)))
+
+(deftest t-conversion-and-7
+  (testing "conversion and 7"
+    (is (= (rte/conversion-and-7 '(:and :sigma :epsilon))
+           :empty-set))
+    (is (= (rte/conversion-and-7 '(:and :epsilon (member 1 2 3)))
+           :empty-set))
+    (is (= (rte/conversion-and-7 '(:and :epsilon (:cat x y)))
+           '(:and :epsilon (:cat x y))))))
+
+(deftest t-conversion-and-8
+  (testing "conversion and 8"
+    ;; if operands contains EmptyWord, then the intersection is either EmptyWord or EmptySet
+    (is (= (rte/conversion-and-8 '(:and a b c))
+           '(:and a b c)))
+    (is (= (rte/conversion-and-8 '(:and (:* a) (:* b) :epsilon))
+           :epsilon))
+    (is (= (rte/conversion-and-8 '(:and (:* a) (:* b) (member 1 2 3) :epsilon))
+           :empty-set))))
+
+(deftest t-conversion-and-9
+  (testing "conversion and 9"
+    ;; if x matches only singleton then And(x,y*) -> And(x,y)
+    (is (= (rte/conversion-and-9 '(:and (= 1) (:* x)))
+           '(:and (= 1) x)))))
+
+(deftest t-conversion-and-10
+  (testing "conversion and 10"
+    ;; And(A,B,Or(X,Y,Z),C,D)
+    ;; --> Or(And(A,B,   X,   C, D)),
+    ;;        And(A,B,   Y,   C, D)),
+    ;;        And(A,B,   Z,   C, D)))
+    (is (= (rte/conversion-and-10 '(:and a b (:or x y z) c d))
+           '(:or (:and a b x c d)
+                 (:and a b y c d)
+                 (:and a b z c d))))
+    (is (= (rte/conversion-and-10 '(:and a b (:and x y z) c d))
+           '(:and a b (:and x y z) c d)))))
+
+(deftest t-conversion-and-18
+  (testing "conversion and 18"
+    ;; if there is a singleton which is not inhabited
+    (is (= (rte/conversion-and-18 '(:and (and (member 1 2 3) (member 4 5 6))))
+           :empty-set))))
+
+(deftest t-conversion-and-13
+  (testing "conversion and 13"
+    ;; if there is an explicit :sigma and also a singleton which is inhabited, then
+    ;;  we can simply remove the sigma.
+    (is (= (rte/conversion-and-13 '(:and (= 1) :sigma (= 2) :sigma))
+           '(:and (= 1) (= 2))))
+    (is (= (rte/conversion-and-13 '(:and a b c))
+           '(:and a b c)))
+    (is (not= (rte/conversion-and-13 '(:and :sigma (:not (:or :epsilon :sigma))))
+              '(:not (:or :epsilon :sigma))))))
+
+(deftest t-conversion-and-17
+  (testing "conversion and 17"
+    ;; if And(...) contains a Cat(...) with at least 2 non-nullable components,
+    ;;    then this Cat matches only sequences of length 2 or more.
+    ;; If And(...) contains a singleton, then it matches only sequences
+    ;;    of length 1, perhaps an empty set of such sequences if the singleton type
+    ;;    is empty.
+    ;; If both are true, then the And() matches EmptySet
+    (is (= (rte/conversion-and-17 '(:and (= 1) (:cat (= 1) (:* x) (= 2) (:* x))))
+           :empty-set))
+    (is (not= (rte/conversion-and-17 '(:and (:* (= 1)) (:cat (= 1) (:* x) (= 2) (:* x))))
+              :empty-set))
+    (is (not= (rte/conversion-and-17 '(:and (= 1) (:cat (:* x) (= 2) (:* x))))
+           :empty-set))))
+
+(deftest t-conversion-and-17a
+  (testing "conversion and 17a"
+    ;; if And(...) has more than one Cat(...) which has no nullable operand,
+    ;;    then the number of non-nullables must be the same, else EmptySet.
+    ;;    We also replace the several Cat(...) (having no nullables)
+    ;;    with a single Cat(...) with intersections of operands.
+    ;;    And(Cat(a,b,c),Cat(x,y,z) ...)
+    ;;    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
+    (is (= (rte/conversion-and-17a '(:and (:cat (= 1) (= 2) (= 3))
+                                          (:cat (= 10) (= 20) (= 30))))
+           '(:cat (:and (= 1) (= 10))
+                  (:and (= 2) (= 20))
+                  (:and (= 3) (= 30))))
+        800)
+    (is (= (rte/conversion-and-17a '(:and (:cat (= 1) (= 2) (= 3))
+                                          (:cat (= 10) (= 20))))
+           :empty-set)
+        801)
+    (is (= (rte/conversion-and-17a '(:and (:cat (= 1) (= 2) (:* (= 3)))
+                                          (:cat (= 10) (= 20))))
+           '(:and (:cat (= 1) (= 2) (:* (= 3)))
+                  (:cat (= 10) (= 20))))
+        802)))
+
+(deftest t-conversion-and-17b
+  (testing "conversion and 17b"
+    ;; after 17a we know that if there are multiple Cats(...) without a nullable,
+    ;;   then all such Cats(...) without a nullable have same number of operands
+    ;;   have been merged into one Cat(...)
+    ;;   So assure that all other Cats have no more non-nullable operands.
+    (is (= (rte/conversion-and-17b '(:and (:cat (= 1) (= 2)) ;; 2 operands
+                                          (:cat (= 1) (= 2) (= 3) (:* (= 4))))) ;; 2 operands
+           :empty-set)
+        800)
+    (is (not= (rte/conversion-and-17b '(:and (:cat (= 1) (= 2)) ;; 2 operands
+                                             (:cat (= 1) (= 2) (:* (= 4))))) ;; 2 operands
+              :empty-set)
+        801)))
+
+(deftest t-conversion-and-17c
+  (testing "conversion and 17c"
+    (is (= (rte/conversion-and-17c '(:and (:cat (= 1) (= 2))
+                                          (:cat (:* (= 4)) (= 1) (:* (= 5)) (= 2))
+                                          (:cat (:* (= 4)) (= 10) (:* (= 5)) (= 20))))
+           '(:and (:cat (= 1) (= 2))
+                  (:cat  (= 1)  (= 2))
+                  (:cat  (= 10)  (= 20))))
+        800)
+    (is (= (rte/conversion-and-17c '(:and :sigma
+                                          (:cat (:* (= 4)) (:* (= 1)) (:* (= 5)) (= 2))
+                                          (:cat (:* (= 4)) (:* (= 10)) (:* (= 5)) (= 20))))
+           '(:and :sigma
+                  (= 2)
+                  (= 20)))
+        801)
+    (is (= (rte/conversion-and-17c '(:and (= 42)
+                                          (:cat (:* (= 4)) (:* (= 1)) (:* (= 5)) (= 2))
+                                          (:cat (:* (= 4)) (:* (= 10)) (:* (= 5)) (= 20))))
+           '(:and (= 42)
+                  (= 2)
+                  (= 20)))
+        802)))
+        
+(deftest t-conversion-and-19
+  (testing "conversion and 19"
+    ;; if there is at least one singleton and zero or more Not(x) where x is a singleton
+    ;;   then build a SimpleTypeD and ask whether it is inhabited.
+    ;;   if it is not inhabited, then self converts to EmptySet
+    (is (= (rte/conversion-and-19 '(:and (:not :sigma) (:not (= 0))))
+           ;; does not contain singleton
+           '(:and (:not :sigma) (:not (= 0))))
+        800)
+    (is (= (rte/conversion-and-19 '(:and (= 3) (:not :sigma) (:not (= 0))))
+           :empty-set)
+        801)
+    (is (not= (rte/conversion-and-19 '(:and (= 3) (:not (= 4) (:not (member 10 20 30)))))
+              :empty-set)
+        802)))
+
+(deftest t-conversion-or-8
+  (testing "conversion or 8"
+    ;; (:or A :epsilon B (:cat X (:* X)) C)
+    ;;   --> (:or A :epsilon B (:* X) C )
+    (is (= (rte/conversion-or-8 '(:or a :epsilon b (:cat x (:* x)) c))
+           '(:or a :epsilon b (:* x) c))
+        800)
+    ;; (:or :epsilon (:cat X (:* X)))
+    ;;   --> (:or :epsilon (:* X))
+    (is (= (rte/conversion-or-8 '(:or :epsilon (:cat x (:* x))))
+           '(:or :epsilon (:* x)))
+        801)
+    ;; (:or (:* Y) (:cat X (:* X)))
+    ;;   --> (:or (:* Y) (:* X))
+    (is (= (rte/conversion-or-8 '(:or (:* y) (:cat x (:* x))))
+           '(:or (:* y) (:* x)))
+        802)
+    
+    (is (= (rte/conversion-or-8 '(:or a :epsilon b (:cat (:* x) x) c))
+           '(:or a :epsilon b (:* x) c))
+        803)
+
+    (is (= (rte/conversion-or-8 '(:or :epsilon (:cat (:* x) x)))
+           '(:or :epsilon (:* x)))
+        804)
+
+    (is (= (rte/conversion-or-8 '(:or (:* y) (:cat (:* x) x)))
+           '(:or (:* y) (:* x)))
+        805)))
+
+(deftest t-conversion-or-9
+  (testing "conversion or 9"
+    ;; (:or A :epsilon B (:cat X Y Z (:* (:cat X Y Z))) C)
+    ;;   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
+    (is (= (rte/conversion-or-9 '(:or a :epsilon b (:cat x y z (:* (:cat x y z))) c))
+           '(:or a :epsilon b (:* (:cat x y z)) c))
+        800)
+    ;; (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
+    ;;   --> (:or :epsilon (:* (:cat X Y Z)))
+    (is (= (rte/conversion-or-9 '(:or :epsilon (:cat X Y Z (:* (:cat X Y Z)))))
+           '(:or :epsilon (:* (:cat X Y Z))))
+        801)
+
+    (is (= (rte/conversion-or-9 '(:or :epsilon (:cat X Y Z (:* (:cat X Y)))))
+           '(:or :epsilon (:cat X Y Z (:* (:cat X Y)))))
+        802)
+
+    (is (= (rte/conversion-or-9 '(:or :epsilon (:cat X Y (:* (:cat X Y Z)))))
+           '(:or :epsilon (:cat X Y (:* (:cat X Y Z)))))
+        803)))
+
+(deftest t-conversion-or-10
+  (testing "conversion or 10"
+    ;; (: or A :epsilon B (: * X) C)
+    ;; --> (: or A B (: * X) C)
+    (is (= (rte/conversion-or-10 '(:or a :epsilon b (:* x) x))
+           '(:or a b (:* x) x)))
+
+    (is (= (rte/conversion-or-10 '(:or A :epsilon B :epsilon C))
+           '(:or A :epsilon B :epsilon C)))))
+
+(deftest t-conversion-or-11b
+  (testing "conversion or 11b"
+    ;; if Sigma is in the operands, then filter out all singletons
+    ;; Or(Singleton(A),Sigma,...) -> Or(Sigma,...)
+    (is (= (rte/conversion-or-11b '(:or :sigma :sigma))
+           '(:or :sigma :sigma))
+        800)
+    (is (= (rte/conversion-or-11b '(:or :sigma (= 1) (member 1 2 3 4)))
+           ':sigma))))
+
+(deftest t-conversion-or-15
+  (testing "conversion or 15"
+    ;; Or(Not(A),B*,C) = Or(Not(A),C) if A and B  disjoint,
+    ;;   i.e. remove all B* where B is disjoint from A
+    (is (= (rte/conversion-or-15 '(:or (:* (= 1)) (:not (member 2 3 4))))
+           '(:not (member 2 3 4)))
+        800)
+    (is (= (rte/conversion-or-15 '(:or (:* (= 1)) (:not (member 2 3 4)) (:* (= 0)) (:* (member 3 4 5))))
+           '(:or  (:not (member 2 3 4)) (:* (member 3 4 5))))
+        801)))
+
+(deftest t-conversion-dual-16b
+  (testing "conversion dual 16b"
+    ;; And(A, x, Not(y)) --> And(A, x) if x, y disjoint
+    (is (= (rte/conversion-dual-16b '(:and (member 1 2 3) (member 10 20) (:not (member 11 21))))
+           '(:and (member 1 2 3) (member 10 20)))
+        800)
+    ;; Or(A, x, Not(y)) --> And(A, Not(x)) if x, y disjoint
+    (is (= (rte/conversion-dual-16b '(:or (member 11 2 3) (member 10 20) (:not (member 11 21))))
+           '(:or (member 11 2 3) (:not (member 11 21))))
+        801)))
+
+(defn test-circular-dfa-rte-flow
+  [rte-1]
+  (let [dfa (xym/minimize (xym/trim (rte-to-dfa rte-1)))
+        rte-2 (get (dfa-to-rte dfa) true)
+        rte-1-2 (template (:and ~rte-1 (:not ~rte-2)))
+        rte-2-1 (template (:and ~rte-2 (:not ~rte-1)))
+        dfa-2-1 (xym/minimize (xym/trim (rte-to-dfa rte-1-2)))
+        dfa-1-2 (xym/minimize (xym/trim (rte-to-dfa rte-2-1)))
+        rte-2-1b (get (dfa-to-rte dfa-2-1) true)
+        rte-1-2b (get (dfa-to-rte dfa-1-2) true)
+        null-dfa (rte-to-dfa :empty-set)]
+    (if (xym/dfa-equivalent? dfa-2-1 null-dfa)
+      (is true)
+      (do
+        (dot/dfa-to-dot null-dfa :title "null" :view true)
+        (dot/dfa-to-dot dfa-2-1 :title "800" :view true)
+        (is (xym/dfa-equivalent? dfa-2-1 null-dfa)
+            (cl-format false "800: ~%rte-1=~A~%     =~A~%rte-2=~A~%2-1=~A"
+                       rte-1 (canonicalize-pattern rte-1) rte-2
+                       rte-2-1b))))
+    (if (xym/dfa-equivalent? dfa-1-2 null-dfa)
+      (is true)
+      (do (dot/dfa-to-dot null-dfa :title "null" :view true)
+          (dot/dfa-to-dot dfa-1-2 :title "802" :view true)
+          (is (xym/dfa-equivalent? dfa-1-2 null-dfa)
+              (cl-format false "802: ~%rte-1=~A~%     =~A~%rte-2=~A~%1-2=~A"
+                         rte-1 (canonicalize-pattern rte-1) rte-2
+                         rte-1-2b))))))
+
+(deftest t-circular-dfa-rte-flow
+  (testing "circular dfa rte flow"
+    (doseq [depth (range 1)
+              rep (range 10)]
+        (test-circular-dfa-rte-flow (gen-rte depth gns/*test-types*)))))
+
+(deftest t-discovered-case-1261
+  (test-circular-dfa-rte-flow '(:* (:contains-any))))
+
+(deftest t-discovered-case-1262
+  (test-circular-dfa-rte-flow '(:? :sigma)))
+
+(deftest t-discovered-case-1260
+  (testing "test 1260"
+    (let [rte-1 '(:+ (:cat))
+          rte-2 :epsilon
+          dfa-1 (rte-to-dfa rte-1)
+          dfa-2 (rte-to-dfa rte-2)]
+      (is (xym/dfa-equivalent? dfa-1 dfa-2)
+          800)
+      (is (rte-equivalent? (get (dfa-to-rte dfa-1) true)
+                           (get (dfa-to-rte dfa-2) true))
+          801))))
+
+
+(deftest t-discovered-case-1263
+  (testing "test 1263"
+    (is (= (rte/canonicalize-pattern '(:and (:or :epsilon :sigma) (:not (:or :epsilon :sigma))))
+           :empty-set))))
 
 (defn -main []
-  (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
+  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
   (clojure.test/run-tests 'clojure-rte.rte-test))

@@ -30,11 +30,8 @@
             [backtick :refer [template]]
             [clojure.test :as t]))
 
-(def odd-int? (every-pred int? odd?))
-(def even-int? (every-pred int? even?))
-
-(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even-int?)  
-                                 :2  (s/cat :5 odd-int? :6 pos?))))
+(s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 pos-int?)  
+                                 :2  (s/cat :5 pos? :6 neg-int?))))
 
 (defmacro testing
   [string & body]
@@ -52,24 +49,25 @@
     (let [rte '(rte
                 (:*
                  (:or
-                  (:cat (spec clojure.core/neg?) (spec clojure.core/even?))
-                  (:cat (spec clojure.core/odd?) (spec clojure.core/pos?)))))]
-      (t/is (= (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                   :y  (s/cat :c odd? :d pos?)))))
+                  (:cat (spec clojure.core/neg?) (spec clojure.core/pos-int?))
+                  (:cat (spec clojure.core/pos?) (spec clojure.core/neg-int?)))))]
+      (t/is (= (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                                   :y  (s/cat :c pos? :d neg-int?)))))
                rte) "test x43")
       
       (t/is (= (binding [*ns* (find-ns 'user)]
-                 (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                     :y  (s/cat :c odd? :d pos?))))))
+                 (gs/spec-to-rte (s/form (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                                     :y  (s/cat :c pos? :d neg-int?))))))
                rte) "test x43")
 
 
-      (t/is (= (gs/spec-to-rte `(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                            :y  (s/cat :c odd? :d pos?))))
+      (t/is (= (gs/spec-to-rte `(s/* (s/alt :x  (s/cat :a neg? :b pos-int?)
+                                            :y  (s/cat :c pos? :d neg-int?))))
                rte) "test x48")
 
       (t/is (= (gs/spec-to-rte (s/form ::test-spec-1))
                rte) "test x51")
+
       )))
 
 (t/deftest t-canonicalize-rte-type
@@ -79,25 +77,25 @@
                  (:or
                   (:cat
                    (satisfies clojure.core/neg?)
-                   (satisfies clojure.core/even?))
+                   (satisfies clojure.core/pos-int?))
                   (:cat
-                   (satisfies clojure.core/odd?)
-                   (satisfies clojure.core/pos?)))))]
+                   (satisfies clojure.core/pos?)
+                   (satisfies clojure.core/neg-int?)))))]
 
-      (t/is (= (gns/canonicalize-type (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even?)  
-                                                                   :y  (s/cat :c odd? :d pos?))))))
+      (t/is (= (gns/canonicalize-type (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                                                   :y  (s/cat :c pos? :d neg-int?))))))
                rte) "test x68")
 
       (t/is (= (gns/canonicalize-type '(spec ::test-spec-1))
                rte) "test x71")
 
-      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b even?)
-                                                         :y  (s/cat :c odd? :d pos?)))))
+      (t/is (= (gns/canonicalize-type '(spec (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)
+                                                         :y  (s/cat :c pos? :d neg-int?)))))
                '(rte
                  (:*
                   (:or
-                   (:cat (satisfies neg?) (satisfies even?))
-                   (:cat (satisfies odd?) (satisfies pos?))))))
+                   (:cat (satisfies neg?) (satisfies pos-int?))
+                   (:cat (satisfies pos?) (satisfies neg-int?))))))
             "test x80")
       )))
 
@@ -143,25 +141,25 @@
                  (:or
                   (:cat
                    (satisfies clojure.core/neg?)
-                   (satisfies clojure.core/even?))
+                   (satisfies clojure.core/pos-int?))
                   (:cat
-                   (satisfies clojure.core/odd?)
-                   (satisfies clojure.core/pos?)))))]
+                   (satisfies clojure.core/pos?)
+                   (satisfies clojure.core/neg-int?)))))]
 
       (doseq [rte2 [rte
-                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b even-int?)  
-                                                 :y  (s/cat :c odd-int? :d pos?)))))
+                    (template (spec ~(s/* (s/alt :x  (s/cat :a neg? :b pos-int?)
+                                                 :y  (s/cat :c pos? :d neg-int?)))))
                     '(spec ::test-spec-1)
-                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b even-int?  )
-                                       :y  (s/cat :c odd-int? :d pos?))))
+                    '(spec (s/* (s/alt :x  (s/cat :a neg? :b pos-int?  )
+                                       :y  (s/cat :c pos? :d neg-int?))))
                     ]
               seq [[]
                    [-1 2]
-                   [-1 2 3 1]
-                   [-1 2 3 1 -3 1 -1 4]]
+                   [-1 2 -3 1]
+                   [-1 2 -3 1 3 -1 -1 4]]
               ]
-        (t/is (= false (rte/match rte2 seq)) "test 105")
-        (t/is (= true (rte/match rte2 [seq])) "test 106")
+        (t/is (= false (rte/match rte2 seq)) (cl-format false "test 105: seq=~A rte2=~A" seq rte2))
+        (t/is (= true (rte/match rte2 [seq])) (cl-format false "test 106: seq=~A rte2=~A" seq rte2))
         ))))
 
 ;; cat - concatenation of predicates/patterns
@@ -207,9 +205,9 @@
              '(spec ::test-spec-2)))))
 
 (s/def ::test-spec-3 (s/or :1 string?
-                           :2 (s/and int? #(even? %))))
+                           :2 (s/and int? #(pos-int? %))))
 (s/def ::test-spec-4 (s/or :1 (s/and string? #(even? (count %)))
-                           :2 (s/and int? #(even? %))))
+                           :2 (s/and int? #(pos-int? %))))
 
 (t/deftest t-canonicalize-spec-type
   (testing "canonicalize spec non-sequence types"
@@ -219,9 +217,9 @@
                           (spec ::test-spec-3)
                           (spec ~(s/or :1 int? :2 ::test-spec-3))
                           (spec ~(s/and int? ::test-spec-3))
-                          (spec ~(s/or :1 (s/and int? odd?)
+                          (spec ~(s/or :1 (s/and int? neg-int?)
                                        :2 string?))
-                          (spec ~(s/or :1 (s/and int? odd?)
+                          (spec ~(s/or :1 (s/and int? pos-int?)
                                        :2 string?))))
             :let [t2 (gns/canonicalize-type t1)]
             v1 [0 1 1.0 -1 -1.0 2 3 4 5 -2 -3 -4 -5

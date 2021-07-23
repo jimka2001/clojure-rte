@@ -123,7 +123,7 @@ Compute the xor of two Dfas. I.e., compute the Dfa which
 will recognized any sequence which is recognized by `dfa-1` or
 by `dfa-2` but not by both.
 
-## `dfa-equivalent`
+## `dfa-equivalent?`
 Returns a Boolean indicating whether the two given Dfas
 recognize the same language.
 

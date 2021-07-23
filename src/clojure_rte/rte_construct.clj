@@ -21,17 +21,21 @@
 
 (ns clojure-rte.rte-construct
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [member exists setof exists-pair
-                                      call-with-collector defn-memoized
-                                      visit-permutations fixed-point
+            [clojure-rte.util :refer [member exists setof exists-pair forall
+                                      call-with-collector defn-memoized defmulti-memoized defmethod-memoized
+                                      visit-permutations fixed-point stacksize
                                       sort-operands with-first-match
                                       partition-by-pred seq-matcher
-                                      rte-identity rte-constantly]]
+                                      rte-identity rte-constantly
+                                      gc-friendly-memoize
+                                      search-replace remove-element uniquify print-vals
+                                      non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union subset?]]
             [clojure-rte.cl-compat :as cl]
             [backtick :refer [template]]
+            [clojure-rte.genus-spec :as gs]
             )
   (:refer-clojure :exclude [compile])
 )
@@ -39,16 +43,17 @@
 ;; allow rte/ prefix even in this file.
 (alias 'rte 'clojure-rte.rte-construct)
 
+(declare ^:dynamic canonicalize-pattern canonicalize-pattern-impl)
+(declare ^:dynamic compile rte-to-dfa)
+(declare ^:dynamic canonicalize-pattern-once canonicalize-pattern-once-impl)
+(declare ^:dynamic rte-inhabited? rte-inhabited?-impl)
+(declare ^:dynamic nullable? nullable?-impl)
 
 (declare traverse-pattern)
-(declare canonicalize-pattern)
 (declare match)
-(declare compile)
-(declare rte-inhabited?)
 (declare rte-vacuous?)
-(declare rte-to-dfa)
-(declare canonicalize-pattern-once)
-(declare -canonicalize-pattern-once)
+(declare operand)
+(declare operands)
 
 (def ^:dynamic *rte-known*
   "Dynamic variable whose value is a map.
@@ -63,9 +68,18 @@
    })
 
 (defn call-with-compile-env [thunk]
-  (binding [rte/compile (memoize rte-to-dfa)
-            canonicalize-pattern-once (memoize -canonicalize-pattern-once)
-            gns/check-disjoint (memoize gns/-check-disjoint)
+  (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
+            canonicalize-pattern-once (gc-friendly-memoize canonicalize-pattern-once-impl)
+            xym/optimized-transition-function (gc-friendly-memoize xym/optimized-transition-function-impl)
+            canonicalize-pattern (gc-friendly-memoize canonicalize-pattern-impl)
+            rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
+            nullable? (gc-friendly-memoize nullable?-impl)
+            ;; rte-case-clauses-to-dfa (gc-friendly-memoize rte-case-clauses-to-dfa-impl)
+            gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
+            gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
+            gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
+            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)
+            gs/spec-to-rte (gc-friendly-memoize gs/spec-to-rte-impl)
             ]
     (thunk)))
 
@@ -103,7 +117,8 @@
    Any patterns compiled within the dynamic extend are abandoned when
    the dynamic extend ends."
   [bindings & body]
-  `(call-with-rte '~bindings (fn [] ~@body)))
+  `(with-compile-env []
+     (call-with-rte '~bindings (fn [] ~@body))))
 
 (defn rte? [t]
   (and (sequential? t)
@@ -222,6 +237,46 @@
 (def sigma-* '(:* :sigma))
 (def not-sigma `(:or (:cat :sigma :sigma ~sigma-*) :epsilon))
 (def not-epsilon `(:cat :sigma ~sigma-*))
+
+(defn type-dispatch [pattern]
+  (cond (sequential? pattern)
+        (first pattern)
+
+        (keyword? pattern)
+        pattern
+
+        (gns/valid-type? pattern)
+        :type
+
+        :else
+        :default))
+
+(defmulti operands
+  type-dispatch)
+
+(defmulti operand
+  type-dispatch)
+
+(defmethod operands :or
+  [pattern]
+  (rest pattern))
+
+(defmethod operands :and
+  [pattern]
+  (rest pattern))
+
+(defmethod operand :*
+  [pattern]
+  (second pattern))
+
+(defmethod operand :not
+  [pattern]
+  (second pattern))
+
+(defmethod operands :cat
+  [pattern]
+  (rest pattern))
+
 
 (def ^:dynamic *traversal-functions*
   "Default callbacks for walking an rte tree.
@@ -427,7 +482,7 @@
   "Workhorse function for walking an rte pattern.
    This function is the master of understanding the syntax of an rte
    pattern.  Any function which needs to perform a recursive operation
-   such as derivative, nullable, first-types, or canonicalize-pattern
+   such as derivative, nullable?, first-types, or canonicalize-pattern
    may call traverse-pattern with an augmented map of
    *traversal-functions*, indicating the callbacks for each rte
    keyword such as :* :cat etc.  The philosophy is that no other
@@ -515,27 +570,27 @@
              ;; cond-else (:keyword args) or list-expr ;; (:and x y)
              :else (if-multiple-operands pattern))))))
 
-(defn nullable 
+(defn-memoized [nullable? nullable?-impl]
   "Determine whether the given rational type expression is nullable.
   I.e., does the empty-word satisfy the expression."
   [expr]
   (boolean
    (traverse-pattern expr
                      (assoc *traversal-functions*
-                            :client nullable
+                            :client nullable?
                             :empty-set (rte-constantly false)
                             :epsilon (rte-constantly true)
                             :sigma   (rte-constantly false)
                             :type (rte-constantly false)
                             :* (rte-constantly true)
                             :cat (fn [operands _functions]
-                                   (every? nullable operands))
+                                   (every? nullable? operands))
                             :and (fn [operands _functions]
-                                   (every? nullable operands))
+                                   (every? nullable? operands))
                             :or (fn [operands _functions]
-                                  (some nullable operands))
+                                  (some nullable? operands))
                             :not (fn [operand _functions]
-                                   (not (nullable operand)))))))
+                                   (not (nullable? operand)))))))
 
 (defn first-types 
   "Return a possibly empty set of types (i.e., object which can be
@@ -566,7 +621,7 @@
                                           (empty? tail)
                                           (first-types head)
 
-                                          (nullable head)
+                                          (nullable? head)
                                           (union (first-types head)
                                                  (first-types (cons :cat tail)))
 
@@ -595,6 +650,198 @@
   "Predicate determining whether its object is of the form (:or ...)"
   (seq-matcher :or))
 
+(def rte/catxy?
+  "Predicate detecting (:cat x y z (:* (:cat x y z)))"
+  (fn [r]
+    (cond (not (rte/cat? r))
+          false
+
+          (< (count (operands r)) 2)
+          false
+
+          :else
+          (let [right (last (operands r))
+                left  (butlast (operands r))]
+            (and (rte/*? right)
+                 (rte/cat? (operand right))
+                 (= left (operands (operand right))))))))
+
+(def rte/plus?
+  "there won't be a :+ in a pattern after expansion.
+  However, this predicate indicates whether an expression is equivalent to a (:+ x)"
+  (fn [r]
+    (if (not (rte/cat? r))
+      false
+      (let [ops (operands r)]
+        (and (= 2 (count ops))
+             (or (and (rte/*? (nth ops 1))
+                      (= (operand (nth ops 1)) (nth ops 0)))
+                 (and (rte/*? (nth ops 0))
+                      (= (operand (nth ops 0)) (nth ops 1)))))))))
+
+(def rte/create-cat
+  (fn [operands]
+    (cond (empty? operands)
+          :epsilon
+
+          (= 1 (count operands))
+          (first operands)
+
+          :else
+          (cons :cat operands))))
+
+(def rte/create-or
+  (fn [operands]
+    (cond (empty? operands)
+          :empty-set
+
+          (= 1 (count operands))
+          (first operands)
+
+          :else
+          (cons :or operands))))
+
+(def rte/create-and
+  (fn [operands]
+    (cond (empty? operands)
+          sigma-*
+
+          (= 1 (count operands))
+          (first operands)
+
+          :else
+          (cons :and operands))))
+
+(defmulti zero
+  type-dispatch)
+
+(defmethod zero :or
+  [self]
+  sigma-*)
+
+(defmethod zero :and
+  [self]
+  :empty-set)
+
+(defmulti one
+  type-dispatch)
+
+(defmethod one :or
+  [self]
+  :empty-set)
+
+(defmethod one :and
+  [self]
+  sigma-*)
+
+
+(defmulti same-combination?
+  (fn [self operands]
+    (type-dispatch self)))
+
+(defmethod same-combination? :or
+  [self r]
+  (rte/or? r))
+
+(defmethod same-combination? :and
+  [self r]
+  (rte/and? r))
+
+(defmulti dual-combination?
+  (fn [self operands]
+    (type-dispatch self)))
+
+(defmethod dual-combination? :or
+  [self r]
+  (rte/and? r))
+
+(defmethod dual-combination? :and
+  [self r]
+  (rte/or? r))
+
+(defmulti set-dual-operation
+  (fn [self a b]
+    (type-dispatch self)))
+
+(defmethod set-dual-operation :or
+  ;; intersection
+  [self a b]
+  (setof [x a] (member x b)))
+
+(defmethod set-dual-operation :and
+  ;; union
+  [self a b]
+  (concat a (setof [x b] (not (member x a)))))
+
+(defmulti set-operation
+  (fn [self a b]
+    (type-dispatch self)))
+
+(defmethod set-operation :or
+  ;; union
+  [self a b]
+  (concat a (setof [x b] (not (member x a)))))
+
+(defmethod set-operation :and
+  ;; intersection
+  [self a b]
+  (setof [x a] (member x b)))
+
+(defmulti annihilator
+  (fn [self a b]
+    (type-dispatch self)))
+
+(defmethod annihilator :or
+  [self a b]
+  (gns/subtype? b a :dont-know))
+
+(defmethod annihilator :and
+  [self a b]
+  (gns/subtype? a b :dont-know))
+
+(defmulti create-type-descriptor
+  (fn [self operands]
+    (type-dispatch self)))
+
+(defmethod create-type-descriptor :or
+  [self operands]
+  (gns/create-or operands))
+
+(defmethod create-type-descriptor :and
+  [self operands]
+  (gns/create-and operands))
+
+(defmulti or-invert
+  (fn [self x]
+    (type-dispatch self)))
+
+(defmethod or-invert :or
+  [self x]
+  (not x))
+
+(defmethod or-invert :and
+  [self x]
+  x)
+
+(defmulti create
+  (fn [self operands]
+    (type-dispatch self)))
+
+(defmethod create :or
+  [self operands]
+  (create-or operands))
+
+(defmethod create :and
+  [self operands]
+  (create-and operands))
+
+(def rte/create-not
+  (fn [not-operand]
+    (if (rte/not? not-operand)
+      (operand not-operand)
+      (list :not not-operand))))
+
+
 (defmethod gns/-canonicalize-type 'rte
   [type-designator nf]
   ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
@@ -604,11 +851,11 @@
 
 (defn remove-first-duplicate
   "Look through the given sequence to find two consecutive elements a,b
-  for whcih (test a b) is a Boolean true.   If not found, return false.
-  If found return a pair [prefix suffix] where prefix is a copy of the squence
+  for which (test a b) is a Boolean true.   If not found, return false.
+  If found return a pair [prefix suffix] where prefix is a copy of the sequence
   up to but not including a, and suffix is the tail after but not including a.
   The suffix sequence starts with b.   I.e., the length of the input sequence
-  is 1 less than the some of the two output sequences, if a duplicate was found."
+  is 1 more than the sum of the two output sequences, if a duplicate was found."
   [test seq]
   (loop [seq seq
          head ()]
@@ -625,20 +872,7 @@
           (recur (rest seq)
                  (cons (first seq) head)))))
 
-(defn reduce-redundant-or [operands]
-  (let [ands (filter rte/and? operands)
-        xyz (setof [x ands] (exists [y operands] (member y (rest x))))
-        abc (setof [and1 ands]
-                   (let [and1-operands (set (rest and1)) ]
-                     (exists [and2 ands]
-                             (let [and2-operands (set (rest and2))]
-                               (and (not (subset? and1-operands and2-operands))
-                                    (subset? and2-operands and1-operands))))))
-        superfluous-ands (concat xyz abc)]
-    (if (empty? superfluous-ands)
-      operands
-      ;; remove all superfluous-ands from or-operands
-      (remove (fn [to-remove] (member to-remove superfluous-ands)) operands))))
+
 
 (defn disjoint?-false-warn [t1 t2]
   ;; don't complain about rte nor satisfies
@@ -660,8 +894,814 @@
                          t1 t2)
               false)))))
 
-(defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
-  "Rewrite the given rte patter to a canonical form.
+(defn conversion-*-1
+  [self]
+  (let [op (operand self)]
+    (cond (= :epsilon op)
+          :epsilon
+
+          (= :empty-set op)
+          :epsilon
+
+          (rte/*? op)
+          op
+
+          :default
+          self)))
+
+(defn conversion-*-2
+  [self]
+  (if (not (rte/cat? (operand self)))
+    self
+    ;; Star(Cat(...))
+    (let [c (operand self)
+          cat-operands (operands c)]
+      (cond 
+        (not (member (count cat-operands) '(2 3)))
+        self
+
+        ;; Star(Cat(x,Star(x))) -> Star(x)
+        (and (= 2 (count cat-operands))
+             (rte/*? (second cat-operands))
+             (= (first cat-operands)
+                (operand (second cat-operands))))
+        (second cat-operands)
+
+        ;; Star(Cat(Star(x),x)) -> Star(x)
+        (and (= 2 (count cat-operands))
+             (rte/*? (first cat-operands))
+             (= (second cat-operands)
+                (operand (first cat-operands))))
+        (first cat-operands)
+
+        ;; Star(Cat(Star(x),x,Star(x))) -> Star(x)
+        (and (= 3 (count cat-operands))
+             (rte/*? (first cat-operands))
+             (= (first cat-operands) (last cat-operands))
+             (= (operand (first cat-operands))
+                (second cat-operands)))
+        (first cat-operands)
+
+        :else
+        self))))
+             
+
+(defn conversion-*-3
+  [self]
+  (if (not (rte/cat? (operand self)))
+    self
+    (let [c (operand self)
+          cat-operands (operands c)]
+      (cond
+        ;; Star(Cat(X, Y, Z, Star(Cat(X, Y, Z))))
+        ;;    -->    Star(Cat(X, Y, Z))
+        (and (rte/*? (last cat-operands))
+             (rte/cat? (operand (last cat-operands)))
+             (= (operands (operand (last cat-operands)))
+                (butlast cat-operands)))
+        (last cat-operands)
+
+        ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z))
+        ;;   -->    Star(Cat(X, Y, Z))
+        (and (rte/*? (first cat-operands))
+             (rte/cat? (operand (first cat-operands)))
+             (= (operands (operand (first cat-operands)))
+                (rest cat-operands)))
+        (first cat-operands)
+
+        ;; Star(Cat(Star(Cat(X, Y, Z)), X, Y, Z, Star(Cat(X, Y, Z)))
+        ;;   -->    Star(Cat(X, Y, Z))
+        (and (<= 3 (count cat-operands))
+             (rte/*? (first cat-operands))
+             (rte/cat? (operand (first cat-operands)))
+             (= (first cat-operands) (last cat-operands))
+             (= (operands (operand (first cat-operands)))
+                (butlast (rest cat-operands))))
+        (first cat-operands)
+
+        :else
+        self))))
+
+(defn conversion-*-99
+  [self]
+  (template (:* ~(canonicalize-pattern-once (operand self)))))
+
+(defn conversion-not-1
+  [self]
+  (let [op (operand self)]
+    (cond (= op :sigma)
+          not-sigma
+
+          (= op sigma-*)
+          :empty-set
+
+          (= op :epsilon)
+          not-epsilon
+
+          (= op :empty-set)
+          sigma-*
+
+          :else
+          self)))
+
+(defn conversion-not-2
+  [self]
+  (cond (rte/not? (operand self))
+        (operand (operand self))
+        :else
+        self))
+
+(defn conversion-not-3
+  [self]
+  (let [op (operand self)]
+    (cond (rte/and? op)
+          (rte/create-or (map rte/create-not (operands op)))
+
+          (rte/or? op)
+          (rte/create-and (map rte/create-not (operands op)))
+
+          :else
+          self)))
+
+(defn conversion-not-99
+  [self]
+  (rte/create-not (canonicalize-pattern-once (operand self))))
+
+
+(defn conversion-cat-1
+  [self]
+  (rte/create-cat (operands self)))
+
+(defn conversion-cat-3
+  [self]
+  (if (member :empty-set (operands self))
+    :empty-set
+    self))
+
+(defn conversion-cat-4
+  [self]
+  ;; remove  EmptyWord and flatten  Cat(Cat(...)...
+  (rte/create-cat (mapcat (fn [rt]
+                            (cond (= rt :epsilon)
+                                  []
+
+                                  (rte/cat? rt)
+                                  (operands rt)
+
+                                  :else
+                                  [rt]))
+                          (operands self))))
+  
+(defn conversion-cat-5
+  [self]
+
+  (letfn [;; Cat(..., x*, x, x* ...) --> Cat(..., x*, x, ...)
+          (f [tail]
+            (cond (< (count tail) 3)
+                  tail
+
+                  (and (= (first tail) (nth  tail 2))
+                       (rte/*? (first tail))
+                       (= (operand (first tail)) (second tail)))
+                  (f (concat [(first tail) (second tail)]
+                             (nthrest tail 3)))                          
+
+                  :else
+                  (cons (first tail) (f (rest tail)))))
+          ;; and Cat(..., x*, x* ...) --> Cat(..., x*, ...)
+          (g [tail]
+            (cond (< (count tail) 2)
+                  tail
+
+                  (and (= (first tail) (second tail))
+                       (rte/*? (first tail)))
+                  (g (rest tail))
+
+                  :else
+                  (cons (first tail) (g (rest tail)))))]
+    (rte/create-cat (f (g (operands self))))))
+
+
+(defn conversion-cat-6
+  [self]
+  ;; Cat(A, B, X *, X, C, D) --> Cat(A, B, X, X *, C, D)
+  ;; Cat(A, B, X *, X, X, C, D) --> Cat(A, B, X, X, X *, C, D)
+  (letfn [(f [tail]
+            (cond (empty? (rest tail))
+                  tail
+
+                  (and (rte/*? (first tail))
+                       (= (operand (first tail)) (second tail)))
+                  (cons (second tail) (f (cons (first tail)
+                                               (rest (rest tail)))))
+
+                  :else
+                  (cons (first tail) (f (rest tail)))))]
+    (rte/create-cat (f (operands self)))))
+
+(defn conversion-cat-99
+  [self]
+  (rte/create-cat (map canonicalize-pattern-once (operands self))))
+
+(defn conversion-combo-1
+  [self]
+  (create self (operands self)))
+
+(defn conversion-combo-3
+  [self]
+  ;; Or(... Sigma * ....) -> Sigma *
+  ;; And(... EmptySet....) -> EmptySet
+  (if (member (zero self) (operands self))
+    (zero self)
+    self))
+
+(defn conversion-combo-4
+  [self]
+  (create self (uniquify (operands self))))
+
+(defn conversion-combo-5
+  [self]
+  (create self (sort-operands (operands self))))
+
+(defn conversion-combo-6
+  [self]
+  ;; remove Sigma * and flatten And(And(...)...)
+  ;; remove EmptySet and flatten Or(Or(...)...)
+  (create self
+          (mapcat (fn [r]
+                    (cond (= r (one self))
+                          []
+
+                          (same-combination? self r)
+                          (operands r)
+
+                          :else
+                          [r]))
+                  (operands self))))
+
+(defn conversion-combo-7
+  [self]
+  ;; (:or A B (:* B) C)
+  ;; --> (:or A (:* B) C)
+  ;; (:and A B (:* B) C)
+  ;; --> (:and A B C)
+  (let [stars (filter rte/*? (operands self))]
+    (if (empty? stars)
+      self
+      (create self
+              (mapcat (fn [r]
+                        (cond (and (rte/or? self)
+                                   (exists [s stars]
+                                           (= r (operand s))))
+                              []
+
+                              (and (rte/and? self)
+                                   (rte/*? r)
+                                   (member (operand r) (operands self)))
+                              []
+
+                              :else
+                              [r]))
+                      (operands self))))))
+
+(defn conversion-combo-11
+  [self]
+  ;; And(...,x,Not(x)...) --> EmptySet
+  ;; Or(...x,Not(x)...) --> SigmaStar
+  (if (exists [r1 (operands self)]
+              (and (rte/not? r1)
+                   (member (operand r1) (operands self))))
+    (zero self)
+    self))
+
+(defn conversion-combo-12
+  [self]
+  ;; sigmaSigmaStarSigma = Cat(Sigma, Sigma, sigmaStar)
+  ;; Or(   A, B, ... Cat(Sigma,Sigma,Sigma*) ... Not(Singleton(X)) ...)
+  ;;   --> Or( A, B, ... Not(Singleton(X))
+  ;; This is correct because Cat(Σ,Σ,(Σ)*) is the set of all sequences of length 2 or more
+  ;;    and Not(Singleton(X)) includes the set of all sequences of length 2 or more
+  ;; Similarly, any Cat(...) which contains at least two non-nullables is either the
+  ;;    empty set, or a set of sequences each of length 2 or more.
+  ;;    And Not(Singleton(X)) contains all all sequences of length 2 or more.
+  ;; So se can remove all such sequences.
+  ;; E.g. Or(Singleton(SEql(1)),
+  ;;         Cat(Singleton(SEql(1)),Singleton(SEql(2)),Singleton(SEql(3))),
+  ;;         Not(Singleton(SEql(0))))
+  ;;     we can remove Cat(...) because it contains at least 2 non-nullable items,
+  ;;         and is therefore a subset of Not(Singleton(SEql(0)))
+  ;; If we have  Or rather than And, then we can remove Not(Singleton(SEql(0)))
+  ;;         because it is a superset of Cat(...)
+  
+  (let [cats (for [c (operands self)
+                   :when (rte/cat? c)
+                   :when (> (count-if-not nullable? (operands c)) 1)]
+               c)
+        not-sing (setof [n (operands self)]
+                        (and (rte/not? n)
+                             (gns/valid-type? (operand n))))]
+    (cond (or (empty? not-sing)
+              (empty? cats))
+          self
+
+          (rte/or? self)
+          (create self (setof [op (operands self)]
+                              (not (member op cats))))
+
+          :else ;; (rte/and? self)
+          (create self (setof [op (operands self)]
+                              (not (member op not-sing)))))))
+
+(defn conversion-combo-14
+  [self]
+  ;; generalization of conversionC11
+  ;; Or(A,Not(B),X) -> Sigma* if B is subtype of A
+  ;; And(A,Not(B),X) -> EmptySet if A is subtype of B
+  (let [nots (for [r (operands self)
+                   :when (rte/not? r)
+                   :when (gns/valid-type? (operand r))]
+               (operand r))
+        singletons (filter gns/valid-type? (operands self))]
+    (if (exists [sub nots]
+                (exists [sup singletons]
+                        (= (annihilator self sup sub) true)))
+      (zero self)
+      self)))
+
+(defn conversion-combo-15
+  [self]
+  ;; simplify to maximum of one SMember(...) and maximum of one Not(SMember(...))
+  ;; Or(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+  ;;   --> Or(<{1,2,3,4,6,7}>,Not(<{12,13}>))
+  ;;
+  ;; And(<{1,2,3,4}>,<{4,5,6,7}>,Not(<{10,11,12,13}>,Not(<{12,13,14,15}>)))
+  ;;   --> And(<{3,4}>,Not(<{10,11,12,13,14,15}>))
+  (let [members (filter (every-pred gns/valid-type? gns/member-or-=?) (operands self))
+        not-members (for [nsm (operands self)
+                          :when (rte/not? nsm)
+                          :when (gns/valid-type? (operand nsm))
+                          :when (gns/member-or-=? (operand nsm))]
+                      nsm)]
+    (if (or (empty? members)
+            (empty? not-members))
+      self
+      (let [new-member-arglist (reduce #(set-operation self %1 %2)
+                                       (gns/operands (first members))
+                                       (map gns/operands members))
+            new-member (if (empty? new-member-arglist)
+                         (one self)
+                         (gns/create-member new-member-arglist))
+            new-not-member-arglist (reduce #(set-dual-operation self %1 %2)
+                                           (gns/operands (operand (first not-members)))
+                                           (for [nsm not-members]
+                                             (gns/operands (operand nsm))))
+            new-not-member (if (empty? new-not-member-arglist)
+                             (one self)
+                             (rte/create-not (gns/create-member new-not-member-arglist)))]
+        (create self (uniquify (map (fn [op]
+                                      (cond (member op members)
+                                            new-member
+
+                                            (member op not-members)
+                                            new-not-member
+
+                                            :else
+                                            op))
+                                    (operands self))))))))
+
+(defn conversion-combo-16
+  [self]
+  ;; WARNING, this function assumes there are no repeated elements
+  ;;     according to ==
+  ;;     If there are repeated elements, both will be removed.
+  
+  ;; remove And superclasses
+  ;; remove Or subclasses
+  
+  ;; Must be careful, e.g. if Or(A,B) with A a subset of B and B a subset of A
+  ;;    but A != B, then don't remove both.
+  (let [ss (filter gns/valid-type? (operands self))
+        f (fn [i]
+            (let [td (nth ss i)
+                  right (if (exists [j (range (inc i) (count ss))]
+                                    (= (annihilator self (nth ss j) td) true))
+                          [td]
+                          [])
+                  ;; left is computed lazily, thus not at all if right is non-empty
+                  left (for [j (range (inc i) (count ss))
+                             :when (= (annihilator self td (nth ss j)) true)]
+                         (nth ss j))]
+              (if (empty? right)
+                left
+                right)))
+        redundant (mapcat f (range (dec (count ss))))
+        g (fn [op]
+            (if (member op redundant)
+              []
+              [op]))              
+        filtered (mapcat g (operands self))]
+    (create self filtered)))
+
+(defn conversion-combo-17
+  [self]
+  ;; And({1,2,3},Singleton(X),Not(Singleton(Y)))
+  ;;  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
+  ;; --> And({...},Singleton(X),Not(Singleton(Y)))
+  
+  ;; Or({1,2,3},Singleton(X),Not(Singleton(Y)))
+  ;;  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
+  ;; --> Or({...},Singleton(X),Not(Singleton(Y)))
+
+  (let [members (filter gns/member-or-=? (operands self))]
+    (if (empty? members)
+      self
+      (let [member-1 (first members)
+            singletons (for [r (remove-element member-1 (operands self))
+                             :when (or (gns/valid-type? r)
+                                       (and (rte/not? r)
+                                            (gns/valid-type? (operand r))))]
+                         r)
+            f (fn [r]
+                (cond (gns/valid-type? r)
+                      [r]
+
+                      (and (rte/not? r)
+                           (gns/valid-type? (operand r)))
+                      [(gns/create-not (operand r))]
+
+                      :else
+                      []))
+            looser (mapcat f singletons)]
+        (if (empty? looser)
+          self
+          (let [td (create-type-descriptor self looser)
+                rt (gns/create-member (setof [a (gns/operands member-1)]
+                                             (or-invert self (gns/typep a td))))]
+            (create self (search-replace (operands self)
+                                         member-1
+                                         rt))))))))
+
+(defn conversion-combo-21
+  [self]
+  (let [singletons (mapcat (fn [r]
+                             (cond (and (rte/and? self)
+                                        (gns/valid-type? r))
+                                   [r]
+
+                                   (and (rte/or? self)
+                                        (rte/not? r)
+                                        (gns/valid-type? (operand r)))
+                                   [(operand r)]
+
+                                   :else
+                                   []))
+                           (operands self))]
+    (if (exists [i (range (count singletons))]
+                (exists [j (range (inc i) (count singletons))]
+                        (gns/disjoint? (nth singletons i) (nth singletons j) false)))
+      (zero self)
+      self)))
+
+(defn conversion-combo-99
+  [self]
+  (create self (map canonicalize-pattern-once (operands self))))
+
+(defn conversion-and-7
+  [self]
+  (if (and (member :epsilon (operands self))
+           (some gns/valid-type? (operands self)))
+    :empty-set
+    self))
+
+(defn conversion-and-8
+  [self]
+  ;; if operands contains EmptyWord, then the intersection is either EmptyWord or EmptySet
+  (cond (not (member :epsilon (operands self)))
+        self
+
+        (every? nullable? (operands self))
+        :epsilon
+
+        :else
+        :empty-set))
+
+(defn conversion-and-9
+  [self]
+  ;; if x matches only singleton then And(x,y*) -> And(x,y)
+  (if (and (some gns/valid-type? (operands self))
+           (some rte/*? (operands self)))
+    (create self (map (fn [rt]
+                        (if (rte/*? rt)
+                          (operand rt)
+                          rt))
+                      (operands self)))
+    self))
+    
+
+(defn conversion-and-10
+  [self]
+  ;; And(A,B,Or(X,Y,Z),C,D)
+  ;; --> Or(And(A,B,   X,   C, D)),
+  ;;        And(A,B,   Y,   C, D)),
+  ;;        And(A,B,   Z,   C, D)))
+  (let [ror (filter rte/or? (operands self))]
+    (if (empty? ror)
+      self
+      (let [ror-1 (first ror)]
+        (rte/create-or (for [r (operands ror-1)]
+                         (rte/create-and (search-replace (operands self) ror-1 r))))))))
+
+(defn conversion-and-18
+  [self]
+  ;; if there is a singleton which is not inhabited
+  (if (exists [r (operands self)]
+              (and (gns/valid-type? r)
+                   (= (gns/inhabited? r :dont-know) false)))
+    :empty-set
+    self))
+
+(defn conversion-and-13
+  [self]
+  ;; if there is an explicit :sigma and also a singleton which is inhabited, then
+  ;;  we can simply remove the sigma.
+  (cond (not (member :sigma (operands self)))
+        self
+
+        (exists [r (operands self)]
+                (and (not= :sigma r)
+                     (gns/valid-type? r)
+                     (gns/inhabited? r false)))
+        (create self (remove-element :sigma (operands self)))
+
+        :else
+        self))
+
+(defn conversion-and-17
+  [self]
+  ;; if And(...) contains a Cat(...) with at least 2 non-nullable components,
+  ;;    then this Cat matches only sequences of length 2 or more.
+  ;; If And(...) contains a singleton, then it matches only sequences
+  ;;    of length 1, perhaps an empty set of such sequences if the singleton type
+  ;;    is empty.
+  ;; If both are true, then the And() matches EmptySet
+  (let [tds (filter gns/valid-type? (operands self))
+        count-non-nullable (fn [c]
+                             (count-if-not nullable? (operands c)))
+        long-cats (filter (fn [c] (and (rte/cat? c)
+                                       (> (count-non-nullable c) 1)))
+                          (operands self))]
+    (if (and (or (member :sigma (operands self))
+                 (non-empty? tds))
+             (non-empty? long-cats))
+      :empty-set
+      self)))
+
+(defn conversion-and-17a
+  [self]
+  ;; if And(...) has more than one Cat(...) which has no nullable operand,
+  ;;    then the number of non-nullables must be the same, else EmptySet.
+  ;;    We also replace the several Cat(...) (having no nullables)
+  ;;    with a single Cat(...) with intersections of operands.
+  ;;    And(Cat(a,b,c),Cat(x,y,z) ...)
+  ;;    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
+  (let [cats (for [c (operands self)
+                   :when (rte/cat? c)
+                   :when (forall [td (operands c)]
+                                 (not (nullable? td)))]
+               (operands c))]
+    (cond (empty? cats)
+          self
+
+          (= 1 (count cats))
+          self
+
+          (exists [i (range 1 (count cats))]
+                  (not= (count (first cats))
+                        (count (nth cats i))))
+          ;; we found two Cat(...) of necessarily different lengths
+          :empty-set
+
+          :else
+          (let [invert (for [i (range 0 (count (first cats)))]
+                         (for [c cats]
+                           (nth c i)))
+                cat (rte/create-cat (for [r invert] (create self r)))]
+            (create self (uniquify (map (fn [r]
+                                          (if (and (rte/cat? r)
+                                                   (member (operands r) cats))
+                                            cat
+                                            r))
+                                        (operands self))))))))
+
+(defn conversion-and-17b
+  [self]
+  ;; after 17a we know that if there are multiple Cats(...) without a nullable,
+  ;;   then all such Cats(...) without a nullable have same number of operands
+  ;;   have been merged into one Cat(...)
+  ;;   So assure that all other Cats have no more non-nullable operands.
+  (let [cats (filter rte/cat? (operands self))
+        non-nullable-cats (filter (fn [c]
+                                   (forall [o (operands c)]
+                                           (not (nullable? o))))
+                                 cats)]
+    (if (empty? non-nullable-cats)
+      self
+      (let [num-non-nullable (count (operands (first non-nullable-cats)))
+            count-non-nullable (fn [c]
+                                 (count-if-not nullable? (operands c)))]
+        (if (exists [c cats]
+                    (> (count-non-nullable c) num-non-nullable))
+          :empty-set
+          self)))))
+
+(defn conversion-and-17c
+  [self]
+  ;; if And(...) contains a Cat with no nullables, (or explicit Sigma or Singleton)
+  ;;  then remove the nullables from ever other Cat with that many non-nullables.
+  ;; Since 7b has run, there should be no cat with more than this many non-nullables.
+  ;; find a Cat(...) with no nullables, there should be at most one because
+  ;;    conversion17a as run.
+  (if (empty? (filter rte/cat? (operands self)))
+    self
+    (let [count-non-nullable (fn [c]
+                               (count-if-not nullable? (operands c)))
+          cat-non-nullables (filter (fn [c]
+                                      (and (rte/cat? c)
+                                           (forall [o (operands c)]
+                                                   (not (nullable? o)))))
+                                    (operands self))
+          num-non-nullables (cond  (member :sigma (operands self))
+                                   1
+
+                                   (some gns/valid-type? (operands self))
+                                   1
+
+                                   (non-empty? cat-non-nullables)
+                                   (count (operands (first cat-non-nullables)))
+                                   
+                                   :else
+                                   0)]
+      (if (= 0 num-non-nullables)
+        self
+        (create self
+                (map (fn [c]
+                       (cond (not (rte/cat? c))
+                             c
+
+                             (= (count-non-nullable c) num-non-nullables)
+                             (create-cat (for [o (operands c)
+                                               :when (not (nullable? o))]
+                                           o))
+
+                             :else
+                             c))                             
+                     (operands self)))))))
+
+(defn conversion-and-19
+  [self]
+  ;; if there is at least one singleton and zero or more Not(x) where x is a singleton
+  ;;   then build a SimpleTypeD and ask whether it is inhabited.
+  ;;   if it is not inhabited, then self converts to EmptySet
+  (let [singletons (filter gns/valid-type? (operands self))]
+    (if (empty? singletons)
+      self
+      (let [not-singletons (for [r (operands self)
+                                 :when (rte/not? r)
+                                 :when (gns/valid-type? (operand r))]
+                             (gns/create-not (operand r)))
+            canonicalized-singletons (gns/canonicalize-type (gns/create-and (concat singletons not-singletons))
+                                                            :dnf)]
+        (if (= (gns/inhabited? canonicalized-singletons :dont-know) false)
+          :empty-set
+          self)))))
+
+(defn conversion-or-8
+  [self]
+  ;; (:or A :epsilon B (:cat X (:* X)) C)
+  ;;   --> (:or A :epsilon B (:* X) C )
+  ;; (:or :epsilon (:cat X (:* X)))
+  ;;   --> (:or :epsilon (:* X))
+  ;; (:or (:* Y) (:cat X (:* X)))
+  ;;   --> (:or (:* Y) (:* X))
+  (if (and (some nullable? (operands self))
+           (some rte/plus? (operands self)))
+    (letfn [(f [op]
+              (cond (not (rte/cat? op))
+                    op
+
+                    (rte/plus? op)
+                    ;; (:cat x (:* x)) -> (:* x)
+                    ;; (:cat (:* x) x) -> (:* x)
+                    (first (filter rte/*? (operands op)))
+
+                    :else
+                    op))]
+      (create self (map f (operands self))))
+    self))
+
+(defn conversion-or-9
+  [self]
+  ;; (:or A :epsilon B (:cat X Y Z (:* (:cat X Y Z))) C)
+  ;;   --> (:or A :epsilon B (:* (:cat X Y Z)) C )
+  ;; (:or :epsilon (:cat X Y Z (:* (:cat X Y Z))))
+  ;;   --> (:or :epsilon (:* (:cat X Y Z)))
+  (if (and (some nullable? (operands self))
+           (some catxy? (operands self)))
+    (create self (map (fn [r]
+                        (if (rte/catxy? r)
+                          (last r)
+                          r))
+                      (operands self)))
+    self))
+    
+
+(defn conversion-or-10
+  [self]
+  ;; (: or A :epsilon B (: * X) C)
+  ;; --> (: or A B (: * X) C)
+  (if (and (member :epsilon (operands self))
+           (exists [r (operands self)]
+                   (and (not= :epsilon r)
+                        (nullable? r))))
+    (create self (remove-element :epsilon (operands self)))
+    self))
+  
+(defn conversion-or-11b
+  [self]
+  ;; if Sigma is in the operands, then filter out all singletons
+  ;; Or(Singleton(A),Sigma,...) -> Or(Sigma,...)
+  (if (member :sigma (operands self))
+    (create self (mapcat (fn [op]
+                           (cond (= op :sigma)
+                                 [:sigma]
+
+                                 (gns/valid-type? op)
+                                 []
+
+                                 :else
+                                 [op]))
+                         (operands self)))
+    self))
+
+(defn conversion-or-15
+  [self]
+  ;; Or(Not(A),B*,C) = Or(Not(A),C) if A and B  disjoint,
+  ;;   i.e. remove all B* where B is disjoint from A
+  (let [tds (for [r (operands self)
+                  :when (rte/not? r)
+                  :when (gns/valid-type? (operand r))]
+              (operand r))
+        stars (for [r (operands self)
+                    :when (rte/*? r)
+                    :when (gns/valid-type? (operand r))
+                    :when (exists [a tds]
+                                  (gns/disjoint? a (operand r) false))]
+                r)]
+    (cond (empty? tds)
+          self
+
+          (empty? stars)
+          self
+
+          :else
+          (create self (for [r (operands self)
+                             :when (not (member r stars))]
+                         r)))))
+
+(defmulti conversion-dual-16b
+  type-dispatch)
+
+(defmethod conversion-dual-16b :or
+  [self]
+  ;; Or(A, x, Not(y)) --> And(A, Not(x)) if x, y disjoint
+  (let [nss (for [r (operands self)
+                  :when (rte/not? r)
+                  :when (gns/valid-type? (operand r))]
+              ;; collect all td for each Not(Singleton(td))
+              (operand r))]
+    (create self (mapcat (fn [r]
+                           (if (and (gns/valid-type? r)
+                                    (exists [d nss]
+                                            (gns/disjoint? r d false)))
+                             []
+                             [r]))
+                         (operands self)))))
+
+(defmethod conversion-dual-16b :and
+  [self]
+  ;;And(A, x, Not(y)) --> And(A, x) if x, y disjoint
+  (let [ss (filter gns/valid-type? (operands self))]
+    (create self (mapcat (fn [r]
+                           (if (and (rte/not? r)
+                                    (gns/valid-type? (operand r))
+                                    (exists [d ss]
+                                            (gns/disjoint? (operand r) d false)))
+                             []
+                             [r]))
+                         (operands self)))))
+
+(defn-memoized [canonicalize-pattern-once canonicalize-pattern-once-impl]
+  "Rewrite the given rte pattern to a canonical form.
   This involves recursive re-writing steps for each sub form,
   including searches for syntatical and semantical reductions.
   The API for canonicalizing a pattern is canonicalize-pattern,
@@ -677,208 +1717,78 @@
                            :epsilon rte-identity
                            :sigma rte-identity
                            :* (fn [operand _functions]
-                                (let [operand (canonicalize-pattern operand)]
-                                  (case operand
-                                    :epsilon    :epsilon ;; (:* :epsilon) --> :epsilon
-                                    :empty-set  :epsilon ;; (:* :empty-set) --> :epsilon
-                                    (if (*? operand)
-                                      operand ;; (:* (:* something)) --> (:* something)
-                                      (list :* (canonicalize-pattern operand))))))
+                                (find-simplifier (list :* operand)
+                                                 [conversion-*-1
+                                                  conversion-*-2
+                                                  conversion-*-3
+                                                  conversion-*-99]))
                            :cat (fn [operands _functions]
-                                  (let [operands (map canonicalize-pattern operands)]
-                                    (assert (< 1 (count operands))
-                                            (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s"
-                                                    re (count operands) operands))
-                                    (cl/cl-cond
-                                     ;; (:cat A (:* X) (:* X) B)
-                                     ;;  --> (:cat A (:* X) B)
-                                     ((let [x (remove-first-duplicate (fn [a b]
-                                                                        (and (*? a)
-                                                                             (= a b)))
-                                                                      operands)]
-                                        ;; remove-first-duplicate returns false if it didn't find a duplicate
-                                        (and x
-                                             (cons :cat (concat (first x) (second x))))))
-
-                                     ;; (:cat x (:cat a b) y) --> (:cat x a b y)
-                                     ((some cat? operands)
-                                      (cons :cat (mapcat (fn [obj]
-                                                           (if (cat? obj)
-                                                             (rest obj)
-                                                             (list obj))) operands)))
-
-                                     ;; (:cat x "empty-set" y) --> :emptyset
-                                     ((member :empty-set operands)
-                                      :empty-set)
-
-                                     ;; (:cat x :epsilon y) --> (:cat x y)
-                                     ((member :epsilon operands)
-                                      (cons :cat (remove #{:epsilon} operands)))
-
-                                     (:else
-                                      (cons :cat operands)))))
+                                  (find-simplifier (cons :cat operands)
+                                                   [conversion-cat-1
+                                                    conversion-cat-3
+                                                    conversion-cat-4
+                                                    conversion-cat-5
+                                                    conversion-cat-6
+                                                    conversion-cat-99]))
                            :not (fn [operand _functions]
-                                  (let [operand (canonicalize-pattern operand)]
-                                    (case operand
-                                      (:sigma) not-sigma
-                                      ((:* :sigma)) :empty-set
-                                      (:epsilon) not-epsilon
-                                      (:empty-set) sigma-*
-                                      (cond
-                                        (rte/not? operand) ;; (:not (:not A)) --> A
-                                        (second operand)
-
-                                        (rte/and? operand) ;;  (:not (:and A B)) --> (:or (:not A) (:not B))
-                                        (cons :or (map (fn [obj]
-                                                         (list :not obj)) (rest operand)))
-
-                                        (rte/or? operand) ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
-                                        (cons :and (map (fn [obj]
-                                                          (list :not obj)) (rest operand)))
-
-                                        :else
-                                        ;; TODO in CL this expands to
-                                        ;; (:or :empty-word
-                                        ;;      (not pattern) ;; not type does not exist in clojure
-                                        ;;      (:cat t (:+ t)))
-                                        ;; so we need to take care of this when when build the automaton
-                                        (list :not operand))
-                                      )))
+                                  (find-simplifier (list :not operand)
+                                                   [conversion-not-1
+                                                    conversion-not-2
+                                                    conversion-not-3
+                                                    conversion-not-99]))
                            :and (fn [operands _functions]
-                                  (let [operands (dedupe (sort-operands (map canonicalize-pattern operands)))]
-                                    (cl/cl-cond
-                                     ;; TODO - (:and :epsilon ...)
-                                     ;;    if any of the :and arguments is not nullable,
-                                     ;;    then the result is :empty-set
-                                     ;;    otherwise the result is :epsilon
-
-                                     ;; TODO (:and (:cat A B sigma-*)
-                                     ;;            (:cat A B ))
-                                     ;;  --> (:and (:cat A B))
-
-                                     ;; (:and :epsilon :sigma A B C)
-                                     ;; --> :empty-set, because :epsilon and :sigma are disjoint
-                                     ((and (member :epsilon operands)
-                                           (member :sigma operands))
-                                      :empty-set)
-                                     
-                                     ((member :empty-set operands)
-                                      :empty-set)
-
-                                     ((some rte/and? operands)
-                                      (cons :and (mapcat (fn [obj]
-                                                           (if (rte/and? obj)
-                                                             (rest obj)
-                                                             (list obj))) operands)))
-
-                                     ((member sigma-* operands)
-                                      (cons :and (remove (fn [obj]
-                                                           (= sigma-* obj)) operands)))
-
-                                     ((some rte/or? operands)
-                                      ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
-                                      (with-first-match rte/or? operands
-                                        (fn [or-item]
-                                          (let [others (remove (fn [x] (= or-item x)) operands)]
-                                            (cons :or (map (fn [x] (list* :and x others)) (rest or-item)))))))
-
-                                     ;; (:and x (:not x)) --> :empty-set
-                                     ((let [nots (filter rte/not? operands)
-                                            others (remove rte/not? operands)]
-                                        (when (some (fn [item]
-                                                      (some #{(list :not item)} nots)) others)
-                                          :empty-set)))
-
-                                     ;; (:and of disjoint types) --> :empty-set
-                                     ((let [atoms (filter (complement seq?) operands)
-                                            types (filter (fn [x] (not= x :epsilon)) atoms)
-                                            ]
-                                        (when (exists-pair [[i1 i2] types]
-                                                           (and (not= i1 i2)
-                                                                (disjoint?-false-warn i1 i2)))
-                                          :empty-set)))
-                                     
-                                     ;; (:and subtype supertype x y z) --> (:and subtype x y z)
-                                     ((let [atoms (filter (complement seq?) operands)
-                                            types (filter (fn [x] (not= x :epsilon)) atoms)
-                                            max (gns/type-max types)
-                                            ]
-                                        (when max
-                                          (cons :and (remove #{max} operands)))))
-                                     
-                                     (:else
-                                      (cons :and operands))
-
-                                     )))
+                                  (find-simplifier (cons :and operands)
+                                                   [conversion-combo-1
+                                                    conversion-combo-3
+                                                    conversion-combo-4
+                                                    conversion-combo-6
+                                                    conversion-and-7
+                                                    conversion-combo-7
+                                                    conversion-and-8
+                                                    conversion-and-9
+                                                    conversion-and-10
+                                                    conversion-combo-11
+                                                    conversion-combo-14
+                                                    conversion-and-18
+                                                    conversion-combo-12
+                                                    conversion-and-13
+                                                    conversion-combo-21
+                                                    conversion-combo-15
+                                                    conversion-combo-16
+                                                    conversion-dual-16b
+                                                    conversion-and-17
+                                                    conversion-and-17a
+                                                    conversion-and-17b
+                                                    conversion-and-17c
+                                                    conversion-and-19
+                                                    conversion-combo-17
+                                                    conversion-combo-99
+                                                    conversion-combo-5
+                                                    ]))
                            :or (fn [operands _functions]
-                                 (assert (< 1 (count operands))
-                                         (format "traverse-pattern should have already eliminated this case: re=%s count=%s operands=%s" re (count operands) operands))
-                                 (let [operands (dedupe
-                                                 (sort-operands (map canonicalize-pattern
-                                                                     (reduce-redundant-or operands))))]
-                                   (cl/cl-cond
-                                    ;; TODO (:or (:cat A B sigma-*)
-                                    ;;           (:cat A B ))
-                                    ;;  --> (:or (:cat A B sigma-*))
+                                 (find-simplifier (cons :or operands)
+                                                  [conversion-combo-1
+                                                   conversion-combo-3
+                                                   conversion-combo-4
+                                                   conversion-combo-6
+                                                   conversion-combo-7
+                                                   conversion-or-8
+                                                   conversion-or-9
+                                                   conversion-or-10
+                                                   conversion-combo-11
+                                                   conversion-combo-14
+                                                   conversion-or-11b
+                                                   conversion-combo-16
+                                                   conversion-dual-16b
+                                                   conversion-combo-12
+                                                   conversion-or-15
+                                                   conversion-combo-21
+                                                   conversion-combo-15
+                                                   conversion-combo-17
+                                                   conversion-combo-99
+                                                   conversion-combo-5])))))
 
-                                    ;; TODO (:or A B C (:* B) D)
-                                    ;;  --> (:or A C (:* B) D)
-                                    
-                                    ;; (:or A :epsilon B (:cat X (:* X)) C)
-                                    ;;   --> (:or A :epsilon B (:* X) C )
-                                    ;;   --> (:or A B (:* X) C) ;; TODO remove :epsilon if there is another element which is nullable
-                                    ((and (member :epsilon operands)
-                                          (some (fn [obj]
-                                                  (and (cat? obj)
-                                                       (= 3 (count obj))
-                                                       (let [[_ x y] obj]
-                                                         (cond (and (*? x)
-                                                                    (= y (second x)))
-                                                               ;; (:or x A B C)
-                                                               (cons :or (cons x (remove (fn [o] (or (= o :epsilon)
-                                                                                                     (= o obj))) operands)))
-
-                                                               (and (*? y)
-                                                                    (= x (second y)))
-                                                               ;; (:or y A B C)
-                                                               (cons :or (cons y (remove (fn [o] (or (= o :epsilon)
-                                                                                                     (= o obj))) operands)))
-                                                               
-                                                               :else
-                                                               false))))
-                                                operands)))
-
-                                    ((some rte/or? operands)
-                                     (cons :or (mapcat (fn [obj]
-                                                         (if (rte/or? obj)
-                                                           (rest obj)
-                                                           (list obj))) operands)))
-
-                                    ((member sigma-* operands)
-                                     sigma-*)
-
-                                    ((member :empty-set operands)
-                                     (cons :or (remove #{:empty-set} operands)))
-
-                                    ;; (:or x (:not x)) --> :sigma
-                                    ((let [nots (filter rte/not? operands)
-                                           others (remove rte/not? operands)]
-                                       (when (some (fn [item]
-                                                     (some #{(list :not item)} nots)) others)
-                                         sigma-*)))
-
-                                    ;; (:or subtype supertype x y z) --> (:and supertype x y z)
-                                    ((let [atoms (filter (complement seq?) operands)
-                                           min (gns/type-min atoms)
-                                           ]
-                                       (when min
-                                         (cons :or (remove #{min} operands)))))
-
-                                    (:else
-                                     (cons :or operands))
-                                    ))))))
-
-(defn canonicalize-pattern 
+(defn-memoized [canonicalize-pattern canonicalize-pattern-impl]
   "find the fixed point of canonicalize-pattern-once"
   [pattern]
   (fixed-point pattern canonicalize-pattern-once =))
@@ -969,82 +1879,12 @@
                                                (term2 []
                                                  (derivative `(:cat ~@tail) wrt))]
                                          (cond
-                                           (nullable head) ;; nu = :epsilon
+                                           (nullable? head) ;; nu = :epsilon
                                            `(:or ~(term1) ~(term2))
                                            :else
                                            (term1))))
                                 :* (fn [operand _functions]
                                      `(:cat ~(derivative operand wrt) (:* ~operand)))))))))
-
-(defn mdtd 
-  "Given a set of type designators, return a newly computed list of type
-  designators which implement the Maximal Disjoint Type Decomposition.
-  I.e., the computed list designates a set whose union is the same as
-  the given set, but all the elements are mutually disjoint."
-  [type-set]
-  ;; find a disjoint type
-  (letfn [(independent? [t1]
-            (every? (fn [t2]
-                      (or (= t1 t2)
-                          (disjoint?-false-warn t1 t2))) type-set))
-          (count-if [pred items]
-            (reduce (fn [acc item]
-                      (if (pred item)
-                        (inc acc)
-                        acc)) 0 items))
-          (collect-left-right [collect left right]
-            (cond
-              (and (empty? right)
-                   (= 1 (count left)))
-              (collect (first left))
-
-              (and (empty? left)
-                   (= 1 (count right)))
-              (collect (list 'not (first right)))
-
-              (and (empty? right)
-                   (empty? left))
-              :sigma
-
-              (> (+ (count-if rte? left)
-                    (count-if rte? right)) 1)
-              (let [[left-rtes left] (partition-by-pred rte? left)
-                    [right-rtes right] (partition-by-pred rte? right)
-                    left-patterns (map second left-rtes)
-                    right-patterns (map second right-rtes)]
-                (cond (empty? left-rtes)
-                      (let [new-rte (canonicalize-pattern `(:or ~@right-patterns))]
-                        (collect-left-right collect
-                                            left
-                                            (cons (list 'rte new-rte) right)))
-
-                      (empty? right-rtes)
-                      (let [new-rte (canonicalize-pattern `(:and ~@left-patterns))]
-                        (collect-left-right collect
-                                            (cons (list 'rte new-rte) left)
-                                            right))
-
-                      :else
-                      (let [new-rte (canonicalize-pattern
-                                     `(:and ~@left-patterns
-                                            (:not (:or ~@right-patterns))))]
-                        (collect-left-right collect
-                                            (cons (list 'rte new-rte) left)
-                                            right))))
-
-              :else
-              (let [right (map (fn [x]
-                                 (list 'not x)) right)]
-                (collect (template (and ~@left ~@right))))))]
-
-    (let [independent (filter independent? type-set)
-          dependent (remove (set independent) type-set)]
-      (concat independent (call-with-collector
-                           (fn [collect]
-                             (gns/map-type-partitions
-                              (seq dependent)
-                              (fn [left right]
-                                (collect-left-right collect left right)))))))))
 
 (defn find-all-derivatives 
   "Start with the given rte pattern, and compute its derivative with
@@ -1053,14 +1893,21 @@
   respect to all of their first-types.  Continue this process until no
   more derivatives can be found.  Warning, the given pattern might not
   be an element of the return value.  I.e., the 0'th derivative is not
-  guaranteed to be among the values returned."
+  guaranteed to be among the values returned.
+  This function returns a pair [triples done]
+  triples: a sequence of triples, where each triple is [rte-1 td rte-2]
+      rte-2 = derivative of rte-1 with respect to td
+              (derivative rte-1 td) --> rte-2
+  done: a sequence of all rte-2 values
+      which might or might not include rte-1
+  "
   [pattern]
   (loop [to-do-patterns (list pattern)
          done #{}
          triples [] 
          ]
     (if (empty? to-do-patterns)
-      [ triples (seq done)]
+      [ triples (seq done)] ;; The return value of find-all-derivatives
       (let [[pattern & to-do-patterns] to-do-patterns]
         (if (done pattern)
           (recur to-do-patterns done triples)
@@ -1073,22 +1920,30 @@
                       )
                     )]
             (let [firsts (first-types pattern)
-                  disjoined (mdtd (conj firsts :sigma))
+                  disjoined (gns/mdtd firsts)
                   [new-triples new-derivatives] (reduce xx [[] ()] disjoined)]
               (recur (concat new-derivatives to-do-patterns)
                      (conj done pattern)
                      (concat triples new-triples)))))))))
 
+(defn human-readable-find-all-derivatives
+  "Similar to find-all-derivatives but returns a value which is easier for the
+  human to understand. The return value is a map (key/value pairs)
+  Each key is an rte, either the given pattern or some n'th derivative thereof.
+  Each value is is a map of key/value pairs.
+     Each key is a potential first-type of the rte,
+     Each value is the derivative of the rte wrt that first-type."
+  [pattern]
+  (into {} (map (fn [[k seq-of-triples]]
+                  [k 
+                   (into {} (map (fn [pair] [(first pair) (second pair)])
+                                 (map rest seq-of-triples)))])
+                (group-by first
+                          (first (rte/find-all-derivatives '(:* (:cat Number Long (not (= 0))))))))))
+
 (defn rte-combine-labels ""
-  [label1 label2]
-  (cond
-    (and (gns/or? label1)
-         (gns/or? label2)) `(~@label1 ~@(rest label2))
-    (and (gns/or? label1)
-         (not (gns/or? label2))) `(~@label1 ~label2)
-    (and (not (gns/or? label1))
-         (gns/or? label2)) `(~(first label2) ~label1 ~@(rest label2))
-    :else `(~'or ~label1 ~label2)))
+  [label-1 label-2]
+  (gns/canonicalize-type (gns/create-or [label-1 label-2])))
 
 (defn-memoized [rte/compile rte-to-dfa]
   "Use the Brzozowski derivative aproach to compute a finite automaton
@@ -1097,7 +1952,6 @@
   ([pattern]
    (rte-to-dfa pattern true))
   ([pattern exit-value]
-
    (let [given-pattern pattern
          pattern (canonicalize-pattern pattern)
          [triples derivatives] (find-all-derivatives pattern)
@@ -1106,8 +1960,8 @@
          triples (map (fn [[primative wrt deriv]]
                         [(index-map primative) wrt (index-map deriv)]
                         ) triples)
-         grouped (group-by (fn [trip]
-                             (trip 0)) triples)]
+         grouped-by-src (group-by first triples)]
+
      (xym/extend-with-sink-state
       (xym/map->Dfa
        {:pattern given-pattern
@@ -1117,32 +1971,31 @@
         :states
         (into {}
               (map (fn [deriv index]
-                     (let [transitions (if (and (grouped index)
-                                                (apply = (map (fn [[_src _wrt dst]]
-                                                                dst) (grouped index))))
-                                         ;; if all transitions have same dst, then don't draw
-                                         ;; multiple transitions, just draw with with label = :sigma
-                                         (list [:sigma ((first (grouped index)) 2)])
-                                         (map (fn [[_src wrt dst]]
-                                                [wrt dst]) (grouped index)))]
+                     (let [from-src (map rest (grouped-by-src index))
+                           grouped-by-dst (group-by second from-src)
+                           ;; grouped-by-dst is of the form
+                           ;;  { dst-id-1 [(td-a dst-id-1)
+                           ;;              (td-b dst-id-1)
+                           ;;              (td-c dst-id-2)...],
+                           ;;    dst-id-2 [(td-d dst-id-2)
+                           ;;              (td-e dst-id-2) ...] ...
+                           ;;  }
+                           ;; derive transitions of the form
+                           ;; [[td-x dst-id-1] [td-y dst-id-2] ...]
+                           ;; where td-x is (or td-a td-b td-c ...) canonicalized
+                           ;;   and td-y is (or td-d td-e ...) canonicalized
+                           transitions (map (fn [[dst pairs]]
+                                                [(gns/canonicalize-type
+                                                  (gns/create-or (map first pairs)) :dnf) dst])
+                                              grouped-by-dst)
+                           ]
                        [index
                         (xym/map->State {:index index
                                          :initial (= 0 index)
-                                         :accepting (nullable deriv)
+                                         :accepting (nullable? deriv)
                                          :pattern deriv
                                          :transitions transitions})]))
                    derivatives (range (count derivatives))))})))))
-
-(defn dfa-to-rte
-  "Accepts an object of type Dfa, and returns a map which associates
-  exit values of the dfa with canonicalized rte patterns of the accepting
-  langauge.  If there are no accepting states in the Dfa, an empty map {}
-  is returned."
-  [dfa]
-  (assert (instance? (xym/record-name) dfa)
-          (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
-  (xym/extract-rte dfa canonicalize-pattern))
-
 
 (defn dispatch [obj caller]
   (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
@@ -1175,14 +2028,15 @@
               )]
       (recurring 0 [] ()))))
 
-(defmulti rte-inhabited?
+(defmulti-memoized [rte-inhabited? rte-inhabited?-impl]
+  "Interface to determine whether the language of an rte is non-vacuous"
   (fn [rte]
     (dispatch rte 'rte-inhabited?)))
 
-(defmethod rte-inhabited? :pattern [pattern]
+(defmethod-memoized rte-inhabited? :pattern [pattern]
   (rte-inhabited? (rte/compile pattern)))
 
-(defmethod rte-inhabited? :Dfa [dfa]
+(defmethod-memoized rte-inhabited? :Dfa [dfa]
   (some :accepting (xym/states-as-seq dfa)))
 
 (defn rte-vacuous? [dfa]

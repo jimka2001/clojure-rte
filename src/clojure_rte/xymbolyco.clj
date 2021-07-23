@@ -24,7 +24,9 @@
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-by-mapped defn-memoized]]
+            [clojure-rte.util :refer [fixed-point member group-by-mapped
+                                      defn-memoized print-vals
+                                      exists setof]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
@@ -151,7 +153,7 @@
   [dfa]
   (map serialize-state (states-as-seq dfa)))
 
-(defn-memoized [optimized-transition-function -optimized-transition-function]
+(defn-memoized [optimized-transition-function optimized-transition-function-impl]
   "Given a set of transitions each of the form [type-designator state-index],
   return a indicator function which can be called with an candidate element
   of a sequence, and the function will return the state-index.  When called
@@ -186,15 +188,6 @@
                       (recur (rest items)
                              duplicates))))
 
-            ;; local-function pretty-or
-            (pretty-or [tds]
-              (cond (empty? tds);; should not occur
-                    :empty-set
-                    (empty? (rest tds))
-                    (first tds)
-                    :else
-                    (cons 'or tds)))
-            
             ;; local function gen-function
             (gen-function []
               (let [state-id->pseudo-type (into {} (for [[_type state-id] transitions
@@ -266,8 +259,8 @@
         (cond
           (not= (count consequents) (count (distinct consequents)))
           ;; If there is a duplicate consequent, then the corresponding types can be unioned.
-          (-optimized-transition-function (for [[consequent transitions] (group-by second transitions)]
-                                            [(pretty-or (map first transitions)) consequent])
+          (optimized-transition-function (for [[consequent transitions] (group-by second transitions)]
+                                            [(gns/create-or (map first transitions)) consequent])
                                           promise-disjoint
                                           default)
 
@@ -451,10 +444,8 @@
                           [(:index q)
                            (if (member q incomplete)
                              (let [existing-labels (map first (:transitions q))
-                                   new-label (if (empty? existing-labels)
-                                               :sigma
-                                               (bdd/canonicalize-type
-                                                (template (and :sigma (not (or ~@existing-labels))))))]
+                                   new-label (gns/canonicalize-type
+                                              (template (and :sigma (not (or ~@existing-labels)))) :dnf)]
                                (if (= :empty-set new-label)
                                  q
                                  (assoc q
@@ -488,19 +479,7 @@
         partitions-map (zipmap ids pi-minimized)
         ids-map (zipmap pi-minimized ids)]
     (assert (sequential? pi-minimized))
-    (letfn [(pretty-or [rest-args or-keyword]
-              (cl/cl-cond
-               ((empty? rest-args)
-                :sigma)
-               ((empty? (rest rest-args))
-                (first rest-args))
-               (:else
-                (conj rest-args or-keyword))))
-            (pretty-or-rte [rest-args]
-              (pretty-or rest-args :or))
-            (pretty-or-type [rest-args]
-              (pretty-or rest-args 'or))
-            (merge-parallel [transitions]
+    (letfn [(merge-parallel [transitions]
               ;; if there are two transitions with the same src/dest, then
               ;;   combine the labels with (or ...)
               ;; We do not, currently, try to reduce the union type.
@@ -513,7 +492,7 @@
                                       transitions)]
                 
                 (map (fn [[[from to] transitions]]
-                       [from (pretty-or-type (map second transitions)) to])
+                       [from (gns/canonicalize-type (gns/create-or (map second transitions)) :dnf) to])
                      grouped)))
             (new-id [state]
               (assert (instance? State state))
@@ -550,7 +529,10 @@
                          [id (map->State
                               {:index id
                                :initial (= 0 id)
-                               :pattern (pretty-or-rte (map :pattern (partitions-map id)))
+                               ;; if any of (partitions-map id) has a :pattern, use that one,
+                               ;;   it is as good as any.  Important to note here is that we
+                               ;;   MUST NOT attempt to combine the patterns.
+                               :pattern (some :pattern (partitions-map id))
                                :accepting (member id new-fids)
                                :transitions new-transitions})])
             ]
@@ -647,149 +629,10 @@
                                       (:states dfa-complete)))
                 :pattern (list 'not (:pattern dfa)) }))))
 
-(defn extract-rte
-  "Accepts an object of type Dfa, and returns a map which associates
-  exit values of the dfa with canonicalized rte patterns of the accepting
-  langauge. If there are no accepting states in the Dfa, an empty map {}
-  is returned."
-  [dfa' canonicalize-pattern]
-  ;; TODO - this can be done easiser
-  ;;    1. minimize and trim the given dfa
-  ;;    2. generate a list of transition triples [from label to]
-  ;;    3. add transitions from extra-state-I to all initial states with :epsilon transition
-  ;;    4. add transitions from all accepting states to extra-state-F (one per exit value) with :epsilon transition
-  ;;    5. loop on each state
-  ;;    6.    partition transitions into 4 groups [to-this-state loops-on-state from-state everything-else]
-  ;;    7.    combine parallel transitions
-  ;;    8.    n^2 iteration to-this-state x from-this-state
-  ;;    9.    append new transitions in next iteration of loop 5.
-  ;;    10. this reduces to one transtion per exit value, returns the map of exit-value to label
-  (let [;; #1
-        dfa (trim (minimize dfa')) ; we must minimize otherwise the size of the returned expression can be HUGE
-        ;; #2
-        old-transition-triples (for [q (states-as-seq dfa)
-                                     [label dst-id] (:transitions q)]
-                                 [(:index q) label dst-id])
-        ;; #3
-        new-initial-transitions [[:I :epsilon 0]]
-        ;; #4
-        new-final-transitions (for [q (states-as-seq dfa)
-                                    :when (:accepting q)]
-                                ;; we designate new final states each as [:F some-exit-value]
-                                [(:index q) :epsilon [:F ((:exit-map dfa) (:index q))]])]
-    (letfn [          ;; local function
-            (combine-labels [operands]
-              (cond (empty? operands)
-                    :empty-set
-                    
-                    (empty? (rest operands))
-                    (first operands)
-                    
-                    :else
-                    ;; I'm not 100% sure whether canonicalizing is a good idea or not.
-                    ;;   the idea is to keep the labels as concise as possible and prevent
-                    ;;   them from becoming larger and larger as the states are eliminated.
-                    ;;   The danger is that a huge amount of time might be spent
-                    ;;   over and over canonicalizing the same patterns.
-                    (canonicalize-pattern (cons :or operands))))
-
-            ;; local function
-            (pretty-cat [operands]
-              (cond (member :epsilon operands)
-                    (pretty-cat (remove (fn [o] (= o :epsilon)) operands))
-
-                    (member '(:* :empty-set) operands)
-                    (pretty-cat (remove (fn [o] (= o '(:* :empty-set))) operands))
-
-                    (empty? operands)
-                    :epsilon
-
-                    (empty? (rest operands))
-                    (first operands)
-
-                    :else
-                    (cons :cat operands)))
-
-            ;; local function
-            (extract-labels [triples]
-              (map second triples))
-
-            ;; local function
-            (combine-parallel [triples]
-              ;; accepts a sequence of triples, each of the form [from label to]
-              ;;   groups them by common from/to, these are parallel transitions
-              ;;   combines the labels of the parallel transitions, into one single lable
-              ;;   and collects a sequence of transitions, none of which are parallel.
-              ;;   This action is important because it greatly reduces the number of transitions
-              ;;   created.  The caller, the computation of new-triples, makes an NxM loop
-              ;;   creating NxM new triples.   This reduces N and M by eliminating parallel
-              ;;   transitions.
-              (for [[[from to] triples] (group-by (fn [[from _ to]] [from to]) triples)
-                    :let [label (combine-labels (extract-labels triples))]
-                    ]
-                [from label to]))
-
-            ;; local function
-            (eliminate-state [transition-triples q-id]
-              (let [[x-to-q q-to-q q-to-x others]
-                    ;; #6
-                    (reduce (fn [[x-to-q q-to-q q-to-x others]
-                                 [src-id _label dst-id :as triple]]
-                              (cond
-                                (and (= src-id q-id)
-                                     (= dst-id q-id))
-                                ;; extend q-to-q
-                                [x-to-q (cons triple q-to-q) q-to-x others]
-
-                                (= src-id q-id)
-                                ;; extend q-to-x
-                                [x-to-q q-to-q (cons triple q-to-x) others]
-                                
-                                (= dst-id q-id)
-                                ;; extend x-to-q
-                                [(cons triple x-to-q) q-to-q q-to-x others]
-
-                                :else
-                                ;; extend others
-                                [x-to-q q-to-q q-to-x (conj others triple)]))
-                            [() () () []]
-                            transition-triples)
-
-                    ;; #7
-                    self-loop-label (combine-labels (extract-labels q-to-q))
-                    ;; #8
-                    new-triples (for [[src pre-label _] (combine-parallel x-to-q)
-                                      [_ post-label dst] (combine-parallel q-to-x)]
-                                  [src
-                                   (pretty-cat (list pre-label
-                                                     (list :* self-loop-label)
-                                                     post-label))
-                                   dst])]
-                (concat others new-triples)))]
-
-      ;; #5 / #9
-      (let [new-transition-triples (reduce eliminate-state
-                                           (concat new-initial-transitions
-                                                   old-transition-triples
-                                                   new-final-transitions)
-                                           ;; TODO need to order states for faster
-                                           ;;    elimination.  I.e., order by increasing
-                                           ;;    product of num-inputs x num-outputs
-                                           (ids-as-seq dfa))
-            grouped (group-by (fn [[_ _ [_ exit-value]]] exit-value) new-transition-triples)]
-        (into {}
-              (doall 
-               (for [[exit-value triples] grouped
-                     :let [pretty (combine-labels (extract-labels triples))]
-                     ]
-                 ;; one label per return value
-                 ;; #10
-                 [exit-value (canonicalize-pattern pretty)])))))))
-
 (defn intersect-labels
   ""
   [label-1 label-2]
-  (bdd/canonicalize-type (list 'and label-1 label-2)))
+  (gns/canonicalize-type (list 'and label-1 label-2)))
 
 (defn cross-intersection
   "Compute a sequence of type designators corresponding to all the
@@ -823,6 +666,7 @@
                   [label-2 dst-2] (:transitions state-2)
                   :when (not (bdd/type-disjoint? label-1 label-2))
                   :let [label-sxp (intersect-labels label-1 label-2)]
+                  :when (gns/inhabited? label-sxp true)
                   ]
               [label-sxp (state-ident-map [dst-1 dst-2])]))
           (accumulate-states [initial-id-pair state-ident-map ident-state-map]
@@ -963,8 +807,44 @@
                           ((:exit-map dfa-1)
                            (:index q1)))))
 
-(defn dfa-equivalent
+(defn paths-to-accepting
+  "Generate a lazy list of sequences, each sequence being a list of states
+  starting at a final/accepting state of the given Dfa, and ending at the
+  inital state.  Each is a path, the reverse of which represents an accepting
+  computation through the dfa.  Between consecutive states there is a type
+  designators (not given in the return value, but which can be found in the Dfa)
+  No state appears twice in the same path, thus no loops.
+  Each type designator is either is known to be non-inhabited; i.e., one (or more)
+  such types might respond :dont-know to the gns/inhabited? predicate, but never
+  responds false."
+  [dfa]
+  (letfn [(extend-path-1 [path]
+            (for [[type-designator next-state-id] (:transitions (first path))
+                  :when (not (exists [st path]
+                                     (= next-state-id (:index st))))
+                  :when (gns/inhabited? type-designator true) ;; include paths where inhabited? returns :dont-know
+                  ]
+              (cons (state-by-index dfa next-state-id) path)))
+    
+          (extend-paths-1 [paths]
+            (mapcat extend-path-1 paths))
+  
+          (extend-paths
+            [paths]
+            (if (empty? paths)
+              paths
+              (concat (setof [p paths]
+                             (:accepting (first p)))
+                      (extend-paths (extend-paths-1 paths)))))]
+  
+  (let [initials (filter :initial (states-as-seq dfa))]
+    (extend-paths (map list initials)))))
+
+(defn dfa-equivalent?
   "Returns a Boolean indicating whether the two given Dfas
   recognize the same language."
   [dfa-1 dfa-2]
-  (every? (comp not :accepting) (states-as-seq (synchronized-xor dfa-1 dfa-2))))
+  (let [xor (synchronized-xor dfa-1 dfa-2)]
+    (or (every? (comp not :accepting) (states-as-seq xor))
+        ;; in case there is a non-accessiable accepting state
+        (empty? (paths-to-accepting xor)))))

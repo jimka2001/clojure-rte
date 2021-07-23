@@ -22,12 +22,13 @@
 (ns clojure-rte.xymbolyco-test
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.rte-core ]
-            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa]]
+            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
             [clojure-rte.xymbolyco :refer [find-eqv-class split-eqv-class
                                            states-as-seq find-incomplete-states
                                            extend-with-sink-state synchronized-product synchronized-union
                                            cross-intersection
                                            trim complete minimize]]
+            [clojure-rte.dot :as dot]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
@@ -38,10 +39,11 @@
 
 (defmacro testing
   [string & body]
-  `(do (println [:testing ~string :starting (java.util.Date.)])
-       (clojure.test/testing ~string ~@body)
-       (println [:finished  (java.util.Date.)])
-       ))
+  `(with-compile-env []
+     (println [:testing ~string :starting (java.util.Date.)])
+     (clojure.test/testing ~string ~@body)
+     (println [:finished  (java.util.Date.)])
+     ))
 
 
 (deftest t-split-eqv-class
@@ -71,13 +73,12 @@
 
 (deftest t-minimize
   (testing "minimize"
-    ;; first example, a dfa already minimum
     (let [dfa1 (rte-to-dfa '(:or (:* Number)
                                  (:cat String Number)
                                  (:* Double)))
           dfa2 (minimize dfa1)]
-      (is (= 6 (count (states-as-seq dfa1))))
-      (is (= 6 (count (states-as-seq dfa2)))))))
+      (is (= 6 (count (states-as-seq dfa1))) 80)
+      (is (= 5 (count (states-as-seq dfa2))) 81))))
 
 (deftest t-minimize-runs
   (testing "that minimize runs"
@@ -238,10 +239,10 @@
           dfa-2 (rte-to-dfa  '(:cat (:* String) Long)
                              2)
           dfa-sxp (synchronized-product dfa-1 dfa-2 
-                                        (fn [a b]
-                                          (and a b))
-                                        (fn [q1 _q2]
-                                          ((:exit-map dfa-1) (:index q1))))
+                                         (fn [a b]
+                                           (and a b))
+                                         (fn [q1 _q2]
+                                           ((:exit-map dfa-1) (:index q1))))
           dfa-sxp-trim (trim dfa-sxp)
           dfa-sxp-min (minimize dfa-sxp)
           _dfa-sxp-trim-min (minimize dfa-sxp-trim)
@@ -263,10 +264,10 @@
               :let [m-1 (rte/match dfa-1 s)
                     m-2 (rte/match dfa-2 s)
                     m-dfa-sxp (rte/match dfa-sxp s)]]
-        (assert (= (boolean (and m-1 m-2))
-                   (boolean m-dfa-sxp))
-                (format "dfa-1 => %s and dfa-2 => %s but dfa-sxp => %s, on sequence %s"
-                        m-1 m-2 m-dfa-sxp s))))))
+        (is (= (boolean (and m-1 m-2))
+               (boolean m-dfa-sxp))
+            (format "dfa-1 => %s and dfa-2 => %s but dfa-sxp => %s, on sequence %s"
+                    m-1 m-2 m-dfa-sxp s))))))
 
 (deftest t-test-2
  (testing "particular case 2 which was failing"
@@ -302,9 +303,9 @@
       (is (member 'Long cx)
           (cl-format false "cx=~a, expecting to contain Long" cx))
       (is (member 'Boolean cx)
-          (cl-format false "cx=~a, expecting to contain (and (not Long) Boolean)" cx))
-      (is (member '(and (not Long) (not Boolean)) cx)
-          (cl-format false "cx=~a, expecting to contain (and (not Long) (not Boolean))" cx)))))
+          (cl-format false "cx=~a, expecting to contain Boolean" cx))
+      (is (member '(and (not Boolean) (not Long)) cx)
+          (cl-format false "cx=~a, expecting to contain (and (not Boolean) (not Long))" cx)))))
 
 (deftest t-missing-final
   (testing "missing final?"

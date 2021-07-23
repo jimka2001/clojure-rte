@@ -31,6 +31,18 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
 
+(deftest t-discovered-case-134
+  (testing "discovered case 134"
+    (is (= (gns/inhabited? '(and (not (member 1 2 3 a b c)) (not BigDecimal)) :dont-know)
+           true)
+        "134/38")
+    ;;disjoint? cannot decide (and (not (member 1 2 3 a b c)) (not BigDecimal)) vs java.lang.Object -- assuming not disjoint
+    (is (= (gns/disjoint? '(and (not (member 1 2 3 a b c)) (not BigDecimal))
+                          'java.lang.Object
+                          :dont-know)
+           false)
+        "134/44")))
+
 (deftest t-disjoint?
   (when (and (resolve 'java.lang.CharSequence)
              (resolve 'java.io.Serializable)
@@ -158,37 +170,6 @@
     (is (gns/typep nil '(member 1 nil 3)) "test 8")
     (is (not (gns/typep false '(member 1 nil 3))) "test 9")
     (is (not (gns/typep nil '(member 1 false 3))) "test 10")))
-
-
-(deftest t-type-max
-  (testing "type-max"
-    (is (= 'Number (gns/type-max '(Number Integer))))
-    (is (= 'Number (gns/type-max '(Integer Number))))))
-
-(deftest t-type-min
-  (testing "type-min"
-    (is (= 'Integer (gns/type-min '(Number Integer))))
-    (is (= 'Integer (gns/type-min '(Integer Number))))))
-
-(deftest t-map-type-partitions
-  (testing "map-type-partitions"
-    (is (not (contains? (set
-                         (call-with-collector (fn [collect]
-                                                (gns/map-type-partitions ['Long 'Integer 'Object]
-                                                                     (fn [left right]
-                                                                       (collect [left right]))))))
-                        ['(Object) ()])) "should not contain 1")
-    (is (= (set
-            (call-with-collector (fn [collect]
-                                   (gns/map-type-partitions ['Long 'Integer 'Object]
-                                                        (fn [left right]
-                                                          (collect [left right]))))))
-           #{[() '(Object)]
-             ['(Integer) ()]
-             ['(Long) ()]
-             ['(Object) '(Integer Long)]})
-        "expected content"
-)))
 
 (deftest t-disjoint-member
   (testing "disjoint member"
@@ -550,6 +531,19 @@
           (check-subtype rt-not-or 
                          rt-and-not "rt-not-or < rt-and-not"))))))
 
+(deftest t-disjoint-commutative
+  (testing "commutativity of disjoint?"
+      (doseq [_ (range 200 )
+              n (range 5)
+              :let [td-1 (gns/gen-type n)
+                    td-2 (gns/gen-type n)
+                    d12 (gns/disjoint? td-1 td-2 :dont-know)
+                    d21 (gns/disjoint? td-2 td-1 :dont-know)]]
+        (is (= d12 d21)
+            (cl-format false "~%td-1=~A~%td-2=~A~%disjoint? td-1 td2 = ~A~%disjoint? td-1 td2 = ~A~%"
+                       td-1 td-2
+                       d12 d21)))))
+    
 (deftest t-intersection-union-subtype
   (testing "intersection-union-subtype"
     (letfn [(check-subtype [rt-1 rt-2 comment]
@@ -956,6 +950,14 @@
     (is (= (gns/conversion-C98 '(and (or) (and)))
            '(and (and) (or)))
         941)))
+
+(deftest t-mdtd
+  (testing "mdtd"
+    (with-compile-env ()
+      (is (= (set (gns/mdtd #{'java.lang.Exception 'clojure.lang.ExceptionInfo}))
+             #{`(~'not java.lang.Exception)
+               `(~'and  (~'not clojure.lang.ExceptionInfo) java.lang.Exception)
+               'clojure.lang.ExceptionInfo})))))
 
 (deftest t-type-membership
   (testing "random type membership"
