@@ -35,6 +35,7 @@
             [clojure.set :refer [union subset?]]
             [clojure-rte.cl-compat :as cl]
             [backtick :refer [template]]
+            [clojure-rte.genus-spec :as gs]
             )
   (:refer-clojure :exclude [compile])
 )
@@ -42,18 +43,14 @@
 ;; allow rte/ prefix even in this file.
 (alias 'rte 'clojure-rte.rte-construct)
 
-
 (declare traverse-pattern)
-(declare canonicalize-pattern)
-(declare -canonicalize-pattern)
+(declare canonicalize-pattern canonicalize-pattern-impl)
 (declare match)
 (declare compile)
-(declare rte-inhabited?)
-(declare -rte-inhabited?)
+(declare rte-inhabited? rte-inhabited?-impl)
 (declare rte-vacuous?)
 (declare rte-to-dfa)
-(declare canonicalize-pattern-once)
-(declare -canonicalize-pattern-once)
+(declare canonicalize-pattern-once canonicalize-pattern-once-impl)
 (declare operand)
 (declare operands)
 
@@ -71,12 +68,16 @@
 
 (defn call-with-compile-env [thunk]
   (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
-            canonicalize-pattern-once (gc-friendly-memoize -canonicalize-pattern-once)
-            canonicalize-pattern (gc-friendly-memoize -canonicalize-pattern)
-            rte-inhabited? (gc-friendly-memoize -rte-inhabited?)
-            gns/check-disjoint (gc-friendly-memoize gns/-check-disjoint)
+            canonicalize-pattern-once (gc-friendly-memoize canonicalize-pattern-once-impl)
+            xym/optimized-transition-function (gc-friendly-memoize xym/optimized-transition-function-impl)
+            canonicalize-pattern (gc-friendly-memoize canonicalize-pattern)
+            rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
+            ;; rte-case-clauses-to-dfa (gc-friendly-memoize rte-case-clauses-to-dfa-impl)
+            gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
             gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
             gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
+            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)
+            gs/spec-to-rte (gc-friendly-memoize gs/spec-to-rte-impl)
             ]
     (thunk)))
 
@@ -1697,7 +1698,7 @@
                              [r]))
                          (operands self)))))
 
-(defn-memoized [canonicalize-pattern-once -canonicalize-pattern-once]
+(defn-memoized [canonicalize-pattern-once canonicalize-pattern-once-impl]
   "Rewrite the given rte pattern to a canonical form.
   This involves recursive re-writing steps for each sub form,
   including searches for syntatical and semantical reductions.
@@ -1785,7 +1786,7 @@
                                                    conversion-combo-99
                                                    conversion-combo-5])))))
 
-(defn-memoized [canonicalize-pattern -canonicalize-pattern]
+(defn-memoized [canonicalize-pattern canonicalize-pattern-impl]
   "find the fixed point of canonicalize-pattern-once"
   [pattern]
   (fixed-point pattern canonicalize-pattern-once =))
@@ -2025,7 +2026,7 @@
               )]
       (recurring 0 [] ()))))
 
-(defmulti-memoized [rte-inhabited? -rte-inhabited?]
+(defmulti-memoized [rte-inhabited? rte-inhabited?-impl]
   "Interface to determine whether the language of an rte is non-vacuous"
   (fn [rte]
     (dispatch rte 'rte-inhabited?)))

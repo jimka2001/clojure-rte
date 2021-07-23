@@ -153,7 +153,7 @@
   [dfa]
   (map serialize-state (states-as-seq dfa)))
 
-(defn-memoized [optimized-transition-function -optimized-transition-function]
+(defn-memoized [optimized-transition-function optimized-transition-function-impl]
   "Given a set of transitions each of the form [type-designator state-index],
   return a indicator function which can be called with an candidate element
   of a sequence, and the function will return the state-index.  When called
@@ -259,7 +259,7 @@
         (cond
           (not= (count consequents) (count (distinct consequents)))
           ;; If there is a duplicate consequent, then the corresponding types can be unioned.
-          (-optimized-transition-function (for [[consequent transitions] (group-by second transitions)]
+          (optimized-transition-function (for [[consequent transitions] (group-by second transitions)]
                                             [(gns/create-or (map first transitions)) consequent])
                                           promise-disjoint
                                           default)

@@ -28,7 +28,7 @@
             [clojure-rte.dot :as dot]
             [clojure-rte.rte-extract :refer [dfa-to-rte]]
             [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa  nullable?
-                                               canonicalize-pattern canonicalize-pattern-once -canonicalize-pattern-once]]
+                                               canonicalize-pattern canonicalize-pattern-once canonicalize-pattern-once-impl]]
             ))
 
 (defn rte-components [pattern]
@@ -148,7 +148,7 @@
   (with-compile-env []
     ;;(cl-format true "canonicalizing:~%")
     ;; TODO doall this lazy seq
-    (binding [canonicalize-pattern-once (memoize -canonicalize-pattern-once)]
+    (binding [canonicalize-pattern-once (memoize canonicalize-pattern-once-impl)]
       (let [can (canonicalize-pattern rte)]
         ;;(cl-format true "canonicalized: ~A~%" can)
         (if (nullable? rte)

@@ -95,7 +95,7 @@
         :else
         pattern))
 
-(defn-memoized [spec-to-rte -spec-to-rte]
+(defn-memoized [spec-to-rte spec-to-rte-impl]
   "Convert spec to rte"
   [pattern]
   (cond (s/regex? pattern)

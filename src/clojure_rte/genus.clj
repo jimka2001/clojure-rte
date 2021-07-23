@@ -28,6 +28,7 @@
                                       partition-by-pred remove-element uniquify
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
+                                      defn-memoized
                                       unchunk gc-friendly-memoize forall
                                       print-vals]]
             [clojure-rte.cl-compat :as cl]
@@ -39,9 +40,8 @@
 (alias 'gns 'clojure-rte.genus)
 
 (declare annihilator)
-(declare canonicalize-type)
-(declare -canonicalize-type)
-(declare check-disjoint)
+(declare canonicalize-type -canonicalize-type)
+(declare check-disjoint check-disjoint-impl)
 (declare combinator)
 (declare combo-filter)
 (declare disjoint?)
@@ -207,14 +207,14 @@
   for the purse of valid-type?"
   ())
 
-(defn-memoized [sort-method-keys -sort-method-keys]
+(defn-memoized [sort-method-keys sort-method-keys-impl]
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
   method has been filtered away."
   [f]
   (cons :primary (remove #{:primary :default} (keys (methods f)))))
 
-(defn-memoized [class-primary-flag -class-primary-flag]
+(defn-memoized [class-primary-flag class-primary-flag-impl]
   "Takes a class-name and returns either :abstract, :interface, :public, or :final,
   or throws an ex-info exception."
   [t]
@@ -1438,7 +1438,7 @@
             default
             (check-disjoint t1-simple t2-simple default)))))))
 
-(defn-memoized [check-disjoint -check-disjoint]
+(defn-memoized [check-disjoint check-disjoint-impl]
   "Internal function used in top level disjoint? implementation."
   [t1' t2' default]
   (loop [[k & ks] (sort-method-keys -disjoint?)]
@@ -1978,32 +1978,31 @@
 ;; implementation of inhabite? and -inhabited?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def inhabited?
+(defn-memoized [inhabited? inhabited?-impl]
   "Given a type-designator, perhaps application specific,
   determine whether the type is inhabited, i.e., not the
   empty type."
-  (gc-friendly-memoize
-   (fn [type-designator default]
-     {:pre [(member default '(true false :dont-know))]
-      :post [(member % '(true false :dont-know))]}
-     (letfn [(calc-inhabited [type-designator default]
-               (loop [[k & ks] (sort-method-keys -inhabited?)]
-                 (case ((k (methods -inhabited?)) type-designator)
-                   (true) true
-                   (false) false
-                   (if ks
-                     (recur ks)
-                     default))))]
-       (let [i (calc-inhabited type-designator :dont-know)
-             td-canon (delay (canonicalize-type type-designator :dnf))]
-         (cond (member i '(true false))
-               i
+  [type-designator default]
+  {:pre [(member default '(true false :dont-know))]
+   :post [(member % '(true false :dont-know))]}
+  (letfn [(calc-inhabited [type-designator default]
+              (loop [[k & ks] (sort-method-keys -inhabited?)]
+                (case ((k (methods -inhabited?)) type-designator)
+                  (true) true
+                  (false) false
+                  (if ks
+                    (recur ks)
+                    default))))]
+      (let [i (calc-inhabited type-designator :dont-know)
+            td-canon (delay (canonicalize-type type-designator :dnf))]
+        (cond (member i '(true false))
+              i
 
-               (= @td-canon type-designator)
-               default
-               
-               :else
-               (calc-inhabited @td-canon default)))))))
+              (= @td-canon type-designator)
+              default
+              
+              :else
+              (calc-inhabited @td-canon default)))))
 
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."

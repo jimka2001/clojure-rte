@@ -30,8 +30,8 @@
             )
   )
 
-(defn-memoized [memoized-rte-case-clauses-to-dfa
-                rte-case-clauses-to-dfa]
+(defn-memoized [rte-case-clauses-to-dfa
+                rte-case-clauses-to-dfa-impl]
   "helper function for macro-expanding rte-case.
   returns a complete dfa which is the union of the input clauses."
   [pairs]
@@ -96,7 +96,7 @@
     
     (let [[fns int-rte-pairs] (compile-clauses clauses)
           num-fns (count fns)]
-      `((~fns (ensure-fns-index (rte/match (memoized-rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
+      `((~fns (ensure-fns-index (rte/match (rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
                                            :promise-disjoint true)
                                 ~num-fns))))))
 
