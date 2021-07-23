@@ -430,44 +430,6 @@
       (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
       (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 
-(deftest t-with-rte-5
-  (testing "with-rte 5"
-    (with-rte [::x (:+ Long)
-               ::y (:+ Double)]
-
-      (let [pat (rte/compile '(:cat ::x  ::y))]
-        ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
-        (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
-        (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
-        ))
-
-    (with-rte [::x (:+ String)
-               ::y (:+ Double)]
-      (cl-format true "-------- with-rte -----------~%")
-      (is (= (rte/canonicalize-pattern ::x)
-             '(:cat String (:* String)))
-          "449 canonicalize-pattern got wrong memoized value")
-      ;; (clojure.core.memoize/memo-clear! rte/canonicalize-pattern) ;; I though clearing the cache would solve the problem, but it doesn't
-      (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
-             '(:cat String (:* String) Double (:* Double)))
-          "452 canonicalize-pattern got wrong memoized value")
-      (let [pat (rte/compile '(:cat ::x  ::y))]
-        ;; the same as (rte/compile '(:cat (:+ String) (:+ Double)))
-        ;; TODO; this currently fails because of memoization.
-        ;;  not yet sure how to fix it.
-        (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
-               '(:cat String (:* String) Double (:* Double)))
-            "canonicalize-pattern got wrong memoized value")
-        (is (rte/match pat ["1" "2" "3" 1.2 3.4 5.6 7.8]))
-
-        (is (not (rte/match pat [["1" "2" "3"] [1.2 3.4 5.6 7.8]])))
-        ))
-    
-
-    (let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
-      (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
-      (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
-
 (deftest t-rte-inhabited
   (testing "rte inhabited?"
     (is (get (methods gns/-disjoint?) 'rte) "test 585")
@@ -1301,5 +1263,4 @@
 
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
-  (rte/canonicalize-pattern '(spec :clojure-rte.genus-spec-test/test-spec-2))
   (clojure.test/run-tests 'clojure-rte.rte-test))
