@@ -72,7 +72,7 @@
   (testing "nullability of :not"
     ;; if an rte is nullable, then (:not rte) is not nullable
     ;; if an rte is not nullable, then (:not rte) is nullable
-    (test-rte-not-nullable 100000 7 false (fn [expr msg] (is expr msg)))))
+    (test-rte-not-nullable 1000 7 false (fn [expr msg] (is expr msg)))))
 
 (deftest t-rte-nullable-canonicalize-random
   (testing "canonicalize of :not"
