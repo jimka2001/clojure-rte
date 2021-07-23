@@ -39,17 +39,17 @@
 ;; allow gns/ prefix even in this file.
 (alias 'gns 'clojure-rte.genus)
 
+(declare ^:dynamic canonicalize-type -canonicalize-type)
+(declare ^:dynamic inhabited? -inhabited?)
+(declare ^:dynamic disjoint? disjoint?-impl -disjoint?)
+
+
 (declare annihilator)
-(declare canonicalize-type -canonicalize-type)
 (declare check-disjoint check-disjoint-impl)
 (declare combinator)
 (declare combo-filter)
-(declare disjoint?)
-(declare -disjoint?)
 (declare dual-combinator)
 (declare expand-satisfies)
-(declare inhabited?)
-(declare -inhabited?)
 (declare operand)
 (declare operands)
 (declare subtype?)

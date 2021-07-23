@@ -43,14 +43,15 @@
 ;; allow rte/ prefix even in this file.
 (alias 'rte 'clojure-rte.rte-construct)
 
+(declare ^:dynamic canonicalize-pattern canonicalize-pattern-impl)
+(declare ^:dynamic compile rte-to-dfa)
+(declare ^:dynamic canonicalize-pattern-once canonicalize-pattern-once-impl)
+(declare ^:dynamic rte-inhabited? rte-inhabited?-impl)
+(declare ^:dynamic nullable? nullable?-impl)
+
 (declare traverse-pattern)
-(declare canonicalize-pattern canonicalize-pattern-impl)
 (declare match)
-(declare compile)
-(declare rte-inhabited? rte-inhabited?-impl)
 (declare rte-vacuous?)
-(declare rte-to-dfa)
-(declare canonicalize-pattern-once canonicalize-pattern-once-impl)
 (declare operand)
 (declare operands)
 
@@ -70,8 +71,9 @@
   (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
             canonicalize-pattern-once (gc-friendly-memoize canonicalize-pattern-once-impl)
             xym/optimized-transition-function (gc-friendly-memoize xym/optimized-transition-function-impl)
-            canonicalize-pattern (gc-friendly-memoize canonicalize-pattern)
+            canonicalize-pattern (gc-friendly-memoize canonicalize-pattern-impl)
             rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
+            nullable? (gc-friendly-memoize nullable?-impl)
             ;; rte-case-clauses-to-dfa (gc-friendly-memoize rte-case-clauses-to-dfa-impl)
             gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
             gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
@@ -568,7 +570,7 @@
              ;; cond-else (:keyword args) or list-expr ;; (:and x y)
              :else (if-multiple-operands pattern))))))
 
-(defn nullable? 
+(defn-memoized [nullable? nullable?-impl]
   "Determine whether the given rational type expression is nullable.
   I.e., does the empty-word satisfy the expression."
   [expr]
