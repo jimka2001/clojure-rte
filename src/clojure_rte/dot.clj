@@ -84,13 +84,12 @@
   rte/compile, or rte-to-dfa.
   For Mac OS, the :view option may be used to display the image
   interactively."
-  [dfa & {:keys [title view abbrev draw-sink verbose state-legend]
-          :as all-args
+  [dfa & {:keys [title view abbrev draw-sink state-legend]
+          :as all-optionals
           :or {title "no-title"
                draw-sink false
                abbrev true
                view false
-               verbose false
                state-legend true}}]
   (cond
     view (let [dot-string (dfa-to-dot dfa
@@ -99,13 +98,7 @@
                                       :view false
                                       :abbrev abbrev
                                       :state-legend state-legend)]
-           (dot-view dot-string
-                     :title title
-                     :draw-sink draw-sink
-                     :abbrev abbrev
-                     :view view
-                     :verbose verbose
-                     :state-legend state-legend))
+           (apply dot-view dot-string (mapcat identity all-optionals)))
     :else
     (let [sink-states (xym/find-sink-states dfa)
           visible-states (if draw-sink
@@ -174,23 +167,19 @@
   "Create (and possibly display) a graphical image rendering the given Bdd
   For Mac OS, the :view option may be used to display the image
   interactively."
-  [bdd & {:keys [title view verbose pen-width draw-false-leaf]
+  [bdd & {:keys [title view pen-width draw-false-leaf]
           :as all-optionals
           :or {title "no-title"
                view false
-               verbose false
                pen-width 2
                draw-false-leaf true}}]
   (cond
-    view (let [png-file-name (str *dot-tmp-dir* "/" title ".png")
-               dot-string (bdd-to-dot bdd
+    view (let [dot-string (bdd-to-dot bdd
                                       :title title
                                       :view false
                                       :pen-width pen-width
                                       :draw-false-leaf draw-false-leaf)]
-           (apply dot-view dot-string (mapcat identity all-optionals))
-
-           )
+           (apply dot-view dot-string (mapcat identity all-optionals)))
     :else
     (letfn [(draw-connection [direction bdd node-to-index]
               (cond
@@ -231,7 +220,7 @@
                      acc []]
                 (if (empty? labels)
                   acc
-                  (let [referenced-labels (set (for [[label seq] groups
+                  (let [referenced-labels (set (for [[_label seq] groups
                                                      bdd seq
                                                      direction '(:positive :negative)
                                                      :let [child (direction bdd)]

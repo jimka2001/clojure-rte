@@ -26,7 +26,7 @@
                                       call-with-collector
                                       visit-permutations
                                       remove-once fixed-point member
-                                      tree-fold]]
+                                      ]]
             [clojure.test :refer [deftest testing is]]))
 
 (defn -main []

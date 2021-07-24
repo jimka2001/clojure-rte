@@ -25,12 +25,11 @@
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
-                                      partition-by-pred remove-element uniquify
+                                      remove-element uniquify
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized
-                                      unchunk gc-friendly-memoize forall
-                                      print-vals]]
+                                      unchunk]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
@@ -525,7 +524,7 @@
 
                  (resolve f)
                  (try ((resolve f) a-value)
-                      (catch Exception e
+                      (catch Exception _e
                         (cl-format true "gns/typep 'satisfies ~A returning false because of exception~%"
                                    [(resolve f) a-value])
                         false))
@@ -655,7 +654,7 @@
                        nf))]))
 
 (defmethod -canonicalize-type 'fn*
-  [type-designator nf]
+  [type-designator _nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
                       ;; convert (fn* [p1__19751#] (clojure.core/even? p1__19751#))}
@@ -675,59 +674,59 @@
                                 type-designator))))]))
 
 (defmulti dual-combinator
-  (fn [self a b]
+  (fn [self _a _b]
     (type-dispatch self)))
 
 (defmulti combinator
-  (fn [self a b]
+  (fn [self _a _b]
     (type-dispatch self)))
 
 (defmethod combinator 'and
-  [self a b]
+  [_self a b]
   (setof [x a]
          (member x b)))
 
 (defmethod dual-combinator 'and
-  [self a b]
+  [_self a b]
   (uniquify (concat a b)))
 
 (defmethod combinator 'or
-  [self a b]
+  [_self a b]
   (uniquify (concat a b)))
 
 (defmethod dual-combinator 'or
-  [self a b]
+  [_self a b]
   (setof [x a]
          (member x b)))
   
 
 (defmulti combo-filter
   ""
-  (fn [self pred xs]
+  (fn [self _pred _xs]
     (type-dispatch self)))
 
 (defmethod combo-filter 'or
-  [self pred xs]
+  [_self pred xs]
   (filter (fn [x] (not (pred x))) xs))
 
 (defmethod combo-filter 'and
-  [self pred xs]
+  [_self pred xs]
   (filter pred xs))
 
 (defmulti dual-combination?
   "Given this as an :or ask whether that is an :and,
   Given this as an :and ask whether that is an :or."
-  (fn [this that]
+  (fn [this _that]
     (type-dispatch this)))
 
 (defmethod dual-combination? 'or
   [this td]
-  (and (combo? td)
+  (and (gns/combo? td)
        (= 'and (first td))))
 
 (defmethod dual-combination? 'and
   [this td]
-  (and (combo? td)
+  (and (gns/combo? td)
        (= 'or (first td))))
 
 (defmethod operands :default
@@ -1068,7 +1067,7 @@
    A + !A BX + Y = (A + BX + Y)
    A + ABX + Y = (A + Y)"
   [self]
-  (let [combos (filter combo? (operands self))
+  (let [combos (filter gns/combo? (operands self))
         duals (setof [td combos] (dual-combination? self td))]
     (letfn [(pred [a]
               (let [n (template (not ~a))]
@@ -1078,7 +1077,7 @@
       (let [ao (filter pred (operands self))
             not-ao (template (not ~(first ao)))]
         (letfn [(consume [td]
-                  (cond (not (combo? td))
+                  (cond (not (gns/combo? td))
                         [td]
 
                         (same-combination? self td)
@@ -1099,10 +1098,10 @@
 (defn conversion-C12
   "AXBC + !X = ABC + !X"
   [self]
-  (let [combos (filter combo? (operands self))
+  (let [combos (filter gns/combo? (operands self))
         duals (setof [td combos] (dual-combination? self td))
         comp (filter (fn [n]
-                       (and (not? n)
+                       (and (gns/not? n)
                             (exists [td duals]
                                     (member (operand n) (operands td)))))
                      (operands self))]
@@ -1759,7 +1758,7 @@
         ;;   we've already assures the first argument is inhabited.
         (and (gns/not? t2)
              (class-designator? (operand t2))
-             (member-or-=? t1-operand))
+             (gns/member-or-=? t1-operand))
         false
         
         ;; ;; TODO something is wrong here because this seems to mean as long

@@ -22,7 +22,7 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty? print-vals forall]]
+  (:require [clojure-rte.util :refer [call-with-collector non-empty? forall]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))
