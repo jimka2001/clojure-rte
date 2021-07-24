@@ -183,9 +183,10 @@
           :else
           (subtype? @can2 @can1 default))))
 
-(defn type-dispatch [type-designator]
+(defn type-dispatch 
   "Dispatch function for several defmulti's.  If the type-designator is a sequence,
   return its first element, else return the scaler itself."
+  [type-designator]
   (if (sequential? type-designator)
     (first type-designator)
     type-designator))
@@ -2199,4 +2200,3 @@
                         [@a @b])))]
         (recur (mapcat f decomposition)
                (disj type-set td))))))
-
