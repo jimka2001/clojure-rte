@@ -1,6 +1,5 @@
 (ns def-hook
   (:require [clj-kondo.hooks-api :as api]
-            [clojure.pprint :refer [cl-format]]
 ))
 
 (defn transform-def [{:keys [:node]}]
@@ -59,9 +58,6 @@
   [public-name dispatch-val & fn-tail]
   "Wrapper around defmethod which defines a method using the internal name of the given
   public name.  The pairing was presumably made in a previous call to defmulti-memoized."
-  (assert (get @clojure-rte.util/memoized-multis public-name)
-          (cl-format false "~A does not name a multimethod defined by defmulti-memoized"
-                     public-name))
   `(defmethod ~(get @clojure-rte.util/memoized-multis public-name) ~dispatch-val ~@fn-tail))
 
 (defn transform-defmethod-memoized [{:keys [:node]}]
