@@ -1,0 +1,8 @@
+{:aliases
+ {:clj-kondo
+  {:replace-deps
+   {clj-kondo/clj-kondo
+    {:git/url "https://github.com/clj-kondo/clj-kondo"
+     ;; see https://github.com/clj-kondo/clj-kondo/commits/macroexpand for newer commits
+     :sha "c2d636f9df7437f46ca0de294d72a884eb9147fe"}}
+   :main-opts ["-m" "clj-kondo.main"]}}}
