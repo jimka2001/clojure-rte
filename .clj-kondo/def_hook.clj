@@ -2,7 +2,8 @@
   (:require [clj-kondo.hooks-api :as api]
 ))
 
-(defn transform-def [{:keys [:node]}]
+(defn transform-def [{:keys [:ns :node]}]
+  (println ['transform-def :node node :ns ns])
   (let [[name-node & arg-nodes] (rest (:children node))
         name-sym (api/sexpr name-node)]
     (when-not (simple-symbol? name-sym)
@@ -21,7 +22,8 @@
                               `[(fn [] ~arg) '~arg]) args))]
     `(print-vals-helper [~@pairs])))
 
-(defn transform-print-vals [{:keys [:node]}]
+(defn transform-print-vals [{:keys [:ns :node]}]
+  (println ['transform-print-vals :node node :ns ns])
   {:node (api/macroexpand print-vals node)})
 
 
@@ -34,14 +36,15 @@
      (def ~(with-meta public-name {:dynamic true}) ~docstring (gc-friendly-memoize ~internal-name))
      ))
 
-(defn transform-defn-memoized [{:keys [:node]}]
+(defn transform-defn-memoized [{:keys [:node :ns]}]
+  (println ['transform-dfn-memoized :node node :ns ns])
   {:node (api/macroexpand defn-memoized node)})
 
 (defmacro defmulti-memoized
-  [[public-name internal-name] docstring dispatch-fn]
   "Define a multimethod on an internal name, and a memoized function implemented
    as a dynamic variable.  Methods must be defined using defmethod-memoized, using
    the public-name."
+  [[public-name internal-name] docstring dispatch-fn]
   (assert (string? docstring))
   `(let []
      (declare ~public-name) ;; so that the methods can call the public function if necessary
@@ -51,16 +54,21 @@
        (gc-friendly-memoize ~internal-name))
      (swap! clojure-rte.util/memoized-multis assoc '~public-name '~internal-name)))
 
-(defn transform-defmulti-memoized [{:keys [:node]}]
+(defn transform-defmulti-memoized [{:keys [:node :ns]}]
+  (println ['transform-defmulti-memoized :node node :ns ns])
   {:node (api/macroexpand defmulti-memoized node)})
 
 (defmacro defmethod-memoized
   [public-name dispatch-val & fn-tail]
   "Wrapper around defmethod which defines a method using the internal name of the given
   public name.  The pairing was presumably made in a previous call to defmulti-memoized."
+  (assert (find-ns 'clojure-rte.util) "no ns clojure-rte.utilxxxxx")
+  (intern (find-ns 'clojure-rte.util) 'memoized-multis)
   `(defmethod ~(get @clojure-rte.util/memoized-multis public-name) ~dispatch-val ~@fn-tail))
 
-(defn transform-defmethod-memoized [{:keys [:node]}]
+(defn transform-defmethod-memoized [{:keys [:node :ns]}]
+  (println ['transform-defmethod-memoized :node node :ns ns])
+  (intern ns 'memoized-multis)
   {:node (api/macroexpand defmethod-memoized node)})
 
 (defmacro exists
@@ -69,7 +77,8 @@
   `(some (fn [~var]
            ~@body) ~seq))
 
-(defn transform-exists [{:keys [:node]}]
+(defn transform-exists [{:keys [:ns :node]}]
+  (println ['transform-exists :node node :ns ns])
   {:node (api/macroexpand exists node)})
 
 (defmacro setof
@@ -78,7 +87,8 @@
   `(filter (fn [~var]
              ~@body) ~seq))
 
-(defn transform-setof [{:keys [:node]}]
+(defn transform-setof [{:keys [:ns :node]}]
+  (println ['transform-setof :node node :ns ns])
   {:node (api/macroexpand setof node)})
 
 
@@ -88,20 +98,23 @@
   `(every? (fn [~var]
              ~@body) ~seq))
 
-(defn transform-forall [{:keys [:node]}]
+(defn transform-forall [{:keys [:ns :node]}]
+  (println ['transform-forall :node node :ns ns])
   {:node (api/macroexpand forall node)})
 
 (defmacro forall-pairs [[[v1 v2] seq] & body]
   `(every? (fn [[~v1 ~v2]] ~@body) (lazy-pairs ~seq)))
 
-(defn transform-forall-pairs [{:keys [:node]}]
+(defn transform-forall-pairs [{:keys [:ns :node]}]
+  (println ['transform-forall-pairs :node node :ns ns])
   {:node (api/macroexpand forall-pairs node)})
 
 (defmacro exists-pair  [[[v1 v2] seq] & body]
   `(some (fn [[~v1 ~v2]]
            ~@body) (lazy-pairs ~seq)))
 
-(defn transform-exists-pair [{:keys [:node]}]
+(defn transform-exists-pair [{:keys [:ns :node]}]
+  (println ['transform-exists-pair :node node :ns ns])
   {:node (api/macroexpand exists-pair node)})
 
 (defmacro casep [test obj & pairs]
@@ -124,5 +137,6 @@
                    (cons `['~key (fn [] ~value)] acc)
                  )))))
 
-(defn transform-casep [{:keys [:node]}]
+(defn transform-casep [{:keys [:ns :node]}]
+  (println ['transform-casep :node node :ns ns])
   {:node (api/macroexpand casep node)})
