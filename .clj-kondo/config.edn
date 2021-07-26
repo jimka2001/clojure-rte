@@ -1,12 +1,16 @@
-{:hooks {:analyze-call {clojure.core/def def-hook/transform-def
-                        clojure-rte.util/print-vals          def-hook/transform-print-vals
-                        clojure-rte.util/defn-memoized  def-hook/transform-defn-memoized
-                        clojure-rte.util/defmulti-memoized  def-hook/transform-defmulti-memoized
-                        clojure-rte.util/defmethod-memoized  def-hook/transform-defmethod-memoized
-                        clojure-rte.util/exists  def-hook/transform-exists
-                        clojure-rte.util/setof  def-hook/transform-setof
-                        clojure-rte.util/forall  def-hook/transform-forall
-                        clojure-rte.util/forall-pairs  def-hook/transform-forall-pairs
-                        clojure-rte.util/exists-pair  def-hook/transform-exists-pair
-                        clojure-rte.util/casep def-hook/transform-casep
+{:hooks {
+         ;; {:macroexpand {app.bar/baz hook.bar/baz}}}
+         :macroexpand {clojure-rte.util/print-vals     def-hook/print-vals,
+                       clojure-rte.util/defn-memoized  def-hook/defn-memoized,
+                       clojure-rte.util/defmethod-memoized  def-hook/defmethod-memoized,
+                       clojure-rte.util/exists  def-hook/exists,
+                       clojure-rte.util/setof  def-hook/setof,
+                       clojure-rte.util/forall  def-hook/forall,
+                       clojure-rte.util/forall-pairs  def-hook/forall-pairs,
+                       clojure-rte.util/exists-pair  def-hook/exists-pair,
+                       clojure-rte.util/casep def-hook/casep,
+                       clojure-rte.cl-compat/cl-cond def-hook/cl-cond,
+                       clojure-rte.cl-compat/with-escape def-hook/with-escape
+                       }
+         :analyze-call {clojure.core/def def-hook/transform-def
 }}}

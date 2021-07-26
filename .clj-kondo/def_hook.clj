@@ -1,12 +1,13 @@
 (ns clojure-rte.util)
 (intern 'clojure-rte.util 'memoized-multis)
+(ns clojure-rte.cl-compat)
+(intern 'clojure-rte.cl-compat 'call-with-escape)
 
 (ns def-hook
   (:require [clj-kondo.hooks-api :as api]
 ))
 
 (defn transform-def [{:keys [:ns :node]}]
-  (println ['transform-def :node node :ns ns])
   (let [[name-node & arg-nodes] (rest (:children node))
         name-sym (api/sexpr name-node)]
     (when-not (simple-symbol? name-sym)
@@ -25,12 +26,6 @@
                               `[(fn [] ~arg) '~arg]) args))]
     `(print-vals-helper [~@pairs])))
 
-(defn transform-print-vals [{:keys [:ns :node]}]
-  (println ['transform-print-vals :node node :ns ns])
-  {:node (api/macroexpand print-vals node)})
-
-
-
 (defmacro defn-memoized
   [[public-name internal-name] docstring & body]
   (assert (string? docstring))
@@ -39,10 +34,6 @@
      (defn ~internal-name ~@body)
      (def ~(with-meta public-name {:dynamic true}) ~docstring (gc-friendly-memoize ~internal-name))
      ))
-
-(defn transform-defn-memoized [{:keys [:node :ns]}]
-  (println ['transform-dfn-memoized :node node :ns ns])
-  {:node (api/macroexpand defn-memoized node)})
 
 (defmacro defmulti-memoized
   "Define a multimethod on an internal name, and a memoized function implemented
@@ -58,10 +49,6 @@
        (gc-friendly-memoize ~internal-name))
      (swap! clojure-rte.util/memoized-multis assoc '~public-name '~internal-name)))
 
-(defn transform-defmulti-memoized [{:keys [:node :ns]}]
-  (println ['transform-defmulti-memoized :node node :ns ns])
-  {:node (api/macroexpand defmulti-memoized node)})
-
 (defmacro defmethod-memoized
   [public-name dispatch-val & fn-tail]
   "Wrapper around defmethod which defines a method using the internal name of the given
@@ -70,30 +57,17 @@
   (intern (find-ns 'clojure-rte.util) 'memoized-multis)
   `(defmethod ~(get @clojure-rte.util/memoized-multis public-name) ~dispatch-val ~@fn-tail))
 
-(defn transform-defmethod-memoized [{:keys [:node :ns]}]
-  (println ['transform-defmethod-memoized :node node :ns ns])
-  (intern ns 'memoized-multis)
-  {:node (api/macroexpand defmethod-memoized node)})
-
 (defmacro exists
   "Test whether there exists an element of a sequence which matches a condition."
   [[var seq] & body]
   `(some (fn [~var]
            ~@body) ~seq))
 
-(defn transform-exists [{:keys [:ns :node]}]
-  (println ['transform-exists :node node :ns ns])
-  {:node (api/macroexpand exists node)})
-
 (defmacro setof
   "Return a sequence of lazy elements of a given sequence which match a given condition"
   [[var seq] & body]
   `(filter (fn [~var]
              ~@body) ~seq))
-
-(defn transform-setof [{:keys [:ns :node]}]
-  (println ['transform-setof :node node :ns ns])
-  {:node (api/macroexpand setof node)})
 
 
 (defmacro forall
@@ -102,24 +76,12 @@
   `(every? (fn [~var]
              ~@body) ~seq))
 
-(defn transform-forall [{:keys [:ns :node]}]
-  (println ['transform-forall :node node :ns ns])
-  {:node (api/macroexpand forall node)})
-
 (defmacro forall-pairs [[[v1 v2] seq] & body]
   `(every? (fn [[~v1 ~v2]] ~@body) (lazy-pairs ~seq)))
-
-(defn transform-forall-pairs [{:keys [:ns :node]}]
-  (println ['transform-forall-pairs :node node :ns ns])
-  {:node (api/macroexpand forall-pairs node)})
 
 (defmacro exists-pair  [[[v1 v2] seq] & body]
   `(some (fn [[~v1 ~v2]]
            ~@body) (lazy-pairs ~seq)))
-
-(defn transform-exists-pair [{:keys [:ns :node]}]
-  (println ['transform-exists-pair :node node :ns ns])
-  {:node (api/macroexpand exists-pair node)})
 
 (defmacro casep [test obj & pairs]
   (loop [pairs pairs
@@ -139,8 +101,32 @@
             (recur (rest (rest pairs))
                    default
                    (cons `['~key (fn [] ~value)] acc)
-                 )))))
+                   )))))
 
-(defn transform-casep [{:keys [:ns :node]}]
-  (println ['transform-casep :node node :ns ns])
-  {:node (api/macroexpand casep node)})
+(defmacro cl-cond
+  "Like CL:cond.  Each operand of the cl-cond is a list of length at least 1.
+   The same semantics as clojure cond, in that the return value is
+   determined by the first test which returns non-false.  The
+   important semantic difference is that an agument has 1, then the
+   specified form is both the test and the return value, and it is
+   evaluated at most once.
+   Implementation from:
+   https://stackoverflow.com/questions/4128993/consolidated-cond-arguments-in-clojure-cl-style"
+  ([] nil)
+  ([[if1 & then1] & others]
+   (when (or if1 then1 others)
+     (let [extra-clauses# (when others `(cl-cond ~@others))]
+       (if then1
+         (case if1
+           (:else)
+           `(do ~@then1) ;; avoid silly lint error, lein eastwood
+
+           (false nil)
+           `(do ~extra-clauses#)
+           
+           ;; else
+           `(if ~if1 (do ~@then1) ~extra-clauses#))
+         `(or ~if1 ~extra-clauses#))))))
+
+(defmacro with-escape [ret & body]
+  `(clojure-rte.cl-compat/call-with-escape (fn [~ret] ~@body)))
