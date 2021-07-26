@@ -1,3 +1,6 @@
+(ns clojure-rte.util)
+(intern 'clojure-rte.util 'memoized-multis)
+
 (ns def-hook
   (:require [clj-kondo.hooks-api :as api]
 ))
@@ -25,6 +28,7 @@
 (defn transform-print-vals [{:keys [:ns :node]}]
   (println ['transform-print-vals :node node :ns ns])
   {:node (api/macroexpand print-vals node)})
+
 
 
 (defmacro defn-memoized
