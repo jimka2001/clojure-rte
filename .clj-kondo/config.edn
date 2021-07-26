@@ -11,6 +11,4 @@
                        clojure-rte.util/casep def-hook/casep,
                        clojure-rte.cl-compat/cl-cond def-hook/cl-cond,
                        clojure-rte.cl-compat/with-escape def-hook/with-escape
-                       }
-         :analyze-call {clojure.core/def def-hook/transform-def
-}}}
+                       }}}
