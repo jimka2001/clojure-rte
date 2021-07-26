@@ -22,7 +22,7 @@
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
             [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [defn-memoized member]]
+            [clojure-rte.util :refer [defn-memoized member non-empty]]
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
@@ -304,7 +304,7 @@
     :else
     (let [pairs (partition 2 operands)]
       (letfn [(conv-1-pair [[lambda-list consequent]]
-                (if (not (vector? lambda-list))
+                (when (not (vector? lambda-list))
                   (throw (ex-info (cl-format false
                                              "dscase expecting vector not ~A" lambda-list)
                                   {:error-type :invalid-dscase-lambda-list
@@ -409,7 +409,7 @@
   [& forms]
   (letfn [(process [form]
             (if (and (sequential? form)
-                     (not (empty? form)))
+                     (non-empty? form))
               (let [meta-data (meta (first form))]
                 (cons [(first form) (if (nil? meta-data) {} meta-data) ] (rest form)))
               form))]
