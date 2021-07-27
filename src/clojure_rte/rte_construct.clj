@@ -21,14 +21,14 @@
 
 (ns clojure-rte.rte-construct
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [member exists setof exists-pair forall
+            [clojure-rte.util :refer [member exists setof forall
                                       call-with-collector defn-memoized defmulti-memoized defmethod-memoized
-                                      visit-permutations fixed-point stacksize
-                                      sort-operands with-first-match
-                                      partition-by-pred seq-matcher
+                                      visit-permutations fixed-point
+                                      sort-operands
+                                      seq-matcher
                                       rte-identity rte-constantly
                                       gc-friendly-memoize
-                                      search-replace remove-element uniquify print-vals
+                                      search-replace remove-element uniquify
                                       non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
