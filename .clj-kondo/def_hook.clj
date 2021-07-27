@@ -7,7 +7,6 @@
   (:require [clj-kondo.hooks-api :as api]
 ))
 
-
 (defmacro print-vals ""
   [& args]
   (let [pairs (into [] (map (fn [arg]
@@ -16,6 +15,12 @@
 
 (defmacro defn-memoized
   [[public-name internal-name] docstring & body]
+  ;; (println {:macro :defn-memoized})
+  ;; (println {           :public-name public-name})
+  ;; (println {           :internal-name internal-name})
+  ;; (println {           :docstring docstring})
+  ;; (println {           :body body})
+  ;; (println "-------")
   (assert (string? docstring))
   `(let []
      (declare ~public-name) ;; so that the internal function can call the public function if necessary
@@ -61,6 +66,7 @@
 (defmacro forall
   "Return true if the given body evaluates to logical true for every element of the given sequence"
    [[var seq] & body]
+  ;;(println ["expanding forall" var seq body])
   `(every? (fn [~var]
              ~@body) ~seq))
 
