@@ -322,7 +322,7 @@
 (defmacro defn-memoized
   [[public-name internal-name] docstring & body]
   (assert (string? docstring))
-  `(let []
+  `(do
      (declare ~public-name) ;; so that the internal function can call the public function if necessary
      (defn ~internal-name ~@body)
      (def ~(with-meta public-name {:dynamic true}) ~docstring (gc-friendly-memoize ~internal-name))
@@ -335,7 +335,7 @@
    as a dynamic variable.  Methods must be defined using defmethod-memoized, using
    the public-name."
   (assert (string? docstring))
-  `(let []
+  `(do
      (declare ~public-name) ;; so that the methods can call the public function if necessary
      (defmulti ~internal-name ~dispatch-fn)
      (def ~(with-meta public-name {:dynamic true})

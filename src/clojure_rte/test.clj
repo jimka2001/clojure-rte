@@ -42,7 +42,7 @@
   (list t1 t2 default) ;; silly return value just to use the function parameters
 )
 
-(let []
+(do
   (declare xdisjoint?)
   (defn xdisjoint?-impl [t1 t2 default]
     {:post [(member % '(true false :dont-know))]}

@@ -1,14 +1,14 @@
 {:hooks {
          ;; {:macroexpand {app.bar/baz hook.bar/baz}}}
-         :macroexpand {clojure-rte.util/print-vals     def-hook/print-vals,
-                       clojure-rte.util/defn-memoized  def-hook/defn-memoized,
-                       clojure-rte.util/defmethod-memoized  def-hook/defmethod-memoized,
-                       clojure-rte.util/exists  def-hook/exists,
-                       clojure-rte.util/setof  def-hook/setof,
-                       clojure-rte.util/forall  def-hook/forall,
-                       clojure-rte.util/forall-pairs  def-hook/forall-pairs,
-                       clojure-rte.util/exists-pair  def-hook/exists-pair,
-                       clojure-rte.util/casep def-hook/casep,
-                       clojure-rte.cl-compat/cl-cond def-hook/cl-cond,
-                       clojure-rte.cl-compat/with-escape def-hook/with-escape
+         :macroexpand {clojure-rte.util/print-vals     clojure-rte.util/print-vals,
+                       clojure-rte.util/defn-memoized  clojure-rte.util/defn-memoized,
+                       clojure-rte.util/defmethod-memoized  clojure-rte.util/defmethod-memoized,
+                       clojure-rte.util/exists  clojure-rte.util/exists,
+                       clojure-rte.util/setof  clojure-rte.util/setof,
+                       clojure-rte.util/forall  clojure-rte.util/forall,
+                       clojure-rte.util/forall-pairs  clojure-rte.util/forall-pairs,
+                       clojure-rte.util/exists-pair  clojure-rte.util/exists-pair,
+                       clojure-rte.util/casep clojure-rte.util/casep,
+                       clojure-rte.cl-compat/cl-cond clojure-rte.cl-compat/cl-cond,
+                       clojure-rte.cl-compat/with-escape clojure-rte.cl-compat/with-escape
                        }}}
