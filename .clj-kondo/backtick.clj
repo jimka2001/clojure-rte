@@ -20,10 +20,13 @@
       (*resolve* sym))))
 
 (defn unquote? [form]
-  (and (seq? form) (= (first form) 'clojure.core/unquote)))
+  (and (seq? form) (or (= (first form) 'clojure.core/unquote)
+                       (= (first form) 'unquote)
+                       )))
 
 (defn unquote-splicing? [form]
-  (and (seq? form) (= (first form) 'clojure.core/unquote-splicing)))
+  (and (seq? form) (or (= (first form) 'clojure.core/unquote-splicing)
+                       (= (first form) 'unquote-splicing))))
 
 (defn inert? [x]
   (or (nil? x)

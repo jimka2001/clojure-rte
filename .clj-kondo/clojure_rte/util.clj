@@ -1,5 +1,5 @@
 (ns clojure-rte.util)
-(intern 'clojure-rte.util 'memoized-multis)
+(def memoized-multis (atom {}))
 
 (defmacro print-vals ""
   [& args]
