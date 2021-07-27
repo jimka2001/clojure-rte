@@ -392,11 +392,7 @@
                        "destructuring-fn, invalid argument list: ~A first non-conforming element ~A"
                        args
                        (map (fn [clause]
-                              (and (type clause);;(list? clause)
-                                   ;;(not-empty clause)
-                                   ;;(vector? (first clause))
-
-                                   )) (rest args))
+                              (type clause)) (rest args))
                        )))))
 
 (defmacro dsfn

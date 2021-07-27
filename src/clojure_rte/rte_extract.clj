@@ -20,8 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.rte-extract
-  (:require [clojure-rte.genus :as gns]
-            [clojure.pprint :refer [cl-format]]
+  (:require [clojure.pprint :refer [cl-format]]
             [clojure-rte.rte-construct :as rte]
             [clojure-rte.xymbolyco :as xym]))
 

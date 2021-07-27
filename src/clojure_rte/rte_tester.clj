@@ -181,7 +181,7 @@
    (with-compile-env []
      ;; is (not rte) equivalent to (complement dfa) ?
      (let [dfa (rte-to-dfa rte)
-           dfa-complete (xym/complete dfa)
+           ;;dfa-complete (xym/complete dfa)
            dfa-complement (xym/complement dfa)
            dfa-not-rte (rte-to-dfa (list :not rte))
            ]

@@ -32,7 +32,7 @@
                                       non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
-            [clojure.set :refer [union subset?]]
+            [clojure.set :refer [union]]
             [clojure-rte.cl-compat :as cl]
             [backtick :refer [template]]
             [clojure-rte.genus-spec :as gs]
@@ -906,7 +906,7 @@
           (rte/*? op)
           op
 
-          :default
+          :else
           self)))
 
 (defn conversion-*-2
@@ -1939,7 +1939,7 @@
                    (into {} (map (fn [pair] [(first pair) (second pair)])
                                  (map rest seq-of-triples)))])
                 (group-by first
-                          (first (rte/find-all-derivatives '(:* (:cat Number Long (not (= 0))))))))))
+                          (first (rte/find-all-derivatives pattern))))))
 
 (defn rte-combine-labels ""
   [label-1 label-2]
@@ -2053,8 +2053,8 @@
    multiple conversions/look-ups, as the correspondence of pattern
    to compiled Dfa is maintained via the memoize function."
 
-  (fn [rte _items & {:keys [promise-disjoint
-                            hot-spot]}]
+  (fn [rte _items & {:keys {_promise-disjoint :promise-disjoint
+                            _hot-spot :hot-spot}}]
     (dispatch rte 'rte/match)))
 
 (defmethod rte/match :pattern

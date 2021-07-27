@@ -241,7 +241,7 @@
          (cond
            (not= new-obj obj)
            (do
-             (if verbose
+             (when verbose
                (cl-format true "[~A] ~A~%   --> ~A~%" i obj new-obj))
              new-obj)
 
@@ -330,10 +330,11 @@
 
 (def memoized-multis (atom {}))
 (defmacro defmulti-memoized
-  [[public-name internal-name] docstring dispatch-fn]
   "Define a multimethod on an internal name, and a memoized function implemented
    as a dynamic variable.  Methods must be defined using defmethod-memoized, using
    the public-name."
+  [[public-name internal-name] docstring dispatch-fn]
+
   (assert (string? docstring))
   `(do
      (declare ~public-name) ;; so that the methods can call the public function if necessary
@@ -344,9 +345,9 @@
      (swap! memoized-multis assoc '~public-name '~internal-name)))
 
 (defmacro defmethod-memoized
-  [public-name dispatch-val & fn-tail]
   "Wrapper around defmethod which defines a method using the internal name of the given
   public name.  The pairing was presumably made in a previous call to defmulti-memoized."
+  [public-name dispatch-val & fn-tail]
   (assert (get @memoized-multis public-name)
           (cl-format false "~A does not name a multimethod defined by defmulti-memoized"
                      public-name))
