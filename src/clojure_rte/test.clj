@@ -39,20 +39,14 @@
   [t1 t2 default]
   {;;:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
-  (cond
-    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
-    true
+  (list t1 t2 default) ;; silly return value just to use the function parameters
+)
 
-    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
-    true
-
-    :else
-    (let [try1 (check-disjoint t1 t2 :dont-know)]
-      (if (not= :dont-know try1)
-        try1
-        (let [t1-simple (canonicalize-type t1 :dnf)
-              t2-simple (canonicalize-type t2 :dnf)]
-          (if (and (= t1-simple t1)
-                   (= t2-simple t2))
-            default
-            (check-disjoint t1-simple t2-simple default)))))))
+(let []
+  (declare xdisjoint?)
+  (defn xdisjoint?-impl [t1 t2 default]
+    {:post [(member % '(true false :dont-know))]}
+    (list t1 t2 default))
+  (def xdisjoint?
+   "Predicate to determine whether the two types overlap.\n  If it cannot be determined whether the two designated types\n  are disjoint, then the default value is returned."
+   (clojure-rte.util/gc-friendly-memoize xdisjoint?-impl)))
