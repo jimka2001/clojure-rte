@@ -30,7 +30,7 @@
       (keyword? x)
       (number? x)
       (string? x)
-      (instance? Boolean x)
+      (boolean? x)
       (= () x)))
 
 (declare quote-fn*)
@@ -83,30 +83,39 @@
        (quote-fn resolver# form#))))
 
 (defquote template identity)
+;; (let [resolver__1274__auto__ identity]
+;;   (defn template-fn [form__1275__auto__]
+;;     (quote-fn resolver__1274__auto__ form__1275__auto__))
+;;   (defmacro template [form__1275__auto__]
+;;     (let [expansion (quote-fn resolver__1274__auto__ form__1275__auto__)]
+;;       (prn [:in form__1275__auto__
+;;             :out expansion])
+;;       expansion
+;; )))
 
-(defn- class-symbol [^java.lang.Class cls]
+(defn- class-symbol [ cls]
   (symbol (.getName cls)))
 
-(defn- namespace-name [^clojure.lang.Namespace ns]
+(defn- namespace-name [ ns]
   (name (.getName ns)))
 
-(defn- var-namespace [^clojure.lang.Var v]
+(defn- var-namespace [ v]
   (name (.name (.ns v))))
 
-(defn- var-name [^clojure.lang.Var v]
+(defn- var-name [ v]
   (name (.sym v)))
 
-(defn- var-symbol [^clojure.lang.Var v]
+(defn- var-symbol [ v]
   (symbol (var-namespace v) (var-name v)))
 
 (defn- ns-resolve-sym [sym]
   (try
     (let [x (ns-resolve *ns* sym)]
       (cond
-        (instance? java.lang.Class x) (class-symbol x)
-        (instance? clojure.lang.Var x) (var-symbol x)
+        (class? x) (class-symbol x)
+        (var? x) (var-symbol x)
         :else nil))
-    (catch ClassNotFoundException _
+    (catch Exception _ ;; ClassNotFoundException _
       sym)))
 
 (defn resolve-symbol [sym]
