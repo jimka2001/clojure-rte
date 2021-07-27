@@ -22,7 +22,7 @@
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
             [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [defn-memoized member non-empty]]
+            [clojure-rte.util :refer [defn-memoized member non-empty?]]
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
