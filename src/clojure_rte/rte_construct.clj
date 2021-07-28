@@ -2053,13 +2053,13 @@
    multiple conversions/look-ups, as the correspondence of pattern
    to compiled Dfa is maintained via the memoize function."
 
-  (fn [rte _items & {:keys {_promise-disjoint :promise-disjoint
-                            _hot-spot :hot-spot}}]
+  (fn [rte _items & {_promise-disjoint :promise-disjoint
+                     _hot-spot :hot-spot}]
     (dispatch rte 'rte/match)))
 
 (defmethod rte/match :pattern
-  [pattern items & {:keys [promise-disjoint
-                           hot-spot]}]
+  [pattern items & {_promise-disjoint :promise-disjoint
+                    hot-spot :hot-spot}]
   (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
 
 (defmethod rte/match :Dfa
