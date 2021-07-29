@@ -24,7 +24,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.bdd :as bdd]
             [clojure-rte.genus :as gns]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format *print-pretty* pprint]]
             [clojure-rte.util :refer [member]]
             [clojure-rte.dot :as dot]
             [clojure.test :refer [deftest is testing]])
@@ -412,13 +412,26 @@
             :let [t1 (gns/gen-type depth)
                   t2 (gns/gen-type depth)
                   t1-can (gns/canonicalize-type t1)
-                  t2-can (gns/canonicalize-type t2)]]
-      
-      (is (= (bdd/type-subtype? t1 t2)
-             (bdd/type-subtype? t1-can t2-can))
-          (cl-format false
-                     "~%different values from bdd/type-subtype?~%lhs=~Arhs=~A~%t1=~A~%t2=~A~%depth=~A~%reps=~A"
-                     (bdd/type-subtype? t1 t2)
-                     (bdd/type-subtype? t1-can t2-can)
-                     t1 t2
-                     depth reps)))))
+                  t2-can (gns/canonicalize-type t2)
+                  sub-1-2 (bdd/type-subtype? t1 t2)
+                  sub-1c-2c (bdd/type-subtype? t1-can t2-can)]]
+
+      (is (= sub-1-2 sub-1c-2c)
+          (bdd/with-hash []
+            (binding [*print-pretty* true]
+              (cl-format false
+                         "~&different values from bdd/type-subtype?~%~
+                      lhs = ~A~@
+                      rhs = ~A~@
+                      t1 = ~A~@
+                      t2 = ~A~@
+                      t1 & !t2 = ~A~@
+                      t1.canonicalized & !t2.canonicalized = ~A~@
+                      depth=~A~@
+                      reps=~A"
+                         sub-1-2 sub-1c-2c
+                         t1 t2
+                         (with-out-str (pprint (bdd/dnf (bdd/and-not (bdd/bdd t1) (bdd/bdd t2)))))
+                         (with-out-str (pprint (bdd/dnf (bdd/and-not (bdd/bdd t1-can) (bdd/bdd t2-can)))))
+
+                         depth reps)))))))
