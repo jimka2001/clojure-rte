@@ -426,13 +426,12 @@
                       rhs = ~A~@
                       t1 = ~A~@
                       t2 = ~A~@
-                      t1 & !t2 = ~A~@
-                      t1.canonicalized & !t2.canonicalized = ~A~@
+                      t1 & !t2 = ~W~@
+                      t1.canonicalized & !t2.canonicalized = ~W~@
                       depth=~A~@
                       reps=~A"
                          sub-1-2 sub-1c-2c
                          t1 t2
-                         (with-out-str (pprint (bdd/dnf (bdd/and-not (bdd/bdd t1) (bdd/bdd t2)))))
-                         (with-out-str (pprint (bdd/dnf (bdd/and-not (bdd/bdd t1-can) (bdd/bdd t2-can)))))
-
+                         (bdd/dnf (bdd/and-not (bdd/bdd t1) (bdd/bdd t2)))
+                         (bdd/dnf (bdd/and-not (bdd/bdd t1-can) (bdd/bdd t2-can)))
                          depth reps)))))))
