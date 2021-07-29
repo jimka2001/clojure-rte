@@ -22,7 +22,7 @@
 (ns clojure-rte.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty? forall]]
+  (:require [clojure-rte.util :refer [call-with-collector non-empty? forall exists]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))
@@ -510,13 +510,36 @@
           bdd-sup (bdd supertype-designator)
           bdd-diff (bdd/and-not bdd-sub bdd-sup)
           satisfying (satisfying-type-designators bdd-diff)]
+      ;; There are four conditions to detect:
+      ;;  1. if the bdd is identically false
+      ;;     subtype -> true
+      ;;  2. if every branch in the bdd is unihabited i.e., inhabited -> false
+      ;;     then subtype -> true.   Note that 2 implies 1, so potentially
+      ;;     there may really be no need to check 1?? not sure
+      ;;  3. if some branch x exists for which inhabited(x :dont-know) = true
+      ;;     subtype -> false
+      ;;  4. thus there necessarily exists some branch x for which inhibited(x :dont-know) = :dont-know,
+      ;;     but no branch y for which inhabited(y :dont-know) = true
+      ;;     then subtype -> :dont-know.
+      ;;     Note that !2 and !3 => 4, so there's no need to check anything on 4.      
       (cond (= false bdd-diff)
             true
-            :else
-            ;; in the case the bdd is not explicitly false, some branch(s)
-            ;;   from the root to the true-leaf might designate a list of
-            ;;   types whose intersection is empty.
-            ;;   The two given types are in a sub/super relation ONLY
-            ;;   if all such intersections are empty.
             (forall [td satisfying]
-                    (= :empty-set (gns/canonicalize-type td)))))))
+                    (or (= false (gns/inhabited? td :dont-know))
+                        (= false (gns/inhabited? (gns/canonicalize-type td) :dont-know))))
+            true
+
+            (exists [td satisfying]
+                    (or (= true (gns/inhabited? td :dont-know))
+                        (= true (gns/inhabited? (gns/canonicalize-type td) :dont-know))))
+            false
+            
+            :else
+            (do (assert (exists [td satisfying]
+                                (= :dont-know (gns/inhabited? td :dont-know))))
+                ;; in the case the bdd is not explicitly false, some branch(s)
+                ;;   from the root to the true-leaf might designate a list of
+                ;;   types whose intersection is empty.
+                ;;   The two given types are in a sub/super relation ONLY
+                ;;   if all such intersections are empty.
+                :dont-know)))))
