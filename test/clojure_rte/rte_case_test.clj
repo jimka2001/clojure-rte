@@ -121,7 +121,7 @@
 (deftest t-destructuring-case
   (testing "destructuring-case"
     (is (= 1 (destructuring-case '(true ["hello" 3] true)
-                                 [[a [b c] & d]  {a Boolean b String d Boolean}]
+                                 [[_a [b c] & d]  {a Boolean b String d Boolean}]
                                  1
 
                                  [[a b]          {a Boolean b (or String Boolean)}]
@@ -251,13 +251,13 @@
           (let [v41977 fn-var-41956]
             (rte-case v41977
                       (:cat (and :sigma Boolean) (and :sigma (or String Boolean)))
-                      (let [[a b] v41977] (do 2))
+                      (let [[_a _b] v41977] (do 2))
 
                       (:cat
                        (and :sigma Boolean)
                        (rte (:cat (and :sigma String) (and :sigma :sigma)))
                        (:* (:cat (and :sigma Boolean))))
-                      (let [[a [b c] & d] v41977] (do 1))
+                      (let [[_a [_b _c] & _d] v41977] (do 1))
 
                       (:* :sigma)
                       nil)))]
@@ -266,8 +266,8 @@
   (let [f
         (fn [& fn-var-41956]
           (let [v41977 fn-var-41956]
-            (([(fn [] (let [[a b] v41977] (do 2)))
-               (fn [] (let [[a [b c] & d] v41977] (do 1)))
+            (([(fn [] (let [[_a _b] v41977] 2))
+               (fn [] (let [[_a [_b _c] & _d] v41977] 1))
                (fn [] nil)]
               (let [dfa (rte-case-clauses-to-dfa
                          '[[0
@@ -406,7 +406,7 @@
                     ;;  still need to debug this test case
                     ([[a [b c] & ^Boolean d]  {[a d] (not Number) a Boolean b String}]
                      1)
-                    ([[& others] {}]
+                    ([[& _others] {}]
                      3))]
              (apply f  '(true ["3" 3] true "miss" false true))))
         "test 13")))

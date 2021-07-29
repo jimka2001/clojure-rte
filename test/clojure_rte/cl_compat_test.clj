@@ -123,7 +123,7 @@
   (testing "with-escape"
     (is (= 42 (cl/with-escape ret
                 (ret 42))))
-    (is (= 43 (cl/with-escape ret
+    (is (= 43 (cl/with-escape _ret
                 43)))
     (is (= 44 (cl/with-escape ret
                 (ret 44)
@@ -133,7 +133,7 @@
                   (ret2 46))
                 (ret1 47))))
     (is (= 48 (cl/with-escape ret1
-                (cl/with-escape ret2
+                (cl/with-escape _ret2
                   (ret1 48))
                 (ret1 49))))))
 

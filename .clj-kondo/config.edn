@@ -11,5 +11,6 @@
                        clojure-rte.util/casep clojure-rte.util/casep,
                        clojure-rte.cl-compat/cl-cond clojure-rte.cl-compat/cl-cond,
                        clojure-rte.cl-compat/with-escape clojure-rte.cl-compat/with-escape
+                       clojure-rte.rte-case/rte-case clojure-rte.rte-case/rte-case
                        backtick/template backtick/template
                        }}}

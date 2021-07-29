@@ -357,22 +357,17 @@
             (cl-format false "357: ~A" fold))
 
         (letfn [(range-ext [left right]
-                  (range left (inc right)))
-                ]
+                  (range left (inc right)))]
 
           (doseq [n (range 100)
                   i (range n)
                   :let [seq (map / (concat (range-ext (- i) -1)
-                                           (range-ext 1 i)))]
-                  ]
-            (do
-              (is (= 0 (reduce + 0 seq)))
-              
-              (is (= (reduce + 0 seq)
-                     (fold + 0 seq))
-                  (cl-format false "374: ~A" fold))
-              )
-            ))))))
+                                           (range-ext 1 i)))]]
+            (is (= 0 (reduce + 0 seq)))
+
+            (is (= (reduce + 0 seq)
+                   (fold + 0 seq))
+                (cl-format false "374: ~A" fold))))))))
 
 (deftest t-fold-2
   (testing "fold 2"

@@ -24,9 +24,8 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.bdd :as bdd]
             [clojure-rte.genus :as gns]
-            [clojure.pprint :refer [cl-format *print-pretty* pprint]]
+            [clojure.pprint :refer [cl-format *print-pretty*]]
             [clojure-rte.util :refer [member]]
-            [clojure-rte.dot :as dot]
             [clojure.test :refer [deftest is testing]])
   ;; this imports the name of the Bdd record, which is otherwise not imported by :require
   ;;(:import [clojure_rte.bdd Bdd])
@@ -416,7 +415,9 @@
                   sub-1-2 (bdd/type-subtype? t1 t2)
                   sub-1c-2c (bdd/type-subtype? t1-can t2-can)]]
 
-      (is (= sub-1-2 sub-1c-2c)
+      (is (or (= sub-1-2 sub-1c-2c)
+              (= :dont-know sub-1-2)
+              (= :dont-know sub-1c-2c))
           (bdd/with-hash []
             (binding [*print-pretty* true]
               (cl-format false

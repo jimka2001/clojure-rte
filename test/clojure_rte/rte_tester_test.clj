@@ -21,9 +21,8 @@
 
 (ns clojure-rte.rte-tester-test
   (:require [clojure-rte.rte-core ]
-            [clojure-rte.rte-construct :as rte ]
+            [clojure-rte.rte-construct :as rte :refer [canonicalize-pattern]]
             [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.rte-construct :refer [canonicalize-pattern]]
             [clojure-rte.rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
                                             test-canonicalize-pattern
                                             test-rte-canonicalize-nullable

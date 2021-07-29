@@ -23,7 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [call-with-collector member print-vals]]
+            [clojure-rte.util :refer [ member ]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is testing]]))
@@ -523,7 +523,7 @@
             :let [rt-1 (gns/gen-type n)
                   rt-2 (gns/gen-type n)
                   rt-and-not (template (and (not ~rt-1) (not ~rt-2)))
-                  rt-not-or (template (not (or ~rt-1) (or ~rt-2)))
+                  rt-not-or (template (not (or ~rt-1 ~rt-2)))
                   ]]
         (do 
           (check-subtype rt-and-not 
@@ -597,7 +597,7 @@
   [nreps]
   (letfn [(measure-subtype-computability [n depth inh]
             (assert (> n 0))
-            (let [m (reduce (fn [m current-item]
+            (let [m (reduce (fn [m _current-item]
                               (let [rt1 (if inh
                                           (gns/gen-inhabited-type depth
                                                                   (constantly true))
@@ -963,7 +963,7 @@
   (testing "random type membership"
     
     (doseq [depth (range 4)
-            reps (range (/ 400 (inc depth)))
+            _reps (range (/ 400 (inc depth)))
             :let [nf (rand-nth [:dnf :cnf :none])
                   td (gns/gen-type depth)
                   td-canonical (gns/canonicalize-type td nf)]

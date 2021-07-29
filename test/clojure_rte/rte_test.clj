@@ -23,7 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte
              :refer [nullable? first-types
-                     canonicalize-pattern canonicalize-pattern-once
+                     canonicalize-pattern
                      derivative
                      with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
@@ -32,16 +32,12 @@
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.rte-extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.util :refer [member count-if-not print-vals]]
+            [clojure-rte.util :refer [member count-if-not]]
             [clojure-rte.genus :as gns]
             [clojure-rte.rte-tester :refer [gen-rte]]
             [clojure-rte.dot :as dot]
             [backtick :refer [template]]
             [clojure-rte.xymbolyco :as xym]))
-
-(defn -main []
-  (clojure.test/run-tests 'clojure-rte.rte-test))
-
 
 (defmacro testing
   [string & body]
@@ -129,7 +125,7 @@
           "and-distribute"))))
 
 (deftest t-canonicalize-pattern-14b
-  (when (and (resolve 'java.lang.Comparable))
+  (when (resolve 'java.lang.Comparable)
     (testing "canonicalize-pattern 14b"
       (is (= (canonicalize-pattern '(:permute java.lang.Comparable java.io.Serializable java.lang.Comparable ))
            (canonicalize-pattern '(:or (:cat java.lang.Comparable java.io.Serializable java.lang.Comparable )
@@ -535,8 +531,8 @@
              (rte-combine-labels '(or Double String)
                                  '(or Long String)))))))
 
-(deftest t-rte-combine-labels
-  (testing "and/not conversion"
+(deftest t-rte-combine-labels-b
+  (testing "and/not conversion b"
     (with-compile-env ()
       (is (not= '(:not (= 0))
                 (canonicalize-pattern '(not (= 0)))) "test 0")
@@ -1234,7 +1230,7 @@
 (deftest t-circular-dfa-rte-flow
   (testing "circular dfa rte flow"
     (doseq [depth (range 1)
-              rep (range 10)]
+            _rep (range 10)]
         (test-circular-dfa-rte-flow (gen-rte depth gns/*test-types*)))))
 
 (deftest t-discovered-case-1261
@@ -1264,3 +1260,6 @@
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
   (clojure.test/run-tests 'clojure-rte.rte-test))
+
+
+

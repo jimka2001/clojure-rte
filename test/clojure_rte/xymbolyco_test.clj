@@ -28,7 +28,6 @@
                                            extend-with-sink-state synchronized-product synchronized-union
                                            cross-intersection
                                            trim complete minimize]]
-            [clojure-rte.dot :as dot]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
@@ -223,7 +222,7 @@
     (t-acceptance-test-rte  '(:and (:* Long) (:not (:* Short)))) ;; this was an explicit failing test
     (let [[left-rtes right-rtes] (split-at (unchecked-divide-int (count test-rtes) 2)
                                            test-rtes)]
-      (doseq [[inx rte] (reverse (map-indexed (fn [inx item] [inx item])
+      (doseq [[_inx rte] (reverse (map-indexed (fn [inx item] [inx item])
                                               (distinct (for [rte-1 right-rtes
                                                               rte-2 left-rtes
                                                               rte [`(:and ~rte-1 (:not ~rte-2))
