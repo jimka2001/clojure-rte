@@ -25,7 +25,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
-                                      remove-element uniquify
+                                      remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized
@@ -2080,15 +2080,21 @@
     (let [t1-operands (operands t1)
           n (count t1-operands)]
       (cond
+        ;; if any of the types is empty, the intersection is empty,
+        ;;   even if others are unknown.  (and A B empty D E).
+        ;;   Careful, the computation here depends on laziness of map.
+        ;;   Once a false is found, we don't call inhabited? on the remaining
+        ;;   part of t1-operands.
+        (some false? (map (fn [t] (inhabited? t :dont-know))
+                          (unchunk t1-operands)))
+        false
+        
+        ;; (and (not Float) (not Double) (not (member 1 2 3))) --> inhabited=true
         (and (< 1 n)
-             (forall-pairs [[a b] t1-operands]
-                           (and (or (class-designator? a)
-                                    (and (gns/not? a)
-                                         (class-designator? (second a))))
-                                (or (class-designator? b)
-                                    (and (gns/not? b)
-                                         (class-designator? (second b))))
-                                (not (disjoint? a b true)))))
+             (forall [td t1-operands]
+                     (and (gns/not? td)
+                          (or (class-designator? (operand td))
+                              (gns/member-or-=? (operand td))))))
         true
 
         (exists-pair [[a b] t1-operands]
@@ -2101,18 +2107,9 @@
                           (disjoint? a b false)))
         false
         
-        ;; if any of the types are empty, the intersection is empty,
-        ;;   even if others are unknown.  (or A B empty D E).
-        ;;   Careful, the computation here depends on laziness of map.
-        ;;   Once a false is found, we don't call inhabited? on the remaining
-        ;;   part of t1-operands.
-        (some false? (map (fn [t] (inhabited? t :dont-know))
-                          (unchunk t1-operands)))
-        false
-        
         ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
-        (and (not-empty (filter class-designator? t1-operands))
+        (and (non-empty? (filter class-designator? t1-operands))
              (= 1 (count (filter gns/not-member-or-=?
                                  t1-operands)))
              (let [t2 (canonicalize-type (cons 'and
