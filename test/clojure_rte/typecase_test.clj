@@ -49,6 +49,9 @@
   (and (int? x)
        (odd? x)))
 
+
+
+
 (t/deftest test-typecase-optimization
   (t/testing "typcase optimization"
     (assert (= (sut/typecase "hello"

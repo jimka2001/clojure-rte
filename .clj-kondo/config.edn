@@ -12,5 +12,11 @@
                        clojure-rte.cl-compat/cl-cond clojure-rte.cl-compat/cl-cond,
                        clojure-rte.cl-compat/with-escape clojure-rte.cl-compat/with-escape
                        clojure-rte.rte-case/rte-case clojure-rte.rte-case/rte-case
+                       clojure-rte.rte-case/destructuring-case clojure-rte.rte-case/destructuring-case
+                       clojure-rte.rte-case/destructuring-fn clojure-rte.rte-case/destructuring-fn
+                       clojure-rte.rte-case/-destructuring-fn-many clojure-rte.rte-case/-destructuring-fn-many
+                       clojure-rte.rte-case/dsfn clojure-rte.rte-case/dsfn
+                       clojure-rte.rte-case/dscase clojure-rte.rte-case/dscase
+                       clojure-rte.typecase/typecase clojure-rte.typecase/typecase
                        backtick/template backtick/template
                        }}}

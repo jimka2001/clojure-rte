@@ -100,7 +100,7 @@
                                            :promise-disjoint true)
                                 ~num-fns))))))
 
-(defn- lambda-list-to-rte
+(defn lambda-list-to-rte
   "Helper function for destructuring-case macro.
   Returns an rte either of one of the following forms:
     (:cat ... (:* ...)) -- if the given lambda-list contains &
@@ -340,6 +340,7 @@
              [& ~var]
              (destructuring-case ~var
                                  ~@clauses)))))
+
 
 (defmacro destructuring-fn
   "params => positional-params* , or positional-params* & next-param
