@@ -1,4 +1,5 @@
-{:hooks {
+{:config-paths ["backtick/backtick"]
+ :hooks {
          ;; {:macroexpand {app.bar/baz hook.bar/baz}}}
          :macroexpand {clojure-rte.util/print-vals     clojure-rte.util/print-vals,
                        clojure-rte.util/defn-memoized  clojure-rte.util/defn-memoized,
@@ -18,5 +19,5 @@
                        clojure-rte.rte-case/dsfn clojure-rte.rte-case/dsfn
                        clojure-rte.rte-case/dscase clojure-rte.rte-case/dscase
                        clojure-rte.typecase/typecase clojure-rte.typecase/typecase
-                       backtick/template backtick/template
+                       ;; backtick/template backtick/template
                        }}}

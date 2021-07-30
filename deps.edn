@@ -3,6 +3,9 @@
   {:replace-deps
    {clj-kondo/clj-kondo
     {:git/url "https://github.com/clj-kondo/clj-kondo"
-     :sha "30c878d719c7630ee5f5e51876ba780c5667b23f"
+     
+     :sha "07fd7d0ca055e09072d9ea9779e9e5c73e0c0026" ;; "30c878d719c7630ee5f5e51876ba780c5667b23f"
      }}
-   :main-opts ["-m" "clj-kondo.main"]}}}
+   :main-opts ["-m" "clj-kondo.main"]}}
+ :deps {backtick/backtick {:local/root "/Users/jnewton/Repos/backtick"}}
+}
