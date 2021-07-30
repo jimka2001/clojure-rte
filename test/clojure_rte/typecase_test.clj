@@ -21,6 +21,7 @@
 
 (ns clojure-rte.typecase-test
   (:require [clojure-rte.typecase :as sut]
+            [clojure-rte.genus]
             [clojure.test :as t]))
 
 (defn -main []
