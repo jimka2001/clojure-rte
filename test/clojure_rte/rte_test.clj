@@ -521,13 +521,13 @@
       (is (= '(or Long String)
              (rte-combine-labels 'Long
                                  'String)))
-      (is (= '(or Long String Double)
+      (is (= '(or Double Long String)
              (rte-combine-labels '(or Long String)
                                  'Double)))
       (is (= '(or Double Long String)
              (rte-combine-labels 'Double
                                  '(or Long String))))
-      (is (= '(or Double String Long String)
+      (is (= '(or Double Long String)
              (rte-combine-labels '(or Double String)
                                  '(or Long String)))))))
 
