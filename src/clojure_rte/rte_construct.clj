@@ -2115,7 +2115,7 @@
                             (if (gns/typep candidate type)
                               next-state-index
                               ;; TODO I'm not sure this is correct, do we need to return false
-                              ;;   indicating no-match, or return the sink-stat-id.
+                              ;;   indicating no-match, or return the sink-state-id.
                               ;;   false makes the tests pass, but sink-state-id seems more
                               ;;   logical.  need to investigate whether something more fundamental
                               ;;   is wrong.
