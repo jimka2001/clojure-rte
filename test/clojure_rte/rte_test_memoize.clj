@@ -23,11 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
-            [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.genus :as gns]))
-
-(defn -main []
-  (clojure.test/run-tests 'clojure-rte.rte-test-memoize))
+            [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defmacro testing
   [string & body]
@@ -132,7 +128,7 @@
       (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
              '(:cat String (:* String) Double (:* Double)))
           "452b canonicalize-pattern got wrong memoized value")
-      (let [pat (rte/compile '(:cat ::x  ::y))]
+      (let [_pat (rte/compile '(:cat ::x  ::y))]
         ;; the same as (rte/compile '(:cat (:+ String) (:+ Double)))
         (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
                '(:cat String (:* String) Double (:* Double)))
@@ -142,3 +138,5 @@
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
   (clojure.test/run-tests 'clojure-rte.rte-test-memoize))
+
+

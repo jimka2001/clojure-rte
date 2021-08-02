@@ -177,7 +177,7 @@
 (s/def ::test-spec-2 (s/& (s/* string?)
                           #(even? (count %))))
 
-(t/deftest t-rte-match-2
+(t/deftest t-rte-match-2b
   (testing "rte/match with unsupported specs"
     ;; ::test-spec-2 uses the s/& operator which cannot be converted
     ;;   to an efficent rte.  the semantics should be maintained by the
@@ -356,9 +356,7 @@
 (t/deftest t-canonicalize-spec-2
   (testing "canonicalize spec 2"
     (let [spec1 (s/alt :1 number? :2 (s/* string?))
-          rte1  '(:or (rte Number) (:* String))
           spec2 (s/or :1 number? :2 (s/* string?))
-          rte2  '(:or Number (:* String))
           t1 (template (spec ~spec1))
           t2 (template (spec ~spec2))]
       (doseq [q [[]

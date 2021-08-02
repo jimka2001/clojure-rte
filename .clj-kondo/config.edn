@@ -1,1 +1,23 @@
-{:hooks {:analyze-call {clojure.core/def def-hook/transform-def}}}
+{:config-paths ["backtick/backtick"]
+ :hooks {
+         ;; {:macroexpand {app.bar/baz hook.bar/baz}}}
+         :macroexpand {clojure-rte.util/print-vals     clojure-rte.util/print-vals,
+                       clojure-rte.util/defn-memoized  clojure-rte.util/defn-memoized,
+                       clojure-rte.util/defmethod-memoized  clojure-rte.util/defmethod-memoized,
+                       clojure-rte.util/exists  clojure-rte.util/exists,
+                       clojure-rte.util/setof  clojure-rte.util/setof,
+                       clojure-rte.util/forall  clojure-rte.util/forall,
+                       clojure-rte.util/forall-pairs  clojure-rte.util/forall-pairs,
+                       clojure-rte.util/exists-pair  clojure-rte.util/exists-pair,
+                       clojure-rte.util/casep clojure-rte.util/casep,
+                       clojure-rte.cl-compat/cl-cond clojure-rte.cl-compat/cl-cond,
+                       clojure-rte.cl-compat/with-escape clojure-rte.cl-compat/with-escape
+                       clojure-rte.rte-case/rte-case clojure-rte.rte-case/rte-case
+                       clojure-rte.rte-case/destructuring-case clojure-rte.rte-case/destructuring-case
+                       clojure-rte.rte-case/destructuring-fn clojure-rte.rte-case/destructuring-fn
+                       clojure-rte.rte-case/-destructuring-fn-many clojure-rte.rte-case/-destructuring-fn-many
+                       clojure-rte.rte-case/dsfn clojure-rte.rte-case/dsfn
+                       clojure-rte.rte-case/dscase clojure-rte.rte-case/dscase
+                       clojure-rte.typecase/typecase clojure-rte.typecase/typecase
+                       backtick/template backtick/template
+                       }}}

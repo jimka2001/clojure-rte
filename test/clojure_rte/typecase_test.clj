@@ -21,6 +21,7 @@
 
 (ns clojure-rte.typecase-test
   (:require [clojure-rte.typecase :as sut]
+            [clojure-rte.genus]
             [clojure.test :as t]))
 
 (defn -main []
@@ -48,6 +49,9 @@
 (defn odd-int? [x]
   (and (int? x)
        (odd? x)))
+
+
+
 
 (t/deftest test-typecase-optimization
   (t/testing "typcase optimization"

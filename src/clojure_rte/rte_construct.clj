@@ -21,18 +21,18 @@
 
 (ns clojure-rte.rte-construct
   (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [member exists setof exists-pair forall
+            [clojure-rte.util :refer [member exists setof forall
                                       call-with-collector defn-memoized defmulti-memoized defmethod-memoized
-                                      visit-permutations fixed-point stacksize
-                                      sort-operands with-first-match
-                                      partition-by-pred seq-matcher
+                                      visit-permutations fixed-point
+                                      sort-operands
+                                      seq-matcher
                                       rte-identity rte-constantly
                                       gc-friendly-memoize
-                                      search-replace remove-element uniquify print-vals
+                                      search-replace remove-element uniquify
                                       non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
-            [clojure.set :refer [union subset?]]
+            [clojure.set :refer [union]]
             [clojure-rte.cl-compat :as cl]
             [backtick :refer [template]]
             [clojure-rte.genus-spec :as gs]
@@ -716,123 +716,123 @@
   type-dispatch)
 
 (defmethod zero :or
-  [self]
+  [_self]
   sigma-*)
 
 (defmethod zero :and
-  [self]
+  [_self]
   :empty-set)
 
 (defmulti one
   type-dispatch)
 
 (defmethod one :or
-  [self]
+  [_self]
   :empty-set)
 
 (defmethod one :and
-  [self]
+  [_self]
   sigma-*)
 
 
 (defmulti same-combination?
-  (fn [self operands]
+  (fn [self _operands]
     (type-dispatch self)))
 
 (defmethod same-combination? :or
-  [self r]
+  [_self r]
   (rte/or? r))
 
 (defmethod same-combination? :and
-  [self r]
+  [_self r]
   (rte/and? r))
 
 (defmulti dual-combination?
-  (fn [self operands]
+  (fn [self _operands]
     (type-dispatch self)))
 
 (defmethod dual-combination? :or
-  [self r]
+  [_self r]
   (rte/and? r))
 
 (defmethod dual-combination? :and
-  [self r]
+  [_self r]
   (rte/or? r))
 
 (defmulti set-dual-operation
-  (fn [self a b]
+  (fn [self _a _b]
     (type-dispatch self)))
 
 (defmethod set-dual-operation :or
   ;; intersection
-  [self a b]
+  [_self a b]
   (setof [x a] (member x b)))
 
 (defmethod set-dual-operation :and
   ;; union
-  [self a b]
+  [_self a b]
   (concat a (setof [x b] (not (member x a)))))
 
 (defmulti set-operation
-  (fn [self a b]
+  (fn [self _a _b]
     (type-dispatch self)))
 
 (defmethod set-operation :or
   ;; union
-  [self a b]
+  [_self a b]
   (concat a (setof [x b] (not (member x a)))))
 
 (defmethod set-operation :and
   ;; intersection
-  [self a b]
+  [_self a b]
   (setof [x a] (member x b)))
 
 (defmulti annihilator
-  (fn [self a b]
+  (fn [self _a _b]
     (type-dispatch self)))
 
 (defmethod annihilator :or
-  [self a b]
+  [_self a b]
   (gns/subtype? b a :dont-know))
 
 (defmethod annihilator :and
-  [self a b]
+  [_self a b]
   (gns/subtype? a b :dont-know))
 
 (defmulti create-type-descriptor
-  (fn [self operands]
+  (fn [self _operands]
     (type-dispatch self)))
 
 (defmethod create-type-descriptor :or
-  [self operands]
+  [_self operands]
   (gns/create-or operands))
 
 (defmethod create-type-descriptor :and
-  [self operands]
+  [_self operands]
   (gns/create-and operands))
 
 (defmulti or-invert
-  (fn [self x]
+  (fn [self _x]
     (type-dispatch self)))
 
 (defmethod or-invert :or
-  [self x]
+  [_self x]
   (not x))
 
 (defmethod or-invert :and
-  [self x]
+  [_self x]
   x)
 
 (defmulti create
-  (fn [self operands]
+  (fn [self _operands]
     (type-dispatch self)))
 
 (defmethod create :or
-  [self operands]
+  [_self operands]
   (create-or operands))
 
 (defmethod create :and
-  [self operands]
+  [_self operands]
   (create-and operands))
 
 (def rte/create-not
@@ -843,7 +843,7 @@
 
 
 (defmethod gns/-canonicalize-type 'rte
-  [type-designator nf]
+  [type-designator _nf]
   ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
   ;;    gns/canonicalize-type, we'll need nf again
   (cons 'rte (map canonicalize-pattern
@@ -906,7 +906,7 @@
           (rte/*? op)
           op
 
-          :default
+          :else
           self)))
 
 (defn conversion-*-2
@@ -1939,7 +1939,7 @@
                    (into {} (map (fn [pair] [(first pair) (second pair)])
                                  (map rest seq-of-triples)))])
                 (group-by first
-                          (first (rte/find-all-derivatives '(:* (:cat Number Long (not (= 0))))))))))
+                          (first (rte/find-all-derivatives pattern))))))
 
 (defn rte-combine-labels ""
   [label-1 label-2]
@@ -1997,7 +1997,7 @@
                                          :transitions transitions})]))
                    derivatives (range (count derivatives))))})))))
 
-(defn dispatch [obj caller]
+(defn dispatch [obj _caller]
   (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
                    obj)
         :Dfa
@@ -2053,13 +2053,13 @@
    multiple conversions/look-ups, as the correspondence of pattern
    to compiled Dfa is maintained via the memoize function."
 
-  (fn [rte _items & {:keys [promise-disjoint
-                            hot-spot]}]
+  (fn [rte _items & {_promise-disjoint :promise-disjoint
+                     _hot-spot :hot-spot}]
     (dispatch rte 'rte/match)))
 
 (defmethod rte/match :pattern
-  [pattern items & {:keys [promise-disjoint
-                           hot-spot]}]
+  [pattern items & {_promise-disjoint :promise-disjoint
+                    hot-spot :hot-spot}]
   (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
 
 (defmethod rte/match :Dfa
@@ -2115,7 +2115,7 @@
                             (if (gns/typep candidate type)
                               next-state-index
                               ;; TODO I'm not sure this is correct, do we need to return false
-                              ;;   indicating no-match, or return the sink-stat-id.
+                              ;;   indicating no-match, or return the sink-state-id.
                               ;;   false makes the tests pass, but sink-state-id seems more
                               ;;   logical.  need to investigate whether something more fundamental
                               ;;   is wrong.

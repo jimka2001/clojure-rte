@@ -25,7 +25,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
             [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
-                                      remove-element uniquify
+                                      remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized
@@ -591,7 +591,7 @@
   canonicalization is possible, or should return a value which will be
   considered a simpler form.  For example, converting 
   (member 1 1 2 2 3) to (member 1 2 3)"
-  (fn [td nf]
+  (fn [td _nf]
     (type-dispatch td)))
 
 (defmethod -canonicalize-type :default
@@ -624,7 +624,7 @@
     ))
 
 (defmethod -canonicalize-type 'satisfies
-  [type-designator nf]
+  [type-designator _nf]
   (expand-satisfies type-designator))
 
 (defmethod -canonicalize-type 'not
@@ -721,12 +721,12 @@
     (type-dispatch this)))
 
 (defmethod dual-combination? 'or
-  [this td]
+  [_this td]
   (and (gns/combo? td)
        (= 'and (first td))))
 
 (defmethod dual-combination? 'and
-  [this td]
+  [_this td]
   (and (gns/combo? td)
        (= 'or (first td))))
 
@@ -765,7 +765,7 @@
   (second self))
 
 (defmulti create 
-  (fn [td operands]
+  (fn [td _operands]
     (type-dispatch td)))
 
 (letfn [(cr [td operands]
@@ -787,7 +787,7 @@
 (defmulti create-dual
   "Given this as an :or and a list of operands, create an :and with those operands.
    Given this as an :and and a list of operands, create an :orwith those operands."
-  (fn [this operands]
+  (fn [this _operands]
     (type-dispatch this)))
 
 (defn create-member
@@ -816,11 +816,11 @@
     (list 'not argument)))
 
 (defmethod create-dual 'or
-  [this operands]
+  [_this operands]
   (create-and operands))
 
 (defmethod create-dual 'and
-  [this operands]
+  [_this operands]
   (create-or operands))
 
 (defmulti compute-dnf
@@ -863,7 +863,7 @@
                  SAnd(x1,x2,  y2,  x3,x4),
                  SAnd(x1,x2,  y3,  x3,x4)
                )"
-  [[combo & operands :as this]]
+  [[_combo & operands :as this]]
   (let [[dual-td & _ :as tds] (filter (fn [x] (dual-combination? this x))
                                       operands)]
     (if (empty? tds)
@@ -899,15 +899,15 @@
 
 (defmulti same-combination?
   ":sigma for and, :empty-set for or"
-  (fn [td-1 td-2]
+  (fn [td-1 _td-2]
     (type-dispatch td-1)))
 
 (defmethod same-combination? 'or
-  [td td-2]
+  [_td td-2]
   (= 'or (first td-2)))
 
 (defmethod same-combination? 'and
-  [td td-2]
+  [_td td-2]
   (= 'and (first td-2)))
 
 (defmulti unit 
@@ -915,11 +915,11 @@
   type-dispatch)
 
 (defmethod unit 'or
-  [td]
+  [_td]
   :empty-set)
 
 (defmethod unit 'and
-  [td]
+  [_td]
   :sigma)
 
 (defmulti zero
@@ -927,24 +927,24 @@
   type-dispatch)
 
 (defmethod zero 'and
-  [td]
+  [_td]
   :empty-set)
 
 (defmethod zero 'or
-  [td]
+  [_td]
   :sigma)
 
 (defmulti annihilator
   "subtype? for (and ...), supertype? for (or ...)"
-  (fn [self td-1 td-2]
+  (fn [self _td-1 _td-2]
     (type-dispatch self)))
 
 (defmethod annihilator 'and
-  [self a b]
+  [_self a b]
   (subtype? a b :dont-know))
 
 (defmethod annihilator 'or
-  [self a b]
+  [_self a b]
   (subtype? b a :dont-know))
 
 
@@ -1354,7 +1354,7 @@
                    (combination-simplifiers nf)))
 
 (defmethod -canonicalize-type 'member
-  [type-designator nf]
+  [type-designator _nf]
   ;; the advantage of using find-simplifier rather than calling create-member
   ;; simply and directly is that if create-member returns a new sequence (member ...)
   ;; equal to type-designator, then find-simplfier will return the original
@@ -2080,15 +2080,21 @@
     (let [t1-operands (operands t1)
           n (count t1-operands)]
       (cond
+        ;; if any of the types is empty, the intersection is empty,
+        ;;   even if others are unknown.  (and A B empty D E).
+        ;;   Careful, the computation here depends on laziness of map.
+        ;;   Once a false is found, we don't call inhabited? on the remaining
+        ;;   part of t1-operands.
+        (some false? (map (fn [t] (inhabited? t :dont-know))
+                          (unchunk t1-operands)))
+        false
+        
+        ;; (and (not Float) (not Double) (not (member 1 2 3))) --> inhabited=true
         (and (< 1 n)
-             (forall-pairs [[a b] t1-operands]
-                           (and (or (class-designator? a)
-                                    (and (gns/not? a)
-                                         (class-designator? (second a))))
-                                (or (class-designator? b)
-                                    (and (gns/not? b)
-                                         (class-designator? (second b))))
-                                (not (disjoint? a b true)))))
+             (forall [td t1-operands]
+                     (and (gns/not? td)
+                          (or (class-designator? (operand td))
+                              (gns/member-or-=? (operand td))))))
         true
 
         (exists-pair [[a b] t1-operands]
@@ -2101,18 +2107,9 @@
                           (disjoint? a b false)))
         false
         
-        ;; if any of the types are empty, the intersection is empty,
-        ;;   even if others are unknown.  (or A B empty D E).
-        ;;   Careful, the computation here depends on laziness of map.
-        ;;   Once a false is found, we don't call inhabited? on the remaining
-        ;;   part of t1-operands.
-        (some false? (map (fn [t] (inhabited? t :dont-know))
-                          (unchunk t1-operands)))
-        false
-        
         ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
-        (and (not-empty (filter class-designator? t1-operands))
+        (and (non-empty? (filter class-designator? t1-operands))
              (= 1 (count (filter gns/not-member-or-=?
                                  t1-operands)))
              (let [t2 (canonicalize-type (cons 'and

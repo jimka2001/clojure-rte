@@ -22,7 +22,7 @@
 (ns clojure-rte.rte-case
   (:require [clojure-rte.xymbolyco :as xym]
             [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [defn-memoized member]]
+            [clojure-rte.util :refer [defn-memoized member non-empty?]]
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
@@ -100,7 +100,7 @@
                                            :promise-disjoint true)
                                 ~num-fns))))))
 
-(defn- lambda-list-to-rte
+(defn lambda-list-to-rte
   "Helper function for destructuring-case macro.
   Returns an rte either of one of the following forms:
     (:cat ... (:* ...)) -- if the given lambda-list contains &
@@ -304,7 +304,7 @@
     :else
     (let [pairs (partition 2 operands)]
       (letfn [(conv-1-pair [[lambda-list consequent]]
-                (if (not (vector? lambda-list))
+                (when (not (vector? lambda-list))
                   (throw (ex-info (cl-format false
                                              "dscase expecting vector not ~A" lambda-list)
                                   {:error-type :invalid-dscase-lambda-list
@@ -340,6 +340,7 @@
              [& ~var]
              (destructuring-case ~var
                                  ~@clauses)))))
+
 
 (defmacro destructuring-fn
   "params => positional-params* , or positional-params* & next-param
@@ -392,11 +393,7 @@
                        "destructuring-fn, invalid argument list: ~A first non-conforming element ~A"
                        args
                        (map (fn [clause]
-                              (and (type clause);;(list? clause)
-                                   ;;(not-empty clause)
-                                   ;;(vector? (first clause))
-
-                                   )) (rest args))
+                              (type clause)) (rest args))
                        )))))
 
 (defmacro dsfn
@@ -409,7 +406,7 @@
   [& forms]
   (letfn [(process [form]
             (if (and (sequential? form)
-                     (not (empty? form)))
+                     (non-empty? form))
               (let [meta-data (meta (first form))]
                 (cons [(first form) (if (nil? meta-data) {} meta-data) ] (rest form)))
               form))]

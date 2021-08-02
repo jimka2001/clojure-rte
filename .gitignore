@@ -19,3 +19,5 @@ clojure-rte.iml
 java*.hprof
 .clj-kondo/.cache
 .lsp
+.cpcache
+.clj-kondo/backtick

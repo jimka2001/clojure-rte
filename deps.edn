@@ -1,0 +1,10 @@
+{:aliases
+ {:clj-kondo
+  {:replace-deps
+   {clj-kondo/clj-kondo
+    {:git/url "https://github.com/clj-kondo/clj-kondo"
+     
+     :sha  "d5e0ec443fecbc01f8fc5aae4de69cce2e1e72be"
+     }}
+   :main-opts ["-m" "clj-kondo.main"]}}
+}
