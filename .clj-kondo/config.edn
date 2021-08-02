@@ -19,5 +19,5 @@
                        clojure-rte.rte-case/dsfn clojure-rte.rte-case/dsfn
                        clojure-rte.rte-case/dscase clojure-rte.rte-case/dscase
                        clojure-rte.typecase/typecase clojure-rte.typecase/typecase
-                       ;; backtick/template backtick/template
+                       backtick/template backtick/template
                        }}}
