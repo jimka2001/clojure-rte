@@ -29,7 +29,7 @@
   exit values of the dfa with canonicalized rte patterns of the accepting
   langauge. If there are no accepting states in the Dfa, an empty map {}
   is returned."
-  [dfa' canonicalize-pattern]
+  [dfa']
   ;; TODO - this can be done easier
   ;;    1. minimize and trim the given dfa
   ;;    2. generate a list of transition triples [from label to]
@@ -143,7 +143,7 @@
   [dfa]
   (assert (instance? (xym/record-name) dfa)
           (cl-format false "dfa-to-rte: expecting Dfa, not ~A ~A" (type dfa) dfa))
-  (let [ret-val-rte (extract-rte dfa rte/canonicalize-pattern)]
+  (let [ret-val-rte (extract-rte dfa)]
     (if (= {} ret-val-rte)
       {true :empty-set}
       ret-val-rte)))
