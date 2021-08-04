@@ -153,6 +153,74 @@
   [dfa]
   (map serialize-state (states-as-seq dfa)))
 
+
+(defn gen-function [transitions promise-disjoint sink-state-id]
+  (letfn [(type-intersect [t1 t2]
+            (list 'and t1 t2))
+          (type-and-not [t1 t2]
+            (if (= :empty-set t2)
+              t1
+              (list 'and t1 (list 'not t2))))]
+    (let [state-id->pseudo-type (into {} (for [[_type state-id] transitions
+                                               :let [tag (gensym "pseudo-")]]
+                                           [state-id (template (satisfies ~tag))]))
+          pseudos (for [[_ tag] state-id->pseudo-type]
+                    tag)
+          pseudo-type->state-id (into {} (for [[state-id tag] state-id->pseudo-type]
+                                           [tag state-id]))
+          pseudo-type-functions (for [[_ [_ function-designator]] state-id->pseudo-type]
+                                  function-designator)
+          old-label-< bdd/*label-<*
+          bdd (binding [gns/*pseudo-type-functions* (concat pseudo-type-functions
+                                                            gns/*pseudo-type-functions*)
+                        bdd/*label-<* (fn line176 [t1 t2]
+                                        (cond (and (member t1 pseudos)
+                                                   (member t2 pseudos))
+                                              (old-label-< t1 t2)
+
+                                              (member t1 pseudos)
+                                              false
+
+                                              (member t2 pseudos)
+                                              true
+
+                                              :else
+                                              (old-label-< t1 t2)))]
+                (first
+                 (reduce
+                  (fn line191 [[accum-bdd previous-types] [type state-id]]
+                    [(bdd/or accum-bdd
+                             (bdd/bdd (type-and-not
+                                       (type-intersect type
+                                                       (state-id->pseudo-type state-id))
+                                       (if promise-disjoint
+                                                   ;; This is an optimization
+                                                   ;; see issue
+                                                   ;; https://gitlab.lrde.epita.fr/jnewton/clojure-rte/-/issues/27
+                                                   ;; If the given types are already promised to be disjoint,
+                                                   ;;  then no need to do an expensive Bdd operation
+                                         :empty-set
+                                                   ;; in case the types are not disjoint
+                                         (cons 'or previous-types)))))
+                     (cons type previous-types)])
+                  [false '(:empty-set)] ;; initial bdd and empty-type
+                  transitions)))]
+                ;;(clojure-rte.dot/bdd-to-dot bdd :title (gensym "bdd") :view true)
+      (fn line209 [candidate]
+        (loop [bdd' bdd
+               lineage ()]
+          (cl/cl-cond
+           ((member bdd' '(true false))
+                      ;; transitions not exhaustive
+            sink-state-id)
+           ((pseudo-type->state-id (:label bdd') false)) ;; this is the return value of the (fn [] ...)
+           ((gns/typep candidate (:label bdd'))
+            (recur (:positive bdd')
+                   (cons (:label bdd') lineage)))
+           (true
+            (recur (:negative bdd')
+                   (cons (list 'not (:label bdd')) lineage)))))))))
+
 (defn-memoized [optimized-transition-function optimized-transition-function-impl]
   "Given a set of transitions each of the form [type-designator state-index],
   return a indicator function which can be called with an candidate element
@@ -165,14 +233,9 @@
   ;;  It is not necessary to know whether the transitions cover the
   ;;  universe because the indicator function has a second argument
   ;;  to return if there is no match.
-  [transitions promise-disjoint default]
+  [transitions promise-disjoint sink-state-id]
   (bdd/with-hash []
-    (letfn [(type-intersect [t1 t2]
-              (list 'and t1 t2))
-            (type-and-not [t1 t2]
-              (if (= :empty-set t2)
-                t1
-                (list 'and t1 (list 'not t2))))
+    (letfn [
             ;; local function find-duplicates
             (find-duplicates [items]
               (loop [items items
@@ -188,67 +251,6 @@
                       (recur (rest items)
                              duplicates))))
 
-            ;; local function gen-function
-            (gen-function []
-              (let [state-id->pseudo-type (into {} (for [[_type state-id] transitions
-                                                         :let [tag (gensym "pseudo-")]]
-                                                     [state-id (template (satisfies ~tag))]))
-                    pseudos (for [[_ tag] state-id->pseudo-type]
-                              tag)
-                    pseudo-type->state-id (into {} (for [[state-id tag] state-id->pseudo-type]
-                                                     [tag state-id]))
-                    pseudo-type-functions (for [[_ [_ function-designator]] state-id->pseudo-type]
-                                            function-designator)
-                    old-label-< bdd/*label-<*
-                    bdd (binding [gns/*pseudo-type-functions* (concat pseudo-type-functions
-                                                                      gns/*pseudo-type-functions*)
-                                  bdd/*label-<* (fn [t1 t2]
-                                                  (cond (and (member t1 pseudos)
-                                                             (member t2 pseudos))
-                                                        (old-label-< t1 t2)
-
-                                                        (member t1 pseudos)
-                                                        false
-
-                                                        (member t2 pseudos)
-                                                        true
-
-                                                        :else
-                                                        (old-label-< t1 t2)))]
-                          (first
-                           (reduce
-                            (fn [[accum-bdd previous-types] [type state-id]]
-                              [(bdd/or accum-bdd
-                                       (bdd/bdd (type-and-not 
-                                                 (type-intersect type
-                                                                 (state-id->pseudo-type state-id))
-                                                 (if promise-disjoint
-                                                   ;; This is an optimization
-                                                   ;; see issue
-                                                   ;; https://gitlab.lrde.epita.fr/jnewton/clojure-rte/-/issues/27
-                                                   ;; If the given types are already promised to be disjoint,
-                                                   ;;  then no need to do an expensive Bdd operation
-                                                   :empty-set
-                                                   ;; in case the types are not disjoint
-                                                   (cons 'or previous-types)))))
-                               (cons type previous-types)])
-                            [false '(:empty-set)] ;; initial bdd and empty-type
-                            transitions)))]
-                ;;(clojure-rte.dot/bdd-to-dot bdd :title (gensym "bdd") :view true)
-                (fn [candidate default]
-                  (loop [bdd' bdd
-                         lineage ()]
-                    (cl/cl-cond
-                     ((member bdd' '(true false))
-                      ;; transitions not exhaustive
-                      default)
-                     ((pseudo-type->state-id (:label bdd') false)) ;; this is the return value of the (fn [] ...)
-                     ((gns/typep candidate (:label bdd'))
-                      (recur (:positive bdd')
-                             (cons (:label bdd') lineage)))
-                     (true
-                      (recur (:negative bdd')
-                             (cons (list 'not (:label bdd')) lineage))))))))
             ]
       (let [types (map first transitions)
             duplicate-types (find-duplicates types)
@@ -262,10 +264,10 @@
           (optimized-transition-function (for [[consequent transitions] (group-by second transitions)]
                                             [(gns/create-or (map first transitions)) consequent])
                                           promise-disjoint
-                                          default)
+                                          sink-state-id)
 
           (empty? duplicate-types)
-          (gen-function)
+          (gen-function transitions promise-disjoint sink-state-id)
           
           (not-empty (intersection duplicate-types inhabited-types))
           ;; if some duplicate types are inhbited
@@ -276,7 +278,7 @@
 
           ;; if all duplicate types are empty types
           :else
-          (gen-function))))))
+          (gen-function transitions promise-disjoint sink-state-id))))))
 
 (defn delta
   "Given a state and target-label, find the destination state (object of type State)"

@@ -2062,6 +2062,17 @@
                     hot-spot :hot-spot}]
   (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
 
+(defn slow-transition-function [transitions sink-state-id]
+  (fn [candidate]
+    ;; look through the sequence or [type-designator next-state-id] pairs.
+    ;; if we find a type for which candidate is of that type,
+    ;; then return the next-state-id,
+    ;; else return the synk-state-id.
+    (reduce (fn [acc [td next-state-id]]
+              (if (gns/typep candidate td)
+                (reduced next-state-id)
+                acc)) sink-state-id transitions)))
+
 (defmethod rte/match :Dfa
   [dfa items & {:keys [
                        ;; if the caller promises that never are two transitions in
@@ -2109,30 +2120,19 @@
         ;;       pattern is *compiled* into a form where type-designators are converted
         ;;       to Bdds thus each type check guarantees to never check the same
         ;;       type predicate multiple times, and sometimes not at all.
-        (letfn [(slow-transition-function [transitions]
-                  (fn [candidate sink-state-id]
-                    (some (fn [[type next-state-index]]
-                            (if (gns/typep candidate type)
-                              next-state-index
-                              ;; TODO I'm not sure this is correct, do we need to return false
-                              ;;   indicating no-match, or return the sink-state-id.
-                              ;;   false makes the tests pass, but sink-state-id seems more
-                              ;;   logical.  need to investigate whether something more fundamental
-                              ;;   is wrong.
-                              false))
-                          transitions)))
-                (fast-transition-function [transitions]
+        (letfn [(fast-transition-function [transitions]
                   (xym/optimized-transition-function transitions promise-disjoint sink-state-id))
                 (transition-function [transitions]
+                  ;; transition-function returns a function with lambda-list [item sink-state-id]
                   (if hot-spot
                     (fast-transition-function transitions)
-                    (slow-transition-function transitions)))
+                    (slow-transition-function transitions sink-state-id)))
                 (consume [state-index item]
                   (let [state-obj (state-vec state-index)]
                     (cl/cl-cond
                      ((member state-obj sink-states)
                       (reduced false))
-                     (((transition-function (:transitions state-obj)) item sink-state-id))
+                     (((transition-function (:transitions state-obj)) item))
                      (:else (reduced false)))))]
           (let [final-state (reduce consume 0 items)]
             ;; final-state may be integer desgnating the state which was
