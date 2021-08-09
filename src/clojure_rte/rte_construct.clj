@@ -2062,7 +2062,12 @@
                     hot-spot :hot-spot}]
   (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
 
-(defn slow-transition-function [transitions sink-state-id]
+(defn slow-transition-function
+  "Returns a unary function which can serve as the transfer function of a state
+  in a Dfa.   The (returned) function takes an element, candidate, of an input sequence,
+  and computes the id of the next state as a function of the labels of the transitions.
+  The transitions and the sink-state-id are given when slow-transition-function is called."
+  [transitions sink-state-id]
   (fn [candidate]
     ;; look through the sequence or [type-designator next-state-id] pairs.
     ;; if we find a type for which candidate is of that type,

@@ -154,7 +154,12 @@
   (map serialize-state (states-as-seq dfa)))
 
 
-(defn gen-function [transitions promise-disjoint sink-state-id]
+(defn gen-function
+  "This is a helper function used by optimized-transition-function.
+  gen-funciton computes and returns a unary function which can be called
+  on a candidate element coming from an input sequence, and returns
+  the id of the next state."
+  [transitions promise-disjoint sink-state-id]
   (letfn [(type-intersect [t1 t2]
             (list 'and t1 t2))
           (type-and-not [t1 t2]
@@ -223,10 +228,12 @@
 
 (defn-memoized [optimized-transition-function optimized-transition-function-impl]
   "Given a set of transitions each of the form [type-designator state-index],
-  return a indicator function which can be called with an candidate element
-  of a sequence, and the function will return the state-index.  When called
+  return a unary transfer function which can be called with an candidate element
+  of a sequence, and the function will return the id of the next state.  When called
   with the candidate object, will not evaluate any type predicate more than
-  once."
+  once. optimized-transition-function also accepts a sink-state-id which is
+  what the transfer function will return if no transition label matches the
+  candidate element."
   
   ;; TODO, if we could know whether to trust that the transitions are
   ;;  already disjoint this function could be made much faster.
