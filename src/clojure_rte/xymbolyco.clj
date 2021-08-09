@@ -178,7 +178,7 @@
           old-label-< bdd/*label-<*
           bdd (binding [gns/*pseudo-type-functions* (concat pseudo-type-functions
                                                             gns/*pseudo-type-functions*)
-                        bdd/*label-<* (fn line176 [t1 t2]
+                        bdd/*label-<* (fn [t1 t2]
                                         (cond (and (member t1 pseudos)
                                                    (member t2 pseudos))
                                               (old-label-< t1 t2)
@@ -193,7 +193,7 @@
                                               (old-label-< t1 t2)))]
                 (first
                  (reduce
-                  (fn line191 [[accum-bdd previous-types] [type state-id]]
+                  (fn [[accum-bdd previous-types] [type state-id]]
                     [(bdd/or accum-bdd
                              (bdd/bdd (type-and-not
                                        (type-intersect type
@@ -211,7 +211,7 @@
                   [false '(:empty-set)] ;; initial bdd and empty-type
                   transitions)))]
                 ;;(clojure-rte.dot/bdd-to-dot bdd :title (gensym "bdd") :view true)
-      (fn line209 [candidate]
+      (fn [candidate]
         (loop [bdd' bdd
                lineage ()]
           (cl/cl-cond
