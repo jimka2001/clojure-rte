@@ -800,5 +800,5 @@
            :empty-set))))
 
 (defn -main []
-  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
+  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-canonicalize/the-test])
   (clojure.test/run-tests 'clojure-rte.rte-canonicalize))
