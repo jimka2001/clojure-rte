@@ -34,6 +34,7 @@
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [member]]
             [clojure-rte.genus :as gns]
+            [clojure-rte.genus-tester :refer [*test-types*]]
             [clojure-rte.rte-tester :refer [gen-rte]]
             [clojure-rte.dot :as dot]
             [backtick :refer [template]]
@@ -590,7 +591,7 @@
   (testing "circular dfa rte flow"
     (doseq [depth (range 1)
             _rep (range 10)]
-        (test-circular-dfa-rte-flow (gen-rte depth gns/*test-types*)))))
+        (test-circular-dfa-rte-flow (gen-rte depth *test-types*)))))
 
 (deftest t-discovered-case-1261
   (test-circular-dfa-rte-flow '(:* (:contains-any))))

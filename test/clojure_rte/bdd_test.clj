@@ -24,6 +24,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.bdd :as bdd]
             [clojure-rte.genus :as gns]
+            [clojure-rte.genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format *print-pretty*]]
             [clojure-rte.util :refer [member]]
             [clojure.test :refer [deftest is testing]])
@@ -363,7 +364,7 @@
   (testing "type not subtype of its complement"
     (doseq [depth (range 5)
             reps (range 200)
-            :let [t1 (gns/gen-type depth)]
+            :let [t1 (gen-type depth)]
             :when (gns/inhabited? t1 false)]
       ;; :empty-set is a subtype of (not :empty-set)
       ;; but otherwise x is not a subtype of (not x)
@@ -378,8 +379,8 @@
   (testing "type subtype of union"
     (doseq [depth (range 5)
             reps (range 200)
-            :let [t1 (gns/gen-type depth)
-                  t2 (gns/gen-type depth)]]
+            :let [t1 (gen-type depth)
+                  t2 (gen-type depth)]]
       (is (= true (bdd/type-subtype? t1 (gns/create-or [t1 t2])))
           (cl-format false
                      "~&
@@ -395,8 +396,8 @@
   (testing "intersection subtype of type"
     (doseq [depth (range 5)
             reps (range 200)
-            :let [t1 (gns/gen-type depth)
-                  t2 (gns/gen-type depth)]]
+            :let [t1 (gen-type depth)
+                  t2 (gen-type depth)]]
       
       (is (= true (bdd/type-subtype? (gns/create-and [t1 t2]) t1))
           (cl-format false
@@ -408,8 +409,8 @@
   (testing "bdd/type-subtypep ? vs canonicalized form"
     (doseq [depth (range 5)
             reps (range 200)
-            :let [t1 (gns/gen-type depth)
-                  t2 (gns/gen-type depth)
+            :let [t1 (gen-type depth)
+                  t2 (gen-type depth)
                   t1-can (gns/canonicalize-type t1)
                   t2-can (gns/canonicalize-type t2)
                   sub-1-2 (bdd/type-subtype? t1 t2)
