@@ -27,10 +27,11 @@
   :plugins [[lein-cloverage "1.1.2"]
             [lein-ns-dep-graph "0.2.0-SNAPSHOT"]
             ]
-  :jvm-opts ["-Xmx1g" "-XX:+HeapDumpOnOutOfMemoryError"] ;; 
+  :jvm-opts ["-Xmx1g" "-XX:+HeapDumpOnOutOfMemoryError" "-Djdk.attach.allowAttachSelf"] ;; 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [lein-cloverage "1.1.2"]
                  [org.clojure/data.json "1.0.0"]
+                 [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
                  [backtick "0.3.4"]
                  [org.clojure/core.memoize "1.0.236"]
                  [org.clojure/math.combinatorics "0.1.6"]]
