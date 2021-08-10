@@ -28,7 +28,7 @@
                                       remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
-                                      defn-memoized
+                                      defn-memoized call-with-found find-first
                                       unchunk]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -746,16 +746,15 @@
                  SAnd(x1,x2,  y3,  x3,x4)
                )"
   [[_combo & operands :as this]]
-  (let [[dual-td & _ :as tds] (filter (fn [x] (dual-combination? this x))
-                                      operands)]
-    (if (empty? tds)
-      this
-      (create-dual this (map (fn [y]
-                               (create this (map (fn [x]
-                                                   (if (= x dual-td)
-                                                     y x))
-                                                 operands)))
-                             (rest dual-td))))))
+  (call-with-found (fn [x] (dual-combination? this x)) operands
+                   :if-not-found this
+                   :if-found (fn [dual-td]
+                               (create-dual this (map (fn [y]
+                                                        (create this (map (fn [x]
+                                                                            (if (= x dual-td)
+                                                                              y x))
+                                                                          operands)))
+                                                      (rest dual-td))))))
 
 (defmethod compute-dnf 'and
   [td]
@@ -922,10 +921,10 @@
                                (exists [d duals]
                                        (= (operands d) (search-replace (operands td) n (operand n))))))]
                   ;; find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
-                  (let [to-remove (filter pred (operands td))]
-                    (if (empty? to-remove)
-                      td
-                      (create td (remove-element (first to-remove) (operands td))))))))]
+                  (call-with-found pred (operands td)
+                                   :if-not-found td
+                                   :if-found (fn [to-remove]
+                                               (create td (remove-element to-remove (operands td))))))))]
       (create self (map f (operands self))))))
 
 (defn conversion-C10
@@ -936,14 +935,13 @@
             (exists [v (operands self)]
                     (and (not= u v)
                          (= (annihilator self u v) true))))]
-    (let [subs (filter pred (operands self))]
-      (if (empty? subs)
-        self
-        (let [sub (first subs)
-              keep (setof [sup (operands self)]
-                          (or (= sup sub)
-                              (not= (annihilator self sub sup) true)))]
-          (create self keep))))))
+    (call-with-found pred (operands self)
+                     :if-not-found self
+                     :if-found (fn [sub]
+                                 (let [keep (setof [sup (operands self)]
+                                                   (or (= sup sub)
+                                                       (not= (annihilator self sub sup) true)))]
+                                   (create self keep))))))
 
 (defn conversion-C11
   "A + !A B -> A + B
@@ -953,54 +951,57 @@
   (let [combos (filter gns/combo? (operands self))
         duals (setof [td combos] (dual-combination? self td))]
     (letfn [(pred [a]
-              (let [n (template (not ~a))]
+              (let [n (gns/create-not a)]
                 (exists [td duals]
                         (or (member a (operands td))
                             (member n (operands td))))))]
-      (let [ao (filter pred (operands self))
-            not-ao (template (not ~(first ao)))]
-        (letfn [(consume [td]
-                  (cond (not (gns/combo? td))
-                        [td]
+      (call-with-found
+       pred (operands self)
+       :if-not-found self
+       :if-found (fn [ao]
+                   (let [not-ao (gns/create-not ao)]
+                     (letfn [(consume [td]
+                               (cond (not (gns/combo? td))
+                                     [td]
 
-                        (same-combination? self td)
-                        [td]
+                                     (same-combination? self td)
+                                     [td]
 
-                        (member (first ao) (operands td))
-                        [] ;;  (A + ABX + Y) --> (A + Y)
+                                     (member ao (operands td))
+                                     [] ;;  (A + ABX + Y) --> (A + Y)
 
-                        (member not-ao (operands td))
-                        ;; td is a dual, so td.create creates a dual
-                        ;;    (A + !ABX + Y) --> (A + BX + Y)
-                        [(create td (remove-element not-ao (operands td)))]
+                                     (member not-ao (operands td))
+                                     ;; td is a dual, so td.create creates a dual
+                                     ;;    (A + !ABX + Y) --> (A + BX + Y)
+                                     [(create td (remove-element not-ao (operands td)))]
 
-                        :else
-                        [td]))]
-          (create self (mapcat consume (operands self))))))))
+                                     :else
+                                     [td]))]
+                       (create self (mapcat consume (operands self))))))))))
 
 (defn conversion-C12
   "AXBC + !X = ABC + !X"
   [self]
   (let [combos (filter gns/combo? (operands self))
-        duals (setof [td combos] (dual-combination? self td))
-        comp (filter (fn [n]
-                       (and (gns/not? n)
-                            (exists [td duals]
-                                    (member (operand n) (operands td)))))
-                     (operands self))]
-    (if (empty? comp)
-      self
-      (letfn [(f [td]
-                (cond (not (gns/combo? td))
-                      td
+        duals (setof [td combos] (dual-combination? self td))]
+    (call-with-found (fn [n]
+                        (and (gns/not? n)
+                             (exists [td duals]
+                                     (member (operand n) (operands td)))))
+      (operands self)
+      :if-not-found self
+      :if-found (fn [comp]
+                  (letfn [(f [td]
+                            (cond (not (gns/combo? td))
+                                  td
 
-                      (not (dual-combination? self td))
-                      td
+                                  (not (dual-combination? self td))
+                                  td
 
-                      :else
-                      (create td (remove-element (operand (first comp))
-                                                 (operands td)))))]
-        (create self (map f (operands self)))))))
+                                  :else
+                                  (create td (remove-element (operand comp)
+                                                             (operands td)))))]
+                    (create self (map f (operands self))))))))
 
 
 (defn conversion-C13
@@ -1056,6 +1057,7 @@
                     td))]
           (create self (uniquify (map f (operands self)))))))))
 
+(def secret-value (gensym "secret"))
 (defn conversion-C15
   "SAnd(X, member1, not-member) --> SAnd(X,member2)
    SOr(X, member, not-member1) --> SOr(X,not-member2)
@@ -1071,13 +1073,13 @@
   (letfn [(diff [xs ys]
             (setof [x xs]
                    (not (member x ys))))]
-    (let [members (filter gns/member-or-=? (operands self))
-          not-members (filter (fn [x] (and (gns/not? x)
-                                           (gns/member-or-=? (operand x)))) (operands self))]
-      (cond (empty? members)
+    (let [first-member (find-first gns/member-or-=? (operands self) secret-value)
+          first-not-member (find-first (fn [x] (and (gns/not? x)
+                                         (gns/member-or-=? (operand x)))) (operands self) secret-value)]
+      (cond (= first-member secret-value)
             self
 
-            (empty? not-members)
+            (= first-not-member secret-value)
             self
 
             :else
@@ -1085,23 +1087,23 @@
                       (cond
                         ;; in the SAnd case we remove the not_member and filter the member args
                         (and (gns/and? self)
-                             (= td (first not-members)))
+                             (= td first-not-member))
                         []
 
                         (and (gns/and? self)
-                             (= td (first members)))
-                        [(create-member (diff (operands (first members))
-                                              (operands (operand (first not-members)))))]
+                             (= td first-member))
+                        [(create-member (diff (operands first-member)
+                                              (operands (operand first-not-member))))]
 
                         ;; in the SOr case we remove the member and filter the not-member args
                         (and (gns/or? self)
-                             (= td (first members)))
+                             (= td first-member))
                         []
 
                         (and (gns/or? self)
-                             (= td (first not-members)))
-                        [(template (not ~(create-member (diff (operands (operand (first not-members)))
-                                                              (operands (first members))))))]
+                             (= td first-not-member))
+                        [(gns/create-not (gns/create-member (diff (operands (operand first-not-member))
+                                                              (operands first-member))))]
 
                         :else
                         [td]))]
@@ -1148,11 +1150,11 @@
 
 (defmethod conversion-D1 'and
   [self]
-  (let [members (filter gns/member-or-=? (operands self))]
-    (if (empty? members)
-      self
-      (create-member (setof [x (operands (first members))]
-                            (gns/typep x self))))))
+  (call-with-found gns/member-or-=? (operands self)
+                   :if-not-found self
+                   :if-found (fn [first-member]
+                               (gns/create-member (setof [x (operands first-member)]
+                                                         (gns/typep x self))))))
 
 (defmethod conversion-D1 'or
   [self]
@@ -1989,12 +1991,12 @@
         
         ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
-        (and (non-empty? (filter class-designator? t1-operands))
+        (and (some class-designator? t1-operands)
              (= 1 (count (filter gns/not-member-or-=?
                                  t1-operands)))
-             (let [t2 (canonicalize-type (cons 'and
-                                               (remove gns/not-member-or-=?
-                                                       t1-operands)))]
+             (let [t2 (canonicalize-type (gns/create-and
+                                          (remove gns/not-member-or-=?
+                                                  t1-operands)))]
                (inhabited? t2 false)))
         true
 
