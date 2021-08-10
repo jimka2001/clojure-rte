@@ -1826,35 +1826,38 @@
             :else
             :dont-know))))
 
-  (cond
-    (not (gns/and? t1))
 (defmethod -subtype? 'and subtype-and [t1 t2]
+  (if (not (gns/and? t1))
     :dont-know
-    
-    (member t2 (rest t1))
-    ;; (subtype? (and A B) A)
-    true
+    (letfn [(cond-a []
+              ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)  
+              (exists [t (rest t1)] (subtype? t t2 false)))
+            (cond-b []
+              ;; (subtype? '(and A B) '(not A))
+              (and (gns/not? t2)
+                   (exists [t (rest t1)]
+                           (= t (second t2)))
+                   (inhabited? t1 false)))
+            (cond-c []
+              ;; (subtype? (and A B C X Y) (and A B C) )
+              (and (gns/and? t2)
+                   (subset? (set (rest t2)) (set (rest t1)))))]
+      (cond
+        (member t2 (rest t1))
+        ;; (subtype? (and A B) A)
+        true
 
-    
-    (exists [t (rest t1)] (subtype? t t2 false))
-    ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
-    true
+        (cond-a)
+        true
 
+        (cond-b)
+        false
 
-    ;; (subtype? '(and A B) '(not A))
-    (and (gns/not? t2)
-         (exists [t (rest t1)]
-                 (= t (second t2)))
-         (inhabited? t1 false))
-    false
+        (cond-c)
+        true
 
-    ;; (subtype? (and A B C X Y) (and A B C) )
-    (and (gns/and? t2)
-         (subset? (set (rest t2)) (set (rest t1))))
-    true
-    
-    :else
-    :dont-know))
+        :else
+        :dont-know))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of inhabite? and -inhabited?
