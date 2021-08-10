@@ -47,6 +47,8 @@
 (declare check-disjoint check-disjoint-impl)
 (declare combinator)
 (declare combo-filter)
+(declare create-and)
+(declare create-or)
 (declare dual-combinator)
 (declare expand-satisfies)
 (declare operand)
@@ -649,25 +651,18 @@
   [self]
   (second self))
 
+
 (defmulti create 
   (fn [td _operands]
     (type-dispatch td)))
 
-(letfn [(cr [td operands]
-          (cond (empty? operands)
-                (unit td)
+(defmethod create 'or cr-or
+  [_td operands]
+  (create-or operands))
 
-                (empty? (rest operands))
-                (first operands)
-
-                :else
-                (cons (first td) operands)))]
-  (defmethod create 'or
-    [td operands]
-    (cr td operands))
-  (defmethod create 'and
-    [td operands]
-    (cr td operands)))
+(defmethod create 'and cr-and
+  [_td operands]
+  (create-and operands))
 
 (defmulti create-dual
   "Given this as an :or and a list of operands, create an :and with those operands.
@@ -686,13 +681,15 @@
         :else
         (cons 'member operands)))
 
-(defn create-or
-  [operands]
-  (create '(or) operands))
-
-(defn create-and
-  [operands]
-  (create '(and) operands))
+(letfn [(cr [td operands]
+          (case (bounded-count 2 operands)
+            0 (unit td)
+            1 (first operands)
+            (cons (first td) operands)))]
+  (defn create-or [operands]
+    (cr '(or) operands))
+  (defn create-and [operands]
+    (cr '(and) operands)))
 
 (defn create-not
   [argument]
