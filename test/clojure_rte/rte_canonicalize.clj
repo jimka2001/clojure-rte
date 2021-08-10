@@ -22,10 +22,7 @@
 (ns clojure-rte.rte-canonicalize
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte
-             :refer [
-                     canonicalize-pattern
-                     
-                     with-compile-env ]]
+             :refer [canonicalize-pattern with-compile-env ]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [count-if-not]]
             [clojure-rte.genus :as gns]))
@@ -250,6 +247,9 @@
                              (= 2) (:* (:or (:cat (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)) (= 2)) (= 2)))
                              (:and (:not (= 2)) :sigma) (:* (:and (:not (= 2)) :sigma)))
                        :epsilon))
+
+
+
 
 (deftest t-canonicalize-pattern-714
   (testing "canonicalize-pattern large special case"

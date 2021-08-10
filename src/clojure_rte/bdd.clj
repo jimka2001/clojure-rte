@@ -100,8 +100,7 @@
                          ;; never called unless node is differrent from true or false, i.e.
                          ;; the 3rd case of the cond.
                          exists-disjoint (delay (exists [x parents] (gns/disjoint? x my-label false)))
-                         exists-subtype (delay (exists [x parents] (gns/subtype?  x my-label false)))
-]
+                         exists-subtype (delay (exists [x parents] (gns/subtype?  x my-label false)))]
                      (cond
                        (= true node) ; case #1
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B
