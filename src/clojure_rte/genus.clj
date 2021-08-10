@@ -1716,7 +1716,7 @@
                      :sub sub
                      :super super}))))
 
-(defmethod -subtype? :primary [sub-designator super-designator]
+(defmethod -subtype? :primary subtype-primary [sub-designator super-designator]
   (let [super-canon (delay (gns/canonicalize-type super-designator))
         sub-canon   (delay (gns/canonicalize-type sub-designator))]
     (cond (and (class-designator? super-designator)
@@ -1736,7 +1736,7 @@
           :else
           :dont-know)))
 
-(defmethod -subtype? '= [sub super]
+(defmethod -subtype? '= subtype-= [sub super]
   (cond (gns/=? sub)
         (subtype? (cons 'member (rest sub)) super :dont-know)
 
@@ -1746,7 +1746,6 @@
         :else
         :dont-know))
 
-(defmethod -subtype? 'not [sub super]
   (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
              (disjoint? sub (second super) false))
         true
@@ -1758,6 +1757,7 @@
              (class-designator? (second sub))
              (disjoint? super (second sub) false))
         false
+(defmethod -subtype? 'not subtype-not [sub super]
 
         (and (gns/not? sub)
              (type-equivalent? (second sub) super false))
@@ -1788,7 +1788,7 @@
             :dont-know
             x))))
 
-(defmethod -subtype? 'member [sub super]
+(defmethod -subtype? 'member subtype-member [sub super]
   (cond (gns/member? sub)
         (every? (fn [e1]
                   (typep e1 super)) (rest sub))
@@ -1810,13 +1810,13 @@
         :else
         :dont-know))
 
-(defmethod -subtype? 'or [t1 t2]
+(defmethod -subtype? 'or subtype-or [t1 t2]
   (cond
     (not (gns/or? t1))
     :dont-know
 
     :else
-    (let [values (map (fn [t] (subtype? t t2 :dont-know))
+    (let [values (map (fn subtype-t-t2 [t] (subtype? t t2 :dont-know))
                       (unchunk (rest t1)))]
       (cond (every? true? values)
             true
@@ -1827,9 +1827,9 @@
             :else
             :dont-know))))
 
-(defmethod -subtype? 'and [t1 t2]
   (cond
     (not (gns/and? t1))
+(defmethod -subtype? 'and subtype-and [t1 t2]
     :dont-know
     
     (member t2 (rest t1))
@@ -1922,7 +1922,7 @@
                     {:type-designator type-designator
                      :error-type :should-not-be-called-directly}))))
 
-(defmethod -inhabited? :primary [type-designator]
+(defmethod -inhabited? :primary inhabited-primary [type-designator]
   (cond
     (class-designator? type-designator)
     true
@@ -1936,7 +1936,7 @@
     :else    
     :dont-know))
 
-(defmethod -inhabited? 'or [t1]
+(defmethod -inhabited? 'or inhabited-or [t1]
   (cond
     (not (gns/or? t1))
     :dont-know
@@ -1957,7 +1957,7 @@
             :else
             :dont-know))))
 
-(defmethod -inhabited? 'and [t1]
+(defmethod -inhabited? 'and inhabited-and [t1]
   (if (not (gns/and? t1))
     :dont-know
     (let [t1-operands (operands t1)
@@ -2018,7 +2018,7 @@
         :else
         :dont-know))))
 
-(defmethod -inhabited? 'not [t1]
+(defmethod -inhabited? 'not inhabited-not [t1]
   (cond (not (gns/not? t1))
         :dont-know
 
@@ -2032,7 +2032,7 @@
         :else
         :dont-know))
 
-(defmethod -inhabited? 'member [t1]
+(defmethod -inhabited? 'member inhabited-member [t1]
   (cond (not (gns/member? t1))
         :dont-know
 
@@ -2042,7 +2042,7 @@
         :else    
         true))
 
-(defmethod -inhabited? '= [t1]
+(defmethod -inhabited? '= inhabited-= [t1]
   (if (gns/=? t1)
     true
     :dont-know))
