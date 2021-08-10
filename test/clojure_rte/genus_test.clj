@@ -32,6 +32,16 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
 
+(deftest t-discovered-case-disjoint-135
+  (testing "discovered-case-disjoint-135"
+    (is (= (gns/inhabited? '(and (not clojure.lang.Symbol) (not java.lang.CharSequence) java.lang.Comparable)
+                           :dont-know)
+           true))
+    (is (= (gns/disjoint? '(and (not clojure.lang.Symbol) (not java.lang.CharSequence) java.lang.Comparable)
+                          'java.lang.Comparable
+                                     :dont-know)
+           false))))
+    
 (deftest t-discovered-case-134
   (testing "discovered case 134"
     (is (= (gns/inhabited? '(and (not (member 1 2 3 a b c)) (not BigDecimal)) :dont-know)
