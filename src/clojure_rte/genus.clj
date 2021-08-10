@@ -1416,35 +1416,37 @@
         :else
         :dont-know))
 
+(defn disjoint-classes? [t1 t2]
+  (let [c1 (find-class t1)
+        c2 (find-class t2)]
+    (cond (= c1 c2)
+          false
+
+          (isa? c1 c2)
+          false
+
+          (isa? c2 c1)
+          false
+
+          :else
+          (let [ct1 (class-primary-flag t1)
+                ct2 (class-primary-flag t2)]
+            (cond
+              (or (= :final ct1)
+                  (= :final ct2))
+              true ;; we've already checked isa? above
+
+              (or (= :interface ct1)
+                  (= :interface ct2))
+              false
+
+              :else
+              true)))))
+
 (defmethod -disjoint? :classes [t1 t2]
   (if (and (class-designator? t1)
            (class-designator? t2))
-    (let [c1 (find-class t1)
-          c2 (find-class t2)]
-      (cond (= c1 c2)
-            false
-
-            (isa? c1 c2)
-            false
-
-            (isa? c2 c1)
-            false
-
-            :else
-            (let [ct1 (class-primary-flag t1)
-                  ct2 (class-primary-flag t2)]
-              (cond
-                (or (= :final ct1)
-                    (= :final ct2))
-                true ;; we've already checked isa? above
-
-                (or (= :interface ct1)
-                    (= :interface ct2))
-                true
-
-                :else
-                true))))
-    
+    (disjoint-classes? t1 t2)
     :dont-know))
 
 (defmethod -disjoint? 'or [t1 t2]

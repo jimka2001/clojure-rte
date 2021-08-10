@@ -23,6 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :as rte
              :refer [canonicalize-pattern with-compile-env ]]
+            [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [clojure-rte.util :refer [count-if-not]]
             [clojure-rte.genus :as gns]))
@@ -38,7 +39,7 @@
 (deftest t-canonicalize-pattern-14
   (when (and (resolve 'java.lang.Comparable)
              (resolve 'clojure.lang.IMeta))
-    
+
     (testing "canonicalize-pattern 14"
       (is (= '(:or (:and
                     clojure.lang.IMeta
@@ -50,7 +51,20 @@
                     java.lang.Comparable))
              (canonicalize-pattern '(:and (:or java.io.Serializable java.lang.Comparable)
                                           clojure.lang.IMeta clojure.lang.IReduceInit)))
-          "and-distribute"))))
+          (cl-format false "~&~
+                            and-distribute~@
+                            lhs=~W~@
+                            rhs=~W~%"
+                     '(:or (:and
+                            clojure.lang.IMeta
+                            clojure.lang.IReduceInit
+                            java.io.Serializable)
+                           (:and
+                            clojure.lang.IMeta
+                            clojure.lang.IReduceInit
+                            java.lang.Comparable))
+                     (canonicalize-pattern '(:and (:or java.io.Serializable java.lang.Comparable)
+                                                  clojure.lang.IMeta clojure.lang.IReduceInit)))))))
 
 (deftest t-canonicalize-pattern-14b
   (when (resolve 'java.lang.Comparable)
