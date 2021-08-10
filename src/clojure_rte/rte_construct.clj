@@ -684,7 +684,7 @@
     (cond (empty? operands)
           :epsilon
 
-          (= 1 (count operands))
+          (empty? (rest operands))
           (first operands)
 
           :else
@@ -695,7 +695,7 @@
     (cond (empty? operands)
           :empty-set
 
-          (= 1 (count operands))
+          (empty? (rest operands))
           (first operands)
 
           :else
@@ -706,7 +706,7 @@
     (cond (empty? operands)
           sigma-*
 
-          (= 1 (count operands))
+          (empty? (rest operands))
           (first operands)
 
           :else

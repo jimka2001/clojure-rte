@@ -1326,15 +1326,16 @@
   "Internal function used in top level disjoint? implementation."
   [t1' t2' default]
   (loop [[k & ks] (sort-method-keys -disjoint?)]
-    (case ((k (methods -disjoint?)) t1' t2')
-      (true) true
-      (false) false
-      (case ((k (methods -disjoint?)) t2' t1')
+    (let [f (k (methods -disjoint?))]
+      (case (f t1' t2')
         (true) true
         (false) false
-        (if ks
-          (recur ks)
-          default)))))
+        (case (f t2' t1')
+          (true) true
+          (false) false
+          (if ks
+            (recur ks)
+            default))))))
 
 (defmulti -disjoint?
   "This function should never be called.
@@ -1745,47 +1746,47 @@
         :else
         :dont-know))
 
-  (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
-             (disjoint? sub (second super) false))
-        true
-
-        ;; (subtype? '(not Double) 'Long) = false
-        ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
-        (and (gns/not? sub)
-             (class-designator? super)
-             (class-designator? (second sub))
-             (disjoint? super (second sub) false))
-        false
 (defmethod -subtype? 'not subtype-not [sub super]
+  (if (and (not (gns/not? super))
+           (not (gns/not? sub)))
+    :dont-know
+    (cond (and (gns/not? super)
+               (gns/not? sub)
+               (not= :dont-know (subtype? (operand super) (operand sub) :dont-know)))
+          ;; we are depending on the fact that subtype? is memoized, so we are not
+          ;; really computing subtype? twice with the same arguments.
+          (subtype? (operand super) (operand sub) :dont-know)
 
-        (and (gns/not? sub)
-             (type-equivalent? (second sub) super false))
-        false
+          (and (gns/not? super)  ; (subtype? 'Long '(not Double))
+               (disjoint? sub (operand super) false))
+          true
 
-        (and (gns/not? super)
-             (type-equivalent? sub (second super) false))
-        false
+          ;; (subtype? '(not Double) 'Long) = false
+          ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
+          (and (gns/not? sub)
+               (class-designator? super)
+               (class-designator? (operand sub))
+               (disjoint? super (operand sub) false))
+          false
 
-        (and (gns/not? sub)
-             (inhabited? (second sub) false)
-             (subtype? (second sub) super false)
-             (inhabited? (template (not ~super)) false))
-        ;; TODO to test this take random tds td1, td2, and assert that (or (not td1) (not td2))
-        ;;    is a subtype of (not (and td1 td2)) especially in the case that td1 and td2 are disjoint
-        false
-        
-        (not (gns/not? sub))
-        :dont-know
+          (and (gns/not? sub)
+               (type-equivalent? (operand sub) super false))
+          false
 
-        (not (gns/not? super))
-        :dont-know
+          (and (gns/not? super)
+               (type-equivalent? sub (operand super) false))
+          false
 
-        :else
-        ;; isn't this just the same as directly returning x?
-        (let [x (subtype? (second super) (second sub) :dont-know)]
-          (if (= :dont-know x)
-            :dont-know
-            x))))
+          (and (gns/not? sub)
+               (inhabited? (operand sub) false)
+               (subtype? (operand sub) super false)
+               (inhabited? (gns/create-not super) false))
+          ;; TODO to test this take random tds td1, td2, and assert that (or (not td1) (not td2))
+          ;;    is a subtype of (not (and td1 td2)) especially in the case that td1 and td2 are disjoint
+          false
+
+          :else
+          :dont-know)))
 
 (defmethod -subtype? 'member subtype-member [sub super]
   (cond (gns/member? sub)
