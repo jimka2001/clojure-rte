@@ -1785,9 +1785,15 @@
                                                    conversion-combo-99
                                                    conversion-combo-5])))))
 
+
+;;(def count-canonicalize-pattern (atom 0))
+
 (defn-memoized [canonicalize-pattern canonicalize-pattern-impl]
   "find the fixed point of canonicalize-pattern-once"
   [pattern]
+  ;;(swap! count-canonicalize-pattern inc)
+  ;;(when (zero? (mod @count-canonicalize-pattern 100))
+  ;;  (prn [:count @count-canonicalize-pattern]))
   (fixed-point pattern canonicalize-pattern-once =))
 
 (defn compute-compound-derivative
