@@ -25,7 +25,7 @@
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [fixed-point member group-by-mapped
-                                      defn-memoized
+                                      defn-memoized find-first
                                       exists setof]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
@@ -290,8 +290,8 @@
 (defn delta
   "Given a state and target-label, find the destination state (object of type State)"
   [dfa source-state target-label]
-  (let [[_ index] (first (filter (fn [[label _dst-index]] (= label target-label))
-                                 (:transitions source-state)))]
+  (let [[_ index] (find-first (fn [[label _dst-index]] (= label target-label))
+                              (:transitions source-state))]
     (state-by-index dfa index)))
 
 (defmethod print-method Dfa [v w]
@@ -311,8 +311,9 @@
   "Given a sequence of sequences, find the leaf level
   sequence which contains the given element"
   [partition target]
-  (first (filter (fn [eqv-class]
-                   (member target eqv-class)) partition)))
+  (find-first (fn [eqv-class]
+                (member target eqv-class))
+              partition))
 
 (defn find-hopcroft-partition
   "Apply the Hopcroft partition algorithm to the states of the given
@@ -395,12 +396,12 @@
   (or (first (find-sink-states dfa))
       (let [states (states-as-map dfa)
             num-states (count states)
-            available-ids (filter (fn [id]
+            sink-id (find-first (fn [id]
                                     ;; find smallest non-negative integer which is not already
                                     ;; a state-id in this Dfa
                                     (and (> id 0)
-                                         (not (get states id false)))) (range 1 (+ 1 num-states)))
-            sink-id (first available-ids)]
+                                         (not (get states id false))))
+                                (range 1 (+ 1 num-states)))]
         (map->State {:index sink-id
                      :accepting false
                      :transitions (list [:sigma sink-id])}))))

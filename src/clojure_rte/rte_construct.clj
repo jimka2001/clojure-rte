@@ -27,7 +27,7 @@
                                       sort-operands
                                       seq-matcher
                                       rte-identity rte-constantly
-                                      gc-friendly-memoize
+                                      gc-friendly-memoize call-with-found find-first
                                       search-replace remove-element uniquify
                                       non-empty? count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
@@ -684,7 +684,7 @@
     (cond (empty? operands)
           :epsilon
 
-          (= 1 (count operands))
+          (empty? (rest operands))
           (first operands)
 
           :else
@@ -695,7 +695,7 @@
     (cond (empty? operands)
           :empty-set
 
-          (= 1 (count operands))
+          (empty? (rest operands))
           (first operands)
 
           :else
@@ -706,7 +706,7 @@
     (cond (empty? operands)
           sigma-*
 
-          (= 1 (count operands))
+          (empty? (rest operands))
           (first operands)
 
           :else
@@ -1307,39 +1307,37 @@
   ;; And({1,2,3},Singleton(X),Not(Singleton(Y)))
   ;;  {...} selecting elements, x, for which SAnd(X,SNot(Y)).typep(x) is true
   ;; --> And({...},Singleton(X),Not(Singleton(Y)))
-  
+
   ;; Or({1,2,3},Singleton(X),Not(Singleton(Y)))
   ;;  {...} deleting elements, x, for which SOr(X,SNot(Y)).typep(x) is true
   ;; --> Or({...},Singleton(X),Not(Singleton(Y)))
+  (call-with-found gns/member-or-=? (operands self)
+                   :if-not-found self
+                   :if-found (fn [member-1]
+                               (let [singletons (for [r (remove-element member-1 (operands self))
+                                                      :when (or (gns/valid-type? r)
+                                                                (and (rte/not? r)
+                                                                     (gns/valid-type? (operand r))))]
+                                                  r)
+                                     f (fn [r]
+                                         (cond (gns/valid-type? r)
+                                               [r]
 
-  (let [members (filter gns/member-or-=? (operands self))]
-    (if (empty? members)
-      self
-      (let [member-1 (first members)
-            singletons (for [r (remove-element member-1 (operands self))
-                             :when (or (gns/valid-type? r)
-                                       (and (rte/not? r)
-                                            (gns/valid-type? (operand r))))]
-                         r)
-            f (fn [r]
-                (cond (gns/valid-type? r)
-                      [r]
+                                               (and (rte/not? r)
+                                                    (gns/valid-type? (operand r)))
+                                               [(gns/create-not (operand r))]
 
-                      (and (rte/not? r)
-                           (gns/valid-type? (operand r)))
-                      [(gns/create-not (operand r))]
-
-                      :else
-                      []))
-            looser (mapcat f singletons)]
-        (if (empty? looser)
-          self
-          (let [td (create-type-descriptor self looser)
-                rt (gns/create-member (setof [a (gns/operands member-1)]
-                                             (or-invert self (gns/typep a td))))]
-            (create self (search-replace (operands self)
-                                         member-1
-                                         rt))))))))
+                                               :else
+                                               []))
+                                     looser (mapcat f singletons)]
+                                 (if (empty? looser)
+                                   self
+                                   (let [td (create-type-descriptor self looser)
+                                         rt (gns/create-member (setof [a (gns/operands member-1)]
+                                                                      (or-invert self (gns/typep a td))))]
+                                     (create self (search-replace (operands self)
+                                                                  member-1
+                                                                  rt))))))))
 
 (defn conversion-combo-21
   [self]
@@ -1404,12 +1402,11 @@
   ;; --> Or(And(A,B,   X,   C, D)),
   ;;        And(A,B,   Y,   C, D)),
   ;;        And(A,B,   Z,   C, D)))
-  (let [ror (filter rte/or? (operands self))]
-    (if (empty? ror)
-      self
-      (let [ror-1 (first ror)]
-        (rte/create-or (for [r (operands ror-1)]
-                         (rte/create-and (search-replace (operands self) ror-1 r))))))))
+  (call-with-found rte/or? (operands self)
+                   :if-not-found self
+                   :if-found (fn [ror-1]
+                               (rte/create-or (for [r (operands ror-1)]
+                                                (rte/create-and (search-replace (operands self) ror-1 r)))))))
 
 (defn conversion-and-18
   [self]
@@ -1444,15 +1441,15 @@
   ;;    of length 1, perhaps an empty set of such sequences if the singleton type
   ;;    is empty.
   ;; If both are true, then the And() matches EmptySet
-  (let [tds (filter gns/valid-type? (operands self))
+
+  (let [vt (delay (some gns/valid-type? (operands self)))
         count-non-nullable (fn [c]
-                             (count-if-not nullable? (operands c)))
-        long-cats (filter (fn [c] (and (rte/cat? c)
-                                       (> (count-non-nullable c) 1)))
-                          (operands self))]
+                             (count-if-not nullable? (operands c)))]
     (if (and (or (member :sigma (operands self))
-                 (non-empty? tds))
-             (non-empty? long-cats))
+                 @vt)
+             (exists [c (operands self)]
+                     (and (rte/cat? c)
+                          (> (count-non-nullable c) 1))))
       :empty-set
       self)))
 
@@ -1499,20 +1496,20 @@
   ;;   then all such Cats(...) without a nullable have same number of operands
   ;;   have been merged into one Cat(...)
   ;;   So assure that all other Cats have no more non-nullable operands.
-  (let [cats (filter rte/cat? (operands self))
-        non-nullable-cats (filter (fn [c]
-                                   (forall [o (operands c)]
-                                           (not (nullable? o))))
-                                 cats)]
-    (if (empty? non-nullable-cats)
-      self
-      (let [num-non-nullable (count (operands (first non-nullable-cats)))
-            count-non-nullable (fn [c]
-                                 (count-if-not nullable? (operands c)))]
-        (if (exists [c cats]
-                    (> (count-non-nullable c) num-non-nullable))
-          :empty-set
-          self)))))
+  (let [cats (filter rte/cat? (operands self))]
+    (call-with-found (fn [c]
+                       (forall [o (operands c)]
+                               (not (nullable? o))))
+                     cats
+                     :if-not-found self
+                     :if-found (fn [first-non-nullable-cat]
+                                 (let [num-non-nullable (count (operands first-non-nullable-cat))
+                                       count-non-nullable (fn [c]
+                                                            (count-if-not nullable? (operands c)))]
+                                   (if (exists [c cats]
+                                               (> (count-non-nullable c) num-non-nullable))
+                                     :empty-set
+                                     self))))))
 
 (defn conversion-and-17c
   [self]
@@ -1521,24 +1518,24 @@
   ;; Since 7b has run, there should be no cat with more than this many non-nullables.
   ;; find a Cat(...) with no nullables, there should be at most one because
   ;;    conversion17a as run.
-  (if (empty? (filter rte/cat? (operands self)))
+  (if (not-any? rte/cat? (operands self))
     self
     (let [count-non-nullable (fn [c]
                                (count-if-not nullable? (operands c)))
-          cat-non-nullables (filter (fn [c]
-                                      (and (rte/cat? c)
-                                           (forall [o (operands c)]
-                                                   (not (nullable? o)))))
-                                    (operands self))
+          cat-non-nullable (find-first (fn [c]
+                                         (and (rte/cat? c)
+                                              (forall [o (operands c)]
+                                                      (not (nullable? o)))))
+                                       (operands self))
           num-non-nullables (cond  (member :sigma (operands self))
                                    1
 
                                    (some gns/valid-type? (operands self))
                                    1
 
-                                   (non-empty? cat-non-nullables)
-                                   (count (operands (first cat-non-nullables)))
-                                   
+                                   cat-non-nullable
+                                   (count (operands cat-non-nullable))
+
                                    :else
                                    0)]
       (if (= 0 num-non-nullables)
@@ -1554,7 +1551,7 @@
                                            o))
 
                              :else
-                             c))                             
+                             c))
                      (operands self)))))))
 
 (defn conversion-and-19
@@ -1788,9 +1785,15 @@
                                                    conversion-combo-99
                                                    conversion-combo-5])))))
 
+
+;;(def count-canonicalize-pattern (atom 0))
+
 (defn-memoized [canonicalize-pattern canonicalize-pattern-impl]
   "find the fixed point of canonicalize-pattern-once"
   [pattern]
+  ;;(swap! count-canonicalize-pattern inc)
+  ;;(when (zero? (mod @count-canonicalize-pattern 100))
+  ;;  (prn [:count @count-canonicalize-pattern]))
   (fixed-point pattern canonicalize-pattern-once =))
 
 (defn compute-compound-derivative

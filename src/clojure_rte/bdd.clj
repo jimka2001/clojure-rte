@@ -68,10 +68,10 @@
   (gns/subtype? a b false).  
   "
   [bdd]
-  (letfn [(supertypes [sub types]
-            (filter (fn [super]
-                      (c/and (not= sub super)
-                             (gns/subtype? sub super false))) types))
+  (letfn [(exists-supertype [sub types]
+            (exists [super types]
+                    (c/and (not= sub super)
+                           (gns/subtype? sub super false))))
           (check-supers [args]
             (let [args (distinct args)
                   complements (for [a args
@@ -87,7 +87,7 @@
                 ;; does the list contain A and B where A is subtype B
                 :else
                 (remove (fn [sub]
-                          (non-empty? (supertypes sub args)))
+                          (exists-supertype sub args))
                         args))))]
 
     (gns/create-or
@@ -99,8 +99,8 @@
                          ;; two lazy sequences created by filter.  the filter loops are
                          ;; never called unless node is differrent from true or false, i.e.
                          ;; the 3rd case of the cond.
-                         disjoints (delay (filter (fn [x] (gns/disjoint? x my-label false)) parents))
-                         subtypes  (delay (filter (fn [x] (gns/subtype?  x my-label false)) parents))]
+                         exists-disjoint (delay (exists [x parents] (gns/disjoint? x my-label false)))
+                         exists-subtype (delay (exists [x parents] (gns/subtype?  x my-label false)))]
                      (cond
                        (= true node) ; case #1
                        ;; we know parents ( ... A ... B ...) that B is not subtype of A, but maybe A subtype B
@@ -125,8 +125,8 @@
                        
                        (= false node) ; case #2
                        nil ;; do not collect, and prune recursion
-                       
-                       (non-empty? @disjoints) ; case #3
+
+                       @exists-disjoint ; case #3
                        ;; this means that the type-designators returned by (:label node)
                        ;;    is disjoint with something in the parents list.
                        ;;    E.g., (:label node)=String, and parents= ( ... Number ...).
@@ -140,7 +140,7 @@
                        (walk (:negative node)
                              parents)
                        
-                       (non-empty? @subtypes) ; case #4
+                       @exists-subtype ; case #4
                        ;; this means that the type-designators returned by (:label node)
                        ;;    is a supertype of something in the parents list.  E.g.,
                        ;;    (:label node) = Number and parents= (... Long ...).

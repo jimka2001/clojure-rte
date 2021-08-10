@@ -24,24 +24,7 @@
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
 
-(defn with-first-match 
-  "Find the first element in the given sequence, items,
-   for which the predicate, pred, returns Boolean true.
-   If such is found, call the continuation with the
-   element.  This type of 'finder' avoids the problem of
-   deciding whether nil was the value found.  The continuation
-   is only called on the found value."
-  [pred items continuation]
 
-  (loop [items items]
-    (cond (empty? items)
-          nil
-
-          (pred (first items))
-          (continuation (first items))
-
-          :else
-          (recur (rest items)))))
 
 (defn remove-element
   "Non-destructively remove a given element from a sequence"
@@ -583,3 +566,36 @@
   [expr assertion]
   (assertion expr)
   expr)
+
+(defn call-with-found
+  "Call the given predicate, pred, on successive element of the collection
+  until the first time pred returns a truthy value, at which time if-found
+  is called with that element of the collection, and call-with-found returns
+  the return value of if-found.   If no such element of collection is found
+  (including if collection is empty) then the value if-not-found (defaulting
+  to false) is returned."
+  ([pred coll & {:keys [if-found if-not-found]
+                 :or {if-found (constantly true)
+                      if-not-found false}}]
+   (reduce (fn [_ item]
+             (if (pred item)
+               (reduced (if-found item))
+               if-not-found)) if-not-found coll)))
+
+(defn with-first-match 
+  "Find the first element in the given sequence, items,
+   for which the predicate, pred, returns Boolean true.
+   If such is found, call the continuation with the
+   element.  This type of 'finder' avoids the problem of
+   deciding whether nil was the value found.  The continuation
+   is only called on the found value."
+  [pred items continuation]
+  (call-with-found pred items :if-found continuation :if-not-found nil))
+
+(defn find-first
+  ([pred coll]
+   (find-first pred coll false))
+  ([pred coll default]
+   (call-with-found pred coll
+                    :if-found identity
+                    :if-not-found default)))

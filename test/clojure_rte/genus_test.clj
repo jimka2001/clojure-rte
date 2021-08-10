@@ -23,6 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
+            [clojure-rte.genus-tester :refer [gen-type *test-values* gen-inhabited-type]]
             [clojure-rte.util :refer [ member ]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
@@ -31,6 +32,16 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
 
+(deftest t-discovered-case-disjoint-135
+  (testing "discovered-case-disjoint-135"
+    (is (= (gns/inhabited? '(and (not clojure.lang.Symbol) (not java.lang.CharSequence) java.lang.Comparable)
+                           :dont-know)
+           true))
+    (is (= (gns/disjoint? '(and (not clojure.lang.Symbol) (not java.lang.CharSequence) java.lang.Comparable)
+                          'java.lang.Comparable
+                                     :dont-know)
+           false))))
+    
 (deftest t-discovered-case-134
   (testing "discovered case 134"
     (is (= (gns/inhabited? '(and (not (member 1 2 3 a b c)) (not BigDecimal)) :dont-know)
@@ -349,16 +360,6 @@
            (gns/disjoint? t1 t2 :dont-know)
            (gns/disjoint? t2 t1 :dont-know))))))
 
-(deftest t-disjoint-interfaces
-  (testing "disjoint interfaces"
-    (is (gns/find-class 'javax.security.auth.spi.LoginModule))
-    (is (gns/find-class 'java.net.http.WebSocket))
-    (is (not-empty (gns/find-incompatible-members javax.security.auth.spi.LoginModule
-                                                    java.net.http.WebSocket)))
-    (is (gns/disjoint? 'javax.security.auth.spi.LoginModule
-                       'java.net.http.WebSocket
-                       false))))
-
 (deftest t-disjoint-and
   (testing "disjoint of intersection types"
     (is (= false (gns/disjoint? '(and BigDecimal clojure.lang.IMeta) 'java.lang.Number :dont-know)) "test 1")
@@ -468,7 +469,7 @@
                            )))
        
         (dotimes [_ 1000]
-          (check (gns/gen-type 4)))))))
+          (check (gen-type 4)))))))
 
 (deftest t-canonicalize-not-member
   (testing "canonicalize (and (not (member ...)))"
@@ -506,7 +507,7 @@
               (is (not= false (gns/subtype? td-2 td-1 :dont-know)) (cl-format "~a td-2=~a td-1=~a" comment td-2 td-1)))]
       (for [_ (range 200)
             n (range 5)
-            :let [rt (gns/gen-type n)
+            :let [rt (gen-type n)
                   rt-can (gns/canonicalize-type rt)]]
         (do
           (check-subtype rt rt-can "rt < rt-can ?")
@@ -520,8 +521,8 @@
     
       (for [_ (range 200)
             n (range 5)
-            :let [rt-1 (gns/gen-type n)
-                  rt-2 (gns/gen-type n)
+            :let [rt-1 (gen-type n)
+                  rt-2 (gen-type n)
                   rt-and-not (template (and (not ~rt-1) (not ~rt-2)))
                   rt-not-or (template (not (or ~rt-1 ~rt-2)))
                   ]]
@@ -535,8 +536,8 @@
   (testing "commutativity of disjoint?"
       (doseq [_ (range 200 )
               n (range 5)
-              :let [td-1 (gns/gen-type n)
-                    td-2 (gns/gen-type n)
+              :let [td-1 (gen-type n)
+                    td-2 (gen-type n)
                     d12 (gns/disjoint? td-1 td-2 :dont-know)
                     d21 (gns/disjoint? td-2 td-1 :dont-know)]]
         (is (= d12 d21)
@@ -552,8 +553,8 @@
       (doseq [_ (range 20 ;; 200
                        )
               n (range 5)
-              :let [rt-1 (gns/gen-type n)
-                    rt-2 (gns/gen-type n)
+              :let [rt-1 (gen-type n)
+                    rt-2 (gen-type n)
                     union (template (or ~rt-1 ~rt-2))
                     intersect (template (and ~rt-1 ~rt-2))]]
         (check-subtype rt-1 union "x <: x || y")
@@ -571,7 +572,7 @@
       (doseq [_ (range 20 ;; 200
                        )
               n (range 5)
-              :let [rt (gns/gen-type n)
+              :let [rt (gen-type n)
                     dnf (gns/canonicalize-type rt :dnf)
                     cnf (gns/canonicalize-type rt :cnf)
                     dnf-cnf (gns/canonicalize-type dnf :cnf)
@@ -599,14 +600,14 @@
             (assert (> n 0))
             (let [m (reduce (fn [m _current-item]
                               (let [rt1 (if inh
-                                          (gns/gen-inhabited-type depth
+                                          (gen-inhabited-type depth
                                                                   (constantly true))
-                                          (gns/gen-type depth))
+                                          (gen-type depth))
                                     rt2 (if inh
-                                          (gns/gen-inhabited-type depth
+                                          (gen-inhabited-type depth
                                                                   (fn [td]
                                                                     (not (gns/type-equivalent? td rt1 true))))
-                                          (gns/gen-type depth))
+                                          (gen-type depth))
                                     can1 (gns/canonicalize-type rt1 :dnf)
                                     can2 (gns/canonicalize-type rt2 :dnf)
                                     s1 (gns/subtype? rt1 rt2 :dont-know)
@@ -965,9 +966,9 @@
     (doseq [depth (range 4)
             _reps (range (/ 400 (inc depth)))
             :let [nf (rand-nth [:dnf :cnf :none])
-                  td (gns/gen-type depth)
+                  td (gen-type depth)
                   td-canonical (gns/canonicalize-type td nf)]
-            value gns/*test-values*]
+            value *test-values*]
       (is (= (gns/typep value td)
              (gns/typep value td-canonical))
           (cl-format false "~%value=~A belongs to type but not its canonicalized form~%  td=~A~%  canonicalized=~A~%  nf=~A" value td td-canonical nf)))))

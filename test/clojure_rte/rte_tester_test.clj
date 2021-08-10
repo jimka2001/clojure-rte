@@ -30,6 +30,7 @@
                                             rte-components gen-rte
                                             *rte-keywords*]]
             [clojure-rte.genus :as gns]
+            [clojure-rte.genus-tester :refer [*test-types*]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
@@ -52,12 +53,12 @@
 (deftest t-rte-keywords
   (testing "rte-keywords"
     (for [k *rte-keywords*]
-      (gen-rte k 4 gns/*test-types*))))
+      (gen-rte k 4 *test-types*))))
 
 (deftest t-rte-components
   (testing "rte-components"
     (for [k *rte-keywords*]
-      (rte-components (gen-rte k 4 gns/*test-types*)))))
+      (rte-components (gen-rte k 4 *test-types*)))))
 
 (deftest t-rte-to-dfa-random
   (testing "rte-to-dfa random"

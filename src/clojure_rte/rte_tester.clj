@@ -24,6 +24,7 @@
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.genus :as gns]
+            [clojure-rte.genus-tester :refer [*test-types*]]
             [clojure-rte.rte-extract :refer [dfa-to-rte]]
             [clojure-rte.rte-construct :refer [with-compile-env rte-to-dfa  nullable?
                                                canonicalize-pattern canonicalize-pattern-once canonicalize-pattern-once-impl]]
@@ -73,14 +74,14 @@
                                   (with-compile-env []
                                     (is-fn (rte-to-dfa rte)
                                            (cl-format false "rte-to-dfa failed on ~A" rte))))
-                      (fn [] (gen-rte size gns/*test-types*))
+                      (fn [] (gen-rte size *test-types*))
                       rte-components
                       verbose))
 
 (defn test-canonicalize-pattern [num-tries size verbose is-fn]
   (tester/random-test num-tries (fn [rte] (is-fn (canonicalize-pattern rte)
                                                  (cl-format false "canonicalize-pattern failed on ~A" rte)))
-                      (fn [] (gen-rte size gns/*test-types*))
+                      (fn [] (gen-rte size *test-types*))
                       rte-components verbose))
 
 
@@ -115,7 +116,7 @@
                                        (cl-format false
                                                   "rte ~A is non-nullable but its canonicalization is nullable: ~A"
                                                   rte rte-can))))))
-                       (fn [] (gen-rte size gns/*test-types*))
+                       (fn [] (gen-rte size *test-types*))
                        rte-components
                        verbose)))
 
@@ -167,7 +168,7 @@
   ([num-tries size verbose is-fn]
    (tester/random-test num-tries
                        (fn [rte] (test-rte-canonicalize-nullable-1 rte is-fn))
-                       (fn [] (gen-rte size gns/*test-types*))
+                       (fn [] (gen-rte size *test-types*))
                        rte-components
                        verbose
                        )))
@@ -224,7 +225,7 @@
   [num-tries size verbose]
   (tester/random-test num-tries
                       test-rte-not-1
-                      (fn [] (gen-rte size gns/*test-types*))
+                      (fn [] (gen-rte size *test-types*))
                       rte-components
                       verbose))
 

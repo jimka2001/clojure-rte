@@ -26,6 +26,7 @@
                                       call-with-collector
                                       visit-permutations
                                       remove-once fixed-point member
+                                      call-with-found
                                       ]]
             [clojure.test :refer [deftest testing is]]))
 
@@ -407,3 +408,14 @@
                (println [:acc acc :i i :max-denom m :sum (deref x)])
                (+ acc i)))
            0/1 s)))))
+
+(deftest t-call-with-found
+  (testing "call-with-found"
+    (is (= false (call-with-found (constantly false) '(1 2 3))))
+    (is (= false (call-with-found (constantly nil) '(1 2 3) :if-found (constantly true))))
+    (is (= :hello (call-with-found odd? '(0 2 4 5 6 8)
+                                   :if-not-found 42
+                                   :if-found (constantly :hello))))
+    (is (= 42 (call-with-found odd? '(0 2 4 6 8)
+                               :if-not-found 42
+                               :if-found (constantly :hello))))))

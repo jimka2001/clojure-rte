@@ -28,7 +28,7 @@
                                       remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
-                                      defn-memoized
+                                      defn-memoized call-with-found find-first
                                       unchunk]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -47,6 +47,8 @@
 (declare check-disjoint check-disjoint-impl)
 (declare combinator)
 (declare combo-filter)
+(declare create-and)
+(declare create-or)
 (declare dual-combinator)
 (declare expand-satisfies)
 (declare operand)
@@ -118,40 +120,6 @@
   (if (class-designator? class-name)
     (resolve class-name)
     nil))
-
-(defn find-incompatible-members
-  "Computes a lazy list of pairs [m1 m2] where m1 is an member of c1
-  and m2 is a member of c2, where m1 and m2 have the same name
-  and same parameter-types, thus c1 and c2 are incompatible."
-  [c1 c2]
-  {:pre [(and (or (symbol? c1) (class? c1))
-              (or (symbol? c2) (class? c2)))]}
-  (cond (symbol? c1)
-        (find-incompatible-members (or (find-class c1)
-                                       (throw (ex-info (format "find-incompatible-members: no such class %s" c1)
-                                                       {:c1 c1
-                                                        :c2 c2})))
-                                   c2)
-
-        (symbol? c2)
-        (find-incompatible-members c1 
-                                   (or (find-class c2)
-                                       (throw (ex-info (format "find-incompatible-members: no such class %s" c2)
-                                                       {:c1 c1
-                                                        :c2 c2}))))
-
-        :else
-        (let [members-1 (:members (refl/type-reflect c1))
-              members-2 (:members (refl/type-reflect c2))]
-          (for [m1 members-1
-                m2 members-2
-                :when (and (= (:name m1) (:name m2))
-                           (= (:parameter-types m1) (:parameter-types m2)))
-                ]
-            [m1 m2]))))
-
-(defn compatible-members? [c1 c2]
-  (empty? (find-incompatible-members c1 c2)))
 
 (defn type-equivalent?
   "Test whether two type designators represent the same type."
@@ -370,88 +338,7 @@
        type-designator)))))
 
 
-(def ^:dynamic *test-types*
-  "Some type designators used for testing"
-  '((satisfies integer?)
-    (satisfies int?)
-    (satisfies rational?)
-    (satisfies ratio?)
-    (satisfies string?)
-    (satisfies keyword?)
-    (satisfies symbol?)
-    (satisfies decimal?)
-    (satisfies float?)
-    (satisfies seq?)
-    java.io.Serializable
-    java.lang.CharSequence
-    java.lang.Comparable
-    java.lang.Number
-    java.lang.Object
-    clojure.lang.IMeta
-    (= 1)
-    (= 0)
-    (= -1)
-    (= a)
-    (= [1 2 3])
-    (= [])
-    (member [1 2 3] [1 2] [1] [])
-    (member [1 2 3] [2 1 3])
-    (member a b c "a" "b" "c")
-    (member a b)
-    (member 1 2 3)
-    (member 2 3 4)
-    (member 1.5 3.5)
-    (member 4.5 6.5)
-    (member "a" "b" "c")
-    (member "a" "b" "c" 1 2 3)
-    (member 1 "a")
-    :sigma
-    :empty-set
-    ))
 
-(def ^:dynamic *test-values*
-  "Some values used for random tests"
-  `(~*in* ~*out*
-    0 1 -1 2 -2
-      0.0 1.0 1.1 -1.0 -1.1 1.5 3.5 4.5 6.5
-      1/2
-      "" "hello" "a" "b" "c"
-      a b c
-      12345678901234567890
-      [1 2 3] [1 2] [1] [] [1 2 3 4]
-    ))
-
-(defn gen-type
-  "Generate a type designator for testing."
-  ([size]
-   (gen-type size *test-types*))
-  ([size types]
-   (if (< 0 size)
-     (case (rand-nth '(or and not :else))
-       (or) (template (or ~(gen-type (dec size) types)
-                          ~(gen-type (dec size) types)))
-       (and) (template (and ~(gen-type (dec size) types)
-                            ~(gen-type (dec size) types)))
-       (not) (template (not ~(gen-type (dec size) types)))
-       (rand-nth types))
-     (rand-nth types))))
-
-(defn gen-inhabited-type 
-  "gen-type may generate a type designator which reduces to :empty-set.
-  gen-inhabited-type generates a type designator which is guaranteed
-  NOT to reduce to :empty-set.  If filter (a unary predicate) is
-  given, gen-inhabited-type loops until it generates a type which
-  satisifies the predicate.  If the predicate is never satisifed, it
-  will loop forever."
-  ([size]
-   (gen-inhabited-type size (constantly true)))
-  ([size filter]
-   (loop []
-     (let [td (gen-type size)
-           td-inhabited (inhabited? td false)]
-       (if (and td-inhabited (filter td))
-         td
-         (recur))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of typep and its methods
@@ -764,25 +651,18 @@
   [self]
   (second self))
 
+
 (defmulti create 
   (fn [td _operands]
     (type-dispatch td)))
 
-(letfn [(cr [td operands]
-          (cond (empty? operands)
-                (unit td)
+(defmethod create 'or cr-or
+  [_td operands]
+  (create-or operands))
 
-                (empty? (rest operands))
-                (first operands)
-
-                :else
-                (cons (first td) operands)))]
-  (defmethod create 'or
-    [td operands]
-    (cr td operands))
-  (defmethod create 'and
-    [td operands]
-    (cr td operands)))
+(defmethod create 'and cr-and
+  [_td operands]
+  (create-and operands))
 
 (defmulti create-dual
   "Given this as an :or and a list of operands, create an :and with those operands.
@@ -801,13 +681,15 @@
         :else
         (cons 'member operands)))
 
-(defn create-or
-  [operands]
-  (create '(or) operands))
-
-(defn create-and
-  [operands]
-  (create '(and) operands))
+(letfn [(cr [td operands]
+          (case (bounded-count 2 operands)
+            0 (unit td)
+            1 (first operands)
+            (cons (first td) operands)))]
+  (defn create-or [operands]
+    (cr '(or) operands))
+  (defn create-and [operands]
+    (cr '(and) operands)))
 
 (defn create-not
   [argument]
@@ -864,16 +746,15 @@
                  SAnd(x1,x2,  y3,  x3,x4)
                )"
   [[_combo & operands :as this]]
-  (let [[dual-td & _ :as tds] (filter (fn [x] (dual-combination? this x))
-                                      operands)]
-    (if (empty? tds)
-      this
-      (create-dual this (map (fn [y]
-                               (create this (map (fn [x]
-                                                   (if (= x dual-td)
-                                                     y x))
-                                                 operands)))
-                             (rest dual-td))))))
+  (call-with-found (fn [x] (dual-combination? this x)) operands
+                   :if-not-found this
+                   :if-found (fn [dual-td]
+                               (create-dual this (map (fn [y]
+                                                        (create this (map (fn [x]
+                                                                            (if (= x dual-td)
+                                                                              y x))
+                                                                          operands)))
+                                                      (rest dual-td))))))
 
 (defmethod compute-dnf 'and
   [td]
@@ -1040,10 +921,10 @@
                                (exists [d duals]
                                        (= (operands d) (search-replace (operands td) n (operand n))))))]
                   ;; find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
-                  (let [to-remove (filter pred (operands td))]
-                    (if (empty? to-remove)
-                      td
-                      (create td (remove-element (first to-remove) (operands td))))))))]
+                  (call-with-found pred (operands td)
+                                   :if-not-found td
+                                   :if-found (fn [to-remove]
+                                               (create td (remove-element to-remove (operands td))))))))]
       (create self (map f (operands self))))))
 
 (defn conversion-C10
@@ -1054,14 +935,13 @@
             (exists [v (operands self)]
                     (and (not= u v)
                          (= (annihilator self u v) true))))]
-    (let [subs (filter pred (operands self))]
-      (if (empty? subs)
-        self
-        (let [sub (first subs)
-              keep (setof [sup (operands self)]
-                          (or (= sup sub)
-                              (not= (annihilator self sub sup) true)))]
-          (create self keep))))))
+    (call-with-found pred (operands self)
+                     :if-not-found self
+                     :if-found (fn [sub]
+                                 (let [keep (setof [sup (operands self)]
+                                                   (or (= sup sub)
+                                                       (not= (annihilator self sub sup) true)))]
+                                   (create self keep))))))
 
 (defn conversion-C11
   "A + !A B -> A + B
@@ -1071,54 +951,57 @@
   (let [combos (filter gns/combo? (operands self))
         duals (setof [td combos] (dual-combination? self td))]
     (letfn [(pred [a]
-              (let [n (template (not ~a))]
+              (let [n (gns/create-not a)]
                 (exists [td duals]
                         (or (member a (operands td))
                             (member n (operands td))))))]
-      (let [ao (filter pred (operands self))
-            not-ao (template (not ~(first ao)))]
-        (letfn [(consume [td]
-                  (cond (not (gns/combo? td))
-                        [td]
+      (call-with-found
+       pred (operands self)
+       :if-not-found self
+       :if-found (fn [ao]
+                   (let [not-ao (gns/create-not ao)]
+                     (letfn [(consume [td]
+                               (cond (not (gns/combo? td))
+                                     [td]
 
-                        (same-combination? self td)
-                        [td]
+                                     (same-combination? self td)
+                                     [td]
 
-                        (member (first ao) (operands td))
-                        [] ;;  (A + ABX + Y) --> (A + Y)
+                                     (member ao (operands td))
+                                     [] ;;  (A + ABX + Y) --> (A + Y)
 
-                        (member not-ao (operands td))
-                        ;; td is a dual, so td.create creates a dual
-                        ;;    (A + !ABX + Y) --> (A + BX + Y)
-                        [(create td (remove-element not-ao (operands td)))]
+                                     (member not-ao (operands td))
+                                     ;; td is a dual, so td.create creates a dual
+                                     ;;    (A + !ABX + Y) --> (A + BX + Y)
+                                     [(create td (remove-element not-ao (operands td)))]
 
-                        :else
-                        [td]))]
-          (create self (mapcat consume (operands self))))))))
+                                     :else
+                                     [td]))]
+                       (create self (mapcat consume (operands self))))))))))
 
 (defn conversion-C12
   "AXBC + !X = ABC + !X"
   [self]
   (let [combos (filter gns/combo? (operands self))
-        duals (setof [td combos] (dual-combination? self td))
-        comp (filter (fn [n]
-                       (and (gns/not? n)
-                            (exists [td duals]
-                                    (member (operand n) (operands td)))))
-                     (operands self))]
-    (if (empty? comp)
-      self
-      (letfn [(f [td]
-                (cond (not (gns/combo? td))
-                      td
+        duals (setof [td combos] (dual-combination? self td))]
+    (call-with-found (fn [n]
+                        (and (gns/not? n)
+                             (exists [td duals]
+                                     (member (operand n) (operands td)))))
+      (operands self)
+      :if-not-found self
+      :if-found (fn [comp]
+                  (letfn [(f [td]
+                            (cond (not (gns/combo? td))
+                                  td
 
-                      (not (dual-combination? self td))
-                      td
+                                  (not (dual-combination? self td))
+                                  td
 
-                      :else
-                      (create td (remove-element (operand (first comp))
-                                                 (operands td)))))]
-        (create self (map f (operands self)))))))
+                                  :else
+                                  (create td (remove-element (operand comp)
+                                                             (operands td)))))]
+                    (create self (map f (operands self))))))))
 
 
 (defn conversion-C13
@@ -1174,6 +1057,7 @@
                     td))]
           (create self (uniquify (map f (operands self)))))))))
 
+(def secret-value (gensym "secret"))
 (defn conversion-C15
   "SAnd(X, member1, not-member) --> SAnd(X,member2)
    SOr(X, member, not-member1) --> SOr(X,not-member2)
@@ -1189,13 +1073,13 @@
   (letfn [(diff [xs ys]
             (setof [x xs]
                    (not (member x ys))))]
-    (let [members (filter gns/member-or-=? (operands self))
-          not-members (filter (fn [x] (and (gns/not? x)
-                                           (gns/member-or-=? (operand x)))) (operands self))]
-      (cond (empty? members)
+    (let [first-member (find-first gns/member-or-=? (operands self) secret-value)
+          first-not-member (find-first (fn [x] (and (gns/not? x)
+                                         (gns/member-or-=? (operand x)))) (operands self) secret-value)]
+      (cond (= first-member secret-value)
             self
 
-            (empty? not-members)
+            (= first-not-member secret-value)
             self
 
             :else
@@ -1203,23 +1087,23 @@
                       (cond
                         ;; in the SAnd case we remove the not_member and filter the member args
                         (and (gns/and? self)
-                             (= td (first not-members)))
+                             (= td first-not-member))
                         []
 
                         (and (gns/and? self)
-                             (= td (first members)))
-                        [(create-member (diff (operands (first members))
-                                              (operands (operand (first not-members)))))]
+                             (= td first-member))
+                        [(create-member (diff (operands first-member)
+                                              (operands (operand first-not-member))))]
 
                         ;; in the SOr case we remove the member and filter the not-member args
                         (and (gns/or? self)
-                             (= td (first members)))
+                             (= td first-member))
                         []
 
                         (and (gns/or? self)
-                             (= td (first not-members)))
-                        [(template (not ~(create-member (diff (operands (operand (first not-members)))
-                                                              (operands (first members))))))]
+                             (= td first-not-member))
+                        [(gns/create-not (gns/create-member (diff (operands (operand first-not-member))
+                                                              (operands first-member))))]
 
                         :else
                         [td]))]
@@ -1266,11 +1150,11 @@
 
 (defmethod conversion-D1 'and
   [self]
-  (let [members (filter gns/member-or-=? (operands self))]
-    (if (empty? members)
-      self
-      (create-member (setof [x (operands (first members))]
-                            (gns/typep x self))))))
+  (call-with-found gns/member-or-=? (operands self)
+                   :if-not-found self
+                   :if-found (fn [first-member]
+                               (gns/create-member (setof [x (operands first-member)]
+                                                         (gns/typep x self))))))
 
 (defmethod conversion-D1 'or
   [self]
@@ -1328,9 +1212,7 @@
    conversion-C5
    conversion-C6
    (fn [td] (conversion-C7 td nf))
-   conversion-C8
    conversion-C9
-   conversion-C10
    conversion-C11
    conversion-C12
    conversion-C13
@@ -1339,6 +1221,8 @@
    conversion-C16
    conversion-D1
    conversion-D3
+   conversion-C8
+   conversion-C10
    conversion-C98
    (fn [td] (conversion-C99 td nf))])
 
@@ -1442,15 +1326,16 @@
   "Internal function used in top level disjoint? implementation."
   [t1' t2' default]
   (loop [[k & ks] (sort-method-keys -disjoint?)]
-    (case ((k (methods -disjoint?)) t1' t2')
-      (true) true
-      (false) false
-      (case ((k (methods -disjoint?)) t2' t1')
+    (let [f (k (methods -disjoint?))]
+      (case (f t1' t2')
         (true) true
         (false) false
-        (if ks
-          (recur ks)
-          default)))))
+        (case (f t2' t1')
+          (true) true
+          (false) false
+          (if ks
+            (recur ks)
+            default))))))
 
 (defmulti -disjoint?
   "This function should never be called.
@@ -1531,35 +1416,37 @@
         :else
         :dont-know))
 
+(defn disjoint-classes? [t1 t2]
+  (let [c1 (find-class t1)
+        c2 (find-class t2)]
+    (cond (= c1 c2)
+          false
+
+          (isa? c1 c2)
+          false
+
+          (isa? c2 c1)
+          false
+
+          :else
+          (let [ct1 (class-primary-flag t1)
+                ct2 (class-primary-flag t2)]
+            (cond
+              (or (= :final ct1)
+                  (= :final ct2))
+              true ;; we've already checked isa? above
+
+              (or (= :interface ct1)
+                  (= :interface ct2))
+              false
+
+              :else
+              true)))))
+
 (defmethod -disjoint? :classes [t1 t2]
   (if (and (class-designator? t1)
            (class-designator? t2))
-    (let [c1 (find-class t1)
-          c2 (find-class t2)]
-      (cond (= c1 c2)
-            false
-
-            (isa? c1 c2)
-            false
-
-            (isa? c2 c1)
-            false
-
-            :else
-            (let [ct1 (class-primary-flag t1)
-                  ct2 (class-primary-flag t2)]
-              (cond
-                (or (= :final ct1)
-                    (= :final ct2))
-                true ;; we've already checked isa? above
-
-                (or (= :interface ct1)
-                    (= :interface ct2))
-                (not (compatible-members? c1 c2))
-
-                :else
-                true))))
-    
+    (disjoint-classes? t1 t2)
     :dont-know))
 
 (defmethod -disjoint? 'or [t1 t2]
@@ -1613,9 +1500,7 @@
                (every? class-designator? t1-operands))
           (not (forall-pairs [[a b] (conj t1-operands t2)]
                              (or (isa? (find-class a) (find-class b))
-                                 (isa? (find-class b) (find-class a))
-                                 ;; TODO isn't this wrong? because () is not false
-                                 (compatible-members? a b))))
+                                 (isa? (find-class b) (find-class a)))))
 
           ;; I don't know the general form of this, so make it a special case for the moment.
           ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)
@@ -1833,7 +1718,7 @@
                      :sub sub
                      :super super}))))
 
-(defmethod -subtype? :primary [sub-designator super-designator]
+(defmethod -subtype? :primary subtype-primary [sub-designator super-designator]
   (let [super-canon (delay (gns/canonicalize-type super-designator))
         sub-canon   (delay (gns/canonicalize-type sub-designator))]
     (cond (and (class-designator? super-designator)
@@ -1853,7 +1738,7 @@
           :else
           :dont-know)))
 
-(defmethod -subtype? '= [sub super]
+(defmethod -subtype? '= subtype-= [sub super]
   (cond (gns/=? sub)
         (subtype? (cons 'member (rest sub)) super :dont-know)
 
@@ -1863,49 +1748,49 @@
         :else
         :dont-know))
 
-(defmethod -subtype? 'not [sub super]
-  (cond (and (gns/not? super)  ; (subtype? 'Long '(not Double))
-             (disjoint? sub (second super) false))
-        true
+(defmethod -subtype? 'not subtype-not [sub super]
+  (if (and (not (gns/not? super))
+           (not (gns/not? sub)))
+    :dont-know
+    (cond (and (gns/not? super)
+               (gns/not? sub)
+               (not= :dont-know (subtype? (operand super) (operand sub) :dont-know)))
+          ;; we are depending on the fact that subtype? is memoized, so we are not
+          ;; really computing subtype? twice with the same arguments.
+          (subtype? (operand super) (operand sub) :dont-know)
 
-        ;; (subtype? '(not Double) 'Long) = false
-        ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
-        (and (gns/not? sub)
-             (class-designator? super)
-             (class-designator? (second sub))
-             (disjoint? super (second sub) false))
-        false
+          (and (gns/not? super)  ; (subtype? 'Long '(not Double))
+               (disjoint? sub (operand super) false))
+          true
 
-        (and (gns/not? sub)
-             (type-equivalent? (second sub) super false))
-        false
+          ;; (subtype? '(not Double) 'Long) = false
+          ;; but not (subtype? '(not Double) '(or Long (not Double))) != false
+          (and (gns/not? sub)
+               (class-designator? super)
+               (class-designator? (operand sub))
+               (disjoint? super (operand sub) false))
+          false
 
-        (and (gns/not? super)
-             (type-equivalent? sub (second super) false))
-        false
+          (and (gns/not? sub)
+               (type-equivalent? (operand sub) super false))
+          false
 
-        (and (gns/not? sub)
-             (inhabited? (second sub) false)
-             (subtype? (second sub) super false)
-             (inhabited? (template (not ~super)) false))
-        ;; TODO to test this take random tds td1, td2, and assert that (or (not td1) (not td2))
-        ;;    is a subtype of (not (and td1 td2)) especially in the case that td1 and td2 are disjoint
-        false
-        
-        (not (gns/not? sub))
-        :dont-know
+          (and (gns/not? super)
+               (type-equivalent? sub (operand super) false))
+          false
 
-        (not (gns/not? super))
-        :dont-know
+          (and (gns/not? sub)
+               (inhabited? (operand sub) false)
+               (subtype? (operand sub) super false)
+               (inhabited? (gns/create-not super) false))
+          ;; TODO to test this take random tds td1, td2, and assert that (or (not td1) (not td2))
+          ;;    is a subtype of (not (and td1 td2)) especially in the case that td1 and td2 are disjoint
+          false
 
-        :else
-        ;; isn't this just the same as directly returning x?
-        (let [x (subtype? (second super) (second sub) :dont-know)]
-          (if (= :dont-know x)
-            :dont-know
-            x))))
+          :else
+          :dont-know)))
 
-(defmethod -subtype? 'member [sub super]
+(defmethod -subtype? 'member subtype-member [sub super]
   (cond (gns/member? sub)
         (every? (fn [e1]
                   (typep e1 super)) (rest sub))
@@ -1927,13 +1812,13 @@
         :else
         :dont-know))
 
-(defmethod -subtype? 'or [t1 t2]
+(defmethod -subtype? 'or subtype-or [t1 t2]
   (cond
     (not (gns/or? t1))
     :dont-know
 
     :else
-    (let [values (map (fn [t] (subtype? t t2 :dont-know))
+    (let [values (map (fn subtype-t-t2 [t] (subtype? t t2 :dont-know))
                       (unchunk (rest t1)))]
       (cond (every? true? values)
             true
@@ -1944,35 +1829,38 @@
             :else
             :dont-know))))
 
-(defmethod -subtype? 'and [t1 t2]
-  (cond
-    (not (gns/and? t1))
+(defmethod -subtype? 'and subtype-and [t1 t2]
+  (if (not (gns/and? t1))
     :dont-know
-    
-    (member t2 (rest t1))
-    ;; (subtype? (and A B) A)
-    true
+    (letfn [(cond-a []
+              ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)  
+              (exists [t (rest t1)] (subtype? t t2 false)))
+            (cond-b []
+              ;; (subtype? '(and A B) '(not A))
+              (and (gns/not? t2)
+                   (exists [t (rest t1)]
+                           (= t (second t2)))
+                   (inhabited? t1 false)))
+            (cond-c []
+              ;; (subtype? (and A B C X Y) (and A B C) )
+              (and (gns/and? t2)
+                   (subset? (set (rest t2)) (set (rest t1)))))]
+      (cond
+        (member t2 (rest t1))
+        ;; (subtype? (and A B) A)
+        true
 
-    
-    (exists [t (rest t1)] (subtype? t t2 false))
-    ;; (subtype?  '(and String (not (member "a" "b" "c")))  'java.io.Serializable)
-    true
+        (cond-a)
+        true
 
+        (cond-b)
+        false
 
-    ;; (subtype? '(and A B) '(not A))
-    (and (gns/not? t2)
-         (exists [t (rest t1)]
-                 (= t (second t2)))
-         (inhabited? t1 false))
-    false
+        (cond-c)
+        true
 
-    ;; (subtype? (and A B C X Y) (and A B C) )
-    (and (gns/and? t2)
-         (subset? (set (rest t2)) (set (rest t1))))
-    true
-    
-    :else
-    :dont-know))
+        :else
+        :dont-know))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of inhabite? and -inhabited?
@@ -2039,7 +1927,7 @@
                     {:type-designator type-designator
                      :error-type :should-not-be-called-directly}))))
 
-(defmethod -inhabited? :primary [type-designator]
+(defmethod -inhabited? :primary inhabited-primary [type-designator]
   (cond
     (class-designator? type-designator)
     true
@@ -2053,7 +1941,7 @@
     :else    
     :dont-know))
 
-(defmethod -inhabited? 'or [t1]
+(defmethod -inhabited? 'or inhabited-or [t1]
   (cond
     (not (gns/or? t1))
     :dont-know
@@ -2074,68 +1962,77 @@
             :else
             :dont-know))))
 
-(defmethod -inhabited? 'and [t1]
-  (if (not (gns/and? t1))
-    :dont-know
-    (let [t1-operands (operands t1)
-          n (count t1-operands)]
-      (cond
+(defn inhabited-and? 
+  "helper function for inhabited? 'and method"
+  [t1]
+  (let [t1-operands (operands t1)
+        n (count t1-operands)]
+    (cond
         ;; if any of the types is empty, the intersection is empty,
         ;;   even if others are unknown.  (and A B empty D E).
         ;;   Careful, the computation here depends on laziness of map.
         ;;   Once a false is found, we don't call inhabited? on the remaining
         ;;   part of t1-operands.
-        (some false? (map (fn [t] (inhabited? t :dont-know))
-                          (unchunk t1-operands)))
-        false
-        
-        ;; (and (not Float) (not Double) (not (member 1 2 3))) --> inhabited=true
-        (and (< 1 n)
-             (forall [td t1-operands]
-                     (and (gns/not? td)
-                          (or (class-designator? (operand td))
-                              (gns/member-or-=? (operand td))))))
-        true
+      (some false? (map (fn [t] (inhabited? t :dont-know))
+                        (unchunk t1-operands)))
+      false
 
-        (exists-pair [[a b] t1-operands]
-                     (and (or (class-designator? a)
-                              (and (gns/not? a)
-                                   (class-designator? (second a))))
-                          (or (class-designator? b)
-                              (and (gns/not? b)
-                                   (class-designator? (second b))))
-                          (disjoint? a b false)))
-        false
-        
+      ;; (and (not Float) (not Double) (not (member 1 2 3))) --> inhabited=true
+      ;; (and (not Float) java.lang.Comparable) -> inhabited=true
+      ;; (and (not Float) (not (member 1 2 3)) java.lang.Comparable) -> inhabited=true
+      (and (< 1 n)
+           (forall [td t1-operands]
+                   (or (and (gns/not? td)
+                            (or (class-designator? (operand td))
+                                (gns/member-or-=? (operand td))))
+                       (and (class-designator? td)
+                            (= :interface (class-primary-flag td))))))
+      true
+
+      (exists-pair [[a b] t1-operands]
+                   (and (or (class-designator? a)
+                            (and (gns/not? a)
+                                 (class-designator? (second a))))
+                        (or (class-designator? b)
+                            (and (gns/not? b)
+                                 (class-designator? (second b))))
+                        (disjoint? a b false)))
+      false
+
         ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
-        (and (non-empty? (filter class-designator? t1-operands))
-             (= 1 (count (filter gns/not-member-or-=?
-                                 t1-operands)))
-             (let [t2 (canonicalize-type (cons 'and
-                                               (remove gns/not-member-or-=?
-                                                       t1-operands)))]
-               (inhabited? t2 false)))
-        true
+      (and (some class-designator? t1-operands)
+           (= 1 (count (filter gns/not-member-or-=?
+                               t1-operands)))
+           (let [t2 (canonicalize-type (gns/create-and
+                                        (remove gns/not-member-or-=?
+                                                t1-operands)))]
+             (inhabited? t2 false)))
+      true
 
         ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
-        (exists-pair [[ta tb] t1-operands]
-                     (disjoint? ta tb false))
-        false
+      (exists-pair [[ta tb] t1-operands]
+                   (disjoint? ta tb false))
+      false
 
         ;; in the special case of (and A B) if A and B are NOT disjoint,
         ;;   then the intersection is inhabited.  This does not generalize
         ;;   to (and A B C...), because even if not(A||B), not(B||C), and not(A||C),
         ;;   the intersection might still be empty.
         ;; E.g., (and (member 1 2) (member 2 3) (member 1 3)) is empty yet no pair is disjoint.
-        (and (= 2 n)
-             (not (disjoint? (first t1-operands) (second t1-operands) true)))
-        true       
-        
-        :else
-        :dont-know))))
+      (and (= 2 n)
+           (not (disjoint? (first t1-operands) (second t1-operands) true)))
+      true
 
-(defmethod -inhabited? 'not [t1]
+      :else
+      :dont-know)))
+
+(defmethod -inhabited? 'and method-inhabited-and [t1]
+  (if (not (gns/and? t1))
+    :dont-know
+    (inhabited-and? t1)))
+
+(defmethod -inhabited? 'not inhabited-not [t1]
   (cond (not (gns/not? t1))
         :dont-know
 
@@ -2149,7 +2046,7 @@
         :else
         :dont-know))
 
-(defmethod -inhabited? 'member [t1]
+(defmethod -inhabited? 'member inhabited-member [t1]
   (cond (not (gns/member? t1))
         :dont-know
 
@@ -2159,7 +2056,7 @@
         :else    
         true))
 
-(defmethod -inhabited? '= [t1]
+(defmethod -inhabited? '= inhabited-= [t1]
   (if (gns/=? t1)
     true
     :dont-know))
