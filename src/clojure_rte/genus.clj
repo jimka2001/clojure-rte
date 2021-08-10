@@ -119,40 +119,6 @@
     (resolve class-name)
     nil))
 
-(defn find-incompatible-members
-  "Computes a lazy list of pairs [m1 m2] where m1 is an member of c1
-  and m2 is a member of c2, where m1 and m2 have the same name
-  and same parameter-types, thus c1 and c2 are incompatible."
-  [c1 c2]
-  {:pre [(and (or (symbol? c1) (class? c1))
-              (or (symbol? c2) (class? c2)))]}
-  (cond (symbol? c1)
-        (find-incompatible-members (or (find-class c1)
-                                       (throw (ex-info (format "find-incompatible-members: no such class %s" c1)
-                                                       {:c1 c1
-                                                        :c2 c2})))
-                                   c2)
-
-        (symbol? c2)
-        (find-incompatible-members c1 
-                                   (or (find-class c2)
-                                       (throw (ex-info (format "find-incompatible-members: no such class %s" c2)
-                                                       {:c1 c1
-                                                        :c2 c2}))))
-
-        :else
-        (let [members-1 (:members (refl/type-reflect c1))
-              members-2 (:members (refl/type-reflect c2))]
-          (for [m1 members-1
-                m2 members-2
-                :when (and (= (:name m1) (:name m2))
-                           (= (:parameter-types m1) (:parameter-types m2)))
-                ]
-            [m1 m2]))))
-
-(defn compatible-members? [c1 c2]
-  (empty? (find-incompatible-members c1 c2)))
-
 (defn type-equivalent?
   "Test whether two type designators represent the same type."
   [t1 t2 default]
@@ -1474,7 +1440,7 @@
 
                 (or (= :interface ct1)
                     (= :interface ct2))
-                (not (compatible-members? c1 c2))
+                true
 
                 :else
                 true))))
@@ -1532,9 +1498,7 @@
                (every? class-designator? t1-operands))
           (not (forall-pairs [[a b] (conj t1-operands t2)]
                              (or (isa? (find-class a) (find-class b))
-                                 (isa? (find-class b) (find-class a))
-                                 ;; TODO isn't this wrong? because () is not false
-                                 (compatible-members? a b))))
+                                 (isa? (find-class b) (find-class a)))))
 
           ;; I don't know the general form of this, so make it a special case for the moment.
           ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)

@@ -350,16 +350,6 @@
            (gns/disjoint? t1 t2 :dont-know)
            (gns/disjoint? t2 t1 :dont-know))))))
 
-(deftest t-disjoint-interfaces
-  (testing "disjoint interfaces"
-    (is (gns/find-class 'javax.security.auth.spi.LoginModule))
-    (is (gns/find-class 'java.net.http.WebSocket))
-    (is (not-empty (gns/find-incompatible-members javax.security.auth.spi.LoginModule
-                                                    java.net.http.WebSocket)))
-    (is (gns/disjoint? 'javax.security.auth.spi.LoginModule
-                       'java.net.http.WebSocket
-                       false))))
-
 (deftest t-disjoint-and
   (testing "disjoint of intersection types"
     (is (= false (gns/disjoint? '(and BigDecimal clojure.lang.IMeta) 'java.lang.Number :dont-know)) "test 1")
