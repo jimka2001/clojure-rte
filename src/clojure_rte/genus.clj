@@ -1212,9 +1212,7 @@
    conversion-C5
    conversion-C6
    (fn [td] (conversion-C7 td nf))
-   conversion-C8
    conversion-C9
-   conversion-C10
    conversion-C11
    conversion-C12
    conversion-C13
@@ -1223,6 +1221,8 @@
    conversion-C16
    conversion-D1
    conversion-D3
+   conversion-C8
+   conversion-C10
    conversion-C98
    (fn [td] (conversion-C99 td nf))])
 
