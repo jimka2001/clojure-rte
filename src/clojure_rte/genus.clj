@@ -1220,9 +1220,9 @@
    conversion-C15
    conversion-C16
    conversion-D1
-   conversion-D3
    conversion-C8
    conversion-C10
+   conversion-D3
    conversion-C98
    (fn conversion-C99-nf [td] (conversion-C99 td nf))])
 
@@ -1578,7 +1578,6 @@
         (= t2 t1-operand)
         true
         
-
         ;; (disjoint? (not B) A) ;; when A and B are disjoint, provided that A is inhabited
         ;; (disjoint? (not B) SEmpty) does not apply because SEmpty is not inhabited.
         (and (disjoint? t2 t1-operand false)
