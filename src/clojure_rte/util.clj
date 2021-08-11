@@ -199,7 +199,7 @@
        (catch Exception e (count (.getStackTrace e)))))
 
 (defn find-simplifier
-  "Iterate through a sequence of so-called simplifies.  Each simplifier
+  "Iterate through a sequence of so-called simplifiers.  Each simplifier
   is a unary function which accepts the given obj as arguments.  Each
   simplifier is expected to either _simplify_ the object or leave it as-is.
   If the simplifier returns an object which is = obj, then we assume the
