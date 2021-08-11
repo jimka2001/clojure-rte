@@ -177,7 +177,7 @@
         (list 'spec pattern)
         ))
 
-(defmethod gns/-canonicalize-type 'spec
+(defmethod gns/-canonicalize-type 'spec method-canonicalize-type-spec
   [[_spec pattern] _nf]
   (try (wrap-spec (spec-to-rte pattern))
        (catch clojure.lang.ExceptionInfo ei

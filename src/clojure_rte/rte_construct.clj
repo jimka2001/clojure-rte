@@ -841,8 +841,7 @@
       (operand not-operand)
       (list :not not-operand))))
 
-
-(defmethod gns/-canonicalize-type 'rte
+(defmethod gns/-canonicalize-type 'rte method-canonicalize-type-rte
   [type-designator _nf]
   ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
   ;;    gns/canonicalize-type, we'll need nf again
@@ -871,8 +870,6 @@
           :else
           (recur (rest seq)
                  (cons (first seq) head)))))
-
-
 
 (defn disjoint?-false-warn [t1 t2]
   ;; don't complain about rte nor satisfies

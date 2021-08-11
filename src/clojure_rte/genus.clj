@@ -481,7 +481,7 @@
   (fn [td _nf]
     (type-dispatch td)))
 
-(defmethod -canonicalize-type :default
+(defmethod -canonicalize-type :default method-canonicalize-type-default
   [type-designator nf]
   (cond
     (= 'java.lang.Object type-designator)
@@ -510,11 +510,11 @@
     type-designator
     ))
 
-(defmethod -canonicalize-type 'satisfies
+(defmethod -canonicalize-type 'satisfies method-canonicalize-type-satisfies
   [type-designator _nf]
   (expand-satisfies type-designator))
 
-(defmethod -canonicalize-type 'not
+(defmethod -canonicalize-type 'not method-canonicalize-type-not
   [type-designator nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
@@ -541,7 +541,7 @@
                        (list 'not (-canonicalize-type (second type-designator) nf))
                        nf))]))
 
-(defmethod -canonicalize-type 'fn*
+(defmethod -canonicalize-type 'fn* method-canonicalize-type-fn
   [type-designator _nf]
   (find-simplifier type-designator
                    [(fn [type-designator]
@@ -1211,7 +1211,7 @@
    conversion-C4
    conversion-C5
    conversion-C6
-   (fn [td] (conversion-C7 td nf))
+   (fn conversion-C7-nf [td] (conversion-C7 td nf))
    conversion-C9
    conversion-C11
    conversion-C12
@@ -1224,20 +1224,20 @@
    conversion-C8
    conversion-C10
    conversion-C98
-   (fn [td] (conversion-C99 td nf))])
+   (fn conversion-C99-nf [td] (conversion-C99 td nf))])
 
 
-(defmethod -canonicalize-type 'and
+(defmethod -canonicalize-type 'and method-canonicalize-type-and
   [type-designator nf]
   (find-simplifier type-designator
                    (combination-simplifiers nf)))
 
-(defmethod -canonicalize-type 'or
+(defmethod -canonicalize-type 'or method-canonicalize-type-or
   [type-designator nf]
   (find-simplifier type-designator
                    (combination-simplifiers nf)))
 
-(defmethod -canonicalize-type 'member
+(defmethod -canonicalize-type 'member method-canonicalize-type-member
   [type-designator _nf]
   ;; the advantage of using find-simplifier rather than calling create-member
   ;; simply and directly is that if create-member returns a new sequence (member ...)
