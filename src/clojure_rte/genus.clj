@@ -1484,10 +1484,10 @@
           ;; (disjoint? '(and String (not (member a b c 1 2 3))) 'java.lang.Comparable)
           (and @inhabited-t2
                @inhabited-t1
-               (exists [t1' t1-operands]
-                       (or (subtype? t1' t2 false)
-                           (subtype? t2 t1' false)
-                           )))
+               (or (forall [t1' t1-operands]
+                           (subtype? t1' t2 false))
+                   (forall [t1' t1-operands]
+                           (subtype? t2 t1' false))))
           false
 
           (and (class-designator? t2)
