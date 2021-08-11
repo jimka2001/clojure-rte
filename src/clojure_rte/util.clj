@@ -24,12 +24,10 @@
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
 
-
-
 (defn remove-element
   "Non-destructively remove a given element from a sequence"
   [element-to-remove xs]
-  (filter (fn [x] (not= x element-to-remove)) xs)) 
+  (filter (fn remove-element-filter [x] (not= x element-to-remove)) xs)) 
 
 (defn remove-once 
   "Non-destructively remove the first element of the sequence which is
@@ -369,39 +367,43 @@
 (defmacro exists
   "Test whether there exists an element of a sequence which matches a condition."
   [[var seq] & body]
-  `(some (fn [~var]
+  `(some (fn ~'exists-some [~var]
            ~@body) ~seq))
 
 (defmacro setof
   "Return a sequence of lazy elements of a given sequence which match a given condition"
   [[var seq] & body]
-  `(filter (fn [~var]
+  `(filter (fn ~'setof-filter [~var]
              ~@body) ~seq))
 
 (defmacro forall
   "Return true if the given body evaluates to logical true for every element of the given sequence"
    [[var seq] & body]
-  `(every? (fn [~var]
+  `(every? (fn ~'forall-every [~var]
              ~@body) ~seq))
 
 (defn lazy-pairs
+  ;; code provided by Eugene Pakhomov
+  ;; https://app.slack.com/client/T03RZGPFR/C03S1KBA2/user_profile/U2FRKM4TW
   "Generate (lazily) a sequence of pairs (a b) from the given sequence such
   that a is always to the left of b in the given sequence.   Supposing that
   the given sequence has no duplicates (1 2 3) -> ((1 2) (1 3) (2 3))"
-  [seq]
-  (cond (empty? seq)
-        ()
-
-        :else
-        (concat (for [t (rest seq)]
-                  [(first seq) t])
-                (lazy-pairs (rest seq)))))
+  ([coll]
+   (lazy-pairs [(first coll)] (next coll)))
+  ([seen coll]
+   (when (seq coll)
+     (lazy-seq
+       (let [x (first coll)]
+         (concat (map (fn [s]
+                        [s x])
+                      seen)
+                 (lazy-pairs (conj seen x) (next coll))))))))
 
 (defmacro forall-pairs [[[v1 v2] seq] & body]
-  `(every? (fn [[~v1 ~v2]] ~@body) (lazy-pairs ~seq)))
+  `(every? (fn ~'forall-pairs-every [[~v1 ~v2]] ~@body) (lazy-pairs ~seq)))
 
 (defmacro exists-pair  [[[v1 v2] seq] & body]
-  `(some (fn [[~v1 ~v2]]
+  `(some (fn ~'exists-pair-some [[~v1 ~v2]]
            ~@body) (lazy-pairs ~seq)))
 
 (defn capture-output
