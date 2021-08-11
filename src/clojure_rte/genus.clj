@@ -1376,7 +1376,7 @@
                      :t1 t1
                      :t2 t2}))))
 
-(defmethod -disjoint? :primary [t1 t2]
+(defmethod -disjoint? :primary method-disjoint-primary [t1 t2]
   (cond
     (= :empty-set t1)
     true
@@ -1468,7 +1468,7 @@
     (if (not (gns/and? t1))
       :dont-know
       (let [t1-operands (operands t1)]
-        (cond 
+        (cond
           (exists [t t1-operands]
                   (disjoint? t2 t false))
           ;; (disjoint? (and A B C) X)
@@ -1494,13 +1494,6 @@
                (= (find-class t2) java.lang.Object)
                (some class-designator? t1-operands))
           false
-
-          ;; (disjoint? (and A B C) X)
-          (and (class-designator? t2)
-               (every? class-designator? t1-operands))
-          (not (forall-pairs [[a b] (conj t1-operands t2)]
-                             (or (isa? (find-class a) (find-class b))
-                                 (isa? (find-class b) (find-class a)))))
 
           ;; I don't know the general form of this, so make it a special case for the moment.
           ;; (gns/disjoint? '(and Long (not (member 2 3 4))) 'java.lang.Comparable)
@@ -1975,6 +1968,7 @@
         ;;   part of t1-operands.
       (some false? (map (fn [t] (inhabited? t :dont-know))
                         (unchunk t1-operands)))
+      
       false
 
       ;; (and (not Float) (not Double) (not (member 1 2 3))) --> inhabited=true

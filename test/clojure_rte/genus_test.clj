@@ -32,6 +32,15 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
 
+(deftest t-discovered-case-disjoint-134
+  (testing "discovered-case-disjoint-134"
+    (is (= false (gns/disjoint? 'java.lang.Number
+                                'java.lang.CharSequence
+                                :dont-know)))
+    (is (not= true (gns/disjoint? '(and java.lang.Number)
+                                  'java.lang.CharSequence
+                                  :dont-know)))))
+
 (deftest t-discovered-case-disjoint-135
   (testing "discovered-case-disjoint-135"
     (is (= (gns/inhabited? '(and (not clojure.lang.Symbol) (not java.lang.CharSequence) java.lang.Comparable)
@@ -402,20 +411,26 @@
 (deftest t-inhabited-random
   (testing "checking some randomly generated types for inhabited?"
     (with-compile-env []
-      (letfn [(check [type-designator]
+      (letfn [(check [type-designator msg]
                 (let [inh (gns/inhabited? type-designator :dont-know)
                       t2 (gns/canonicalize-type type-designator)
                       inh-2 (gns/inhabited? t2 :dont-know)]
                   (cond
                     (= true inh)
                     (is (not= false inh-2)
-                        (cl-format false "~A is inhabited but its canonicalized form is not ~A"
+                        (cl-format false "~A: ~W~@
+                                          is inhabited but its canonicalized form is not~@
+                                          ~W"
+                                   msg
                                    type-designator
                                    t2))
-                    
+
                     (= false inh)
                     (is (not= true inh-2)
-                        (cl-format false "~A is not inhabited but its canonicalized form is ~A"
+                        (cl-format false "~A: ~W~@
+                                          is not inhabited but its canonicalized form is~@
+                                          ~W"
+                                   msg
                                    type-designator
                                    t2)))))]
         (check '(and (and (and (or (member a b c 1 2 3) (= 1))
@@ -425,7 +440,8 @@
                      (and (not (and (satisfies symbol?)
                                     (satisfies ratio?)))
                           (not (or (= a)
-                                   (= 1))))))
+                                   (= 1)))))
+               431)
         ;; (check '(and (and (or (member a b c 1 2 3) (= 1))
         ;;                   (not (member a b c a b c))
         ;;                   (not (and java.lang.CharSequence
@@ -458,18 +474,59 @@
         ;;                  (not (satisfies ratio?)))
         ;;              (and (not (= a))
         ;;                   (not (= 1)))))
+
+        (check '(and (or (satisfies int?)
+                         (and java.lang.Number))
+                     java.lang.CharSequence)
+               4655)
+        (check '(and (or (and (satisfies int?))
+                         (and java.lang.Number))
+                     java.lang.CharSequence)
+               4654)
+        (check '(and (or (and (satisfies int?))
+                         (and java.lang.Number))
+                     java.lang.CharSequence)
+               4653)
+        (check '(and (or (and (satisfies symbol?)
+                              (satisfies int?))
+                         (and java.lang.Number))
+                     (satisfies integer?)
+                     java.lang.CharSequence)
+               4652)
+        (check '(and (or (and (satisfies symbol?)
+                              (satisfies int?))
+                         (and java.lang.Number
+                              java.io.Serializable))
+                     (satisfies integer?)
+                     java.lang.CharSequence)
+               4651)
+        (check '(and (or (and (satisfies symbol?)
+                              (satisfies int?))
+                         (and java.lang.Number
+                              java.io.Serializable))
+                     (not (not (satisfies integer?)))
+                     java.lang.CharSequence)
+               465)
+
+        (check '(and (and (or (and (satisfies symbol?)
+                                   (satisfies int?))
+                              (and java.lang.Number
+                                   java.io.Serializable))
+                          (not (not (satisfies integer?))))
+                     java.lang.CharSequence)
+               466)
         (check '(and (and (or (member a b c 1 2 3)
-                              (= 1)
-                              )
+                              (= 1))
                           (not (member a b c a b c))
                           (not java.lang.CharSequence))
-                     
+
                      (and  (not (= a))
-                           (not (= 1))
-                           )))
-       
+                           (not (= 1))))
+               475)
+
         (dotimes [_ 1000]
-          (check (gen-type 4)))))))
+          (check (gen-type 4)
+                 479))))))
 
 (deftest t-canonicalize-not-member
   (testing "canonicalize (and (not (member ...)))"
