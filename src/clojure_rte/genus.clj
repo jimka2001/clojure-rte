@@ -569,20 +569,20 @@
   (fn [self _a _b]
     (type-dispatch self)))
 
-(defmethod combinator 'and
+(defmethod combinator 'and method-combinator-and
   [_self a b]
   (setof [x a]
          (member x b)))
 
-(defmethod dual-combinator 'and
+(defmethod dual-combinator 'and method-dual-combinator-and
   [_self a b]
   (uniquify (concat a b)))
 
-(defmethod combinator 'or
+(defmethod combinator 'or method-combinator-or
   [_self a b]
   (uniquify (concat a b)))
 
-(defmethod dual-combinator 'or
+(defmethod dual-combinator 'or method-dual-combinator-or
   [_self a b]
   (setof [x a]
          (member x b)))
@@ -593,11 +593,11 @@
   (fn [self _pred _xs]
     (type-dispatch self)))
 
-(defmethod combo-filter 'or
+(defmethod combo-filter 'or method-combo-filter-or
   [_self pred xs]
   (filter (fn [x] (not (pred x))) xs))
 
-(defmethod combo-filter 'and
+(defmethod combo-filter 'and method-combo-filter-and
   [_self pred xs]
   (filter pred xs))
 
@@ -607,12 +607,12 @@
   (fn [this _that]
     (type-dispatch this)))
 
-(defmethod dual-combination? 'or
+(defmethod dual-combination? 'or method-dual-combination-or
   [_this td]
   (and (gns/combo? td)
        (= 'and (first td))))
 
-(defmethod dual-combination? 'and
+(defmethod dual-combination? 'and method-dual-combination-or
   [_this td]
   (and (gns/combo? td)
        (= 'or (first td))))
@@ -1026,7 +1026,7 @@
             combined (reduce (fn [x y]
                                (dual-combinator self x y))
                              items)
-            new-not-member (template (not ~(create-member combined)))]
+            new-not-member (gns/create-not (create-member combined))]
         (letfn [(f [td]
                   (if (member td not-members)
                     new-not-member
@@ -1148,7 +1148,7 @@
    == > SNot(SMember(42, 43, 44))"
   type-dispatch)
 
-(defmethod conversion-D1 'and
+(defmethod conversion-D1 'and conversion-D1-and
   [self]
   (call-with-found gns/member-or-=? (operands self)
                    :if-not-found self
@@ -1156,7 +1156,7 @@
                                (gns/create-member (setof [x (operands first-member)]
                                                          (gns/typep x self))))))
 
-(defmethod conversion-D1 'or
+(defmethod conversion-D1 'or conversion-D1-or
   [self]
   ;; This is the dual of conversion-D1 'and,
   ;;   the code is a bit more complicated because we have to destructure (not (member ...))
@@ -1178,14 +1178,14 @@
   SAnd(A, B) --> SEmpty if A and B are disjoint"
   type-dispatch)
 
-(defmethod conversion-D3 'and
+(defmethod conversion-D3 'and conversion-D3-and
   [self]
   (if (exists-pair [[i j] (operands self)]
                    (disjoint? i j false))
     :empty-set
     self))
 
-(defmethod conversion-D3 'or
+(defmethod conversion-D3 'or conversion-D3-or
   [self]
   (let [nots (filter gns/not? (operands self))]
     (if (exists-pair [[i j] nots]
