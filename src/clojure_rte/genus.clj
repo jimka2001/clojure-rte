@@ -1711,24 +1711,22 @@
                      :super super}))))
 
 (defmethod -subtype? :primary subtype-primary [sub-designator super-designator]
-  (let [super-canon (delay (gns/canonicalize-type super-designator))
-        sub-canon   (delay (gns/canonicalize-type sub-designator))]
-    (cond (and (class-designator? super-designator)
-               (= Object (find-class super-designator)))
-          true
-          
-          (and (class-designator? sub-designator)
-               (class-designator? super-designator))
-          (isa? (find-class sub-designator) (find-class super-designator))
+  (cond (and (class-designator? super-designator)
+             (= Object (find-class super-designator)))
+        true
 
-          (= :sigma @super-canon)
-          true
-          
-          (= :empty-set @sub-canon)
-          true
-          
-          :else
-          :dont-know)))
+        (and (class-designator? sub-designator)
+             (class-designator? super-designator))
+        (isa? (find-class sub-designator) (find-class super-designator))
+
+        (= :sigma (gns/canonicalize-type super-designator))
+        true
+
+        (= :empty-set (gns/canonicalize-type sub-designator))
+        true
+
+        :else
+        :dont-know))
 
 (defmethod -subtype? '= subtype-= [sub super]
   (cond (gns/=? sub)
