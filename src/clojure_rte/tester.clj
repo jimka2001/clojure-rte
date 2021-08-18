@@ -62,4 +62,7 @@
     (when verbose
       (cl-format true "~d/~d: trying ~A~%" n num-tries data))
     
-    (unary-test-fun data)))
+    (try (unary-test-fun data)
+         (catch java.lang.StackOverflowError e
+           (cl-format true "~&Stack overflow on ~A~%" data)
+           (throw e)))))
