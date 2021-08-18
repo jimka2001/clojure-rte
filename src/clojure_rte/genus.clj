@@ -1032,7 +1032,7 @@
                     new-not-member
                     td))]
           ;; we replace all SNot(SMember(...)) with the newly computed
-          ;;  SNot(SMember(...)), the remove duplicates.  This effectively
+          ;;  SNot(SMember(...)), then remove duplicates.  This effectively
           ;;  replaces the right-most one, and removes all others.
           (create self (uniquify (map f (operands self)))))))))
 
