@@ -232,17 +232,26 @@
            :else
            (recur fs (inc i))))))))
 
+
 (defn fixed-point
   "Find the fixed point of the given function starting at the given value.
   Convergence is detected when the function good-enough returns Boolean true
   when called with two consecutive values. The older of the two values
   is returned in this case."
   [value f good-enough]
-  (loop [value value]
+  (loop [value value
+         old-values ()]
     (let [new-value (f value)]
-      (if (good-enough value new-value)
-        value
-        (recur new-value)))))
+      (cond (good-enough value new-value)
+            value
+
+            (member value old-values)
+            (throw (ex-info (cl-format nil "infinite loop in fixed-point, twice encountered ~A" value)
+                            {:value value
+                             :old-values old-values}))
+
+            :else
+            (recur new-value (cons value old-values))))))
 
 (defn print-vals-helper ""
   [pairs]
