@@ -1126,7 +1126,7 @@
   ;; remove Sigma * and flatten And(And(...)...)
   ;; remove EmptySet and flatten Or(Or(...)...)
   (create self
-          (mapcat (fn [r]
+          (mapcat (fn combo-6-mapcat [r]
                     (cond (= r (one self))
                           []
 
