@@ -302,3 +302,13 @@
             (cl-format false "~%td-1=~A~%td-2=~A~%disjoint? td-1 td2 = ~A~%disjoint? td-1 td2 = ~A~%"
                        td-1 td-2
                        d12 d21)))))
+
+(deftest t-disjoint-discovered-case-290
+  (testing "disjoint discovered case 290"
+    (is (= true (gns/inhabited? '(and (not BigDecimal) (not BigInteger) (not clojure.lang.Ratio) java.lang.CharSequence java.lang.Number)
+                                :dont-know)))
+    (is (= false (gns/disjoint? '(and (not BigDecimal) (not BigInteger) (not clojure.lang.Ratio)
+                                      ;; maximum of 1 :abstract
+                                      java.lang.CharSequence java.lang.Number)
+                                     'java.lang.CharSequence 
+                                     :dont-know)))))
