@@ -29,7 +29,7 @@
                                       rte-identity rte-constantly
                                       gc-friendly-memoize call-with-found find-first
                                       search-replace remove-element uniquify
-                                      non-empty? count-if-not find-simplifier]]
+                                      count-if-not find-simplifier]]
             [clojure-rte.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union]]
@@ -118,7 +118,7 @@
    the dynamic extend ends."
   [bindings & body]
   `(with-compile-env []
-     (call-with-rte '~bindings (fn [] ~@body))))
+     (call-with-rte '~bindings (fn ~'fn-with-rte [] ~@body))))
 
 (defn rte? [t]
   (and (sequential? t)
@@ -291,28 +291,28 @@
   1) the list of operands given to (:* ...), and 2) the value
   value of functions, i.e., the extended value of
   *traversal-functions*"
-  {:client (fn [pattern functions]
+  {:client (fn traverse-client [pattern functions]
              (traverse-pattern pattern functions))
-   :type (fn [tag functions]
+   :type (fn taverse-type [tag functions]
            ((:client functions) tag functions))
-   :* (fn [pattern functions]
+   :* (fn traverse-* [pattern functions]
         (cons :* ((:client functions) pattern functions)))
-   :and (fn [patterns functions]
+   :and (fn traverse-and [patterns functions]
           (cons :and (map (fn [expr]
                             ((:client functions) expr functions)) patterns)))
-   :or (fn [patterns functions]
+   :or (fn traverse-or [patterns functions]
          (cons :or (map (fn [expr]
                           ((:client functions) expr functions)) patterns)))
-   :not (fn [pattern functions]
+   :not (fn traverse-not [pattern functions]
           (cons :not ((:client functions) pattern functions)))
-   :cat (fn [patterns functions]
+   :cat (fn traverse-cat [patterns functions]
           (cons :cat (map (fn [expr]
                             ((:client functions) expr functions)) patterns)))
-   :sigma (fn [pattern functions]
+   :sigma (fn traverse-sigma [pattern functions]
             ((:client functions) pattern functions))
-   :empty-set (fn [pattern functions]
+   :empty-set (fn traverse-empty-set [pattern functions]
                 ((:client functions) pattern functions))
-   :epsilon (fn [pattern functions]
+   :epsilon (fn traverse-epsilon [pattern functions]
               ((:client functions) pattern functions))
    })
 
@@ -349,39 +349,39 @@
                    :functions functions
                    })))
 
-(defmethod expand-1 :default [pattern _functions]
+(defmethod expand-1 :default method-expand-1-default [pattern _functions]
   pattern)
 
-(defmethod expand-1 'satisfies [pattern _functions]
+(defmethod expand-1 'satisfies method-expand-1-satisfies [pattern _functions]
   (gns/expand-satisfies pattern))
 
-(defmethod expand-1 :? [pattern functions]
+(defmethod expand-1 :? method-expand-1-question [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:? []]))
            ([operand] `(:or :epsilon ~operand))
            ([_ & _] (invalid-pattern pattern functions '[:? [_ & _]]))) 
          (rest pattern)))
 
-(defmethod expand-1 :+ [pattern functions]
+(defmethod expand-1 :+ method-expand-1-plus [pattern functions]
   (apply (fn
            ([] (invalid-pattern pattern functions '[:+ []]))
            ([operand] `(:cat ~operand (:* ~operand)))
            ([_ & _] (invalid-pattern pattern functions '[:+ [_ & _]])))
          (rest pattern)))
 
-(defmethod expand-1 :permute [pattern _functions]
+(defmethod expand-1 :permute method-expand-1-permute [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
            ([_ & _]
             (let [operands (rest pattern)]
-              (cons :or (call-with-collector (fn [collect]
+              (cons :or (call-with-collector (fn collect-permutation [collect]
                                                (visit-permutations
-                                                (fn [perm]
+                                                (fn visit-permutation [perm]
                                                   (collect (cons :cat perm))) operands)))))))
          (rest pattern)))
 
-(defmethod expand-1 :contains-any [pattern _functions]
+(defmethod expand-1 :contains-any method-expand-1-contains-any [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -392,7 +392,7 @@
                      ~sigma-*))))
          (rest pattern)))
 
-(defmethod expand-1 :contains-every [pattern _functions]
+(defmethod expand-1 :contains-every method-expand-1-contains-every [pattern _functions]
   (apply (fn
            ([] :epsilon)
            ([operand] operand)
@@ -402,12 +402,12 @@
               `(:and ~@(doall wrapped)))))
          (rest pattern)))
 
-(defmethod expand-1 :contains-none [pattern _functions]
+(defmethod expand-1 :contains-none method-expand-1-contains-none [pattern _functions]
   ;; TODO, not sure what (:contains-none) should mean with no arguments.
   ;;    as implemented it is equivalent to (:not :epsilon) which seems wierd.
   `(:not (:contains-any ~@(rest pattern))))
 
-(defmethod expand-1 :exp [pattern functions]
+(defmethod expand-1 :exp method-expand-1-exp [pattern functions]
   (letfn [(expand [n m pattern]
             (assert (>= n 0) (format "pattern %s is limited to n >= 0, not %s" pattern n))
             (assert (<= n m) (format "pattern %s is limited to n <= m, got %s > %s" pattern n m))
@@ -436,17 +436,17 @@
                      :pattern pattern
                      :functions functions}))))
 
-(defmethod expand-1 'and [pattern functions]
+(defmethod expand-1 'and method-expand-1-and [pattern functions]
   ;; convert (and a b c) => (:and a b c)
   ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
   (cons :and (rest (verify-type pattern functions))))
 
-(defmethod expand-1 'or [pattern functions]
+(defmethod expand-1 'or method-expand-1-or [pattern functions]
   ;; convert (or a b c) => (:or a b c)
   ;;  i.e., (or (:and ...)) is not allowed, which probably means the user forgot a :
   (cons :or (rest (verify-type pattern functions))))
 
-(defmethod expand-1 'not [pattern functions]
+(defmethod expand-1 'not method-expand-1-not [pattern functions]
   ;;             (not a) => (:and :sigma (:not a))
   `(:and (:not ~@(rest (verify-type pattern functions)))
          :sigma))
