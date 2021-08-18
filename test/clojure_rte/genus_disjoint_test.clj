@@ -260,6 +260,22 @@
         "test 13")
     (is (= true (gns/disjoint? '(not java.io.Serializable) 'Long :dont-know))
         "test 14")
+    (is (= false (gns/disjoint? '(and (not clojure.lang.ISeq)
+                                      (not java.lang.CharSequence)
+                                      BigDecimal)
+                                'BigDecimal :dont-know))
+        "test 15")
+    (is (= false (gns/disjoint? '(and (not BigDecimal) (not BigInteger) (not clojure.lang.Ratio)
+                                      java.lang.CharSequence java.lang.Number)
+                                'java.lang.CharSequence
+                                :dont-know))
+        "test 16")
+    
+        (is (= false (gns/disjoint? '(and (not BigDecimal) (not BigInteger) (not clojure.lang.Ratio)
+                                      java.lang.CharSequence java.lang.Number)
+                                    'java.lang.Number
+                                    :dont-know))
+        "test 17")
     ))
 
 (deftest t-disjoint-public

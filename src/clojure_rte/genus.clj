@@ -1976,14 +1976,14 @@
                    (or (and (gns/not? td)
                             (or (class-designator? (operand td))
                                 (gns/member-or-=? (operand td))))
-                       (and (class-designator? td)
-                            (member (class-primary-flag td) '(:abstract :interface)))))
+                       (class-designator? td)))
            ;; maximum of 1 abstract
            ;; e.g., (and (not BigDecimal) (not BigInteger) (not clojure.lang.Ratio)
            ;;            java.lang.CharSequence java.lang.Number)
+           ;; e.g., (and (not clojure.lang.ISeq) (not java.lang.CharSequence) BigDecimal)
            (<= (bounded-count 2 (filter (fn [td]
                                              (and (class-designator? td)
-                                                  (= :abstract (class-primary-flag td))))
+                                                  (member (class-primary-flag td) '(:abstract :public :final))))
                                            t1-operands)) 1))
       true
 
