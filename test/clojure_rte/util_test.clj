@@ -27,6 +27,7 @@
                                       visit-permutations
                                       remove-once fixed-point member
                                       call-with-found
+                                      lazy-pairs
                                       ]]
             [clojure.test :refer [deftest testing is]]))
 
@@ -419,3 +420,32 @@
     (is (= 42 (call-with-found odd? '(0 2 4 6 8)
                                :if-not-found 42
                                :if-found (constantly :hello))))))
+
+(deftest t-lazy-pairs
+  (testing "lazy-pairs"
+    (let [pairs (lazy-pairs (range 10))]
+      (is (= (/ (* 10 9) 2)
+             (count pairs)))
+      (doseq [i (range 10)
+              j (range i)]
+        (is (member [j i] pairs))
+        (is (not (member [i j] pairs)))
+        (is (not (member [i i] pairs))))
+
+      ;; ([0 1] [1 2] [0 2] [2 3] [1 3] [0 3] [3 4] [2 4] [1 4] [0 4])
+      ;; At the point in the sequence where [a b] occurs, every pair [x y] thereafter
+      ;; has the property that either max(x,y) >= max(a,b), and min(a,b) <= min(x,y)."
+      (let [pairs-as-vec (into [] pairs)]
+        (doseq [i (range (count pairs-as-vec))
+                j (range i)]
+          (let [[a b] (pairs-as-vec j)
+                [x y] (pairs-as-vec i)]
+            (is (>= (max x y) (max a b))
+                (cl-format nil "~&~
+                                ~A~@
+                                a=~A~@
+                                b=~A~@
+                                x=~A~@
+                                y=~A~%" pairs-as-vec a b x y))))))))
+  
+
