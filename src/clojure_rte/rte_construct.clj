@@ -1804,14 +1804,14 @@
   (assert (= 'and (first wrt)))
   (let [[_ & and-args] wrt]
     (cond
-      (member (template (not ~expr)) and-args)
+      (member (rte/create-not expr) and-args)
       :empty-set
 
-      (some #{expr} and-args)
+      (member expr and-args)
       :epsilon
 
       :else
-      (throw (ex-info (format "not yet implemented: derivative of %s wrt %s"
+      (throw (ex-info (cl-format nil "not yet implemented: derivative of ~A wrt ~A"
                               expr wrt)
                       {:error-type :rte-not-yet-implemented
                        :pattern expr
