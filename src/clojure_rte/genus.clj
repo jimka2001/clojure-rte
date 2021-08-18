@@ -1968,6 +1968,12 @@
       
       false
 
+      (exists-pair [[a b] t1-operands]
+                   ;; TODO why do I need all the class-designator? checks?
+                   ;;   why not just check for disjoint?
+                   (disjoint? a b false))
+      false
+
       ;; (and (not Float) (not Double) (not (member 1 2 3))) --> inhabited=true
       ;; (and (not Float) java.lang.Comparable) -> inhabited=true
       ;; (and (not Float) (not (member 1 2 3)) java.lang.Comparable) -> inhabited=true
@@ -1986,16 +1992,6 @@
                                                   (member (class-primary-flag td) '(:abstract :public :final))))
                                            t1-operands)) 1))
       true
-
-      (exists-pair [[a b] t1-operands]
-                   (and (or (class-designator? a)
-                            (and (gns/not? a)
-                                 (class-designator? (second a))))
-                        (or (class-designator? b)
-                            (and (gns/not? b)
-                                 (class-designator? (second b))))
-                        (disjoint? a b false)))
-      false
 
         ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 

@@ -312,3 +312,8 @@
                                       java.lang.CharSequence java.lang.Number)
                                      'java.lang.CharSequence 
                                      :dont-know)))))
+
+(deftest t-disjoint-discovered-case-291
+  (testing "disjoint discovered case 291"
+    (is (= true (gns/disjoint? '(not java.lang.Comparable) 'BigDecimal :dont-know)))
+    (is (= false (gns/inhabited? '(and (not java.lang.Comparable) BigDecimal) :dont-know)))))
