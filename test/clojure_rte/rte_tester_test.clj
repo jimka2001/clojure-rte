@@ -112,8 +112,8 @@
       (is (rte/match rte-1-complement [:x]))
       (is (not (rte/match rte-1-complement [1 2 3]))))))
 
-(deftest t-rte-not-random
-  (testing ":not random"
+(deftest t-rte-not
+  (testing ":not discovered cases"
     (doseq [rte '(:sigma
                   :empty-set
                   (:* :sigma)
@@ -170,7 +170,6 @@
                        (member a b c a b c)
                        (:cat (:+ (:cat (:not (:* (:and)))))
                              (:+ (:and :empty-set))))
-
                   (:or (:or (:or (:not :sigma) (= -1))
                             (:not (:? (satisfies keyword?)))
                             (:* (:and :empty-set)))
@@ -181,9 +180,10 @@
                              (:or (:+ (:and)) (:and (:+ (:or))))))
                   )]
       (println [:rte rte])
-      (clojure-rte.rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))
+      (clojure-rte.rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
 
-
+(deftest t-rte-not-random
+  (testing ":not random"
     (test-rte-not 1000 4
                   false ;verbose
                   )))
