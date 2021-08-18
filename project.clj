@@ -27,7 +27,16 @@
   :plugins [[lein-cloverage "1.1.2"]
             [lein-ns-dep-graph "0.2.0-SNAPSHOT"]
             ]
-  :jvm-opts ["-Xmx1g" "-XX:+HeapDumpOnOutOfMemoryError" "-Djdk.attach.allowAttachSelf"] ;; 
+  :jvm-opts ["-Xmx1g" "-XX:+HeapDumpOnOutOfMemoryError" "-Djdk.attach.allowAttachSelf"
+             ;; increase stack size x6, for preventing SO errors:
+             ;;   (The current default can be found with
+             ;;    `java -XX:+PrintFlagsFinal -version 2>/dev/null | grep "intx ThreadStackSize"`)
+             "-Xss6144k"
+             ;; Prevents trivial StackOverflow errors:
+             "-XX:MaxJavaStackTraceDepth=1000000"             
+             ]
+
+  
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [lein-cloverage "1.1.2"]
                  [org.clojure/data.json "1.0.0"]

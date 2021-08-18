@@ -74,6 +74,23 @@
     ;; if an rte is not nullable, then (:not rte) is nullable
     (test-rte-not-nullable 1000 7 false (fn [expr msg] (is expr msg)))))
 
+(deftest t-canonicalize-discovered-case-177
+  (testing "test-rte-canonicalize-nullable-1"
+    (let [rte '(:not (:contains-every :empty-set
+                                      (:and (:and (:contains-any)) (:* (:contains-any)))
+                                      (:or (:+ (:cat)) (satisfies string?))
+))]
+      (is
+       (canonicalize-pattern rte)
+       "failed to canonicalize")
+
+      (rte/nullable? rte)
+      
+      (clojure-rte.rte-tester/test-rte-canonicalize-nullable-1
+        rte
+        (fn [expr msg] (is expr msg)))
+)))
+
 (deftest t-rte-nullable-canonicalize-random
   (testing "canonicalize of :not"
     (is (= (canonicalize-pattern 
@@ -86,6 +103,8 @@
                                  (:and (satisfies ratio?) (:+ (:cat))))
                  :sigma))
            '(:* :sigma)) "test 076")
+    
+
     (test-rte-canonicalize-nullable 500 ; num-tries
                                     4 ; size
                                     false ;verbose
