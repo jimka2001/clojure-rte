@@ -1201,8 +1201,8 @@
 (defn conversion-C99
   ""
   [self nf]
-  (create self (for [td (operands self)]
-                 (canonicalize-type td nf))))
+  (create self (map (fn [td] (canonicalize-type td nf))
+                       (operands self))))
 
 (defn combination-simplifiers [nf]
   [conversion-C1

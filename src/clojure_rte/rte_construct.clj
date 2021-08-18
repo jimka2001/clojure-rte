@@ -397,9 +397,10 @@
            ([] :epsilon)
            ([operand] operand)
            ([_ & _]
-            (let [wrapped (for [operand (rest pattern)]
-                            `(:cat ~sigma-* ~operand ~sigma-*))]
-              `(:and ~@(doall wrapped)))))
+            (let [wrapped (map (fn map-wrapped [operand]
+                                    `(:cat ~sigma-* ~operand ~sigma-*)) 
+                                  (rest pattern))]
+              `(:and ~@wrapped))))
          (rest pattern)))
 
 (defmethod expand-1 :contains-none method-expand-1-contains-none [pattern _functions]
