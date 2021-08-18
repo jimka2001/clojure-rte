@@ -396,9 +396,20 @@
   ;; https://app.slack.com/client/T03RZGPFR/C03S1KBA2/user_profile/U2FRKM4TW
   "Generate (lazily) a sequence of pairs (a b) from the given sequence such
   that a is always to the left of b in the given sequence.   Supposing that
-  the given sequence has no duplicates (1 2 3) -> ((1 2) (1 3) (2 3))"
+  the given sequence has no duplicates (1 2 3) -> ((1 2) (1 3) (2 3)).
+  The order of the list of pairs is not guaranteed, however the following
+  property holds.
+  At the point in the sequence where [a b] occurs, every pair [x y] thereafter
+  has the property that either max(x,y) >= max(a,b). E.g every pair containing
+  both entries less than 13 appears before the first occurance of 13.
+  If the sequence contains [4 13], then every element [a b] to the left has
+  both a and b <= 13 and no [a b] after [4 13] has both a and b < 13.
+  This ordering property ensures that if the given collection is a lazy
+  sequence, that as few items as possible are realized.  I.e., if the first
+  n items have been realized, then all pairs involving the first n items
+  have been generated before the n+1'th item gets realized."
   ([coll]
-   (lazy-pairs [(first coll)] (next coll)))
+   (lazy-pairs (list (first coll)) (next coll)))
   ([seen coll]
    (when (seq coll)
      (lazy-seq
@@ -406,7 +417,7 @@
          (concat (map (fn [s]
                         [s x])
                       seen)
-                 (lazy-pairs (conj seen x) (next coll))))))))
+                 (lazy-pairs (cons x seen) (next coll))))))))
 
 (defmacro forall-pairs [[[v1 v2] seq] & body]
   `(every? (fn ~'forall-pairs-every [[~v1 ~v2]] ~@body) (lazy-pairs ~seq)))
