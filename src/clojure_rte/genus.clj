@@ -1986,7 +1986,14 @@
                             (or (class-designator? (operand td))
                                 (gns/member-or-=? (operand td))))
                        (and (class-designator? td)
-                            (= :interface (class-primary-flag td))))))
+                            (member (class-primary-flag td) '(:abstract :interface)))))
+           ;; maximum of 1 abstract
+           ;; e.g., (and (not BigDecimal) (not BigInteger) (not clojure.lang.Ratio)
+           ;;            java.lang.CharSequence java.lang.Number)
+           (<= (bounded-count 2 (lz/filter (fn [td]
+                                             (and (class-designator? td)
+                                                  (= :abstract (class-primary-flag td))))
+                                           t1-operands)) 1))
       true
 
       (exists-pair [[a b] t1-operands]
