@@ -772,7 +772,7 @@
 (deftest t-mdtd
   (testing "mdtd"
     (with-compile-env ()
-      (is (= (set (gns/mdtd #{'java.lang.Exception 'clojure.lang.ExceptionInfo}))
+      (is (= (set (map first (gns/mdtd #{'java.lang.Exception 'clojure.lang.ExceptionInfo})))
              #{`(~'not java.lang.Exception)
                `(~'and  (~'not clojure.lang.ExceptionInfo) java.lang.Exception)
                'clojure.lang.ExceptionInfo})))))

@@ -2057,28 +2057,31 @@
   Every set, x, in the return value has the property that if y is in
   the given type-set, then either x and y are disjoint, or x is a subset of y."
   [type-set]
-  (loop [decomposition [:sigma]
+  (loop [decomposition [[:sigma () ()]]
          type-set (disj type-set :sigma)]
     (if (empty? type-set)
       decomposition
       (let [td (first type-set) ;; take any element, doesn't matter which
-            n (canonicalize-type (gns/create-not td) :dnf)
-            f (fn [td-1]
-                (let [a (delay (canonicalize-type (gns/create-and [td td-1]) :dnf))
-                      b (delay (canonicalize-type (gns/create-and [n td-1]) :dnf))]
+            n (gns/create-not td)
+            nc (canonicalize-type n :dnf)
+            f (fn [triple]
+                (let [[td-1 factors disjoints] triple
+                      a (delay (canonicalize-type (gns/create-and [td td-1]) :dnf))
+                      b (delay (canonicalize-type (gns/create-and [nc td-1]) :dnf))]
                   (cond (disjoint? td td-1 false)
-                        [td-1]
+                        [[td-1 (cons n factors) (cons td disjoints)]]
                         
                         (disjoint? n td-1 false)
-                        [td-1]
+                        [[td-1 (cons td factors) (cons n disjoints)]]
                         
                         (not (inhabited? @a true))
-                        [td-1]
+                        [[td-1 (cons n factors) (cons td disjoints)]]
                         
                         (not (inhabited? @b true))
-                        [td-1]
+                        [[td-1 (cons td factors) (cons n disjoints)]]
                         
                         :else
-                        [@a @b])))]
+                        [[@a (cons td factors) (cons n disjoints)]
+                         [@b (cons n factors) (cons td disjoints)]])))]
         (recur (mapcat f decomposition)
                (disj type-set td))))))

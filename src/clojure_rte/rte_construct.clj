@@ -1819,20 +1819,20 @@
                        :wrt wrt
                        })))))
 
-(defn derivative 
+(defn derivative
   "Compute the Brzozowski rational expression derivative of the given
   rte pattern with respect to the given type wrt."
-  [expr wrt]
+  [expr wrt factors disjoints]
   (letfn [(walk [patterns]
             (map (fn [p]
-                   (derivative (canonicalize-pattern p) wrt))
+                   (derivative (canonicalize-pattern p) wrt factors disjoints))
                  patterns))]
     ;; TODO need to test deriv x wrt :sigma, should be empty-word unless x is :empty-set and :empty-set if x is :empty-set
     (canonicalize-pattern
      (cond
        (= :empty-set expr)
        :empty-set
-       
+
        (= :epsilon wrt)
        expr ;; deriv of anything with respect to :epsilon is that thing.
 
@@ -1843,17 +1843,23 @@
        (traverse-pattern expr
                          (assoc *traversal-functions*
                                 :epsilon (rte-constantly :empty-set)
-                                :empty-set (rte-constantly :empty-set)     
+                                :empty-set (rte-constantly :empty-set)
                                 :sigma (fn [_type _functions]
                                          :epsilon)
                                 :type (fn [td _functions]
-                                        (cond 
+                                        (cond
+                                          (member td factors)
+                                          :epsilon
+
+                                          (member td disjoints)
+                                          :empty-set
+
                                           (disjoint?-false-warn wrt td)
                                           :empty-set
 
                                           (gns/subtype? wrt td false)
                                           :epsilon
-                                          
+
                                           (gns/and? wrt)
                                           (compute-compound-derivative td wrt)
 
@@ -1863,10 +1869,11 @@
                                                           {:error-type :derivative-undefined
                                                            :wrt wrt
                                                            :expr expr
+                                                           :factors factors
+                                                           :disjoints disjoints
                                                            :sub-types [{:type (template (and ~wrt ~expr))}
-                                                                       {:type (template (and ~wrt (not ~expr)))}]
-                                                           }))
-                                          ))
+                                                                       {:type (template (and ~wrt (not ~expr)))}]}))))
+
                                 :or (fn [operands _functions]
                                       (cons :or (walk operands)))
                                 :and (fn [operands _functions]
@@ -1875,17 +1882,21 @@
                                        (cons :not (walk (list operand))))
                                 :cat (fn [[head & tail] _functions]
                                        (letfn [(term1 []
-                                                 `(:cat ~(derivative head wrt)
+                                                 `(:cat ~(derivative head wrt factors disjoints)
                                                         ~@tail))
                                                (term2 []
-                                                 (derivative `(:cat ~@tail) wrt))]
+                                                 (derivative `(:cat ~@tail) wrt factors disjoints))]
                                          (cond
                                            (nullable? head) ;; nu = :epsilon
                                            `(:or ~(term1) ~(term2))
                                            :else
                                            (term1))))
                                 :* (fn [operand _functions]
-                                     `(:cat ~(derivative operand wrt) (:* ~operand)))))))))
+                                     `(:cat ~(derivative operand wrt factors disjoints) (:* ~operand)))))))))
+
+
+(defn derivative-1 [expr wrt]
+  (derivative expr wrt () ()))
 
 (defn find-all-derivatives 
   "Start with the given rte pattern, and compute its derivative with
@@ -1912,8 +1923,8 @@
       (let [[pattern & to-do-patterns] to-do-patterns]
         (if (done pattern)
           (recur to-do-patterns done triples)
-          (letfn [(xx [[acc-triples acc-derivs] wrt-type]
-                    (let [triple [pattern wrt-type (derivative pattern wrt-type)]]
+          (letfn [(xx [[acc-triples acc-derivs] [wrt-type factors disjoints]]
+                    (let [triple [pattern wrt-type (derivative pattern wrt-type factors disjoints)]]
                       [(conj acc-triples triple)
                        (if (done (triple 2))
                          acc-derivs
@@ -1921,8 +1932,8 @@
                       )
                     )]
             (let [firsts (first-types pattern)
-                  disjoined (gns/mdtd firsts)
-                  [new-triples new-derivatives] (reduce xx [[] ()] disjoined)]
+                  disjoined-triples (gns/mdtd firsts)
+                  [new-triples new-derivatives] (reduce xx [[] ()] disjoined-triples)]
               (recur (concat new-derivatives to-do-patterns)
                      (conj done pattern)
                      (concat triples new-triples)))))))))
