@@ -24,7 +24,7 @@
             [clojure-rte.rte-construct :as rte
              :refer [nullable? first-types
                      canonicalize-pattern
-                     derivative
+                     derivative derivative-1
                      with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
                      rte-combine-labels
@@ -111,71 +111,71 @@
 
 (deftest t-derivative
   (testing "derivative"
-    (is (= (derivative :empty-set java.lang.Comparable)
+    (is (= (derivative-1 :empty-set java.lang.Comparable)
            :empty-set) "derivative empty-set w.r.t A")
 
     ;; :sigma
-    (is (= (derivative :sigma :sigma)
+    (is (= (derivative-1 :sigma :sigma)
            :epsilon) "derivative sigma wrt sigma")
-    (is (= (derivative :sigma :epsilon)
+    (is (= (derivative-1 :sigma :epsilon)
            :sigma) "derivative sigma wrt epsilon")
     (is (= :epsilon
-           (derivative :sigma java.lang.Comparable)) "derivative sigma wrt A")
+           (derivative-1 :sigma java.lang.Comparable)) "derivative sigma wrt A")
 
     ;; :epsilon
-    (is (= (derivative :epsilon :epsilon)
+    (is (= (derivative-1 :epsilon :epsilon)
            :epsilon))
-    (is (= (derivative :epsilon java.lang.Comparable)
+    (is (= (derivative-1 :epsilon java.lang.Comparable)
            :empty-set))
-    (is (= (derivative :epsilon :empty-set)
+    (is (= (derivative-1 :epsilon :empty-set)
            :empty-set))
-    (is (= (derivative :epsilon :sigma)
+    (is (= (derivative-1 :epsilon :sigma)
            :empty-set))
 
     ;; :empty-set
-    (is (= (derivative :empty-set :epsilon)
+    (is (= (derivative-1 :empty-set :epsilon)
            :empty-set))
-    (is (= (derivative :empty-set java.lang.Comparable)
+    (is (= (derivative-1 :empty-set java.lang.Comparable)
            :empty-set))
-    (is (= (derivative :empty-set :empty-set)
+    (is (= (derivative-1 :empty-set :empty-set)
            :empty-set))
-    (is (= (derivative :empty-set :sigma)
+    (is (= (derivative-1 :empty-set :sigma)
            :empty-set))
 
     ;; type
-    (is (= (derivative java.lang.Comparable java.lang.Comparable)
+    (is (= (derivative-1 java.lang.Comparable java.lang.Comparable)
            :epsilon))
-    (is (= (derivative 'Number 'String)
+    (is (= (derivative-1 'Number 'String)
            :empty-set) "derivative disjoint types")
 
     ;; or
     
-    (is (= (derivative '(:or Double String)
+    (is (= (derivative-1 '(:or Double String)
                        'Double)
            :epsilon))
 
     ;; cat
     (is (thrown? clojure.lang.ExceptionInfo
-                 (derivative '(:cat (:or java.io.Serializable java.lang.Comparable) Long)
+                 (derivative-1 '(:cat (:or java.io.Serializable java.lang.Comparable) Long)
                              'java.io.Serializable))
         "derivative wrt overlpping type not possible")
     
-    (is (= (derivative '(:cat (:or Double String) Long)
+    (is (= (derivative-1 '(:cat (:or Double String) Long)
                        'Double)
            'Long) "derivative cat with reduction 1")
 
-    (is (= (derivative '(:cat (:or Double String) Long)
+    (is (= (derivative-1 '(:cat (:or Double String) Long)
                        'String)
            'Long) "derivative cat with reduction 2")
 
-    (is (= (derivative '(:cat Number Number Number)
+    (is (= (derivative-1 '(:cat Number Number Number)
                        'Number)
            '(:cat Number Number)) "line 237")
 
-    (is (= (derivative '(:cat (:or java.io.Serializable Number) Number Number)
+    (is (= (derivative-1 '(:cat (:or java.io.Serializable Number) Number Number)
                        'Number)
            '(:cat Number Number))  "line 277")
-    (is (= (derivative '(:cat (:or String Number) Number Number)
+    (is (= (derivative-1 '(:cat (:or String Number) Number Number)
                        'String)
            '(:cat Number Number))  "line 280")
     ))
@@ -183,16 +183,53 @@
 (deftest t-derivative-1
   (testing "previous failure"
     (is (= '(:* :sigma)
-           (derivative '(:not (:cat Boolean :sigma)) '(not Boolean)))
+           (derivative-1 '(:not (:cat Boolean :sigma)) '(not Boolean)))
         "test 308")
 
     (is (= '(:* :sigma)
-           (derivative '(:not (:cat Boolean :sigma (:* :sigma))) '(not Boolean)))
+           (derivative-1 '(:not (:cat Boolean :sigma (:* :sigma))) '(not Boolean)))
         "test 312")
     
     (is (= '(:* :sigma)
-           (derivative '(:and (:not (:cat Boolean :sigma (:* :sigma)))
+           (derivative-1 '(:and (:not (:cat Boolean :sigma (:* :sigma)))
                               (:not (:cat Boolean :sigma))) '(not Boolean))))))
+
+
+(deftest t-derivative-factors
+  (testing "derivative factors"
+    (let [z '(= 0)
+          f '(= false)
+          i '(satisfies int?)
+          s 'String
+          rt `(:and (:or (:* (:and :sigma (:not ~i)))
+                         :epsilon)
+                    (:* (:* (:or (:or ~z ~f) (:* ~s)))))
+          ft (first-types rt)]
+      (is (= ft #{'String
+                  '(= false)
+                  :sigma
+                  'Integer
+                  'Short
+                  '(= 0)
+                  'Long
+                  'Byte}))
+      (prn [:rt rt])
+      (prn [:ft ft])
+      (doseq [[td factors disjoints] (gns/mdtd ft)]
+        (cl-format true "~&~
+                         ~,4@Ttd=~A~@
+                         ~,8@Tfactors=~A~@
+                         ~,8@Tdisjoints=~A~@
+                         ~%"
+                   td factors disjoints)
+        (let [deriv (derivative rt td factors disjoints)
+              can (canonicalize-pattern deriv)]
+          (cl-format true "~&~
+                           ~,4@Tderiv=~A~@
+                           ~,4@Tcan=~A~%"
+                     deriv
+                     can
+          ))))))
 
 
 (deftest t-rte-to-dfa
@@ -512,7 +549,7 @@
 
 (deftest t-derivative-2
   (testing "derivative previous failure"
-    (is (nullable? (derivative '(:and (:cat (:* :sigma))
+    (is (nullable? (derivative-1 '(:and (:cat (:* :sigma))
                                      (:not (:or (:cat Boolean :sigma (:* :sigma))
                                                 (:cat Boolean :sigma))))
                               '(not Boolean)))
