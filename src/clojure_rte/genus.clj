@@ -1993,16 +1993,15 @@
                                            t1-operands)) 1))
       true
 
-      (and (some class-designator? t1-operands)
-           (= 1 (count (filter gns/not-member-or-=?
-                               t1-operands)))
-           (let [t2 (canonicalize-type (gns/create-and
-                                        (remove gns/not-member-or-=?
-                                                t1-operands)))]
-             (inhabited? t2 false)))
-      true
-
       ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
+      ;; (and (some class-designator? t1-operands)
+      ;;      (= 1 (count (filter gns/not-member-or-=?
+      ;;                          t1-operands)))
+      ;;      (let [t2 (canonicalize-type (gns/create-and
+      ;;                                   (remove gns/not-member-or-=?
+      ;;                                           t1-operands)))]
+      ;;        (inhabited? t2 false)))
+      ;; true
 
       ;; in the special case of (and A B) if A and B are NOT disjoint,
       ;;   then the intersection is inhabited.  This does not generalize
