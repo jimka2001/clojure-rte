@@ -2002,10 +2002,6 @@
              (inhabited? t2 false)))
       true
 
-        ;; (and ... A ... B ...) where A and B are disjoint, then vacuous
-      (exists-pair [[ta tb] t1-operands]
-                   (disjoint? ta tb false))
-      false
       ;; (and A (not (member ...))) is inhabited if A is inhabited and infinite because (member ...) is finite
 
       ;; in the special case of (and A B) if A and B are NOT disjoint,
