@@ -2009,7 +2009,7 @@
       ;;   the intersection might still be empty.
       ;; E.g., (and (member 1 2) (member 2 3) (member 1 3)) is empty yet no pair is disjoint.
       (and (= 2 n)
-           (not (disjoint? (first t1-operands) (second t1-operands) true)))
+           (= false (disjoint? (first t1-operands) (second t1-operands) :dont-know)))
       true
 
       :else
