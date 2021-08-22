@@ -1923,7 +1923,7 @@
       (let [[pattern & to-do-patterns] to-do-patterns]
         (if (done pattern)
           (recur to-do-patterns done triples)
-          (letfn [(xx [[acc-triples acc-derivs] [wrt-type factors disjoints]]
+          (letfn [(f [[acc-triples acc-derivs] [wrt-type factors disjoints]]
                     (let [triple [pattern wrt-type (derivative pattern wrt-type factors disjoints)]]
                       [(conj acc-triples triple)
                        (if (done (triple 2))
@@ -1933,7 +1933,7 @@
                     )]
             (let [firsts (first-types pattern)
                   disjoined-triples (gns/mdtd firsts)
-                  [new-triples new-derivatives] (reduce xx [[] ()] disjoined-triples)]
+                  [new-triples new-derivatives] (reduce f [[] ()] disjoined-triples)]
               (recur (concat new-derivatives to-do-patterns)
                      (conj done pattern)
                      (concat triples new-triples)))))))))
