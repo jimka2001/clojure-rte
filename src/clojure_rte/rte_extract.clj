@@ -40,7 +40,7 @@
   ;;    7.    combine parallel transitions
   ;;    8.    n^2 iteration to-this-state x from-this-state
   ;;    9.    append new transitions in next iteration of loop 5.
-  ;;    10. this reduces to one transtion per exit value, returns the map of exit-value to label
+  ;;    10. this reduces to one transition per exit value, returns the map of exit-value to label
   (let [;; #1
         dfa (xym/trim (xym/minimize dfa')) ; we must minimize otherwise the size of the returned expression can be HUGE
         ;; #2
@@ -67,7 +67,7 @@
             (combine-parallel [triples]
               ;; accepts a sequence of triples, each of the form [from label to]
               ;;   groups them by common from/to, these are parallel transitions
-              ;;   combines the labels of the parallel transitions, into one single lable
+              ;;   combines the labels of the parallel transitions, into one single label
               ;;   and collects a sequence of transitions, none of which are parallel.
               ;;   This action is important because it greatly reduces the number of transitions
               ;;   created.  The caller, the computation of new-triples, makes an NxM loop
