@@ -648,6 +648,33 @@
                            (get (dfa-to-rte dfa-2) true))
           801))))
 
+
+(defn check-extraction-cycle
+  ([rt]
+   (check-extraction-cycle rt (fn [expr msg] (assert expr msg))))
+  ([rt-1 check]
+   (let [extracted (dfa-to-rte (rte-to-dfa rt-1 true))
+         rt-2 (extracted true)
+         empty (canonicalize-pattern (template (:or (:and ~rt-2 (:not ~rt-1))
+                                                    (:and (:not ~rt-2) ~rt-1))))
+         empty-dfa (rte-to-dfa empty)]
+     (when (not (xym/dfa-vacuous? empty-dfa))
+       (dot/dfa-to-dot empty-dfa :title "empty" :view true))
+     (check (xym/dfa-vacuous? empty-dfa)
+            (cl-format nil "~&~
+                            rt-1=~W~@
+                            r2-2=~W~@
+                            empty=~W~%" rt-1 rt-2 empty)))))
+
+(deftest t-extract-rte
+  (testing "extract-rte"
+    (doseq [depth (range 4)
+            _rep (range 1000) ]
+      (check-extraction-cycle (gen-rte depth *test-types*) (fn [expr message]
+                                                             (is expr message))))))
+            
+
+
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
   (clojure.test/run-tests 'clojure-rte.rte-test))
