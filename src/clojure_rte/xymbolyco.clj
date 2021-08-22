@@ -828,6 +828,10 @@
   such types might respond :dont-know to the gns/inhabited? predicate, but never
   responds false."
   [dfa]
+  ;; TODO - this finds only paths for which ALL labels are satisfyable.  However,
+  ;;   There might be a path for which some label is maybe-satisfyable, ie., for which
+  ;;   (inhabited? td :dont-know) returns :dont-know
+  ;;   We need to also be able to find such paths.
   (letfn [(extend-path-1 [path]
             (for [[type-designator next-state-id] (:transitions (first path))
                   :when (not (exists [st path]
@@ -850,11 +854,13 @@
   (let [initials (filter :initial (states-as-seq dfa))]
     (extend-paths (map list initials)))))
 
+(defn dfa-vacuous? [dfa]
+  (or (every? (comp not :accepting) (states-as-seq dfa))
+      ;; in case there is a non-accessiable accepting state
+      (empty? (paths-to-accepting dfa))))
+
 (defn dfa-equivalent?
   "Returns a Boolean indicating whether the two given Dfas
   recognize the same language."
   [dfa-1 dfa-2]
-  (let [xor (synchronized-xor dfa-1 dfa-2)]
-    (or (every? (comp not :accepting) (states-as-seq xor))
-        ;; in case there is a non-accessiable accepting state
-        (empty? (paths-to-accepting xor)))))
+  (dfa-vacuous? (synchronized-xor dfa-1 dfa-2)))
