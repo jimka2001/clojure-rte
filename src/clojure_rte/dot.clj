@@ -129,7 +129,7 @@
                                          :when (boolean (:pattern q))]
                                      (cl-format false "\\lq~a= ~a"
                                                 (:index q) (:pattern q)))
-                                   "")))))
+                                   [""])))))
         (cl-format *out* "  graph [labeljust=l,nojustify=true];~%")
         (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
         (cl-format *out* "  edge [fontname=Helvetica, fontsize=20];~%")
