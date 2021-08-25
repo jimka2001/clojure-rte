@@ -110,7 +110,7 @@
                                             :when (member dst-id visible-state-ids)]
                                         label))          
           abbrevs (zipmap transition-labels (range (count transition-labels)))
-          indices (clojure.set/map-invert abbrevs)]
+          labels (clojure.set/map-invert abbrevs)]
       (with-out-str
         (cl-format *out* "digraph G {~%")
         (when title
@@ -121,8 +121,8 @@
           (cl-format *out* "  label=\"~a\\l\"~%"
                      (str/join
                       "" (concat (map (fn [index]
-                                        (cl-format false "\\lt~a= ~a" index (indices index)))
-                                      (range (count (keys indices))))
+                                        (cl-format false "\\lt~a= ~a" index (labels index)))
+                                      (range (count (keys labels))))
                                  ["\\l"]
                                  (if state-legend
                                    (for [q visible-states
