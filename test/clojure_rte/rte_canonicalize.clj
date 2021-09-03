@@ -639,22 +639,33 @@
 (deftest t-conversion-and-17a
   (testing "conversion and 17a"
     ;; if And(...) has more than one Cat(...) which has no nullable operand,
-    ;;    then the number of non-nullables must be the same, else EmptySet.
-    ;;    We also replace the several Cat(...) (having no nullables)
-    ;;    with a single Cat(...) with intersections of operands.
-    ;;    And(Cat(a,b,c),Cat(x,y,z) ...)
-    ;;    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
-    (is (= (rte/conversion-and-17a '(:and (:cat (= 1) (= 2) (= 3))
-                                          (:cat (= 10) (= 20) (= 30))))
-           '(:cat (:and (= 1) (= 10))
-                  (:and (= 2) (= 20))
-                  (:and (= 3) (= 30))))
-        800)
+    ;;    then the number of non-nullables must be the same, else EmptySet. 
+
     (is (= (rte/conversion-and-17a '(:and (:cat (= 1) (= 2) (= 3))
                                           (:cat (= 10) (= 20))))
            :empty-set)
         801)
     (is (= (rte/conversion-and-17a '(:and (:cat (= 1) (= 2) (:* (= 3)))
+                                          (:cat (= 10) (= 20))))
+           '(:and (:cat (= 1) (= 2) (:* (= 3)))
+                  (:cat (= 10) (= 20))))
+        802)))
+
+(deftest t-conversion-and-17a2
+  (testing "conversion and 17a2"
+    ;; if And(...) has more than one Cat(...) which has no nullable operand,
+    ;;    We also replace the several Cat(...) (having no nullables)
+    ;;    with a single Cat(...) with intersections of operands.
+    ;;    And(Cat(a,b,c),Cat(x,y,z) ...)
+    ;;    --> And(Cat(And(a,x),And(b,y),And(c,z),...)
+    (is (= (rte/conversion-and-17a2 '(:and (:cat (= 1) (= 2) (= 3))
+                                          (:cat (= 10) (= 20) (= 30))))
+           '(:cat (:and (= 1) (= 10))
+                  (:and (= 2) (= 20))
+                  (:and (= 3) (= 30))))
+        800)
+
+    (is (= (rte/conversion-and-17a2 '(:and (:cat (= 1) (= 2) (:* (= 3)))
                                           (:cat (= 10) (= 20))))
            '(:and (:cat (= 1) (= 2) (:* (= 3)))
                   (:cat (= 10) (= 20))))

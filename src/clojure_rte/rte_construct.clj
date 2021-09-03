@@ -1455,6 +1455,29 @@
   [self]
   ;; if And(...) has more than one Cat(...) which has no nullable operand,
   ;;    then the number of non-nullables must be the same, else EmptySet.
+  (let [cats (for [c (operands self)
+                   :when (rte/cat? c)
+                   :when (forall [td (operands c)]
+                                 (not (nullable? td)))]
+               (operands c))]
+    (cond (empty? cats)
+          self
+
+          (= 1 (count cats))
+          self
+
+          (exists [i (range 1 (count cats))]
+                  (not= (count (first cats))
+                        (count (nth cats i))))
+          ;; we found two Cat(...) of necessarily different lengths
+          :empty-set
+
+          :else
+          self)))
+
+(defn conversion-and-17a2
+  [self]
+  ;; if And(...) has more than one Cat(...) which has no nullable operand,
   ;;    We also replace the several Cat(...) (having no nullables)
   ;;    with a single Cat(...) with intersections of operands.
   ;;    And(Cat(a,b,c),Cat(x,y,z) ...)
@@ -1474,7 +1497,7 @@
                   (not= (count (first cats))
                         (count (nth cats i))))
           ;; we found two Cat(...) of necessarily different lengths
-          :empty-set
+          self
 
           :else
           (let [invert (for [i (range 0 (count (first cats)))]
