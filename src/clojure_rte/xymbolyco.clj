@@ -26,7 +26,7 @@
   (:require [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [fixed-point member group-by-mapped
                                       defn-memoized find-first
-                                      exists setof]]
+                                      non-empty? exists setof]]
             [clojure-rte.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.bdd :as bdd]
@@ -826,41 +826,63 @@
   No state appears twice in the same path, thus no loops.
   Each type designator is either is known to be non-inhabited; i.e., one (or more)
   such types might respond :dont-know to the gns/inhabited? predicate, but never
-  responds false."
-  [dfa]
+  responds false.
+  The allow-maybe-satisfiable argument may be specified as true to allow
+  such :dont-know values, and allow-maybe-satisfiable=false indicates that all
+  :dont-know values should be rejected."
+  ([dfa]
+   (paths-to-accepting dfa false))
+  ([dfa allow-maybe-satisfiable]
   ;; TODO - this finds only paths for which ALL labels are satisfyable.  However,
   ;;   There might be a path for which some label is maybe-satisfyable, ie., for which
   ;;   (inhabited? td :dont-know) returns :dont-know
   ;;   We need to also be able to find such paths.
-  (letfn [(extend-path-1 [path]
-            (for [[type-designator next-state-id] (:transitions (first path))
-                  :when (not (exists [st path]
-                                     (= next-state-id (:index st))))
-                  :when (gns/inhabited? type-designator true) ;; include paths where inhabited? returns :dont-know
-                  ]
-              (cons (state-by-index dfa next-state-id) path)))
-    
-          (extend-paths-1 [paths]
-            (mapcat extend-path-1 paths))
-  
-          (extend-paths
-            [paths]
-            (if (empty? paths)
-              paths
-              (concat (setof [p paths]
-                             (:accepting (first p)))
-                      (extend-paths (extend-paths-1 paths)))))]
-  
-  (let [initials (filter :initial (states-as-seq dfa))]
-    (extend-paths (map list initials)))))
+   (letfn [(extend-path-1 [path]
+             (for [[type-designator next-state-id] (:transitions (first path))
+                   :when (not (exists [st path]
+                                      (= next-state-id (:index st))))
+                   :when (gns/inhabited? type-designator allow-maybe-satisfiable)                             
+                   ]
+               (cons (state-by-index dfa next-state-id) path)))
+
+           (extend-paths-1 [paths]
+             (mapcat extend-path-1 paths))
+
+           (extend-paths
+             [paths]
+             (if (empty? paths)
+               paths
+               (concat (setof [p paths]
+                              (:accepting (first p)))
+                       (extend-paths (extend-paths-1 paths)))))]
+
+     (let [initials (filter :initial (states-as-seq dfa))]
+       (extend-paths (map list initials))))))
+
+(defn dfa-inhabited? [dfa]
+  (cond (every? (comp not :accepting) (states-as-seq dfa))
+        ;; if no accepting state, then it is not inhabited
+        false
+
+        (non-empty? (paths-to-accepting dfa false)) ;; only allow certain accepting paths
+        true
+
+        (non-empty? (paths-to-accepting dfa true)) ;; is there a maybe-accepting path
+        :dont-know
+
+        :else
+        false))
 
 (defn dfa-vacuous? [dfa]
-  (or (every? (comp not :accepting) (states-as-seq dfa))
-      ;; in case there is a non-accessiable accepting state
-      (empty? (paths-to-accepting dfa))))
+  (let [inh (dfa-inhabited? dfa)]
+    (if (= inh :dont-know)
+      :dont-know
+      (not inh))))
 
 (defn dfa-equivalent?
-  "Returns a Boolean indicating whether the two given Dfas
-  recognize the same language."
+  "Returns a Boolean (or None) indicating whether the two given Dfas
+  recognize the same language.
+  A return value of None indicates that it could not be proven yes or
+  no whether the dfas are equivalent."
   [dfa-1 dfa-2]
   (dfa-vacuous? (synchronized-xor dfa-1 dfa-2)))
