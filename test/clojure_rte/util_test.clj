@@ -28,6 +28,7 @@
                                       remove-once fixed-point member
                                       call-with-found
                                       lazy-pairs
+                                      or-else
                                       ]]
             [clojure.test :refer [deftest testing is]]))
 
@@ -448,3 +449,17 @@
                                 x=~A~@
                                 y=~A~%" pairs-as-vec a b x y))))))))
   
+(deftest t-or-else
+  (testing "or-else"
+    (is :dont-know (or-else))
+    (is (= 1 (or-else (fn [] 1))))
+    (is (= 1 (or-else (fn [] 1) (fn [] 2))))
+    (is (= 1 (or-else (fn [] :dont-know) (fn [] 1))))
+    (is (= 1 (or-else (fn [] 1) (fn [] :dont-know) (fn [] 2))))
+    (is (= 1 (or-else  (fn [] :dont-know)
+                       (fn [] :dont-know)
+                       (fn [] :dont-know)
+                       (fn [] :dont-know)
+                       (fn [] :dont-know)
+                       (fn [] 1))))
+    ))

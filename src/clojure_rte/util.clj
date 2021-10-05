@@ -621,3 +621,17 @@
    (call-with-found pred coll
                     :if-found identity
                     :if-not-found default)))
+
+(defn or-else
+  "Takes a (var-arg) seq of 0 or more 0-ary functions.  or-else calls the functions in-turn
+  until one returns something other than :dont-know, and returns that value.  Otherwise
+  :dont-know is returned"
+  ([]
+   :dont-know)
+  ([f]
+   (f))
+  ([f & fs]
+   (let [result (f)]
+     (if (= :dont-know result)
+       (apply or-else fs)
+       result))))

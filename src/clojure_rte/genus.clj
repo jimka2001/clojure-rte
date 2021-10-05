@@ -29,7 +29,7 @@
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized call-with-found find-first
-                                      unchunk]]
+                                      unchunk or-else]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
@@ -126,30 +126,27 @@
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
-  (let [sp1 (delay (subtype? t1 t2 :dont-know))
-        can1 (delay (canonicalize-type t1 :dnf))
-        sp2 (delay (subtype? @can1 t2 :dont-know))
+  (let [can1 (delay (canonicalize-type t1 :dnf))
         can2 (delay (canonicalize-type t2 :dnf))
-        sp3 (delay (subtype? @can1 @can2 :dont-know))]
+        sp1 (or-else (fn [] (subtype? t1 t2 :dont-know))
+                     (fn [] (subtype? @can1 t2 :dont-know))
+                     (fn [] (subtype? @can1 @can2 :dont-know)))
+        sp2 (or-else (fn [] (subtype? t2 t1 :dont-know))
+                     (fn [] (subtype? @can2 t1 :dont-know))
+                     (fn [] (subtype? @can2 @can1 :dont-know)))]
     ;; two types are equivalent if each is a subtype of the other.
-    (cond (= t1 t2)
-          true
-          ;; However, if t1 is NOT a subtype of t2, don't test (subtype? t2 t1)
-          ;;    as that may be compute intensive.
-          (= @sp1 false)
-          false
+    (cond
 
-          (and (= @sp1 :dont-know)
-               (= @sp2 false))
-          false
+      (or (= sp1 false)
+          (= sp2 false))
+      false
 
-          (and (= @sp1 :dont-know)
-               (= @sp2 :dont-know)
-               (= @sp3 false))
-          false
+      (and (= sp1 true)
+           (= sp2 true))
+      true
 
-          :else
-          (subtype? @can2 @can1 default))))
+      :else
+      default)))
 
 (defn type-dispatch 
   "Dispatch function for several defmulti's.  If the type-designator is a sequence,
