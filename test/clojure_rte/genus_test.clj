@@ -451,10 +451,10 @@
 
                                  ;; A < B = False  B < A = None
                                  ['(member 2) '(satisfies odd?) false :dont-know false]
-                                 ;; A < B = False  B < A = True
-                                 ['(member 1 2 3) '(member 2 3) false true false]
                                  ;; A < B = False   B < A = False
-                                 ['(member 1 2 3) '(member 2 3 4) false false false]]]
+                                 ['(member 1 2 3) '(member 2 3 4) false false false]
+                                 ;; A < B = False  B < A = True
+                                 ['(member 1 2 3) '(member 2 3) false true false]]]
         (is (= (gns/subtype? a b :dont-know)
                a<b)
             (cl-format nil "a=~W~@
