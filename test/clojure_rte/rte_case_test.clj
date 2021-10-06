@@ -38,9 +38,7 @@
   `(with-compile-env []
      (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)])
      (clojure.test/testing ~string ~@body)
-     (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)]))
-  )
-
+     (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)])))
 
 (deftest t-rte-case
   (testing "rte-case"

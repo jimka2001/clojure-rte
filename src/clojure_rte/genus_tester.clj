@@ -74,17 +74,30 @@
       [1 2 3] [1 2] [1] [] [1 2 3 4]
     ))
 
+(declare gen-inhabited-type)
+
 (defn gen-type
   "Generate a type designator for testing."
   ([size]
-   (gen-type size *test-types*))
+   (gen-type size *test-types* false))
   ([size types]
+   (gen-type size types false))
+  ([size types limit-to-inhabited]
    (if (< 0 size)
      (case (rand-nth '(or and not :else))
        (or) (template (or ~(gen-type (dec size) types)
                           ~(gen-type (dec size) types)))
-       (and) (template (and ~(gen-type (dec size) types)
-                            ~(gen-type (dec size) types)))
+       (and) (let [t1 (if limit-to-inhabited
+                        (gen-inhabited-type (dec size) (constantly true) types)
+                        (gen-type (dec size) types limit-to-inhabited))
+                   t2 (if limit-to-inhabited
+                        (gen-inhabited-type (dec size) (constantly true) types)
+                        (gen-type (dec size) types limit-to-inhabited))]
+               ;; when trying to generate an inhabited type, and in the AND case
+               ;;   we must make sure that both operands of (and ...) designate
+               ;;   inhabited types.  If not, we can correct this now, rather than
+               ;;   waiting to the top level
+               (template (and ~t1 ~t2)))
        (not) (template (not ~(gen-type (dec size) types)))
        (rand-nth types))
      (rand-nth types))))
@@ -99,8 +112,10 @@
   ([size]
    (gen-inhabited-type size (constantly true)))
   ([size filter]
+   (gen-inhabited-type size filter *test-types*))
+  ([size filter types]
    (loop []
-     (let [td (gen-type size)
+     (let [td (gen-type size types true)
            td-inhabited (gns/inhabited? td false)]
        (if (and td-inhabited (filter td))
          td

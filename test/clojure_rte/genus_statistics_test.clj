@@ -36,20 +36,21 @@
         (when ~verbose (println [:testing ~string :starting (java.util.Date.)]))
         (clojure.test/testing ~string ~@body)
         (when ~verbose (println [:finished  (java.util.Date.)]))))))
+
 (defn statistics
   "Generate a table of statics indicating the accuracy of the subtype? function."
-  [nreps]
-  (letfn [(measure-subtype-computability [n depth inh]
+  [nreps inh]
+  (letfn [(measure-subtype-computability [n depth]
             (assert (> n 0))
             (let [m (reduce (fn [m _current-item]
                               (let [rt1 (if inh
                                           (gen-inhabited-type depth
-                                                                  (constantly true))
+                                                              (constantly true))
                                           (gen-type depth))
                                     rt2 (if inh
                                           (gen-inhabited-type depth
-                                                                  (fn [td]
-                                                                    (not (gns/type-equivalent? td rt1 true))))
+                                                              (fn [td]
+                                                                (not (gns/type-equivalent? td rt1 true))))
                                           (gen-type depth))
                                     can1 (gns/canonicalize-type rt1 :dnf)
                                     can2 (gns/canonicalize-type rt2 :dnf)
@@ -57,8 +58,7 @@
                                     s2 (gns/subtype? can1 can2 :dont-know)]
                                 (letfn [(f [key bool]
                                           [key (+ (get m key 0)
-                                                (if bool 1 0))]
-                                          )]
+                                                  (if bool 1 0))])]
                                   (into {} [(f :inhabited
                                                (gns/inhabited? rt1 false))
                                             (f :inhabited-dnf
@@ -72,7 +72,7 @@
                                             (f :subtype-dont-know
                                                (= s1 :dont-know))
                                             (f :subtype-know ;; accuracy
-                                               (not= s1 :dont-know) )
+                                               (not= s1 :dont-know))
                                             (f :subtype-dnf-true
                                                (= s2 true))
                                             (f :subtype-dnf-false
@@ -84,19 +84,21 @@
                                             (f :gained
                                                (and (= s1 :dont-know) (not= s2 :dont-know)))
                                             (f :lost
-                                               (and (not= s1 :dont-know) (= s2 :dont-know)))
-                                            ]))
-                                  ))
+                                               (and (not= s1 :dont-know) (= s2 :dont-know)))]))))
+
                             {}
                             (range n))]
               (map (fn [[k v]] [k
-                                (/ (* 100.0 v) n)]) m)
-              )
-            )]
-    (doall (map println (measure-subtype-computability nreps 3 false)))
-    (println "--------------------")
-    (doall (map println (measure-subtype-computability nreps 3 true)))))
+                                (/ (* 100.0 v) n)]) m)))]
+    (doall (map println (measure-subtype-computability nreps 3)))
+    (println "--------------------")))
 
 (deftest t-statistics
   (testing "statistics"
-    (statistics 1000)))
+    (statistics 1000 false)))
+
+(deftest t-statistics-inhabited
+  (testing "statistics inhabited"
+    (statistics 100 true)))
+
+
