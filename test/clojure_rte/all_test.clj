@@ -32,6 +32,7 @@
              clojure-rte.rte-tester-test
              clojure-rte.genus-test
              clojure-rte.genus-statistics-test
+             clojure-rte.genus-subtype-test
              clojure-rte.genus-equiv-test
              clojure-rte.genus-conversion-test
              clojure-rte.util-test             
@@ -53,6 +54,7 @@
                           'clojure-rte.rte-tester-test
                           'clojure-rte.genus-test
                           'clojure-rte.genus-statistics-test
+                          'clojure-rte.genus-subtype-test
                           'clojure-rte.genus-equiv-test
                           'clojure-rte.genus-conversion-test
                           'clojure-rte.util-test
