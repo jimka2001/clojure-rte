@@ -40,8 +40,8 @@
 
 (deftest t-type-equivalent-random
   (testing "type-equivalent? random"
-    (doseq [_ (range 1000)
-            n (range 5)
+    (doseq [n (range 5)
+            m (range 100)
             :let [t1 (gen-type n)
                   t2 (gen-type n)]]
       (is (= true (gns/type-equivalent? t1 t1 :dont-know))
