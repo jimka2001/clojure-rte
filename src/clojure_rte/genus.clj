@@ -1709,7 +1709,10 @@
                      :super super}))))
 
 (defmethod -subtype? :primary subtype-primary [sub-designator super-designator]
-  (cond (and (class-designator? super-designator)
+  (cond (= sub-designator super-designator)
+        true ;; every type is a subtype of itself
+
+        (and (class-designator? super-designator)
              (= Object (find-class super-designator)))
         true
 

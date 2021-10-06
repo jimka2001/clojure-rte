@@ -44,11 +44,20 @@
             n (range 5)
             :let [t1 (gen-type n)
                   t2 (gen-type n)]]
-      (is (= true (gns/type-equivalent? t1 t1 :dont-know)))
-      (is (not= true (gns/type-equivalent? t1 (gns/create-not t1) :dont-know)))
+      (is (= true (gns/type-equivalent? t1 t1 :dont-know))
+          (cl-format nil "~@
+                         t1=~W~@
+                         failed to find type equivalent to itself" t1))
+      (is (not= true (gns/type-equivalent? t1 (gns/create-not t1) :dont-know))
+          (cl-format nil "~@
+                         t1=~W~@
+                         failed to find type NOT equivalent to its complement" t1))
       (is (not= false (gns/type-equivalent? (template (not (and ~t1 ~t2)))
                                             (template (or (not ~t1) (not ~t2)))
-                                            :dont-know))))))
+                                            :dont-know))
+          (cl-format nil "~@
+                         t1=~W~@
+                         erroniously proved type not equal to is demorganization" t1)))))
 
 (defn test-1 [_a] true)
 (defn test-2 [_a] true)
