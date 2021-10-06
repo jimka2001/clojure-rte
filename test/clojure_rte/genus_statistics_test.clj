@@ -1,4 +1,4 @@
-;; Copyright (c) 2020,2021 EPITA Research and Development Laboratory
+;; Copyright (c) 2021 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -22,7 +22,7 @@
 (ns clojure-rte.genus-statistics-test
   (:require [clojure-rte.rte-core]
             [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type *test-values* gen-inhabited-type]]
+            [clojure-rte.genus-tester :refer [gen-type gen-inhabited-type]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []

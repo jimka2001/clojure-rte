@@ -21,10 +21,8 @@
 
 (ns clojure-rte.genus-equiv-test
   (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type *test-values*]]
-            [clojure-rte.util :refer [ member ]]
+            [clojure-rte.genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is testing]]))
