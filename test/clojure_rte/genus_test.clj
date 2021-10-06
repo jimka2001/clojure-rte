@@ -23,7 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type *test-values* gen-inhabited-type]]
+            [clojure-rte.genus-tester :refer [gen-type *test-values*]]
             [clojure-rte.util :refer [ member ]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
@@ -474,70 +474,6 @@
                               expecting a = b = ~W, got ~W"
                        a b a=b (gns/type-equivalent? a b :dont-know)))))))
 
-(defn statistics
-  "Generate a table of statics indicating the accuracy of the subtype? function."
-  [nreps]
-  (letfn [(measure-subtype-computability [n depth inh]
-            (assert (> n 0))
-            (let [m (reduce (fn [m _current-item]
-                              (let [rt1 (if inh
-                                          (gen-inhabited-type depth
-                                                                  (constantly true))
-                                          (gen-type depth))
-                                    rt2 (if inh
-                                          (gen-inhabited-type depth
-                                                                  (fn [td]
-                                                                    (not (gns/type-equivalent? td rt1 true))))
-                                          (gen-type depth))
-                                    can1 (gns/canonicalize-type rt1 :dnf)
-                                    can2 (gns/canonicalize-type rt2 :dnf)
-                                    s1 (gns/subtype? rt1 rt2 :dont-know)
-                                    s2 (gns/subtype? can1 can2 :dont-know)]
-                                (letfn [(f [key bool]
-                                          [key (+ (get m key 0)
-                                                (if bool 1 0))]
-                                          )]
-                                  (into {} [(f :inhabited
-                                               (gns/inhabited? rt1 false))
-                                            (f :inhabited-dnf
-                                               (gns/inhabited? can1 false))
-                                            (f :equal
-                                               (gns/type-equivalent? can1 can2 false))
-                                            (f :subtype-true
-                                               (= s1 true))
-                                            (f :subtype-false
-                                               (= s1 false))
-                                            (f :subtype-dont-know
-                                               (= s1 :dont-know))
-                                            (f :subtype-know ;; accuracy
-                                               (not= s1 :dont-know) )
-                                            (f :subtype-dnf-true
-                                               (= s2 true))
-                                            (f :subtype-dnf-false
-                                               (= s2 false))
-                                            (f :subtype-dnf-dont-know
-                                               (= s2 :dont-know))
-                                            (f :subtype-dnf-know ;; accuracy DNF
-                                               (not= s2 :dont-know))
-                                            (f :gained
-                                               (and (= s1 :dont-know) (not= s2 :dont-know)))
-                                            (f :lost
-                                               (and (not= s1 :dont-know) (= s2 :dont-know)))
-                                            ]))
-                                  ))
-                            {}
-                            (range n))]
-              (map (fn [[k v]] [k
-                                (/ (* 100.0 v) n)]) m)
-              )
-            )]
-    (doall (map println (measure-subtype-computability nreps 3 false)))
-    (println "--------------------")
-    (doall (map println (measure-subtype-computability nreps 3 true)))))
-
-(deftest t-statistics
-  (testing "statistics"
-    (statistics 10000)))
 
 (deftest t-mdtd
   (testing "mdtd"

@@ -31,6 +31,8 @@
              clojure-rte.rte-case-test
              clojure-rte.rte-tester-test
              clojure-rte.genus-test
+             clojure-rte.genus-statistics-test
+             clojure-rte.genus-conversion-test
              clojure-rte.util-test             
              clojure-rte.genus-spec-test
              clojure-rte.typecase
@@ -49,6 +51,8 @@
                           'clojure-rte.rte-case-test
                           'clojure-rte.rte-tester-test
                           'clojure-rte.genus-test
+                          'clojure-rte.genus-statistics-test
+                          'clojure-rte.genus-conversion-test
                           'clojure-rte.util-test
                           'clojure-rte.genus-spec-test
                           'clojure-rte.typecase
