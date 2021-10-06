@@ -21,6 +21,7 @@
 
 (ns clojure-rte.rte-tester-test
   (:require [clojure-rte.rte-core ]
+            [clojure.pprint :refer [cl-format]]
             [clojure-rte.rte-construct :as rte :refer [canonicalize-pattern]]
             [clojure-rte.xymbolyco :as xym]
             [clojure-rte.rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
@@ -30,7 +31,7 @@
                                             rte-components gen-rte
                                             *rte-keywords*]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [*test-types*]]
+            [clojure-rte.genus-tester :refer [*test-types* gen-inhabited-type]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
@@ -39,12 +40,13 @@
 
 (defmacro testing
   [string & body]
+  (let [verbose true]
   `(rte/with-compile-env []
-     (println [:testing ~string :starting (java.util.Date.)])
-       (clojure.test/testing ~string ~@body)
-       (println [:finished  ~string (java.util.Date.)])
-       ))
-
+     (when ~verbose
+       (println [:testing ~string :starting (java.util.Date.)]))
+     (clojure.test/testing ~string ~@body)
+     (when ~verbose
+       (println [:finished  ~string (java.util.Date.)])))))
 
 (deftest t-test-canonicalize-pattern
   (testing "test-canonicalize-pattern"
@@ -206,6 +208,18 @@
     (test-rte-not 1000 4
                   false ;verbose
                   )))
+
+(deftest t-inhabited-type
+  (testing "inhabited type"
+    (doseq [_ (range 100)
+            n (range 5)
+            :let [t1 (gen-inhabited-type n)
+                  inh (gns/inhabited? t1 :dont-know)]]
+      (is (= true inh)
+          (cl-format nil "~@
+                          t1=~W~@
+                          inhabited=~W" t1 inh)))))
+
 
 ;; this test is not yet correctly implemented,
 ;;    need a good way to compare two rtes for equivalence
