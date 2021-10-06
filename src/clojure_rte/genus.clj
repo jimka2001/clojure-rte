@@ -29,6 +29,7 @@
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized call-with-found find-first
+                                      gc-friendly-memoize
                                       unchunk or-else]]
             [clojure-rte.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -2082,3 +2083,10 @@
                          [@b (cons n factors) (cons td disjoints)]])))]
         (recur (mapcat f decomposition)
                (disj type-set td))))))
+
+(defn call-with-genus-env [thunk]
+  (binding [gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
+            gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
+            gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
+            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)]
+  (thunk)))

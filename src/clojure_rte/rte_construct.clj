@@ -68,20 +68,17 @@
    })
 
 (defn call-with-compile-env [thunk]
-  (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
-            canonicalize-pattern-once (gc-friendly-memoize canonicalize-pattern-once-impl)
-            xym/optimized-transition-function (gc-friendly-memoize xym/optimized-transition-function-impl)
-            canonicalize-pattern (gc-friendly-memoize canonicalize-pattern-impl)
-            rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
-            nullable? (gc-friendly-memoize nullable?-impl)
-            ;; rte-case-clauses-to-dfa (gc-friendly-memoize rte-case-clauses-to-dfa-impl)
-            gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
-            gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
-            gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
-            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)
-            gs/spec-to-rte (gc-friendly-memoize gs/spec-to-rte-impl)
-            ]
-    (thunk)))
+  (gns/call-with-genus-env
+   (fn []
+     (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
+               canonicalize-pattern-once (gc-friendly-memoize canonicalize-pattern-once-impl)
+               xym/optimized-transition-function (gc-friendly-memoize xym/optimized-transition-function-impl)
+               canonicalize-pattern (gc-friendly-memoize canonicalize-pattern-impl)
+               rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
+               nullable? (gc-friendly-memoize nullable?-impl)
+               ;; rte-case-clauses-to-dfa (gc-friendly-memoize rte-case-clauses-to-dfa-impl)
+               gs/spec-to-rte (gc-friendly-memoize gs/spec-to-rte-impl)]
+       (thunk)))))
 
 (defmacro with-compile-env [[] & body]
   `(call-with-compile-env (fn [] ~@body)))

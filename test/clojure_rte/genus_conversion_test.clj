@@ -22,10 +22,19 @@
 (ns clojure-rte.genus-conversion-test
   (:require [clojure-rte.rte-core]
             [clojure-rte.genus :as gns]
-            [clojure.test :refer [deftest is testing]]))
+            [clojure.test :refer [deftest is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-conversion-test))
+
+(defmacro testing
+  [string & body]
+  (let [verbose false]
+    `(gns/call-with-genus-env
+      (fn []
+        (when ~verbose (println [:testing ~string :starting (java.util.Date.)]))
+        (clojure.test/testing ~string ~@body)
+        (when ~verbose (println [:finished  (java.util.Date.)]))))))
 
 (deftest t-combo-conversion-C1
   (testing "combo conversion-C1"

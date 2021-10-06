@@ -25,12 +25,19 @@
             [clojure-rte.genus :as gns]
             [clojure-rte.genus-tester :refer [gen-type *test-values*]]
             [clojure-rte.util :refer [ member ]]
-            [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
-            [clojure.test :refer [deftest is testing]]))
+            [clojure.test :refer [deftest is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
+
+(defmacro testing
+  [string & body]
+  `(gns/call-with-genus-env
+    (fn []
+      (println [:testing ~string :starting (java.util.Date.)])
+      (clojure.test/testing ~string ~@body)
+      (println [:finished  (java.util.Date.)]))))
 
 (deftest t-typep
   (testing "typep"

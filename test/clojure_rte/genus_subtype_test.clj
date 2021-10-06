@@ -21,16 +21,22 @@
 
 (ns clojure-rte.genus-subtype-test
   (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :refer [with-compile-env]]
             [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type *test-values*]]
-            [clojure-rte.util :refer [ member ]]
+            [clojure-rte.genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
-            [clojure.test :refer [deftest is testing]]))
+            [clojure.test :refer [deftest is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-subtype-test))
+
+(defmacro testing
+  [string & body]
+  `(gns/call-with-genus-env
+    (fn []
+      (println [:testing ~string :starting (java.util.Date.)])
+      (clojure.test/testing ~string ~@body)
+      (println [:finished  (java.util.Date.)]))))
 
 (deftest t-subtype?-and
   (testing "subtype? and"

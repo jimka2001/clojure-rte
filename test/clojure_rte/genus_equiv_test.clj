@@ -25,10 +25,18 @@
             [clojure-rte.genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
-            [clojure.test :refer [deftest is testing]]))
+            [clojure.test :refer [deftest is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-test))
+
+(defmacro testing
+  [string & body]
+  `(gns/call-with-genus-env
+    (fn []
+      (println [:testing ~string :starting (java.util.Date.)])
+      (clojure.test/testing ~string ~@body)
+      (println [:finished  (java.util.Date.)]))))
 
 (deftest t-type-equivalent-random
   (testing "type-equivalent? random"
