@@ -91,4 +91,4 @@
 
 (deftest t-statistics
   (testing "statistics"
-    (statistics 10000)))
+    (statistics 1000)))
