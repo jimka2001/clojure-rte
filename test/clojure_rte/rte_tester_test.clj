@@ -52,12 +52,12 @@
 
 (deftest t-rte-keywords
   (testing "rte-keywords"
-    (for [k *rte-keywords*]
+    (doseq [k *rte-keywords*]
       (gen-rte k 4 *test-types*))))
 
 (deftest t-rte-components
   (testing "rte-components"
-    (for [k *rte-keywords*]
+    (doseq [k *rte-keywords*]
       (rte-components (gen-rte k 4 *test-types*)))))
 
 (deftest t-rte-to-dfa-random

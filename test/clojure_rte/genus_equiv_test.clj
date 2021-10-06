@@ -40,16 +40,15 @@
 
 (deftest t-type-equivalent-random
   (testing "type-equivalent? random"
-    (for [_ (range 1000)
-          n (range 5)
-          t1 (gen-type n)
-          t2 (gen-type n)]
-      (do
-        (is (= true (gns/type-equivalent? t1 t1 :dont-know)))
-        (is (not= true (gns/type-equivalent? t1 (gns/create-not t1) :dont-know)))
-        (is (not= false (gns/type-equivalent? (template (not (and ~t1 ~t2)))
-                                              (template (or (not ~t1) (not ~t2)))
-                                              :dont-know)))))))
+    (doseq [_ (range 1000)
+            n (range 5)
+            :let [t1 (gen-type n)
+                  t2 (gen-type n)]]
+      (is (= true (gns/type-equivalent? t1 t1 :dont-know)))
+      (is (not= true (gns/type-equivalent? t1 (gns/create-not t1) :dont-know)))
+      (is (not= false (gns/type-equivalent? (template (not (and ~t1 ~t2)))
+                                            (template (or (not ~t1) (not ~t2)))
+                                            :dont-know))))))
 
 (defn test-1 [_a] true)
 (defn test-2 [_a] true)
