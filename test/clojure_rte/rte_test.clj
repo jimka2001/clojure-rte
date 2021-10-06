@@ -213,8 +213,6 @@
                   '(= 0)
                   'Long
                   'Byte}))
-      (prn [:rt rt])
-      (prn [:ft ft])
       (doseq [[td factors disjoints] (gns/mdtd ft)]
         (cl-format true "~&~
                          ~,4@Ttd=~A~@
