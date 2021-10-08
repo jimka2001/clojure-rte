@@ -43,24 +43,24 @@
   (letfn [(measure-subtype-computability [n depth]
             (assert (> n 0))
             (let [m (reduce (fn [m _current-item]
-                              (let [rt1 (if inh
+                              (let [td1 (if inh
                                           (gen-inhabited-type depth
                                                               (constantly true))
                                           (gen-type depth))
-                                    rt2 (if inh
+                                    td2 (if inh
                                           (gen-inhabited-type depth
                                                               (fn [td]
                                                                 (not (gns/type-equivalent? td rt1 true))))
                                           (gen-type depth))
-                                    can1 (gns/canonicalize-type rt1 :dnf)
-                                    can2 (gns/canonicalize-type rt2 :dnf)
-                                    s1 (gns/subtype? rt1 rt2 :dont-know)
+                                    can1 (gns/canonicalize-type td1 :dnf)
+                                    can2 (gns/canonicalize-type td2 :dnf)
+                                    s1 (gns/subtype? td1 td2 :dont-know)
                                     s2 (gns/subtype? can1 can2 :dont-know)]
                                 (letfn [(f [key bool]
                                           [key (+ (get m key 0)
                                                   (if bool 1 0))])]
                                   (into {} [(f :inhabited
-                                               (gns/inhabited? rt1 false))
+                                               (gns/inhabited? td1 false))
                                             (f :inhabited-dnf
                                                (gns/inhabited? can1 false))
                                             (f :equal
