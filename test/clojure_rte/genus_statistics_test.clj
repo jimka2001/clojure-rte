@@ -23,7 +23,7 @@
   (:require [clojure-rte.rte-core]
             [clojure-rte.genus :as gns]
             [clojure-rte.genus-tester :refer [gen-type gen-inhabited-type]]
-            [clojure.test :refer [deftest]]))
+            [clojure.test :refer [deftest is]]))
 
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.genus-statistics-test))
@@ -90,15 +90,17 @@
                             (range n))]
               (map (fn [[k v]] [k
                                 (/ (* 100.0 v) n)]) m)))]
-    (doall (map println (measure-subtype-computability nreps 3)))
-    (println "--------------------")))
+    (let [computability (measure-subtype-computability nreps 3)]
+      (doall (map println computability))
+      (println "--------------------")
+      computability)))
 
 (deftest t-statistics
   (testing "statistics"
-    (statistics 1000 false)))
+    (is (statistics 1000 false))))
 
 (deftest t-statistics-inhabited
   (testing "statistics inhabited"
-    (statistics 100 true)))
+    (is (statistics 100 true))))
 
 
