@@ -1762,12 +1762,16 @@
                (disjoint? super (operand sub) false))
           false
 
+          ;; (subtype? (not A) A)
           (and (gns/not? sub)
-               (type-equivalent? (operand sub) super false))
+               ;; don't call equivalent, just simple structural equivalence
+               (= (operand sub) super))
           false
 
+          ;; (subtype? A (not A))
           (and (gns/not? super)
-               (type-equivalent? sub (operand super) false))
+               ;; don't call equivalent, just simple structural equivalence
+               (= sub (operand super)))
           false
 
           (and (gns/not? sub)
