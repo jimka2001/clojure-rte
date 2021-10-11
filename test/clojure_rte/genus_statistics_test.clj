@@ -50,7 +50,7 @@
                                     rt2 (if inh
                                           (gen-inhabited-type depth
                                                               (fn [td]
-                                                                (not (gns/type-equivalent? td rt1 true))))
+                                                                (not (gns/type-equivalent? td rt1 false))))
                                           (gen-type depth))
                                     can1 (gns/canonicalize-type rt1 :dnf)
                                     can2 (gns/canonicalize-type rt2 :dnf)
