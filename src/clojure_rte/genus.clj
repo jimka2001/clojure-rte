@@ -1716,14 +1716,14 @@
         :dont-know))
 
 (defmethod -subtype? '= subtype-= [sub super]
-  (cond (gns/=? sub)
-        (subtype? (cons 'member (rest sub)) super :dont-know)
+  (cond (not (gns/=? sub))
+        :dont-know
 
         (gns/=? super)
-        (subtype? sub (cons 'member (rest super)) :dont-know)
+        (= (operand sub) (operand super))
 
         :else
-        :dont-know))
+        (typep (operand sub) super)))
 
 (defmethod -subtype? 'not subtype-not [sub super]
   (if (and (not (gns/not? super))
