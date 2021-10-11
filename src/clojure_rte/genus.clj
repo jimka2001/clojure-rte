@@ -447,26 +447,12 @@
                  (-canonicalize-type td nf))
                =))
 
-(def canonicalize-type-atom (atom #{}))
 (defn canonicalize-type
   "Simplify the given type-designator to a stable form"
   ([type-designator]
    (canonicalize-type type-designator :dnf))
   ([type-designator nf]
-   (if (contains? @canonicalize-type-atom [type-designator nf])
-     ;; this means type-designator was a value previously returned from
-     ;; canonicalize-type, so if we ever tried to canonicalize it again
-     ;; we'd get the same value back. i.e., canonicalize-type is idempotent.
-     ;; So, don't try to canonicalize it now, just return it as itself.
-     type-designator
-     ;; otherwise, we call the canonicalize-memoized to perhaps do
-     ;;   a potentially time comsuming computation, or perhaps
-     ;;   return a memoized value.
-     (let [canonicalized (canonicalize-type-2-arg type-designator nf)]
-       ;; save the return value, so as to avoid trying to canonicalize
-       ;;   a canonicalized value.
-       (swap! canonicalize-type-atom conj [canonicalized nf])
-       canonicalized))))
+   (canonicalize-type-2-arg type-designator nf)))
 
 (defmulti -canonicalize-type
   "Methods of -canonicalize-type implement the behavior of canonicalize-type.
