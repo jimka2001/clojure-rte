@@ -88,10 +88,10 @@
        (or) (template (or ~(gen-type (dec size) types)
                           ~(gen-type (dec size) types)))
        (and) (let [t1 (if limit-to-inhabited
-                        (gen-inhabited-type (dec size) (constantly true) types)
+                        (gen-inhabited-type (dec size) types)
                         (gen-type (dec size) types limit-to-inhabited))
                    t2 (if limit-to-inhabited
-                        (gen-inhabited-type (dec size) (constantly true) types)
+                        (gen-inhabited-type (dec size) types)
                         (gen-type (dec size) types limit-to-inhabited))]
                ;; when trying to generate an inhabited type, and in the AND case
                ;;   we must make sure that both operands of (and ...) designate
@@ -105,18 +105,12 @@
 (defn gen-inhabited-type 
   "gen-type may generate a type designator which reduces to :empty-set.
   gen-inhabited-type generates a type designator which is guaranteed
-  NOT to reduce to :empty-set.  If filter (a unary predicate) is
-  given, gen-inhabited-type loops until it generates a type which
-  satisifies the predicate.  If the predicate is never satisifed, it
-  will loop forever."
+  NOT to reduce to :empty-set."
   ([size]
-   (gen-inhabited-type size (constantly true)))
-  ([size filter]
-   (gen-inhabited-type size filter *test-types*))
-  ([size filter types]
+   (gen-inhabited-type size  *test-types*))
+  ([size types]
    (loop []
-     (let [td (gen-type size types true)
-           td-inhabited (gns/inhabited? td false)]
-       (if (and td-inhabited (filter td))
+     (let [td (gen-type size types true) ]
+       (if (gns/inhabited? td false)
          td
          (recur))))))
