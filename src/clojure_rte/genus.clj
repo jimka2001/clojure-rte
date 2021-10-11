@@ -122,7 +122,7 @@
     (resolve class-name)
     nil))
 
-(defn type-equivalent?
+(defn-memoized [type-equivalent? type-equivalent?-impl]
   "Test whether two type designators represent the same type."
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
@@ -130,10 +130,8 @@
   (let [can1 (delay (canonicalize-type t1 :dnf))
         can2 (delay (canonicalize-type t2 :dnf))
         sp1 (or-else (fn [] (subtype? t1 t2 :dont-know))
-                     (fn [] (subtype? @can1 t2 :dont-know))
                      (fn [] (subtype? @can1 @can2 :dont-know)))
         sp2 (or-else (fn [] (subtype? t2 t1 :dont-know))
-                     (fn [] (subtype? @can2 t1 :dont-know))
                      (fn [] (subtype? @can2 @can1 :dont-know)))]
     ;; two types are equivalent if each is a subtype of the other.
     (cond
@@ -2077,5 +2075,7 @@
   (binding [gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
             gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
             gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
-            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)]
+            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)
+            gns/type-equivalent? (gc-friendly-memoize gns/type-equivalent?-impl)
+]
   (thunk)))
