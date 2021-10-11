@@ -40,18 +40,21 @@
 (defn statistics
   "Generate a table of statics indicating the accuracy of the subtype? function."
   [nreps inh]
-  (letfn [(measure-subtype-computability [n depth]
+  (letfn [(distinct-type-pair [depth]
+            (if (not inh)
+              [(gen-type depth)
+               (gen-type depth)]
+              (loop []
+                (let [t1 (gen-inhabited-type depth)
+                      t2 (gen-inhabited-type depth)
+                      ]
+                  (if (gns/type-equivalent? t1 t2 false)
+                    (recur)
+                    [t1 t2])))))
+          (measure-subtype-computability [n depth]
             (assert (> n 0))
             (let [m (reduce (fn [m _current-item]
-                              (let [rt1 (if inh
-                                          (gen-inhabited-type depth
-                                                              (constantly true))
-                                          (gen-type depth))
-                                    rt2 (if inh
-                                          (gen-inhabited-type depth
-                                                              (fn [td]
-                                                                (not (gns/type-equivalent? td rt1 false))))
-                                          (gen-type depth))
+                              (let [[rt1  rt2] (distinct-type-pair depth)
                                     can1 (gns/canonicalize-type rt1 :dnf)
                                     can2 (gns/canonicalize-type rt2 :dnf)
                                     s1 (gns/subtype? rt1 rt2 :dont-know)
