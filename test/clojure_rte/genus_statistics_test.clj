@@ -30,12 +30,13 @@
 
 (defmacro testing
   [string & body]
-  (let [verbose true]
+  (let [verbose (gensym)]
     `(gns/call-with-genus-env
-      (fn []
-        (when ~verbose (println [:testing ~string :starting (java.util.Date.)]))
-        (clojure.test/testing ~string ~@body)
-        (when ~verbose (println [:finished  (java.util.Date.)]))))))
+      (let [~verbose false]
+        (fn []
+          (when ~verbose (println [:testing ~string :starting (java.util.Date.)]))
+          (clojure.test/testing ~string ~@body)
+          (when ~verbose (println [:finished  (java.util.Date.)])))))))
 
 (defn statistics
   "Generate a table of statics indicating the accuracy of the subtype? function."
@@ -104,6 +105,5 @@
 
 (deftest t-statistics-inhabited
   (testing "statistics inhabited"
-    (is (statistics 100 true))))
-
+    (is (statistics 1000 true))))
 
