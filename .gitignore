@@ -21,3 +21,4 @@ java*.hprof
 .lsp
 .cpcache
 .clj-kondo/backtick
+.DS_Store
