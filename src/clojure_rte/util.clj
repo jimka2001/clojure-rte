@@ -679,3 +679,7 @@
                  (assoc m
                         current-state-id
                         (conj (m current-state-id) [label (v-to-int v1)]))))))))
+
+(defn group-map [f seq g]
+  (into {} (for [[k vs] (group-by f seq)]
+             [k (map g vs)])))
