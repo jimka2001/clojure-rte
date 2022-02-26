@@ -26,6 +26,7 @@
   (:require [clojure-rte.cl-compat :as cl]
             [clojure-rte.util :refer [fixed-point member group-by-mapped
                                       defn-memoized find-first
+                                      partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]
             [clojure-rte.rte-construct :as rte]
             [clojure-rte.genus :as gns]
@@ -34,7 +35,12 @@
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
             [clojure-rte.xymbolyco :as xym]
+            [clojure.set :as set]
             ))
+
+(declare accessible)
+(declare coaccessible)
+(declare trim)
 
 (def counter (atom 0))
 (defn new-state []
@@ -211,12 +217,51 @@
 (construct-transitions '(:or Double))
 (construct-transitions '(:or Double String))
 (construct-transitions '(:or Double String Double))
+(construct-transitions '(:and))
+(construct-transitions '(:and Double))
+(construct-transitions '(:and Double String))
+(construct-transitions '(:and Double String Double))
+(construct-transitions '(:not Double))
 
+(defn trim
+  "remove transitions which are not accessible and are not coaccessible.
+   This doesn't change the input state, but some final states may be lost."
+  [in finals transitions]
+  (let [[a-in a-finals a-transitions] (accessible in finals transitions)]
+    (coaccessible a-in a-finals a-transitions)))
 
-(defn remove-epsilon-transitions [ini out transitions ;; List[Tuple[int, Optional[SimpleTypeD], int]]
+(defn remove-epsilon-transitions [in out transitions ;; List[Tuple[int, Optional[SimpleTypeD], int]]
                                   ] ;; -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]
-  )
-
+  (let [[epsilon-transitions normal-transitions]
+        (partition-by-pred (fn [[_ tr _]] (= :epsilon tr)) transitions)
+        all-states (vec (find-all-states transitions))]
+    (letfn [(reachable-from [q]
+              (for [[x y] epsilon-transitions
+                    :when x == q]
+                y))
+            (extend-closure [m] ;; m is seq of set of int
+              (for [qs m]
+                (set/union (mapcat reachable-from qs) qs)))]
+      (let [epsilon-closure (fixed-point (map set all-states)
+                                         extend-closure 
+                                         =)
+            transitions2 (mapcat (fn [q closure]
+                                   (for [c closure
+                                         [x label y] normal-transitions
+                                         :when (= x c)
+                                         :when (not= x q)]
+                                     [q label y]))
+                                 all-states epsilon-closure)
+            ;; some states no longer exist after removing epsilon transitions
+            updated-transitions (concat normal-transitions transitions2)
+            remaining-states (find-all-states updated-transitions)
+            finals (mapcat (fn [q closure]
+                             (if (and (or (member q remaining-states)
+                                          (= q in))
+                                      (member out closure))
+                               [q]))
+                           all-states epsilon-closure)]
+        (trim in finals updated-transitions)))))
 
 (defn construct-epsilon-free-transitions [rte] ;; -> (int, List[int], List[Tuple[int, SimpleTypeD, int]])
   (let [[ini out transitions] (construct-transitions rte)]
@@ -224,7 +269,6 @@
 
 (defn find-all-states [transitions]
   (set (mapcat (fn [[x _ y]] [x y]) transitions)))
-
 
 (defn complete
   "Transform a sequence of transitions (either deterministic or otherwise)
@@ -336,6 +380,21 @@
 
     ;;[in accessible-outs accessible-transitions]
     ))
+
+(defn coaccessible [in outs transitions]
+  (let [proxy (new-state)
+        augmented-transitions (concat (for [q outs]
+                                        [q :sigma proxy])
+                                transitions)
+        third (comp second rest)
+        grouped (group-map third augmented-transitions (fn [[x y _]] [y x]))
+        [coaccessible-outs reversed-transitions] (trace-transition-graph proxy
+                                                   (fn [q] (get grouped q []))
+                                                   (fn [q] (= q in)))
+        coaccessible-transitions (for [[y td x] reversed-transitions
+                                       :when (not= y proxy)]
+                                   [x td y])]
+    [in outs coaccessible-transitions]))
 
 
 (defn construct-thompson-dfa [pattern ret]
