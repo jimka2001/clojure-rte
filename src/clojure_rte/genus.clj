@@ -2046,7 +2046,7 @@
   Every set, x, in the return value has the property that if y is in
   the given type-set, then either x and y are disjoint, or x is a subset of y."
   [type-set]
-  (loop [decomposition [[:sigma () ()]]
+  (loop [decomposition [[:sigma '(:sigma) '(:empty-set)]]
          type-set (disj type-set :sigma)]
     (if (empty? type-set)
       decomposition
