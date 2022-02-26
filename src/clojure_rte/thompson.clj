@@ -40,6 +40,7 @@
 
 (declare accessible)
 (declare coaccessible)
+(declare construct-epsilon-free-transitions)
 (declare trim)
 
 (def counter (atom 0))
@@ -52,18 +53,17 @@
   (let [grouped-1 (group-by first transitions-1)
         grouped-2 (group-by first transitions-2)]
     (letfn [(state-transitions [[q1 q2]]
-              (for [trs-1 (get grouped-1 q1 [])
-                    trs-2 (get grouped-2 q2 [])
-                    [_ td1 y1] trs-1
-                    [_ td2 y2] trs-2
+              (for [[_ td1 y1] (get grouped-1 q1 [])
+                    [_ td2 y2] (get grouped-2 q2 [])
                     :let [td (template (and ~td1 ~td2))]
-                    :when (not= false (gns/inhabited? td :dont-know))]
+                    :when (not= false (gns/inhabited? td :dont-know))
+                    ]
                 [(gns/canonicalize-type td) [y1 y2]]))]
       (let [inX [in1 in2]
             [finalsX transitionsX] (trace-transition-graph inX state-transitions
                                                            (fn [[x y]]
                                                              (arbitrate (boolean (member x outs1))
-                                                                        (boolean (member x outs2)))))]
+                                                                        (boolean (member y outs2)))))]
         [inX finalsX transitionsX]))))
 
 (defn renumber-transitions 
@@ -79,7 +79,7 @@
     [(mapping in)
      (map mapping outs)
      (map (fn [[xx td yy]]
-            [(mapping xx) td (mapping yy)]))]))
+            [(mapping xx) td (mapping yy)]) transitions)]))
 
 (defn confluxify
   "join the multiple outputs of a set of transitions (each labeled with a SimpleTypeD)
@@ -137,11 +137,9 @@
                                               out (new-state)]
                                           [in out [[in td out]]]))
                                :* (fn [rte _]
-                                    (cl-format true "rte=~A~%" rte)
                                     (let [in (new-state)
                                           out (new-state)
                                           [in-inner out-inner transitions] (construct-transitions rte)]
-                                      (cl-format true "transitions=~A~%" transitions)
                                       [in out (concat [[in :epsilon in-inner]
                                                        [out-inner :epsilon out]
                                                        [in :epsilon out]
@@ -236,13 +234,14 @@
         (partition-by-pred (fn [[_ tr _]] (= :epsilon tr)) transitions)
         all-states (vec (find-all-states transitions))]
     (letfn [(reachable-from [q]
-              (for [[x y] epsilon-transitions
-                    :when x == q]
+              (for [[x _ y] epsilon-transitions
+                    :when (= x q)]
                 y))
             (extend-closure [m] ;; m is seq of set of int
               (for [qs m]
-                (set/union (mapcat reachable-from qs) qs)))]
-      (let [epsilon-closure (fixed-point (map set all-states)
+                (set/union qs
+                           (mapcat reachable-from qs))))]
+      (let [epsilon-closure (fixed-point (map (comp set list) all-states)
                                          extend-closure 
                                          =)
             transitions2 (mapcat (fn [q closure]
@@ -264,8 +263,9 @@
         (trim in finals updated-transitions)))))
 
 (defn construct-epsilon-free-transitions [rte] ;; -> (int, List[int], List[Tuple[int, SimpleTypeD, int]])
-  (let [[ini out transitions] (construct-transitions rte)]
-    (remove-epsilon-transitions ini out transitions)))
+  (let [[in out transitions] (construct-transitions rte)]
+    (remove-epsilon-transitions in out transitions)))
+
 
 (defn find-all-states [transitions]
   (set (mapcat (fn [[x _ y]] [x y]) transitions)))
@@ -358,12 +358,12 @@
                               is_final ;; : Callable[[V], bool]
                               ];; -> Tuple[List[V], List[Tuple[V, SimpleTypeD, V]]]:
   (let [[qs transitions] (trace-graph q0 edges)]
-    [(filter is_final qs)]
-    (mapcat (fn [x pairs]
+    [(filter is_final qs)
+     (mapcat (fn [x pairs]
               (map (fn [[label y]]
                      [x label (qs y)])
                    pairs))
-            qs transitions)))
+            qs transitions)]))
 
 ;; remove non-accessible transitions, and non-accessible final states
 (defn accessible [in outs
@@ -377,9 +377,7 @@
                                 (fn [q] 
                                   (get grouped q []))
                                 (fn [q] (boolean (member q outs))))]
-
-    ;;[in accessible-outs accessible-transitions]
-    ))
+    [in accessible-outs accessible-transitions]))
 
 (defn coaccessible [in outs transitions]
   (let [proxy (new-state)
