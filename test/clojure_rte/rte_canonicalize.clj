@@ -312,7 +312,14 @@
                                          x y z
                                          (:* (:cat x y z)))))
            '(:* (:cat x y z)))
-        862)))
+        862)
+
+    (is (= (rte/conversion-*-3 '(:* (:cat)))
+           '(:* (:cat)))
+        863)
+    (is (= (rte/conversion-*-3 '(:* (:cat x)))
+           '(:* (:cat x)))
+        864)))
 
 (deftest t-conversion-not-1
   (testing "conversion not 1"
