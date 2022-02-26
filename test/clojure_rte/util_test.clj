@@ -29,6 +29,7 @@
                                       call-with-found
                                       lazy-pairs
                                       or-else
+                                      trace-graph
                                       ]]
             [clojure.test :refer [deftest testing is]]))
 
@@ -463,3 +464,18 @@
                        (fn [] :dont-know)
                        (fn [] 1))))
     ))
+
+(deftest t-trace-graph
+  (testing "trace-graph"
+    (defn edges [i]
+      (case i
+        (0) [["a" 1]
+             ["b" 2]]
+        (1) [["a" 2]]
+        [["b" 2]
+         ["a" 0]]))
+    (is (= (trace-graph 0 edges)
+           [[0 1 2]
+            [[["a" 1] ["b" 2]]
+             [["a" 2]]
+             [["b" 2] ["a" 0]]]]))))
