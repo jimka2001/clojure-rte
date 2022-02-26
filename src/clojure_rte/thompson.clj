@@ -234,13 +234,16 @@
         (partition-by-pred (fn [[_ tr _]] (= :epsilon tr)) transitions)
         all-states (vec (find-all-states transitions))]
     (letfn [(reachable-from [q]
-              (for [[x _ y] epsilon-transitions
+              (set (for [[x _ y] epsilon-transitions
                     :when (= x q)]
-                y))
+                y)))
             (extend-closure [m] ;; m is seq of set of int
               (for [qs m]
                 (set/union qs
-                           (mapcat reachable-from qs))))]
+                           (reduce (fn [acc q]
+                                     (set/union acc (reachable-from q)))
+                                   #{}
+                                   qs))))]
       (let [epsilon-closure (fixed-point (map (comp set list) all-states)
                                          extend-closure 
                                          =)
@@ -265,7 +268,6 @@
 (defn construct-epsilon-free-transitions [rte] ;; -> (int, List[int], List[Tuple[int, SimpleTypeD, int]])
   (let [[in out transitions] (construct-transitions rte)]
     (remove-epsilon-transitions in out transitions)))
-
 
 (defn find-all-states [transitions]
   (set (mapcat (fn [[x _ y]] [x y]) transitions)))
@@ -299,18 +301,18 @@
                      [[q remaining @sink]])))))
         completing-transitions (mapcat cf all-states)]
     (cond (empty? clean-transitions)
-          [[in :sigma sink]
-           [sink :sigma sink]]
+          [[in :sigma @sink]
+           [@sink :sigma @sink]]
 
           (empty? completing-transitions)
           clean-transitions
 
           :else
           (concat (conj completing-transitions
-                        [sink :sigma sink])
+                        [@sink :sigma @sink])
                   clean-transitions))))
 
-(defn determinize [ini outs
+(defn determinize [in outs
                    transitions ;; List[Tuple[int, SimpleTypeD, int]]
                    ] ;; -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]:
   ;; This can be done with a call to traceTransitionGraph.
@@ -326,9 +328,8 @@
     (letfn [(expand-one-state [qs] ;; qs is a set of int
               ;; Given a set of states, find all the SimpleTypeD which are labels of
               ;;   transitions leaving any of those states.
-              (let [tds (set (for [q qs
-                                   trs (get grouped q [])
-                                   [_ td _] trs]
+              (let [tds (set (for [q qs                                   
+                                   [_ td _] (get grouped q [])]
                                td))
                     ;; The set tds of SimpleTypeD might contain some non-disjoint types.
                     ;;   So we call compute the minimum disjoint type decomposition (mdtd)
@@ -340,8 +341,7 @@
                     ;;      The pair returned from step 2 is exactly what is needed by traceGraph
                     tr2 (for [[td factors _] (gns/mdtd tds)
                               q qs
-                              trs (get grouped q [])
-                              [_ td1 y] trs
+                              [_ td1 y] (get grouped q [])
                               :when (member td1 factors)]
                           [td y])]
                 (for [[td pairs] (group-by first tr2)

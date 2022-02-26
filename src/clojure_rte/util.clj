@@ -238,10 +238,15 @@
   Convergence is detected when the function good-enough returns Boolean true
   when called with two consecutive values. The older of the two values
   is returned in this case."
-  [value f good-enough]
+  ([value f good-enough]
+   (fixed-point value f good-enough false))
+  ([value f good-enough verbose]
   (loop [value value
          old-values ()]
     (let [new-value (f value)]
+      (when verbose
+        (cl-format true "reducing ~A~%" value)
+        (cl-format true "   to -> ~A~%" new-value))
       (cond (good-enough value new-value)
             value
 
@@ -251,7 +256,7 @@
                              :old-values old-values}))
 
             :else
-            (recur new-value (cons value old-values))))))
+            (recur new-value (cons value old-values)))))))
 
 (defn print-vals-helper ""
   [pairs]
