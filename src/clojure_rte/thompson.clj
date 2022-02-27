@@ -42,6 +42,10 @@
 (declare coaccessible)
 (declare construct-epsilon-free-transitions)
 (declare trim)
+(declare trace-transition-graph)
+(declare find-all-states)
+(declare construct-determinized-transitions)
+(declare construct-epsilon-free-transitions)
 
 (def counter (atom 0))
 (defn new-state []
@@ -71,15 +75,17 @@
    need to convert to that form.  So we assign a new Int value to each (x,_,y)
    in the transitions, and return a translated copy of transitions, as well
    as updated value of in and outs."
-  [in outs transitions]
-  (let [states (concat (conj outs in)
-                       (mapcat (fn [[xx _ yy]] [xx yy]) transitions))
-        mapping (into {} (map (fn [qq] [qq (new-state)])
-                              (distinct states)))]
-    [(mapping in)
-     (map mapping outs)
-     (map (fn [[xx td yy]]
-            [(mapping xx) td (mapping yy)]) transitions)]))
+  ([in outs transitions]
+   (renumber-transitions in outs transitions new-state))
+  ([in outs transitions new-state-index]
+   (let [states (concat (conj outs in)
+                        (mapcat (fn [[xx _ yy]] [xx yy]) transitions))
+         mapping (into {} (map (fn [qq] [qq (new-state-index)])
+                               (distinct states)))]
+     [(mapping in)
+      (map mapping outs)
+      (map (fn [[xx td yy]]
+             [(mapping xx) td (mapping yy)]) transitions)])))
 
 (defn confluxify
   "join the multiple outputs of a set of transitions (each labeled with a SimpleTypeD)
@@ -202,24 +208,6 @@
                                
                                )))
 
-(construct-transitions :empty-set)
-(construct-transitions :epsilon)
-(construct-transitions :sigma)
-(construct-transitions 'Double)
-(construct-transitions '(:* Double))
-(construct-transitions '(:cat))
-(construct-transitions '(:cat Double))
-(construct-transitions '(:cat Double String))
-(construct-transitions '(:cat Double String Double))
-(construct-transitions '(:or))
-(construct-transitions '(:or Double))
-(construct-transitions '(:or Double String))
-(construct-transitions '(:or Double String Double))
-(construct-transitions '(:and))
-(construct-transitions '(:and Double))
-(construct-transitions '(:and Double String))
-(construct-transitions '(:and Double String Double))
-(construct-transitions '(:not Double))
 
 (defn trim
   "remove transitions which are not accessible and are not coaccessible.
@@ -409,12 +397,18 @@
 
 (defn construct-thompson-dfa [pattern ret]
   (let [[ini outs determinized] (construct-determinized-transitions pattern)
+        counter (atom -1)
+        new-state (fn [] 
+                    (swap! counter inc))
+        [ini outs determinized] (renumber-transitions ini outs determinized new-state)
         fmap (into {} (map (fn [f] {f ret}) outs))
-        states (for [[x triples] (group-by (fn [[x td y]] x) determinized)]
-                 (xym/map->State {:index x
-                                  :accepting (= ini x)
-                                  :transitions (map rest triples)}))]
+        states (into {} (for [[x triples] (group-by (fn [[x td y]] x) determinized)]
+                          [x (xym/map->State {:index x
+                                              :accepting (boolean (member x outs))
+                                              :initial (= ini x)
+                                              :transitions (map rest triples)})]))]
 
+    (assert (= ini 0))
     (xym/make-dfa {:pattern pattern
                    :states states
                    :exit-map fmap

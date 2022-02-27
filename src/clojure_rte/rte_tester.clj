@@ -56,6 +56,8 @@
    :sigma :empty-set :epsilon])
 
 (defn gen-rte
+  ([size]
+   (gen-rte *test-types*))
   ([size types]
    (let [key (rand-nth *rte-keywords*)] 
      (gen-rte key size types)))

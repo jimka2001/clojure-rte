@@ -2069,7 +2069,7 @@
   (rte-inhabited? (rte/compile pattern)))
 
 (defmethod-memoized rte-inhabited? :Dfa [dfa]
-  (some :accepting (xym/states-as-seq dfa)))
+  (boolean (some :accepting (xym/states-as-seq dfa))))
 
 (defn rte-vacuous? [dfa]
   (not (rte-inhabited? dfa)))
