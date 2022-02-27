@@ -26,7 +26,6 @@
             [clojure-rte.rte-construct :as rte]
             [clojure-rte.xymbolyco :as xym]
             [clojure-rte.rte-tester :as test]
-            [backtick :refer [template]]
             [clojure.test :refer [deftest is]]))
 
 
@@ -178,7 +177,7 @@
             :let [pattern (test/gen-rte depth)
                   dfa-thompson (tom/construct-thompson-dfa pattern  42)
                   dfa-brzozowski (rte/compile pattern 42)]]
-      ;; equivalent might return None or True  but need to fail if returns False
+      ;; equivalent might return :dont-know or true  but need to fail if returns false
       (is (not= false (xym/dfa-equivalent? dfa-thompson dfa-brzozowski))))))
 
 (deftest t-accessible

@@ -201,6 +201,7 @@
                        (:cat (:+ (:cat (:not (:* (:and)))))
                              (:+ (:and :empty-set))
                              (:or (:+ (:and)) (:and (:+ (:or))))))
+                  (:or (:? (:not (:cat (:contains-none)))))
                   )]
       (clojure-rte.rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
 

@@ -316,6 +316,7 @@
     (letfn [(expand-one-state [qs] ;; qs is a set of int
               ;; Given a set of states, find all the SimpleTypeD which are labels of
               ;;   transitions leaving any of those states.
+              (assert (set? qs) (cl-format false "expecting a set, not ~A" qs))
               (let [tds (set (for [q qs                                   
                                    [_ td _] (get grouped q [])]
                                td))
@@ -333,7 +334,7 @@
                               :when (member td1 factors)]
                           [td y])]
                 (for [[td pairs] (group-by first tr2)
-                      :let [next-states (map second pairs)]]
+                      :let [next-states (set (map second pairs))]]
                   [td next-states])))]
 
       (let [inX #{in}
@@ -345,8 +346,7 @@
         ;; we now have transitions which map Set[Int] to Set[Int]
         ;;   where each state (Set[Int]) represents 1 state.  We must
         ;;   now replace each Set[Int] with a corresponding Int.
-        (renumber-transitions inX expanded-finals expanded-transitions)
-))))
+        (renumber-transitions inX expanded-finals expanded-transitions)))))
 
 (defn construct-determinized-transitions [rte] ;; -> Tuple[int, List[int], List[Tuple[int, SimpleTypeD, int]]]
   (let [[in2 outs2 clean] (construct-epsilon-free-transitions rte)
@@ -437,5 +437,3 @@
                 (member f outs))
       exit-value
       false)))
-                
-    

@@ -57,7 +57,7 @@
 
 (defn gen-rte
   ([size]
-   (gen-rte *test-types*))
+   (gen-rte size *test-types*))
   ([size types]
    (let [key (rand-nth *rte-keywords*)] 
      (gen-rte key size types)))
