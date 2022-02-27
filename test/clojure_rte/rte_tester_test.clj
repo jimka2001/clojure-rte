@@ -38,9 +38,11 @@
   (clojure.test/run-tests 'clojure-rte.rte-tester-test))
 
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
-  (let [verbose true]
+  (let [verbose test-verbose]
   `(rte/with-compile-env []
      (when ~verbose
        (println [:testing ~string :starting (java.util.Date.)]))
@@ -200,7 +202,6 @@
                              (:+ (:and :empty-set))
                              (:or (:+ (:and)) (:and (:+ (:or))))))
                   )]
-      (println [:rte rte])
       (clojure-rte.rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
 
 (deftest t-rte-not-random

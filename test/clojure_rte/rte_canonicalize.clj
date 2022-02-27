@@ -28,13 +28,16 @@
             [clojure-rte.util :refer [count-if-not]]
             [clojure-rte.genus :as gns]))
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
   `(with-compile-env []
-     (println [:testing 'clojure-rte.rte-canonicalize ~string :starting (java.util.Date.)])
+     (when test-verbose
+       (println [:testing 'clojure-rte.rte-canonicalize ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
-     (println [:finished 'clojure-rte.rte-canonicalize ~string (java.util.Date.)])
-     ))
+     (when test-verbose
+       (println [:finished 'clojure-rte.rte-canonicalize ~string (java.util.Date.)]))))
 
 (deftest t-canonicalize-pattern-14
   (when (and (resolve 'java.lang.Comparable)

@@ -25,13 +25,16 @@
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
   `(rte/with-compile-env []
-     (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
+     (when test-verbose
+       (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
-     (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
-     ))
+     (when test-verbose
+       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)]))))
 
 (deftest t-with-rte-5
   (testing "with-rte 5"
@@ -45,7 +48,7 @@
 
     (rte/with-rte [::x (:+ String)
                    ::y (:+ Double)]
-      (cl-format true "-------- with-rte -----------~%")
+      ;; (cl-format true "-------- with-rte -----------~%")
       (is (= (rte/canonicalize-pattern ::x)
              '(:cat String (:* String)))
           "449 canonicalize-pattern got wrong memoized value")
@@ -78,7 +81,7 @@
         ))
 
     (rte/with-rte [::x (:+ String)]
-      (cl-format true "-------- with-rte -----------~%")
+      ;;(cl-format true "-------- with-rte -----------~%")
       (is (= (rte/canonicalize-pattern ::x)
              '(:cat String (:* String)))
           "449a canonicalize-pattern got wrong memoized value")
@@ -98,7 +101,7 @@
 
     (rte/with-rte [::x (:+ String)
                    ::y (:+ Double)]
-      (cl-format true "-------- with-rte -----------~%")
+      ;;(cl-format true "-------- with-rte -----------~%")
       (is (= (rte/canonicalize-pattern ::x)
              '(:cat String (:* String)))
           "440b canonicalize-pattern got wrong memoized value")
