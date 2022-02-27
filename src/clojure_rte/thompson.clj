@@ -413,3 +413,29 @@
                    :states states
                    :exit-map fmap
                    :combine-labels (fn [td1 td2] (gns/create-or (list td1 td2)))})))
+
+(defn simulate
+  "Consider the set of transitions as a non-deterministic symbolic finite
+  automaton, having in as initial state and outs as accepting/final states.
+  Execute the state machine by consuming the values of stream.
+  stream may be any value acceptable to reduce.
+  If the given sequence (stream) is accepted, return the given exit-value;
+  otherwise return false."
+  [stream exit-value
+   in outs transitions]
+  (let [groups (group-map first transitions rest)
+        computed (reduce (fn [states v]
+                           (if (empty? states)
+                             (reduced false)
+                             (set (for [x states
+                                        [td y] (get groups x [])
+                                        :when (gns/typep v td)]
+                                    y))))
+                         #{in}
+                         stream)]
+    (if (exists [f computed]
+                (member f outs))
+      exit-value
+      false)))
+                
+    
