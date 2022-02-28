@@ -36,13 +36,16 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.xymbolyco-test))
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
   `(with-compile-env []
-     (println [:testing ~string :starting (java.util.Date.)])
+     (when test-verbose
+       (println [:testing ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
-     (println [:finished  (java.util.Date.)])
-     ))
+     (when test-verbose
+       (println [:finished  (java.util.Date.)]))))
 
 
 (deftest t-split-eqv-class

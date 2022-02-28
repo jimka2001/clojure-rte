@@ -33,12 +33,16 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.rte-case-test))
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
   `(with-compile-env []
-     (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)])
+     (when test-verbose
+       (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
-     (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)])))
+     (when test-verbose
+       (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)]))))
 
 (deftest t-rte-case
   (testing "rte-case"

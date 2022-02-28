@@ -40,13 +40,16 @@
             [backtick :refer [template]]
             [clojure-rte.xymbolyco :as xym]))
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
   `(with-compile-env []
-     (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)])
+     (when test-verbose
+       (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
-     (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)])
-     ))
+     (when test-verbose
+       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)]))))
 
 (deftest t-nullable
   (testing "nullable"
@@ -214,20 +217,15 @@
                   'Long
                   'Byte}))
       (doseq [[td factors disjoints] (gns/mdtd ft)]
-        (cl-format true "~&~
-                         ~,4@Ttd=~A~@
-                         ~,8@Tfactors=~A~@
-                         ~,8@Tdisjoints=~A~@
-                         ~%"
-                   td factors disjoints)
         (let [deriv (derivative rt td factors disjoints)
               can (canonicalize-pattern deriv)]
-          (cl-format true "~&~
-                           ~,4@Tderiv=~A~@
-                           ~,4@Tcan=~A~%"
-                     deriv
-                     can
-          ))))))
+          nil
+          ;;(cl-format true "~&~
+          ;;                 ~,4@Tderiv=~A~@
+          ;;                 ~,4@Tcan=~A~%"
+          ;;           deriv
+          ;;           can)
+          )))))
 
 
 (deftest t-rte-to-dfa

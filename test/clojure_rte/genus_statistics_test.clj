@@ -64,7 +64,7 @@
                                           [key (+ (get m key 0)
                                                   (if bool 1 0))])]
                                   (into {} [(f :inhabited
-                                               (gns/inhabited? td1 false))
+                                               (gns/inhabited? can1 false))
                                             (f :inhabited-dnf
                                                (gns/inhabited? can1 false))
                                             (f :equal

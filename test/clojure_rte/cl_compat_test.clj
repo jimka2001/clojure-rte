@@ -28,12 +28,15 @@
 (defn -main []
   (clojure.test/run-tests 'clojure-rte.cl-compat-test))
 
+(def test-verbose false)
+
 (defmacro testing
   [string & body]
-  `(do (println [:testing ~string :starting (java.util.Date.)])
+  `(do (when test-verbose
+         (println [:testing ~string :starting (java.util.Date.)]))
        (clojure.test/testing ~string ~@body)
-       (println [:finished  (java.util.Date.)])
-       ))
+       (when test-verbose
+         (println [:finished  (java.util.Date.)]))))
 
 
 (deftest t-cl-prog1

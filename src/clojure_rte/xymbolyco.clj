@@ -153,7 +153,6 @@
   [dfa]
   (map serialize-state (states-as-seq dfa)))
 
-
 (defn gen-function
   "This is a helper function used by optimized-transition-function.
   gen-funciton computes and returns a unary function which can be called
@@ -882,7 +881,7 @@
 (defn dfa-equivalent?
   "Returns a Boolean (or None) indicating whether the two given Dfas
   recognize the same language.
-  A return value of None indicates that it could not be proven yes or
+  A return value of :dont-know indicates that it could not be proven yes or
   no whether the dfas are equivalent."
   [dfa-1 dfa-2]
   (dfa-vacuous? (synchronized-xor dfa-1 dfa-2)))
