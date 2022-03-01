@@ -281,13 +281,6 @@
                               `[(fn [] ~arg) '~arg]) args))]
     `(print-vals-helper [~@pairs])))
 
-(defn group-by-mapped
-  "Like group-by but allows a second function to be mapped over each
-  of the values in the computed hash map."
-  [f1 f2 coll]
-  (into {} (map (fn [[key value]]
-                  [key (set (map f2 value))]) (group-by f1 coll))))
-
 
 (defn mapc
   "Like map but does not accumulate the return values.  Returns its second argument."
@@ -683,6 +676,15 @@
                         current-state-id
                         (conj (m current-state-id) [label (v-to-int v1)]))))))))
 
+;; TODO group-map and group-by-mapped need to be combined into one function
 (defn group-map [f seq g]
   (into {} (for [[k vs] (group-by f seq)]
              [k (map g vs)])))
+
+(defn group-by-mapped
+  "Like group-by but allows a second function to be mapped over each
+  of the values in the computed hash map."
+  [f1 f2 coll]
+  (into {} (map (fn [[key value]]
+                  [key (set (map f2 value))]) (group-by f1 coll))))
+
