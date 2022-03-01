@@ -24,7 +24,7 @@
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-by-mapped
+            [clojure-rte.util :refer [fixed-point member group-map-set
                                       defn-memoized find-first
                                       non-empty? exists setof]]
             [clojure-rte.genus :as gns]
@@ -563,8 +563,8 @@
                                           [(:index q) dst-id])
                                         (:transitions q)))
                                  (states-as-seq dfa))
-        forward-map (group-by-mapped first second transition-pairs)
-        backward-map (group-by-mapped second first transition-pairs)]
+        forward-map (group-map-set first second transition-pairs)
+        backward-map (group-map-set second first transition-pairs)]
     (letfn [(trace-fb [states fb-map skip]
               (loop [states states
                      done #{}]

@@ -676,15 +676,16 @@
                         current-state-id
                         (conj (m current-state-id) [label (v-to-int v1)]))))))))
 
-;; TODO group-map and group-by-mapped need to be combined into one function
-(defn group-map [f seq g]
+(defn group-map [f g seq]
+  "Like group-by but allows a second function to be mapped over each
+  of the values in the computed hash map."
   (into {} (for [[k vs] (group-by f seq)]
              [k (map g vs)])))
 
-(defn group-by-mapped
-  "Like group-by but allows a second function to be mapped over each
-  of the values in the computed hash map."
+(defn group-map-set
+  "like group-map but collects values (of key values pairs) in sets
+  rather than sequences."
   [f1 f2 coll]
-  (into {} (map (fn [[key value]]
-                  [key (set (map f2 value))]) (group-by f1 coll))))
+  (into {} (for [[k vs] (group-map f1 f2 coll)]
+             [k (set vs)])))
 
