@@ -408,7 +408,7 @@
              (let [m (max (denom-digits acc)
                           (denom-digits i))]
                (swap! x (fn [old new] (+ old (* new new new))) m)
-               (println [:acc acc :i i :max-denom m :sum (deref x)])
+               ;; (println [:acc acc :i i :max-denom m :sum (deref x)])
                (+ acc i)))
            0/1 s)))))
 

@@ -680,12 +680,5 @@
   "Like group-by but allows a second function to be mapped over each
   of the values in the computed hash map."
   (into {} (for [[k vs] (group-by f seq)]
-             [k (map g vs)])))
-
-(defn group-map-set
-  "like group-map but collects values (of key values pairs) in sets
-  rather than sequences."
-  [f1 f2 coll]
-  (into {} (for [[k vs] (group-map f1 f2 coll)]
-             [k (set vs)])))
+             [k (set (map g vs))])))
 

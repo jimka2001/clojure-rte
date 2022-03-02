@@ -194,6 +194,22 @@
                                   [1  :sigma  97]
                                   [1  :sigma  98]})))))
 
+(deftest t-coaccessible
+  (testing "coaccessible"
+    (let [[ini  outs  transitions] (tom/coaccessible 0 
+                                                   [97  98]
+                                                   [[0  :sigma  1]
+                                                    [0  :sigma  3]
+                                                    [1  :sigma  97]
+                                                    [1  :sigma  98] 
+                                                    [2  :sigma  99]])]
+      (is (= ini 0))
+      (is (= (set outs) #{97 98}))
+      (is (= (set transitions)  #{[0  :sigma  1]
+                                  [1  :sigma  97]
+                                  [1  :sigma  98]
+                                  })))))
+
 (deftest t-simulate
   (testing "simulate"
     (let [ini 0

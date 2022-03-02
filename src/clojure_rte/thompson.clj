@@ -24,7 +24,7 @@
   Finite Automata"
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-map-set
+            [clojure-rte.util :refer [fixed-point member
                                       defn-memoized find-first
                                       partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]
@@ -375,7 +375,7 @@
         [accessible-outs accessible-transitions]
         (trace-transition-graph in
                                 (fn [q] 
-                                  (get grouped q []))
+                                  (get grouped q #{}))
                                 (fn [q] (boolean (member q outs))))]
     [in accessible-outs accessible-transitions]))
 
@@ -387,7 +387,7 @@
         third (comp second rest)
         grouped (group-map third (fn [[x y _]] [y x]) augmented-transitions)
         [coaccessible-outs reversed-transitions] (trace-transition-graph proxy
-                                                   (fn [q] (get grouped q []))
+                                                   (fn [q] (get grouped q #{}))
                                                    (fn [q] (= q in)))
         coaccessible-transitions (for [[y td x] reversed-transitions
                                        :when (not= y proxy)]
@@ -428,7 +428,7 @@
                            (if (empty? states)
                              (reduced false)
                              (set (for [x states
-                                        [td y] (get groups x [])
+                                        [td y] (get groups x #{})
                                         :when (gns/typep v td)]
                                     y))))
                          #{in}
