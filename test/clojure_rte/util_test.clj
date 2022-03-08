@@ -389,7 +389,7 @@
 
 (deftest t-fold-3
   (testing "fold 3"
-    (doseq [f [reduce clojure-rte.util/pairwise-fold clojure-rte.util/tree-fold ]]
+    (doseq [f [reduce clojure-rte.util/pairwise-fold clojure-rte.util/tree-fold]]
       (let [x (atom 0)
             s [1/23 1/29
                1/31 1/37
