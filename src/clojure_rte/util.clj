@@ -587,8 +587,9 @@
   (assertion expr)
   expr)
 
+
 (defn call-with-found
-  "Call the given predicate, pred, on successive element of the collection
+  "Call the given predicate, pred, on successive elements of the collection
   until the first time pred returns a truthy value, at which time if-found
   is called with that element of the collection, and call-with-found returns
   the return value of if-found.   If no such element of collection is found
@@ -676,9 +677,10 @@
                         current-state-id
                         (conj (m current-state-id) [label (v-to-int v1)]))))))))
 
-(defn group-map [f g seq]
+(defn group-map 
   "Like group-by but allows a second function to be mapped over each
   of the values in the computed hash map."
+  [f g seq]
   (into {} (for [[k vs] (group-by f seq)]
              [k (set (map g vs))])))
 

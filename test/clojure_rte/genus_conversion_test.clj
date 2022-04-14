@@ -22,6 +22,7 @@
 (ns clojure-rte.genus-conversion-test
   (:require [clojure-rte.rte-core]
             [clojure-rte.genus :as gns]
+            [backtick :refer [template]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
@@ -287,6 +288,39 @@
            '(or Double (member "a" "b")))
         896)))
     
+
+(deftest t-combo-conversion-17
+  (testing "combo conversion 17"
+    (let [a (template (= "a"))
+          b (template (= "b"))
+          c (template (= "c"))
+          d (template (= "d"))]
+      (is (= (gns/conversion-C17 (template (or (and ~a ~b ~c)
+                                               (and ~a (not ~b) ~c))))
+             (template (or (and ~a ~c)
+                           (and ~a ~c)))))
+      (is (= (gns/conversion-C17 (template (and (or ~a ~b ~c)
+                                                (or ~a (not ~b) ~c))))
+             (template (and (or ~a ~c)
+                            (or ~a ~c)))))
+
+      (is (= (gns/conversion-C17 (template (or (and ~a ~b ~c ~d)
+                                               (and ~a (not ~b) ~c ~d))))
+             (template (or (and ~a ~c ~d)
+                           (and ~a  ~c ~d)))))
+      (is (= (gns/conversion-C17 (template (and (or ~a ~b ~c ~d)
+                                                (or ~a (not ~b) ~c ~d))))
+             (template (and (or ~a ~c ~d)
+                            (or ~a  ~c ~d)))))
+      (is (= (gns/conversion-C17 (template (or (and ~a ~b ~c ~d)
+                                               (and ~a (not ~b) ~c (not ~d)))))
+             (template (or (and ~a ~b ~c ~d)
+                           (and ~a (not ~b) ~c (not ~d))))))
+      (is (= (gns/conversion-C17 (template (and (or ~a ~b ~c ~d)
+                                                (or ~a (not ~b) ~c (not ~d)))))
+             (template (and (or ~a ~b ~c ~d)
+                           (or ~a (not ~b) ~c (not ~d))))))
+    )))
 
 (deftest t-combo-conversion-D1
   (testing "combo conversion-D1"

@@ -1117,6 +1117,38 @@
                     td))]
       (create self (map f (operands self))))))
 
+(defn conversion-C17
+  " A !B + A B --> A
+   (A + !B)(A + B) -> A"
+  [self]
+  (letfn [(f [td]
+            (if (not (dual-combination? self td))
+              td
+              (let [others (filter (fn [c]
+                                     (and (gns/combo? c)
+                                          (not= c td)
+                                          (dual-combination? self c)))
+                                   (operands self))]
+                (letfn [(except_for [c tds1 tds2]
+                          (if (not= (count tds1) (count tds2))
+                            false
+                            (let [shorter (remove-element c tds1)]
+                              (if (gns/not? c)
+                                (= shorter (remove-element (operand c) tds2))
+                                (= shorter (remove-element (template (not ~c)) tds2))))))]
+
+                  (call-with-found (fn [c]
+                                     (exists [x others]
+                                             (except_for c (operands td) (operands x))))
+                                   (operands td)
+                                   :if-found (fn [negated]
+                                               (create-dual self (remove-element negated (operands td))))
+                                   :if-not-found td)
+                  
+                  ))))]
+    (create self (map (fn [td] (if (gns/combo? td) (f td) td))
+                      (operands self)))))
+
 (defmulti conversion-D1
   "Note this isn't consumed in SCombination:conversion16,
    conversion-C16 converts SAnd(SMember(42, 43, 44, \"a\", \"b\", \"c\"), SInt)
@@ -1201,6 +1233,7 @@
    conversion-C14
    conversion-C15
    conversion-C16
+   conversion-C17
    conversion-D1
    conversion-C8
    conversion-C10
