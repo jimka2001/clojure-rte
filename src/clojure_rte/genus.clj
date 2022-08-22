@@ -2089,17 +2089,24 @@
             f (fn [triple]
                 (let [[td-1 factors disjoints] triple
                       a (delay (canonicalize-type (gns/create-and [td td-1]) :dnf))
-                      b (delay (canonicalize-type (gns/create-and [nc td-1]) :dnf))]
-                  (cond (disjoint? td td-1 false)
+                      b (delay (canonicalize-type (gns/create-and [nc td-1]) :dnf))
+                      d-td (delay (disjoint? td td-1 :dont-know))
+                      d-n (delay (disjoint? n td-1 :dont-know))
+                      ]
+                  (cond (= true @d-td)
                         [[td-1 (cons n factors) (cons td disjoints)]]
                         
-                        (disjoint? n td-1 false)
+                        (= true @d-n)
                         [[td-1 (cons td factors) (cons n disjoints)]]
-                        
-                        (not (inhabited? @a true))
+
+                        ;; dont call the expensive inhabited? function unless disjoint? returned :dont-know
+                        (and (= :dont-know @d-td)
+                             (not (inhabited? @a true)))
                         [[td-1 (cons n factors) (cons td disjoints)]]
                         
-                        (not (inhabited? @b true))
+                        ;; dont call the expensive inhabited? function unless disjoint? returned :dont-know
+                        (and (= :dont-know @d-n)
+                             (not (inhabited? @b true)))
                         [[td-1 (cons td factors) (cons n disjoints)]]
                         
                         :else
@@ -2114,5 +2121,5 @@
             gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
             gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)
             gns/type-equivalent? (gc-friendly-memoize gns/type-equivalent?-impl)
-]
+            ]
   (thunk)))
