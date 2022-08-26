@@ -31,6 +31,7 @@
                                       or-else
                                       trace-graph
                                       ]]
+            [clojure.string :as str]
             [clojure.test :refer [deftest testing is]]))
 
 (defn -main []
@@ -411,6 +412,27 @@
                ;; (println [:acc acc :i i :max-denom m :sum (deref x)])
                (+ acc i)))
            0/1 s)))))
+
+(deftest t-fold-4
+  (testing "fold 4"
+    (let [lorem-ipsum "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          words (str/split lorem-ipsum #" ")]
+      (for [n (range (count words))
+            suffix (drop n words)]
+        (is (= (reduce (fn [acc item] (+ acc (count item))) 0 suffix)
+               (clojure-rte.util/tree-fold + count 0 suffix))))
+
+      (for [n (range (count words))
+            suffix (drop n words)
+            f (fn [acc item] (str/join [acc item]))
+            ]
+        (is (= (reduce f "" suffix)
+               (clojure-rte.util/tree-fold f "" suffix)))))))
+      
+      
+
+
+
 
 (deftest t-call-with-found
   (testing "call-with-found"
