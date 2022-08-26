@@ -534,8 +534,15 @@
    (+ (+ (+ 1 2) (+ 3 4)) (+ (+ 5 6) (+ 7 8))) ...
   The remaining (right-most) elements are partitioned into 2's as much as possible.
   Intermediate values become unreferenced as quickly as possible, allowing them to 
-  be GCed"
-  [f z coll]
+  be GCed.
+  4-arg version allows function, g, which is used to *treat* incoming
+  values of the collection, but it is avoided in recursive calls.  E.g.,
+  to add the lengths of a collection of strings,
+  (tree-fold + count 0 list-of-strings)
+  is semantically eqiv to (reduce + 0 (map count list-of-strings))"
+  ([f z coll]
+   (tree-fold f identity z coll))
+  ([f g z coll]
   (letfn [(dwindle-tree [stack]
             (if (empty? (rest stack))
               stack
@@ -544,7 +551,7 @@
                   (dwindle-tree (cons [(inc i) (f b2 b1)] tail))
                   stack))))
           (reduce-1 [stack ob]
-            (dwindle-tree (cons [1 ob] stack)))]
+            (dwindle-tree (cons [1 (g ob)] stack)))]
 
     ;; (apply (fn
     ;;          ([] z)
@@ -561,7 +568,7 @@
             (first stack)
 
             :else
-            (tree-fold f z (reverse stack))))))
+            (tree-fold f identity z (reverse stack)))))))
 
 (defn uniquify
   "returns a new sequence with duplicates remove.
