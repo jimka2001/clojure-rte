@@ -154,7 +154,7 @@
 (deftest t-or
   (testing "bdd or"
     (bdd/with-hash []
-      (for [a [true false]
+      (doseq [a [true false]
             b [true false]]
         (is (= (or a b)
                (bdd/or a b)))))))
@@ -162,7 +162,7 @@
 (deftest t-and
   (testing "bdd and"
     (bdd/with-hash []
-      (for [a [true false]
+      (doseq [a [true false]
             b [true false]]
         (is (= (and a b)
                (bdd/and a b)))))))
@@ -170,7 +170,7 @@
 (deftest t-not
   (testing "bdd not"
     (bdd/with-hash []
-      (for [a [true false]]
+      (doseq [a [true false]]
         (is (= (not a)
                (bdd/not a))))
       (doseq [_n (range num-random-samples)
@@ -181,15 +181,92 @@
 (deftest t-and-not
   (testing "bdd and-not"
     (bdd/with-hash []
-      (for [a [true false]
-            b [true false]]
-        (is (= (not (and a b))
-               (bdd/and a b))))
+      (doseq [a [true false]
+              b [true false]]
+        (is (= (and a (not b))
+               (bdd/and-not a b))
+            (cl-format false
+                       "~&~
+                      expecting (and a (not b)) == (bdd/and a b)~@
+                      (and a (not b))=~A~@
+                      (bdd/and a b)=~A~@
+                      a=~A~@
+                      b=~A"
+                       (and a (not b)) (bdd/and a b)
+                       (and a (not b)) (bdd/and a b)
+                       a b)))
       (doseq [_n (range num-random-samples)
               :let [bdd1 (bdd/gen-random)
                     bdd2 (bdd/gen-random)]]
         (is (= (bdd/and-not bdd1 bdd2)
                (bdd/and bdd1 (bdd/not bdd2))))))))
+
+(deftest t-and-not-var-args
+  (testing "bdd and-not-var-args"
+    (bdd/with-hash []
+      (doseq [a [true false]
+              b [true false]
+              c [true false]
+              d [true false]
+              e [true false]]
+        (is (= (bdd/and a (bdd/not b))
+               (bdd/and-not a b)))
+        (is (= (bdd/and-not a b c)
+               (bdd/and a (bdd/not (bdd/or b c)))))
+        (is (= (bdd/and-not a b c d)
+               (bdd/and a (bdd/not (bdd/or b c d)))))
+        (is (= (bdd/and-not a b c d e)
+               (bdd/and a (bdd/not (bdd/or b c d e)))))))))
+
+
+(deftest t-and-not-var-args-2
+  (testing "bdd and-not-var-args 2"
+    (bdd/with-hash []
+      (doseq [_ (range num-random-samples)
+            :let [a (bdd/gen-random)
+                  b (bdd/gen-random)
+                  c (bdd/gen-random)
+                  d (bdd/gen-random)]]
+        (is (= (bdd/and a (bdd/not b))
+               (bdd/and-not a b)))
+
+        (is (= (bdd/and-not a b c)
+               (bdd/and-not (bdd/and-not a b) c)))
+        (is (= (bdd/and-not a b c)
+               (bdd/and a (bdd/not (bdd/or b c)))))
+
+        (is (= (bdd/and-not a b c d)
+               (bdd/and-not (bdd/and-not (bdd/and-not a b) c) d)))
+        (is (= (bdd/and-not a b c d)
+               (bdd/and a (bdd/not (bdd/or b c d)))))))))
+
+(deftest t-and-var-args
+  (testing "bdd and-var-args"
+    (bdd/with-hash []
+      (doseq [_ (range num-random-samples)
+            :let [a (bdd/gen-random)
+                  b (bdd/gen-random)
+                  c (bdd/gen-random)
+                  d (bdd/gen-random)]]
+        (is (= (bdd/and a b c)
+               (bdd/and a (bdd/and b c))))
+        (is (= (bdd/and a b c d)
+               (bdd/and a (bdd/and b (bdd/and c d)))))))))
+
+(deftest t-or-var-args-2
+  (testing "bdd or-var-args"
+    (bdd/with-hash []
+      (doseq [_ (range num-random-samples)
+            :let [a (bdd/gen-random)
+                  b (bdd/gen-random)
+                  c (bdd/gen-random)
+                  d (bdd/gen-random)]]
+        (is (= (bdd/or a b c)
+               (bdd/or a (bdd/or b c))))
+        (is (= (bdd/or a b c d)
+               (bdd/or a (bdd/or b (bdd/or c d)))))))))
+
+
 
 (deftest t-dnf-previously-failed
   (testing "dnf test which previously failed"

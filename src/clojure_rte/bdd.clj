@@ -384,7 +384,7 @@
        (identical? bdd1 bdd2) bdd1
        :else (binary-op bdd/and bdd1 bdd2)))
     ([bdd1 bdd2 & bdds]
-     (reduce bdd/and (apply cons bdd1 bdd2 bdds)))))
+     (reduce bdd/and (bdd/and bdd1 bdd2) bdds))))
 
 (def bdd/or
   "Perform a Boolean OR on 0 or more Bdds."
@@ -400,7 +400,7 @@
        (identical? bdd1 bdd2) bdd1
        :else (binary-op bdd/or bdd1 bdd2)))
     ([bdd1 bdd2 & bdds]
-     (reduce bdd/or (apply cons bdd1 bdd2 bdds)))))
+     (reduce bdd/or (bdd/or bdd1 bdd2) bdds))))
 
 (def bdd/and-not
   "Perform a relative complement operation on two (or more) Bdds.
@@ -418,7 +418,7 @@
        :else (binary-op bdd/and-not bdd1 bdd2)))
 
     ([bdd1 bdd2 & bdds]
-     (reduce bdd/and (apply cons bdd1 bdd2 bdds)))))
+     (reduce bdd/and-not (bdd/and-not bdd1 bdd2) bdds))))
 
 (def bdd/not
   "Perform a Boolean not of a given Bdd"
