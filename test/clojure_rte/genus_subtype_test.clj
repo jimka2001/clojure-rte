@@ -90,9 +90,11 @@
 (deftest t-random-subtype
   (testing "randomized testing of subtype?"
     (letfn [(check-subtype [td-1 td-2 comment]
-              (is (not= false (gns/subtype? td-1 td-2 :dont-know)) (cl-format "~a td-1=~a td-2=~a" comment td-1 td-2))
-              (is (not= false (gns/subtype? td-2 td-1 :dont-know)) (cl-format "~a td-2=~a td-1=~a" comment td-2 td-1)))]
-      (for [_ (range 200)
+              (is (not= false (gns/subtype? td-1 td-2 :dont-know))
+                  (cl-format nil "~a td-1=~a td-2=~a" comment td-1 td-2))
+              (is (not= false (gns/subtype? td-2 td-1 :dont-know))
+                  (cl-format nil "~a td-2=~a td-1=~a" comment td-2 td-1)))]
+      (doseq [_ (range 200)
             n (range 5)
             :let [rt (gen-type n)
                   rt-can (gns/canonicalize-type rt)]]
@@ -104,10 +106,12 @@
 (deftest t-random-subtype-2
   (testing "randomized testing of subtype? with de morgan"
     (letfn [(check-subtype [td-1 td-2 comment]
-              (is (not= false (gns/subtype? td-1 td-2 :dont-know)) (cl-format "~a td-1=~a td-2=~a" comment td-1 td-2))
-              (is (not= false (gns/subtype? td-2 td-1 :dont-know)) (cl-format "~a td-2=~a td-1=~a" comment td-2 td-1)))]
+              (is (not= false (gns/subtype? td-1 td-2 :dont-know))
+                  (cl-format nil "~a td-1=~a td-2=~a" comment td-1 td-2))
+              (is (not= false (gns/subtype? td-2 td-1 :dont-know))
+                  (cl-format nil "~a td-2=~a td-1=~a" comment td-2 td-1)))]
     
-      (for [_ (range 200)
+      (doseq [_ (range 200)
             n (range 5)
             :let [rt-1 (gen-type n)
                   rt-2 (gen-type n)
