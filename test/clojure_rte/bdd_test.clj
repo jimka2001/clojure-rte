@@ -500,14 +500,14 @@
             (binding [*print-pretty* true]
               (cl-format false
                          "~&different values from bdd/type-subtype?~%~
-                      lhs = ~A~@
-                      rhs = ~A~@
-                      t1 = ~A~@
-                      t2 = ~A~@
-                      t1 & !t2 = ~W~@
-                      t1.canonicalized & !t2.canonicalized = ~W~@
-                      depth=~A~@
-                      reps=~A"
+                          lhs = ~A~@
+                          rhs = ~A~@
+                          t1 = ~A~@
+                          t2 = ~A~@
+                          t1 & !t2 = ~W~@
+                          t1.canonicalized & !t2.canonicalized = ~W~@
+                          depth=~A~@
+                          reps=~A"
                          sub-1-2 sub-1c-2c
                          t1 t2
                          (bdd/dnf (bdd/and-not (bdd/bdd t1) (bdd/bdd t2)))
