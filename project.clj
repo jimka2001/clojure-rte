@@ -26,7 +26,7 @@
              ]
 
   
-  :dependencies [[org.clojure/clojure "1.11.13"]
+  :dependencies [[org.clojure/clojure "1.11.3"]
                  [lein-cloverage "1.1.2"]
                  [org.clojure/data.json "1.0.0"]
                  [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
