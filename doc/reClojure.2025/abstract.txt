@@ -1,0 +1,70 @@
+Recognizing regular patterns in mixed-type sequences using Symbolic Finite Automata.
+
+Abstract:
+Run-time type-based reflection is a powerful tool which is used to
+solve certain problems which are out of reach to purely statically
+typed programming languages. The JVM-based implementation Clojure allows
+a running program to make certain type-based decisions which cannot
+be made at compile time. Notably, type predicates and dynamic method
+dispatch allow the running Clojure program to make run-time decisions
+based on characteristics of input data, the type of which cannot be
+known at compile time.
+
+In this expose, we present yet another kind of run-time based type
+decision which allows us to arbitrate among various regular patterns
+in otherwise untyped data. We call these patterns RTEs (regular type
+expressions).
+
+Clojure programs often manipulate sequences of mixed typed elements.
+We would additionally like to specify sequences of heterogeneous but
+regular types. 
+
+We assume the audience to already be familiar with string-based
+regular expressions (REs). REs are used to distinguish strings which
+follow a regular pattern such as $a(a|b)^*b$, the set of strings
+beginning with the character a, ending with b, and with zero or more a
+or b (or both) characters falling in between. We generalize this
+familiar concept to define expressions which specify a sequence
+beginning with an integer, ending with a string, and with zero or more
+integers or strings (or both) falling in between.
+
+The implementation of Regular Type Expressions (RTEs) in Clojure
+involved several challenges.
+
+1) Embed a Simple type system (SETS) into Clojure’s run-time---adding
+intersection, union, and complement types, as well an singleton and
+predicate types.
+
+2) Define an s-expression syntax for defining regular-type-expression
+in terms of types, including intersections, unions, and complements.
+
+3) Construct deterministic finite automata, DFAs, from the regular
+type expressions. This library manipulates DFAs with operations such
+as minimize, intersection, union, xor, and extract-rte.  The run-time
+flow consists of:
+
+There are many theoretical questions which investigate the limitations
+of the generalization from classical character based regular
+expressions to regular type expressions. Some of these concerns
+include habitation and vacuity checks (given an RTE, can we determine
+whether all or no sequence will match). Given two types designators
+determine whether one is a subtype of the other, and whether either is
+empty. Subtype determination is important for guaranteeing that finite
+automata be deterministic. Unfortunately, the subtype relation cannot
+always be determined (for several interesting theoretical reasons). We
+present a clever procedure for DFA construction which is guaranteed to
+be deterministic, even when the subtype relation cannot be determined.
+
+This project is part of a larger scoped multi-language project
+including implementsion in Clojure, Scala, Python, and Common Lisp.
+The fundamental theoretical introduction was given in the PhD thesis:
+Representing and computing with types in dynamically typed languages,
+https://theses.hal.science/tel-03018107v1
+
+The library is publically available at https://github.com/jimka2001/clojure-rte
+
+Bio: Jim Newton is an assistant research professor at EPITA, Kremlin
+Becetre, FRANCE, where he occasionally teaches courses in functional
+programming using Clojure and Scala.  Jim has been a Lisp programmer
+since 1988, and has used various lisp dialects such as Common
+Lisp, SKILL++ (a Scheme dialect), elisp, and most recently, Clojure.
