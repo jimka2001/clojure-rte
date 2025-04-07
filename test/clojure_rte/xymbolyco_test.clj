@@ -29,7 +29,7 @@
                                            cross-intersection optimized-transition-function
                                            trim complete minimize
 
-                                           dfa-inhabited? dfa-dijkstra-inhabited?]]
+                                           dfa-inhabited?]]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
@@ -367,5 +367,5 @@
                  ]]
 
       (let [dfa (rte-to-dfa rte)]
-        (dfa-to-dot dfa :title (gensym "bdd") :view true)
+        ;; (dfa-to-dot dfa :title (gensym "bdd") :view true)
         (is (dfa-inhabited? dfa))))))
