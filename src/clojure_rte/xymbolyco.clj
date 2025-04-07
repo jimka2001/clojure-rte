@@ -1,4 +1,4 @@
-;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21,25 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -32,6 +32,7 @@
             [clojure-rte.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
+            [clojure-rte.dijkstra :refer [dijkstra-to-final]]
             ))
 
 (defrecord State 
@@ -859,18 +860,34 @@
        (extend-paths (map list initials))))))
 
 (defn dfa-inhabited? [dfa]
-  (cond (every? (comp not :accepting) (states-as-seq dfa))
-        ;; if no accepting state, then it is not inhabited
-        false
+  (let [states (states-as-map dfa)
+        indeterminate-weight (inc (count states))
+        finals (map :index (filter :accepting (states-as-seq dfa)))]
 
-        (non-empty? (paths-to-accepting dfa false)) ;; only allow certain accepting paths
-        true
+    (letfn [(f [state-id]
+              ;; return a return a map with the successors of state
+              ;;  as keys and their (non-negative) distance from state as vals.
+              (into {}
+                    (for [[type next-state] (:transitions (get states state-id))
+                          :let [inh (gns/inhabited? type :dont-know)]
+                          :when (not= inh false)]
+                      (case inh
+                        (:dont-know) [next-state indeterminate-weight]
+                        (true) [next-state 1]))))]
+      (let [[final distance :as found] (dijkstra-to-final 0 f finals)]
+        (cond (not found)
+              ;; if no accepting state, then it is not inhabited
+              ;;  or no path to an accepting state
+              false
 
-        (non-empty? (paths-to-accepting dfa true)) ;; is there a maybe-accepting path
-        :dont-know
+              ;; there is an accepting path
+              (< distance indeterminate-weight)
+              true
 
-        :else
-        false))
+              ;; all paths contain a maybe-accepting transition
+              :else
+              :dont-know
+              )))))
 
 (defn dfa-vacuous? [dfa]
   (let [inh (dfa-inhabited? dfa)]

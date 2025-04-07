@@ -27,10 +27,13 @@
                                            states-as-seq find-incomplete-states
                                            extend-with-sink-state synchronized-product synchronized-union
                                            cross-intersection optimized-transition-function
-                                           trim complete minimize]]
+                                           trim complete minimize
+
+                                           dfa-inhabited?]]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
+            [clojure-rte.dot :refer [dfa-to-dot]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
@@ -355,3 +358,14 @@
                        (f1 item)
                        (f2 item)))))))
       
+
+(deftest t-inhabited
+  (testing "inhabited"
+    (doseq [rte ['(:cat Long Long (and Long (satisfies even?)))
+                 '(:or (:cat Number Number (and Number (satisfies even?)))
+                       (:cat Double (and (satisfies even?) String) Number Number))
+                 ]]
+
+      (let [dfa (rte-to-dfa rte)]
+        ;; (dfa-to-dot dfa :title (gensym "bdd") :view true)
+        (is (dfa-inhabited? dfa))))))
