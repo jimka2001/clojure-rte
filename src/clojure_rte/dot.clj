@@ -110,7 +110,10 @@
                                             :when (member dst-id visible-state-ids)]
                                         label))          
           abbrevs (zipmap transition-labels (range (count transition-labels)))
-          labels (clojure.set/map-invert abbrevs)]
+          labels (clojure.set/map-invert abbrevs)
+          exit-map (:exit-map dfa)
+          all-final-true (every? (fn [q] (= true (get exit-map (:index q))))
+                                 (filter :accepting (xym/states-as-seq dfa)))]
       (with-out-str
         (cl-format *out* "digraph G {~%")
         (when title
@@ -134,6 +137,7 @@
         (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
         (cl-format *out* "  edge [fontname=Helvetica, fontsize=20];~%")
 
+        
         (doseq [q (xym/states-as-seq dfa)]
           (cl/cl-cond
            ((and (member q sink-states)
@@ -141,9 +145,12 @@
            (:else
             (when (:accepting q)
               (cl-format *out* "   q~D [shape=doublecircle] ;~%" (:index q))
-              (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
-                         (:index q) ((:exit-map dfa) (:index q)))
-              (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q)))
+              ;; if all exit values are explicitly true, the don't draw
+              ;; any exit arrows.
+              (when all-final-true
+                (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
+                           (:index q) (get exit-map (:index q)))
+                (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))))
             (when (:initial q)
               (cl-format *out* "   H~D [label=\"\", style=invis, width=0]~%" (:index q))
               (cl-format *out* "   H~D -> q~D;~%" (:index q) (:index q)))
