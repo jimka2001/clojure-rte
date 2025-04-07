@@ -5,7 +5,7 @@
             :url "https://opensource.org/licenses/MIT"}
   :plugins [[lein-cloverage "1.1.2"]
             [lein-ns-dep-graph "0.2.0-SNAPSHOT"]
-            [cider/cider-nrepl "0.30.0"]
+            [cider/cider-nrepl "0.53.2"]
             ]
   :jvm-opts ["-Xmx1g" "-XX:+HeapDumpOnOutOfMemoryError" "-Djdk.attach.allowAttachSelf"
              ;; increase stack size x6, for preventing SO errors:
