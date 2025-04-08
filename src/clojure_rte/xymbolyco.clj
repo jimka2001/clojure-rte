@@ -32,7 +32,7 @@
             [clojure-rte.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [clojure-rte.dijkstra :refer [dijkstra-to-final]]
+            [clojure-rte.dijkstra :refer [dijkstra-to-final dijkstra find-path]]
             ))
 
 (defrecord State 
@@ -859,35 +859,86 @@
      (let [initials (filter :initial (states-as-seq dfa))]
        (extend-paths (map list initials))))))
 
-(defn dfa-inhabited? [dfa]
+(defn gen-dijkstra-edges [states indeterminate-weight]
+  (fn [state-id]
+    ;; return a return a map with the successors of state
+    ;;  as keys and their (non-negative) distance from state as vals.
+    (into {}
+          (for [[type next-state] (:transitions (get states state-id))
+                :let [inh (gns/inhabited? type :dont-know)]
+                :when (not= inh false)]
+            (case inh
+              (:dont-know) [next-state indeterminate-weight]
+              (true) [next-state 1])))))
+
+(defn find-spanning-map
+  "Return a map from exit-value to [satisfiability path]"
+  [dfa]
+  (let [states (states-as-seq dfa)
+        indeterminate-weight (inc (count states))
+        f (gen-dijkstra-edges (states-as-map dfa) indeterminate-weight)
+        [d p] (dijkstra 0 f)        
+        ]
+    (letfn [(arbitrate [[sat1 path1] [sat2 path2]]
+              (cond (= :satisfiable sat1)
+                    [sat1 path1]
+
+                    (= :satisfiable sat2)
+                    [sat2 path2]
+
+                    (= :indeterminate sat1)
+                    [sat1 path1]
+
+                    :otherwise
+                    [sat1 sat2]))]
+      
+      (reduce (fn [exit-val-map state]
+                (let [ev (exit-value dfa state)
+                      distance (get d (:index state))
+                      path (find-path 0 (:index state) p)
+                      satisfiability (cond (empty? path)
+                                           :unsatisfiable
+                                           (< distance indeterminate-weight)
+                                           :satisfiable
+                                           :else
+                                           :indeterminate)
+                      ]
+                  (assoc exit-val-map ev
+                         (if (contains? exit-val-map ev)
+                           (arbitrate [satisfiability path] (get exit-val-map ev))
+                           [satisfiability path]))))
+              {}
+              (filter :accepting states)))))
+
+(defn dfa-find-accepting-path [dfa]
   (let [states (states-as-map dfa)
         indeterminate-weight (inc (count states))
-        finals (map :index (filter :accepting (states-as-seq dfa)))]
+        finals (map :index (filter :accepting (states-as-seq dfa)))
+        f (gen-dijkstra-edges states indeterminate-weight)]
+    (let [[_final distance path] (dijkstra-to-final 0 f finals)]
+      (cond
+        (empty? path)
+        [:unsatisfiable path]
 
-    (letfn [(f [state-id]
-              ;; return a return a map with the successors of state
-              ;;  as keys and their (non-negative) distance from state as vals.
-              (into {}
-                    (for [[type next-state] (:transitions (get states state-id))
-                          :let [inh (gns/inhabited? type :dont-know)]
-                          :when (not= inh false)]
-                      (case inh
-                        (:dont-know) [next-state indeterminate-weight]
-                        (true) [next-state 1]))))]
-      (let [[final distance :as found] (dijkstra-to-final 0 f finals)]
-        (cond (not found)
-              ;; if no accepting state, then it is not inhabited
-              ;;  or no path to an accepting state
-              false
+        (< distance indeterminate-weight)
+        [:satisfiable path]
 
-              ;; there is an accepting path
-              (< distance indeterminate-weight)
-              true
+        :else
+        [:indeterminate path]))))
 
-              ;; all paths contain a maybe-accepting transition
-              :else
-              :dont-know
-              )))))
+(defn dfa-inhabited? [dfa]
+  (let [[satisfiability _] (dfa-find-accepting-path dfa)]
+    (case satisfiability
+      ;; if no accepting state, then it is not inhabited
+      ;;  or no path to an accepting state
+      (:unsatisfiable) false
+      
+      ;; there is an accepting path
+      (:satisfiable) true
+
+      ;; all paths contain a maybe-accepting transition
+      (:indeterminate) :dont-know)))
+
 
 (defn dfa-vacuous? [dfa]
   (let [inh (dfa-inhabited? dfa)]

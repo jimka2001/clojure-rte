@@ -25,10 +25,11 @@
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
             [clojure-rte.xymbolyco :refer [find-eqv-class split-eqv-class
                                            states-as-seq find-incomplete-states
-                                           extend-with-sink-state synchronized-product synchronized-union
+                                           extend-with-sink-state synchronized-product
+                                           synchronized-union synchronized-xor
                                            cross-intersection optimized-transition-function
                                            trim complete minimize
-
+                                           find-spanning-map
                                            dfa-inhabited?]]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
@@ -357,7 +358,6 @@
                        transitions
                        (f1 item)
                        (f2 item)))))))
-      
 
 (deftest t-inhabited
   (testing "inhabited"
@@ -367,5 +367,19 @@
                  ]]
 
       (let [dfa (rte-to-dfa rte)]
-        ;; (dfa-to-dot dfa :title (gensym "bdd") :view true)
+        (println [:view (dfa-to-dot dfa :title (gensym "bdd") :view true :verbose true)])
         (is (dfa-inhabited? dfa))))))
+
+(deftest t-spanning-paths
+  (testing "spanning paths"
+    (let [r1 '(:cat Long String (and Long (satisfies even?)))
+          r2 '(:or (:cat Number Number (and Number (satisfies even?)))
+                   (:cat Double (and (satisfies even?) String) Number Number))
+          r3 '(:cat String String String String)
+          dfa-1 (rte-to-dfa r1 42)
+          dfa-2 (rte-to-dfa r2 -11)
+          dfa-3 (rte-to-dfa r3 12)
+          dfa-4 (synchronized-union (synchronized-union dfa-1 dfa-2) dfa-3)]
+      (dfa-to-dot dfa-4 :title "union 4" :view true :verbose true)
+      
+      (println (find-spanning-map dfa-4)))))
