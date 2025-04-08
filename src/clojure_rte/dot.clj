@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns clojure-rte.dot
-  (:require [clojure.pprint :refer [cl-format]]
+  (:require [clojure.pprint :refer [cl-format pprint]]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]
@@ -78,6 +78,15 @@
           (println dot-string))
         stat))))
   
+(defn line-wrap [data]
+  (binding [clojure.pprint/*print-right-margin* 120]
+    (clojure.string/replace
+     (clojure.string/trim-newline (with-out-str
+                                    (pprint data *out*)))
+     "\n" ; search
+     "\\l     " ; replace
+     )))
+
 (defn dfa-to-dot 
   "Create (and possibly display) a graphical image rendering the automaton
   represented by the given dfa.  dfa is a value as returned from function
@@ -124,14 +133,14 @@
           (cl-format *out* "  label=\"~a\\l\"~%"
                      (str/join
                       "" (concat (map (fn [index]
-                                        (cl-format false "\\lt~a= ~a" index (labels index)))
+                                        (cl-format false "\\lt~a= ~a" index (line-wrap (labels index))))
                                       (range (count (keys labels))))
                                  ["\\l"]
                                  (if state-legend
                                    (for [q visible-states
                                          :when (boolean (:pattern q))]
                                      (cl-format false "\\lq~a= ~a"
-                                                (:index q) (:pattern q)))
+                                                (:index q) (line-wrap (:pattern q))))
                                    [""])))))
         (cl-format *out* "  graph [labeljust=l,nojustify=true];~%")
         (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
@@ -147,7 +156,7 @@
               (cl-format *out* "   q~D [shape=doublecircle] ;~%" (:index q))
               ;; if all exit values are explicitly true, the don't draw
               ;; any exit arrows.
-              (when all-final-true
+              (when (not all-final-true)
                 (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
                            (:index q) (get exit-map (:index q)))
                 (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))))
