@@ -85,6 +85,18 @@
       (is (= false (gns/inhabited? '(rte (:and (:+ Number)
                                                (:+ String))) :dont-know))))))
 
+(deftest t-inhabited-bizarre
+  (testing "inhabited?"
+    (is (= :abstract (gns/class-primary-flag 'Number)))
+    (is (= :interface (gns/class-primary-flag 'clojure.lang.IPersistentList)))
+    (is (= :public (gns/class-primary-flag 'clojure.lang.PersistentList)))
+    (is (= true (gns/disjoint-classes? 'clojure.lang.PersistentList 'Number)))
+    (is (= false (isa? 'Number 'clojure.lang.IPersistentList)))
+    (is (= false (isa? 'clojure.lang.IPersistentList 'Number)))
+    (is (= false (gns/disjoint-classes?  'Number 'clojure.lang.IPersistentList)))
+    (is (= false (gns/disjoint? 'Number 'clojure.lang.IPersistentList :dont-know)))
+    (is (= true (gns/inhabited? '(and Number clojure.lang.IPersistentList) :dont-know)))))
+
 (deftest t-expand-satisfies
   (testing "expand-satisfies"
     (is (= (gns/expand-satisfies nil)
