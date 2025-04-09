@@ -199,13 +199,13 @@
                                        (type-intersect type
                                                        (state-id->pseudo-type state-id))
                                        (if promise-disjoint
-                                                   ;; This is an optimization
-                                                   ;; see issue
-                                                   ;; https://gitlab.lrde.epita.fr/jnewton/clojure-rte/-/issues/27
-                                                   ;; If the given types are already promised to be disjoint,
-                                                   ;;  then no need to do an expensive Bdd operation
+                                         ;; This is an optimization
+                                         ;; see issue
+                                         ;; https://gitlab.lrde.epita.fr/jnewton/clojure-rte/-/issues/27
+                                         ;; If the given types are already promised to be disjoint,
+                                         ;;  then no need to do an expensive Bdd operation
                                          :empty-set
-                                                   ;; in case the types are not disjoint
+                                         ;; in case the types are not disjoint
                                          (cons 'or previous-types)))))
                      (cons type previous-types)])
                   [false '(:empty-set)] ;; initial bdd and empty-type
