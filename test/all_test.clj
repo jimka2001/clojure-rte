@@ -27,6 +27,7 @@
              cl-compat-test
              xymbolyco-test
              dot-test
+             dijkstra-test
              rte-test
              rte-case-test
              rte-tester-test

@@ -2,6 +2,10 @@
   (:require [dijkstra :as sut]
             [clojure.test :refer [deftest is testing]]))
 
+(defn -main []
+  (clojure.test/run-tests 'dijkstra-test))
+
+
 (deftest t-dijkstra-self-loop
   (testing "dijkstra"
     (let [[d p] (sut/dijkstra 0 (fn [v]
