@@ -360,7 +360,7 @@
                  ]]
 
       (let [dfa (rte-to-dfa rte)]
-        (println [:view (dfa-to-dot dfa :title (gensym "bdd") :view true :verbose true)])
+        ;;(println [:view (dfa-to-dot dfa :title (gensym "bdd") :view true :verbose true)])
         (is (xym/dfa-inhabited? dfa))))))
 
 (deftest t-spanning-paths
@@ -369,11 +369,53 @@
           r2 '(:or (:cat Number Number (and Number (satisfies even?)))
                    (:cat Double (and (satisfies even?) String) Number Number))
           r3 '(:cat String String String String)
+          r4 '(:cat clojure.lang.IPersistentList clojure.lang.IPersistentList)
           dfa-1 (rte-to-dfa r1 42)
           dfa-2 (rte-to-dfa r2 -11)
           dfa-3 (rte-to-dfa r3 12)
-          dfa-4 (xym/synchronized-union (xym/synchronized-union dfa-1 dfa-2) dfa-3)]
-      (dfa-to-dot dfa-4 :draw-sink true :title "union 4" :view true)
+          dfa-4 (rte-to-dfa r4 -11)
+          dfa-x (reduce xym/synchronized-union [dfa-1 dfa-2 dfa-3 dfa-4])
+          spanning-map       (xym/find-spanning-map dfa-x)
 
-      (xym/find-spanning-map dfa-4)
+          ]
+      (is (= #{-11 12 42} (set (keys spanning-map))))
+      (is (= spanning-map 
+             {-11 [:satisfiable '(0 35 6)],
+              12 [:satisfiable '(0 20 13 9 28)],
+             42 [:indeterminate '(0 16 45 37)]}))
+      ;; (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view true)
+      )))
+
+
+(deftest t-spanning-trace
+  (testing "spanning trace"
+    (let [r1 '(:cat Long String (and Long (satisfies even?)))
+          r2 '(:or (:cat Number Number (and Number (satisfies even?)))
+                   (:cat Double (and (satisfies even?) String) Number Number))
+          r3 '(:cat String String String String)
+          r4 '(:cat clojure.lang.PersistentList clojure.lang.PersistentList)
+          dfa-1 (rte-to-dfa r1 42)
+          dfa-2 (rte-to-dfa r2 -11)
+          dfa-3 (rte-to-dfa r3 12)
+          dfa-4 (rte-to-dfa r4 -11)
+          dfa-x (reduce xym/synchronized-union [dfa-1 dfa-2 dfa-3 dfa-4])
+          spanning-trace       (xym/find-trace-map dfa-x)
+
+          ]
+      (is (= spanning-trace
+             {-11 '[:satisfiable
+                   [[:satisfiable clojure.lang.PersistentList]
+                    [:satisfiable clojure.lang.PersistentList]]],
+              42 '[:indeterminate
+                  [[:satisfiable Long]
+                   [:satisfiable String]
+                   [:indeterminate (and (satisfies even?)
+                                         Long)]]],
+              12 '[:satisfiable
+                  [[:satisfiable String]
+                   [:satisfiable String]
+                   [:satisfiable String] 
+                   [:satisfiable String]]]}))
+
+      ;;(dfa-to-dot dfa-x :draw-sink true :title "union 4" :view true)
       )))

@@ -294,6 +294,16 @@
                               (:transitions source-state))]
     (state-by-index dfa index)))
 
+(defn find-transition-label
+  "Find all parallel transitions from src-id to dst-id,
+  and union their type destinator labels."
+  ([dfa src-id dst-id]
+   (find-transition-label (state-by-index dfa src-id) dst-id))
+  ([src-state dst-id]
+   (gns/create-or (for [[td id] (:transitions src-state)
+                        :when (= id dst-id)]
+                    td))))
+
 (defmethod print-method Dfa [v w]
   (.write w (format "#<Dfa %d states>" (count (states-as-seq v)))))
 
@@ -881,35 +891,51 @@
         [f indeterminate-weight] (gen-dijkstra-edges dfa)
         [d p] (dijkstra 0 f)
         ]
-    (letfn [(arbitrate [[sat1 path1] [sat2 path2]]
-              (cond (= :satisfiable sat1)
-                    [sat1 path1]
-
-                    (= :satisfiable sat2)
-                    [sat2 path2]
-
-                    (= :indeterminate sat1)
-                    [sat1 path1]
-
-                    :otherwise
-                    [sat1 sat2]))]
-      (reduce (fn [exit-val-map state]
-                (let [ev (exit-value dfa state)
-                      distance (get d (:index state))
-                      path @(get p (:index state))
-                      satisfiability (cond (empty? path)
-                                           :unsatisfiable
-                                           (< distance indeterminate-weight)
-                                           :satisfiable
-                                           :else
-                                           :indeterminate)
-                      ]
-                  (assoc exit-val-map ev
-                         (if (contains? exit-val-map ev)
-                           (arbitrate [satisfiability path] (get exit-val-map ev))
-                           [satisfiability path]))))
-              {}
-              (filter :accepting states)))))
+    ;; dijkstra has computed the shortest paths from state 0
+    ;;   to every other state in the dfa.
+    ;;   1. we are only interested in accepting states
+    ;;   2. if two accepting states have the same exit-value
+    ;;       then we choose the minimum of the two paths.
+    (reduce (fn [acc [ev states]]
+              ;; `states` is a seq of States, we want to choose the one
+              ;;   with the minimum distance as per the `d` map.
+              (let [best-q (apply min-key (fn [q] (get d (:index q))) states)
+                    best-path @(get p (:index best-q))
+                    satisfiability (if (< (get d (:index best-q))
+                                          indeterminate-weight)
+                                     :satisfiable
+                                     :indeterminate)]
+                (assoc acc ev [satisfiability best-path])))
+            {}
+            (group-by (fn [q] (exit-value dfa q))
+                      (filter :accepting states)))))
+(defn find-trace-map
+  "Return a map from exit-value to [satisfiability path]
+  where path is a sequence of pairs [satisfiability type-designator]"
+  [dfa]
+  (letfn [(sat-label [td]
+            (case (gns/inhabited? td :dont-know)
+              (:dont-know) :indeterminate
+              (true) :satisfiable
+              (false) :unsatisfiable))
+          (path-to-tds [id-path]
+            (loop [depth 0
+                   type-path []
+                   [v1 v2 :as id-path] id-path
+                   ]
+              (if (empty? (rest id-path))
+                type-path
+                (recur (inc depth) (conj type-path
+                             (let [td (find-transition-label dfa v1 v2)]
+                               [(sat-label td)
+                                td]))
+                       (rest id-path))
+)))
+          ]
+    (reduce (fn [acc [ev [satisfiability id-path]]]
+              (assoc acc ev [satisfiability (path-to-tds id-path)]))
+            {}
+            (find-spanning-map dfa))))
 
 (defn dfa-find-accepting-path [dfa]
   (let [states (states-as-map dfa)
