@@ -23,14 +23,7 @@
   (:refer-clojure :exclude [complement])
   (:require [clojure-rte.rte-core ]
             [clojure-rte.rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
-            [clojure-rte.xymbolyco :refer [find-eqv-class split-eqv-class
-                                           states-as-seq find-incomplete-states
-                                           extend-with-sink-state synchronized-product
-                                           synchronized-union synchronized-xor
-                                           cross-intersection optimized-transition-function
-                                           trim complete minimize
-                                           find-spanning-map
-                                           dfa-inhabited?]]
+            [clojure-rte.xymbolyco :as xym]
             [clojure-rte.bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
             [clojure-rte.util :refer [member]]
@@ -54,26 +47,26 @@
 
 (deftest t-split-eqv-class
   (testing "split-eqv-class"
-    (is (= (split-eqv-class #{1 2 3 4 5 6 7} even?)
+    (is (= (xym/split-eqv-class #{1 2 3 4 5 6 7} even?)
            #{#{1 3 5 7}
              #{2 4 6}}))
-    (is (= (split-eqv-class #{1 2 3 4 5 6 7 8 9} #(mod % 3))
+    (is (= (xym/split-eqv-class #{1 2 3 4 5 6 7 8 9} #(mod % 3))
            #{#{2 5 8}
              #{1 4 7}
              #{3 6 9}}))))
 
 (deftest t-find-eqv-class
   (testing "find-eqv-class"
-    (is (= (find-eqv-class [#{1 2 3} #{4 5 6} #{7 8 9}]
+    (is (= (xym/find-eqv-class [#{1 2 3} #{4 5 6} #{7 8 9}]
                            7)
            #{7 8 9}))
-    (is (= (find-eqv-class [#{1 2 3} #{4 5 6} #{7 8 9}]
+    (is (= (xym/find-eqv-class [#{1 2 3} #{4 5 6} #{7 8 9}]
                            8)
            #{7 8 9}))
-    (is (= (find-eqv-class [#{1 2 3} #{4 5 6} #{7 8 9}]
+    (is (= (xym/find-eqv-class [#{1 2 3} #{4 5 6} #{7 8 9}]
                            2)
            #{1 2 3}))
-    (is (= (find-eqv-class #{#{1 2 3} #{4 5 6} #{7 8 9}}
+    (is (= (xym/find-eqv-class #{#{1 2 3} #{4 5 6} #{7 8 9}}
                            2)
            #{1 2 3}))))
 
@@ -82,9 +75,9 @@
     (let [dfa1 (rte-to-dfa '(:or (:* Number)
                                  (:cat String Number)
                                  (:* Double)))
-          dfa2 (minimize dfa1)]
-      (is (= 6 (count (states-as-seq dfa1))) 80)
-      (is (= 5 (count (states-as-seq dfa2))) 81))))
+          dfa2 (xym/minimize dfa1)]
+      (is (= 6 (count (xym/states-as-seq dfa1))) 80)
+      (is (= 5 (count (xym/states-as-seq dfa2))) 81))))
 
 (deftest t-minimize-runs
   (testing "that minimize runs"
@@ -96,7 +89,7 @@
                                 (rte (:cat String Number))
                                 (rte (:* Double)))]]
       (rte-to-dfa rte)
-      (minimize (rte-to-dfa rte)))))
+      (xym/minimize (rte-to-dfa rte)))))
 
 (deftest t-trim-runs
   (testing "that trim runs"
@@ -108,14 +101,14 @@
                                 (rte (:cat String Number))
                                 (rte (:* Double)))]]
       (rte-to-dfa rte)
-      (trim (rte-to-dfa rte))
-      (trim       (minimize (rte-to-dfa rte))))))
+      (xym/trim (rte-to-dfa rte))
+      (xym/trim       (xym/minimize (rte-to-dfa rte))))))
 
 (deftest t-rte-match-min
   (testing "same results from matching minimized"
     (let [rte '(:* Long)
           dfa (rte-to-dfa rte)
-          dfa-min (minimize dfa)
+          dfa-min (xym/minimize dfa)
           seq [4.0]]
       (is (= (rte/match dfa seq)
              (rte/match dfa-min seq))))))
@@ -188,8 +181,8 @@
     (bdd/with-hash []
       (doseq [rte test-rtes
               :let [dfa (rte-to-dfa rte)
-                    dfa-complete (complete dfa)
-                    incomplete-states (find-incomplete-states dfa-complete)]]
+                    dfa-complete (xym/complete dfa)
+                    incomplete-states (xym/find-incomplete-states dfa-complete)]]
         (is (empty? incomplete-states))))))
 
 (defn t-acceptance-test-rte
@@ -197,10 +190,10 @@
   (doseq [seq-root test-seqs
           exit-value [42 true -1]
           :let [dfa (rte-to-dfa rte exit-value)
-                dfa-trim (extend-with-sink-state (trim dfa))
-                dfa-min (extend-with-sink-state (minimize dfa))
-                dfa-min-trim (extend-with-sink-state (trim dfa-min))
-                dfa-trim-min (extend-with-sink-state (minimize dfa-trim))]
+                dfa-trim (xym/extend-with-sink-state (xym/trim dfa))
+                dfa-min (xym/extend-with-sink-state (xym/minimize dfa))
+                dfa-min-trim (xym/extend-with-sink-state (xym/trim dfa-min))
+                dfa-trim-min (xym/extend-with-sink-state (xym/minimize dfa-trim))]
           reps (range 5)
           :let [seq-long (reduce concat (repeat reps seq-root))
                 match? (rte/match dfa seq-long)]
@@ -244,15 +237,15 @@
                             1)
           dfa-2 (rte-to-dfa  '(:cat (:* String) Long)
                              2)
-          dfa-sxp (synchronized-product dfa-1 dfa-2 
+          dfa-sxp (xym/synchronized-product dfa-1 dfa-2 
                                          (fn [a b]
                                            (and a b))
                                          (fn [q1 _q2]
                                            ((:exit-map dfa-1) (:index q1))))
-          dfa-sxp-trim (trim dfa-sxp)
-          dfa-sxp-min (minimize dfa-sxp)
-          _dfa-sxp-trim-min (minimize dfa-sxp-trim)
-          _dfa-sxp-min-trim (trim dfa-sxp-min)
+          dfa-sxp-trim (xym/trim dfa-sxp)
+          dfa-sxp-min (xym/minimize dfa-sxp)
+          _dfa-sxp-trim-min (xym/minimize dfa-sxp-trim)
+          _dfa-sxp-min-trim (xym/trim dfa-sxp-min)
           seqs [[]
                 [1]
                 [1 2 3]
@@ -282,7 +275,7 @@
                                             (:* (:cat String Short)))))
                            42)
          test-seq '("hello" 1 "world" 2)
-         dfa-min (minimize dfa-1)
+         dfa-min (xym/minimize dfa-1)
          ]
      (is (= (rte/match dfa-1 test-seq)
             (rte/match dfa-min test-seq))))))
@@ -295,13 +288,13 @@
                            1)
           dfa-2 (rte-to-dfa '(:and (:* String) (:not (:or (:* Boolean) (:* Long))))
                            2)
-          dfa-01 (synchronized-union dfa-0 dfa-1)
-          dfa-012 (synchronized-union dfa-01 dfa-2)]
+          dfa-01 (xym/synchronized-union dfa-0 dfa-1)
+          dfa-012 (xym/synchronized-union dfa-01 dfa-2)]
       (is (= 2 (rte/match dfa-012 ["hello" "world"]))))))
 
 (deftest t-cross-intersection
   (testing "cross-intersection"
-    (let [cx (cross-intersection '((not Long)
+    (let [cx (xym/cross-intersection '((not Long)
                                    Long)
                                  '((and (not Long) (not Boolean))
                                    Long
@@ -318,7 +311,7 @@
     (let [dfa (rte-to-dfa '(:and (:cat :sigma (:* :sigma))
                                  (:not (:or (:cat :sigma))))
                           12)]
-      (is (not-empty (filter (comp boolean :accepting) (states-as-seq dfa)))
+      (is (not-empty (filter (comp boolean :accepting) (xym/states-as-seq dfa)))
           "missing final 1"))))
 
 (deftest t-missing-final-2
@@ -327,13 +320,13 @@
                                  (:not (:or (:cat Boolean :sigma (:* :sigma))
                                             (:cat Boolean :sigma))))
                           13)]
-      (is (not-empty (filter (comp boolean :accepting) (states-as-seq dfa)))
+      (is (not-empty (filter (comp boolean :accepting) (xym/states-as-seq dfa)))
           "missing final 2"))))
 
 (deftest t-transition-functions
   (testing "transition functions"
     (letfn [(tf1 [transitions]
-              (optimized-transition-function transitions true 99))
+              (xym/optimized-transition-function transitions true 99))
             (tf2 [transitions]
               (rte/slow-transition-function transitions 99))]
       (doseq [transitions '[;; [[td state-id] [td state-id] ...]
@@ -368,7 +361,7 @@
 
       (let [dfa (rte-to-dfa rte)]
         (println [:view (dfa-to-dot dfa :title (gensym "bdd") :view true :verbose true)])
-        (is (dfa-inhabited? dfa))))))
+        (is (xym/dfa-inhabited? dfa))))))
 
 (deftest t-spanning-paths
   (testing "spanning paths"
@@ -379,7 +372,8 @@
           dfa-1 (rte-to-dfa r1 42)
           dfa-2 (rte-to-dfa r2 -11)
           dfa-3 (rte-to-dfa r3 12)
-          dfa-4 (synchronized-union (synchronized-union dfa-1 dfa-2) dfa-3)]
-      (dfa-to-dot dfa-4 :title "union 4" :view true :verbose true)
-      
-      (println (find-spanning-map dfa-4)))))
+          dfa-4 (xym/synchronized-union (xym/synchronized-union dfa-1 dfa-2) dfa-3)]
+      (dfa-to-dot dfa-4 :draw-sink true :title "union 4" :view true)
+
+      (xym/find-spanning-map dfa-4)
+      )))

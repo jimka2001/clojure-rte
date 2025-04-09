@@ -32,7 +32,7 @@
             [clojure-rte.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [clojure-rte.dijkstra :refer [dijkstra-to-final dijkstra find-path]]
+            [clojure-rte.dijkstra :refer [dijkstra-to-final dijkstra]]
             ))
 
 (defrecord State 
@@ -859,25 +859,27 @@
      (let [initials (filter :initial (states-as-seq dfa))]
        (extend-paths (map list initials))))))
 
-(defn gen-dijkstra-edges [states indeterminate-weight]
-  (fn [state-id]
-    ;; return a return a map with the successors of state
-    ;;  as keys and their (non-negative) distance from state as vals.
-    (into {}
-          (for [[type next-state] (:transitions (get states state-id))
-                :let [inh (gns/inhabited? type :dont-know)]
-                :when (not= inh false)]
-            (case inh
-              (:dont-know) [next-state indeterminate-weight]
-              (true) [next-state 1])))))
+(defn gen-dijkstra-edges [dfa]
+  (let [states (states-as-map dfa)
+        indeterminate-weight (inc (count states))]
+    [(fn [state-id]
+      ;; return a return a map with the successors of state
+      ;;  as keys and their (non-negative) distance from state as vals.
+      (into {}
+            (for [[type next-state] (:transitions (get states state-id))
+                  :let [inh (gns/inhabited? type :dont-know)]
+                  :when (not= inh false)]
+              (case inh
+                (:dont-know) [next-state indeterminate-weight]
+                (true) [next-state 1]))))
+     indeterminate-weight]))
 
 (defn find-spanning-map
   "Return a map from exit-value to [satisfiability path]"
   [dfa]
   (let [states (states-as-seq dfa)
-        indeterminate-weight (inc (count states))
-        f (gen-dijkstra-edges (states-as-map dfa) indeterminate-weight)
-        [d p] (dijkstra 0 f)        
+        [f indeterminate-weight] (gen-dijkstra-edges dfa)
+        [d p] (dijkstra 0 f)
         ]
     (letfn [(arbitrate [[sat1 path1] [sat2 path2]]
               (cond (= :satisfiable sat1)
@@ -891,11 +893,10 @@
 
                     :otherwise
                     [sat1 sat2]))]
-      
       (reduce (fn [exit-val-map state]
                 (let [ev (exit-value dfa state)
                       distance (get d (:index state))
-                      path (find-path 0 (:index state) p)
+                      path @(get p (:index state))
                       satisfiability (cond (empty? path)
                                            :unsatisfiable
                                            (< distance indeterminate-weight)
@@ -912,9 +913,8 @@
 
 (defn dfa-find-accepting-path [dfa]
   (let [states (states-as-map dfa)
-        indeterminate-weight (inc (count states))
         finals (map :index (filter :accepting (states-as-seq dfa)))
-        f (gen-dijkstra-edges states indeterminate-weight)]
+        [f indeterminate-weight] (gen-dijkstra-edges dfa)]
     (let [[_final distance path] (dijkstra-to-final 0 f finals)]
       (cond
         (empty? path)
