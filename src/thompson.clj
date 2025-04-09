@@ -19,22 +19,22 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.thompson
+(ns thompson
   "Implementation of Thompson construction of Sigma Complete Deterministic
   Finite Automata"
   (:refer-clojure :exclude [complement])
-  (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member
+  (:require [cl-compat :as cl]
+            [util :refer [fixed-point member
                                       defn-memoized find-first
                                       partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]
-            [clojure-rte.rte-construct :as rte]
-            [clojure-rte.genus :as gns]
+            [rte-construct :as rte]
+            [genus :as gns]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.bdd :as bdd]
+            [bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [clojure-rte.xymbolyco :as xym]
+            [xymbolyco :as xym]
             [clojure.set :as set]
             ))
 

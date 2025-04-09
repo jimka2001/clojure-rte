@@ -19,14 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.cl-compat-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [call-with-collector]]
+(ns cl-compat-test
+  (:require [rte-core]
+            [cl-compat :as cl]
+            [util :refer [call-with-collector]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.cl-compat-test))
+  (clojure.test/run-tests 'cl-compat-test))
 
 (def test-verbose false)
 
@@ -143,7 +143,7 @@
 (deftest t-ldiff
   (testing "ldiff"
     (is (= (let [L '(1 2 3 4)]
-             (clojure-rte.cl-compat/ldiff L (rest (rest L))))
+             (cl-compat/ldiff L (rest (rest L))))
            '(1 2)))
-    (is (= (clojure-rte.cl-compat/ldiff '(1 2 3 4) '(3 4))
+    (is (= (cl-compat/ldiff '(1 2 3 4) '(3 4))
            '(1 2)))))

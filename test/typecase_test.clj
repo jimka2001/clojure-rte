@@ -19,13 +19,13 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.typecase-test
-  (:require [clojure-rte.typecase :as sut]
-            [clojure-rte.genus]
+(ns typecase-test
+  (:require [typecase :as sut]
+            [genus]
             [clojure.test :as t]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.typecase-test))
+  (clojure.test/run-tests 'typecase-test))
 
 (t/deftest test-substitute-1-type
   (t/testing "substitute-1-type"
@@ -58,38 +58,38 @@
     (assert (= (sut/typecase "hello"
                              (or String Double) 42
                              ;; TODO need a way to avoid using fully qualified name here.
-                             (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
-                             (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+                             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
                          45)
                42))
     (assert (= (sut/typecase 1.0
                          (or String Double) 42
-                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
                          45)
                42))
     (assert (= (sut/typecase 1
                          (or String Double) 42
-                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
                          45)
                43))
     (assert (= (sut/typecase 2
                          (or String Double) 42
-                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
                          45)
                44))
     (assert (= (sut/typecase -2
                          (or String Double) 42
-                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
                          45)
                45))
     (assert (= (sut/typecase -1
                          (or String Double) 42
-                         (and (satisfies int?) (satisfies clojure-rte.typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies clojure-rte.typecase-test/odd-int?)) (not (satisfies neg?))) 44
+                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
                          45)
                43))
     ))            

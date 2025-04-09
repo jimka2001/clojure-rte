@@ -19,47 +19,48 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.all-test
-  (:require  [clojure-rte.rte-core]
+(ns all-test
+  (:require  [rte-core]
              clojure.test
-             clojure-rte.api-test
-             clojure-rte.bdd-test
-             clojure-rte.cl-compat-test
-             clojure-rte.xymbolyco-test
-             clojure-rte.dot-test
-             clojure-rte.rte-test
-             clojure-rte.rte-case-test
-             clojure-rte.rte-tester-test
-             clojure-rte.genus-test
-             clojure-rte.genus-statistics-test
-             clojure-rte.genus-subtype-test
-             clojure-rte.genus-equiv-test
-             clojure-rte.genus-conversion-test
-             clojure-rte.util-test             
-             clojure-rte.genus-spec-test
-             clojure-rte.typecase
+             api-test
+             bdd-test
+             cl-compat-test
+             xymbolyco-test
+             dot-test
+             rte-test
+             rte-case-test
+             rte-tester-test
+             genus-test
+             genus-statistics-test
+             genus-subtype-test
+             genus-equiv-test
+             genus-conversion-test
+             util-test             
+             genus-spec-test
+             typecase
              )
   (:gen-class))
 
 (defn rte-run-all-test
   "Run all the tests defined in the clojure-rte project"
   []
-  (clojure.test/run-tests 'clojure-rte.api-test
-                          'clojure-rte.bdd-test
-                          'clojure-rte.cl-compat-test
-                          'clojure-rte.xymbolyco-test
-                          'clojure-rte.dot-test
-                          'clojure-rte.rte-test
-                          'clojure-rte.rte-case-test
-                          'clojure-rte.rte-tester-test
-                          'clojure-rte.genus-test
-                          'clojure-rte.genus-statistics-test
-                          'clojure-rte.genus-subtype-test
-                          'clojure-rte.genus-equiv-test
-                          'clojure-rte.genus-conversion-test
-                          'clojure-rte.util-test
-                          'clojure-rte.genus-spec-test
-                          'clojure-rte.typecase
+  (clojure.test/run-tests 'api-test
+                          'bdd-test
+                          'cl-compat-test
+                          'xymbolyco-test
+                          'dot-test
+                          'dijkstra-test
+                          'rte-test
+                          'rte-case-test
+                          'rte-tester-test
+                          'genus-test
+                          'genus-statistics-test
+                          'genus-subtype-test
+                          'genus-equiv-test
+                          'genus-conversion-test
+                          'util-test
+                          'genus-spec-test
+                          'typecase
                           ))
 
 (defn -main []

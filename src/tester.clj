@@ -19,9 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.tester
+(ns tester
   (:require [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [map-eagerly]])
+            [util :refer [map-eagerly]])
   )
 
 

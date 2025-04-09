@@ -1,5 +1,5 @@
-(ns clojure-rte.dijkstra-test
-  (:require [clojure-rte.dijkstra :as sut]
+(ns dijkstra-test
+  (:require [dijkstra :as sut]
             [clojure.test :refer [deftest is testing]]))
 
 (deftest t-dijkstra-self-loop

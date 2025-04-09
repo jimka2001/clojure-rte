@@ -19,9 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte
+(ns rte-test
+  (:require [rte-core]
+            [rte-construct :as rte
              :refer [nullable? first-types
                      canonicalize-pattern
                      derivative derivative-1
@@ -30,15 +30,15 @@
                      rte-combine-labels
                      with-rte]]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.rte-extract :refer [dfa-to-rte rte-equivalent?]]
+            [rte-extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.util :refer [member]]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [*test-types*]]
-            [clojure-rte.rte-tester :refer [gen-rte]]
-            [clojure-rte.dot :as dot]
+            [util :refer [member]]
+            [genus :as gns]
+            [genus-tester :refer [*test-types*]]
+            [rte-tester :refer [gen-rte]]
+            [dot :as dot]
             [backtick :refer [template]]
-            [clojure-rte.xymbolyco :as xym]))
+            [xymbolyco :as xym]))
 
 (def test-verbose false)
 
@@ -46,10 +46,10 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-test ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)]))))
+       (println [:finished ' rte-test ~string (java.util.Date.)]))))
 
 (deftest t-nullable
   (testing "nullable"
@@ -672,5 +672,5 @@
 
 
 (defn -main []
-  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
-  (clojure.test/run-tests 'clojure-rte.rte-test))
+  ;; To run one test (clojure.test/test-vars [#'rte-test/the-test])
+  (clojure.test/run-tests 'rte-test))

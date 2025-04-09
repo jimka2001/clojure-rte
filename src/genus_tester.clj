@@ -19,8 +19,8 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-tester
-  (:require [clojure-rte.genus :as gns]
+(ns genus-tester
+  (:require [genus :as gns]
             [backtick :refer [template]]))
 
 (def ^:dynamic *test-types*

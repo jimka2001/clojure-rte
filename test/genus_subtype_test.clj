@@ -19,16 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-subtype-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type]]
+(ns genus-subtype-test
+  (:require [rte-core]
+            [genus :as gns]
+            [genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-subtype-test))
+  (clojure.test/run-tests 'genus-subtype-test))
 
 (def test-verbose false)
 

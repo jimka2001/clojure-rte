@@ -19,14 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.dot
+(ns dot
   (:require [clojure.pprint :refer [cl-format pprint]]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]
-            [clojure-rte.cl-compat :as cl]
-            [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.util :refer [member]]
+            [cl-compat :as cl]
+            [xymbolyco :as xym]
+            [util :refer [member]]
             [clojure.java.shell :refer [sh]]))
 
 (def ^:dynamic *dot-path*

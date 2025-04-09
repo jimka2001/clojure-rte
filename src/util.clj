@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.util
+(ns util
   (:require [clojure.pprint :refer [cl-format]]
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))

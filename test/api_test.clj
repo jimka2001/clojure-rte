@@ -19,13 +19,13 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.api-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
+(ns api-test
+  (:require [rte-core]
+            [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.api-test))
+  (clojure.test/run-tests 'api-test))
 
 (deftest t-rte-match
   (testing "rte/match"

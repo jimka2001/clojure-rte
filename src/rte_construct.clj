@@ -19,9 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-construct
-  (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [member exists setof forall
+(ns rte-construct
+  (:require [genus :as gns]
+            [util :refer [member exists setof forall
                                       call-with-collector defn-memoized defmulti-memoized defmethod-memoized
                                       visit-permutations fixed-point
                                       sort-operands
@@ -30,18 +30,18 @@
                                       gc-friendly-memoize call-with-found find-first
                                       search-replace remove-element uniquify
                                       count-if-not find-simplifier]]
-            [clojure-rte.xymbolyco :as xym]
+            [xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.set :refer [union]]
-            [clojure-rte.cl-compat :as cl]
+            [cl-compat :as cl]
             [backtick :refer [template]]
-            [clojure-rte.genus-spec :as gs]
+            [genus-spec :as gs]
             )
   (:refer-clojure :exclude [compile])
 )
 
 ;; allow rte/ prefix even in this file.
-(alias 'rte 'clojure-rte.rte-construct)
+(alias 'rte 'rte-construct)
 
 (declare ^:dynamic canonicalize-pattern canonicalize-pattern-impl)
 (declare ^:dynamic compile rte-to-dfa)

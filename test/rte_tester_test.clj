@@ -19,23 +19,23 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-tester-test
-  (:require [clojure-rte.rte-core ]
+(ns rte-tester-test
+  (:require [rte-core ]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.rte-construct :as rte :refer [canonicalize-pattern]]
-            [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
+            [rte-construct :as rte :refer [canonicalize-pattern]]
+            [xymbolyco :as xym]
+            [rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
                                             test-canonicalize-pattern
                                             test-rte-canonicalize-nullable
                                             test-rte-not
                                             rte-components gen-rte
                                             *rte-keywords*]]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [*test-types* gen-inhabited-type]]
+            [genus :as gns]
+            [genus-tester :refer [*test-types* gen-inhabited-type]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.rte-tester-test))
+  (clojure.test/run-tests 'rte-tester-test))
 
 
 (def test-verbose false)
@@ -90,7 +90,7 @@
 
       (rte/nullable? rte)
       
-      (clojure-rte.rte-tester/test-rte-canonicalize-nullable-1
+      (rte-tester/test-rte-canonicalize-nullable-1
         rte
         (fn [expr msg] (is expr msg)))
 )))
@@ -203,7 +203,7 @@
                              (:or (:+ (:and)) (:and (:+ (:or))))))
                   (:or (:? (:not (:cat (:contains-none)))))
                   )]
-      (clojure-rte.rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
+      (rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
 
 (deftest t-rte-not-random
   (testing ":not random"

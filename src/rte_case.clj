@@ -19,11 +19,11 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-case
-  (:require [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [defn-memoized member non-empty?]]
-            [clojure-rte.rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
+(ns rte-case
+  (:require [xymbolyco :as xym]
+            [genus :as gns]
+            [util :refer [defn-memoized member non-empty?]]
+            [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
             [backtick :refer [template]]

@@ -19,14 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-spec-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte]
+(ns genus-spec-test
+  (:require [rte-core]
+            [rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [forall]]
-            [clojure-rte.genus :as gns]
+            [util :refer [forall]]
+            [genus :as gns]
             [clojure.spec.alpha :as s]
-            [clojure-rte.genus-spec :as gs]
+            [genus-spec :as gs]
             [backtick :refer [template]]
             [clojure.test :as t]))
 
@@ -463,4 +463,4 @@
                       (gns/canonicalize-type (template (spec ~::person)))) "test 440")))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-spec-test))
+  (clojure.test/run-tests 'genus-spec-test))

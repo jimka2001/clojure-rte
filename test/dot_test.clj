@@ -20,14 +20,14 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(ns clojure-rte.dot-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
-            [clojure-rte.dot :as sut]
+(ns dot-test
+  (:require [rte-core]
+            [rte-construct :as rte :refer [with-compile-env]]
+            [dot :as sut]
             [clojure.test :refer [deftest testing]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.dot-test))
+  (clojure.test/run-tests 'dot-test))
 
 (deftest t-dfa-to-dot
   (testing "dfa-to-dot"

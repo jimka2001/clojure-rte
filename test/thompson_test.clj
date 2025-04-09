@@ -19,18 +19,18 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.thompson-test
-  (:require [clojure-rte.thompson :as tom]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte]
-            [clojure-rte.xymbolyco :as xym]
-            [clojure-rte.rte-tester :as test]
+(ns thompson-test
+  (:require [thompson :as tom]
+            [genus :as gns]
+            [rte-core]
+            [rte-construct :as rte]
+            [xymbolyco :as xym]
+            [rte-tester :as test]
             [clojure.test :refer [deftest is]]))
 
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.thompson-test))
+  (clojure.test/run-tests 'thompson-test))
 
 (def testing-verbose false)
 
@@ -48,7 +48,7 @@
 ;;   and set it to a smaller number for a quicker run of the tests.
 (def num_random_tests 1000)
 
-(def Dfa clojure_rte.xymbolyco.Dfa)
+(def Dfa xymbolyco.Dfa)
 
 (deftest t-transitions
   (testing "transitions"

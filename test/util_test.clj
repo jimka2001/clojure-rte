@@ -19,10 +19,10 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.util-test
-  (:require [clojure-rte.rte-core]
+(ns util-test
+  (:require [rte-core]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.util :refer [sort-operands partition-by-pred
+            [util :refer [sort-operands partition-by-pred
                                       call-with-collector
                                       visit-permutations
                                       remove-once fixed-point member
@@ -35,7 +35,7 @@
             [clojure.test :refer [deftest testing is]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.util-test))
+  (clojure.test/run-tests 'util-test))
 
 (deftest t-partition-by-pred
   (testing "partition-by-pred"
@@ -349,8 +349,8 @@
                  [1 2 3 4 5 6 7 8
                   10 20 30 40 50 60 70 80
                   100 200 300 400 500 600 700 800]]]
-      (doseq [fold [clojure-rte.util/pairwise-fold
-                    clojure-rte.util/tree-fold]]
+      (doseq [fold [util/pairwise-fold
+                    util/tree-fold]]
         (is (= (reduce + 0 seq)
                (fold + 0 seq))
             (cl-format false "351: ~A" fold))
@@ -379,8 +379,8 @@
     (let [s (map / [23 29 31 37 41 43 47 53 57 67
                     71 73 79 83 89 97])
           ]
-      (doseq [fold [clojure-rte.util/pairwise-fold
-                    clojure-rte.util/tree-fold]]
+      (doseq [fold [util/pairwise-fold
+                    util/tree-fold]]
 
         (reduce + 0 s)
         (fold + 0 s)
@@ -390,7 +390,7 @@
 
 (deftest t-fold-3
   (testing "fold 3"
-    (doseq [f [reduce clojure-rte.util/pairwise-fold clojure-rte.util/tree-fold]]
+    (doseq [f [reduce util/pairwise-fold util/tree-fold]]
       (let [x (atom 0)
             s [1/23 1/29
                1/31 1/37
@@ -420,14 +420,14 @@
       (doseq [n (range (count words))
               :let [suffix (drop n words)]]
         (is (= (reduce (fn [acc item] (+ acc (count item))) 0 suffix)
-               (clojure-rte.util/tree-fold + count 0 suffix))))
+               (util/tree-fold + count 0 suffix))))
 
       (doseq [n (range (count words))
               :let [suffix (drop n words)
                     f (fn [acc item] (str/join [acc item]))]
               ]
         (is (= (reduce f "" suffix)
-               (clojure-rte.util/tree-fold f "" suffix)))))))
+               (util/tree-fold f "" suffix)))))))
 
 
 (deftest t-call-with-found

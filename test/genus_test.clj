@@ -19,17 +19,17 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :refer [with-compile-env]]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type *test-values*]]
-            [clojure-rte.util :refer [ member ]]
+(ns genus-test
+  (:require [rte-core]
+            [rte-construct :refer [with-compile-env]]
+            [genus :as gns]
+            [genus-tester :refer [gen-type *test-values*]]
+            [util :refer [ member ]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-test))
+  (clojure.test/run-tests 'genus-test))
 
 (def test-verbose false)
 
@@ -129,10 +129,10 @@
 
 (deftest t-satisfies-ns
   (testing "satifies in namespace"
-    (is (not (gns/typep 3 '(satisfies clojure-rte.genus-test/test-predicate)))
+    (is (not (gns/typep 3 '(satisfies genus-test/test-predicate)))
         "test 0")
 
-    (is (gns/typep 13 '(satisfies clojure-rte.genus-test/test-predicate))
+    (is (gns/typep 13 '(satisfies genus-test/test-predicate))
         "test 1")
 
     ;; cannot use satisfies with undecorated function name

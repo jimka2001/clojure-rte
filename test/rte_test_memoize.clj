@@ -19,9 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-test-memoize
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte]
+(ns rte-test-memoize
+  (:require [rte-core]
+            [rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
@@ -31,10 +31,10 @@
   [string & body]
   `(rte/with-compile-env []
      (when test-verbose
-       (println [:testing 'clojure-rte.rte-test ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-test ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished ' clojure-rte.rte-test ~string (java.util.Date.)]))))
+       (println [:finished ' rte-test ~string (java.util.Date.)]))))
 
 (deftest t-with-rte-5
   (testing "with-rte 5"
@@ -139,7 +139,7 @@
         ))))
 
 (defn -main []
-  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-test/the-test])
-  (clojure.test/run-tests 'clojure-rte.rte-test-memoize))
+  ;; To run one test (clojure.test/test-vars [#'rte-test/the-test])
+  (clojure.test/run-tests 'rte-test-memoize))
 
 

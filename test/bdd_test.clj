@@ -20,20 +20,20 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(ns clojure-rte.bdd-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.bdd :as bdd]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type]]
+(ns bdd-test
+  (:require [rte-core]
+            [bdd :as bdd]
+            [genus :as gns]
+            [genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format *print-pretty*]]
-            [clojure-rte.util :refer [member]]
+            [util :refer [member]]
             [clojure.test :refer [deftest is testing]])
   ;; this imports the name of the Bdd record, which is otherwise not imported by :require
   ;;(:import [clojure_rte.bdd Bdd])
   )
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.bdd-test))
+  (clojure.test/run-tests 'bdd-test))
 
 (def num-random-samples 500)
 

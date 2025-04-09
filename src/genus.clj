@@ -19,25 +19,25 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus
+(ns genus
   (:refer-clojure :exclude [satisfies?])
   (:require [clojure.set :refer [subset?]]
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
-            [clojure-rte.util :refer [exists-pair forall-pairs exists fixed-point
+            [util :refer [exists-pair forall-pairs exists fixed-point
                                       remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized call-with-found find-first
                                       gc-friendly-memoize
                                       unchunk or-else]]
-            [clojure-rte.cl-compat :as cl]
+            [cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
             ))
 
 ;; allow gns/ prefix even in this file.
-(alias 'gns 'clojure-rte.genus)
+(alias 'gns 'genus)
 
 (declare ^:dynamic canonicalize-type -canonicalize-type)
 (declare ^:dynamic inhabited? -inhabited?)

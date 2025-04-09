@@ -19,20 +19,20 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.xymbolyco
+(ns xymbolyco
   "Implementation of Sigma Complete Deterministic Finite Automata
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
-  (:require [clojure-rte.cl-compat :as cl]
-            [clojure-rte.util :refer [fixed-point member group-map
+  (:require [cl-compat :as cl]
+            [util :refer [fixed-point member group-map
                                       defn-memoized find-first
                                       non-empty? exists setof]]
-            [clojure-rte.genus :as gns]
+            [genus :as gns]
             [clojure.pprint :refer [cl-format]]
-            [clojure-rte.bdd :as bdd]
+            [bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [clojure-rte.dijkstra :refer [dijkstra-to-final dijkstra]]
+            [dijkstra :refer [dijkstra-to-final dijkstra]]
             ))
 
 (defrecord State 

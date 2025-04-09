@@ -19,19 +19,19 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-case-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.rte-construct :as rte :refer [with-compile-env]]
+(ns rte-case-test
+  (:require [rte-core]
+            [genus :as gns]
+            [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
-            [clojure-rte.rte-case :refer [rte-case destructuring-case
+            [rte-case :refer [rte-case destructuring-case
                                           rte-case-clauses-to-dfa ;;rte-case-clauses-to-dfa-impl
                                           dsfn dscase
                                           -destructuring-fn-many destructuring-fn]]
 ))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.rte-case-test))
+  (clojure.test/run-tests 'rte-case-test))
 
 (def test-verbose false)
 
@@ -39,10 +39,10 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'clojure-rte.rte-case-test ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-case-test ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished 'clojure-rte.rte-case-test ~string :finished (java.util.Date.)]))))
+       (println [:finished 'rte-case-test ~string :finished (java.util.Date.)]))))
 
 (deftest t-rte-case
   (testing "rte-case"
@@ -69,10 +69,10 @@
 (deftest t-rte-case-clauses-to-dfa
   (testing "rte-case-clauses-to-dfa"
     (is (= 0 (rte/match
-              ;; I don't know why it is necessary to prefix clojure-rte.rte-core/rte-case-clauses-to-dfa
+              ;; I don't know why it is necessary to prefix rte-core/rte-case-clauses-to-dfa
               ;; otherwise the loader complains:
               ;; java.lang.RuntimeException: Unable to resolve symbol: rte-case-clauses-to-dfa in this context
-              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
+              (#'rte-case/rte-case-clauses-to-dfa
 
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
@@ -85,7 +85,7 @@
         "case-0")
 
     (is (= 1 (rte/match
-              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
+              (#'rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -97,7 +97,7 @@
         "case-1")
 
     (is (= 2 (rte/match
-              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
+              (#'rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -109,7 +109,7 @@
         "case-2")
 
     (is (= 3 (rte/match
-              (#'clojure-rte.rte-case/rte-case-clauses-to-dfa
+              (#'rte-case/rte-case-clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]

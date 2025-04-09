@@ -19,9 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.typecase
-  (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [setof]]
+(ns typecase
+  (:require [genus :as gns]
+            [util :refer [setof]]
             [backtick :refer [template]]))
 
 (defn- collect-leaf-types [tds]

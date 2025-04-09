@@ -19,16 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-spec
-  (:require [clojure-rte.genus :as gns]
-            [clojure-rte.util :refer [casep defn-memoized exists seq-matcher]]
+(ns genus-spec
+  (:require [genus :as gns]
+            [util :refer [casep defn-memoized exists seq-matcher]]
             [clojure.pprint :refer [cl-format]]
             [clojure.spec.alpha :as s]
             [backtick :refer [template]]
 ))
 
 ;; allow gns/ prefix even in this file.
-(alias 'gs 'clojure-rte.genus-spec)
+(alias 'gs 'genus-spec)
 
 (def gs/spec?
   "Detect sequence starting with the simple symbol spec"
@@ -63,7 +63,7 @@
   :dont-know)
 
 (defn symbol= [x y]
-  (let [ns (find-ns 'clojure-rte.genus-spec)]
+  (let [ns (find-ns 'genus-spec)]
     (= (ns-resolve ns x)
        (ns-resolve ns y))))
 

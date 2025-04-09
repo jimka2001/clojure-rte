@@ -19,16 +19,15 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.bdd
+(ns bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [clojure-rte.util :refer [call-with-collector non-empty? forall exists]]
-            [clojure-rte.genus :as gns]
+  (:require [util :refer [call-with-collector non-empty? forall exists]]
+            [genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))
 
 (alias 'c 'clojure.core)
-(alias 'bdd 'clojure-rte.bdd)
 
 (defrecord Bdd
     [label positive negative])

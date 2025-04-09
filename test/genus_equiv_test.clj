@@ -19,16 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-equiv-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type]]
+(ns genus-equiv-test
+  (:require [rte-core]
+            [genus :as gns]
+            [genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-test))
+  (clojure.test/run-tests 'genus-test))
 
 (def test-verbose false)
 

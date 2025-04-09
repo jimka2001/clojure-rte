@@ -19,14 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-statistics-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type gen-inhabited-type]]
+(ns genus-statistics-test
+  (:require [rte-core]
+            [genus :as gns]
+            [genus-tester :refer [gen-type gen-inhabited-type]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-statistics-test))
+  (clojure.test/run-tests 'genus-statistics-test))
 
 (defmacro testing
   [string & body]

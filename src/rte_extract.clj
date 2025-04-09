@@ -19,10 +19,10 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-extract
+(ns rte-extract
   (:require [clojure.pprint :refer [cl-format]]
-            [clojure-rte.rte-construct :as rte]
-            [clojure-rte.xymbolyco :as xym]))
+            [rte-construct :as rte]
+            [xymbolyco :as xym]))
 
 (defn extract-rte
   "Accepts an object of type Dfa, and returns a map which associates

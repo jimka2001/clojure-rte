@@ -19,16 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.genus-disjoint-test
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.genus :as gns]
-            [clojure-rte.genus-tester :refer [gen-type]]
+(ns genus-disjoint-test
+  (:require [rte-core]
+            [genus :as gns]
+            [genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []
-  (clojure.test/run-tests 'clojure-rte.genus-disjoint-test))
+  (clojure.test/run-tests 'genus-disjoint-test))
 
 (deftest t-discovered-case-disjoint-132
   (testing "discovered-case-disjoint-132"

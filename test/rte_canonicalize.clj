@@ -19,14 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns clojure-rte.rte-canonicalize
-  (:require [clojure-rte.rte-core]
-            [clojure-rte.rte-construct :as rte
+(ns rte-canonicalize
+  (:require [rte-core]
+            [rte-construct :as rte
              :refer [canonicalize-pattern with-compile-env ]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [clojure-rte.util :refer [count-if-not]]
-            [clojure-rte.genus :as gns]))
+            [util :refer [count-if-not]]
+            [genus :as gns]))
 
 (def test-verbose false)
 
@@ -34,10 +34,10 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'clojure-rte.rte-canonicalize ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-canonicalize ~string :starting (java.util.Date.)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished 'clojure-rte.rte-canonicalize ~string (java.util.Date.)]))))
+       (println [:finished 'rte-canonicalize ~string (java.util.Date.)]))))
 
 (deftest t-canonicalize-pattern-14
   (when (and (resolve 'java.lang.Comparable)
@@ -835,5 +835,5 @@
            :empty-set))))
 
 (defn -main []
-  ;; To run one test (clojure.test/test-vars [#'clojure-rte.rte-canonicalize/the-test])
-  (clojure.test/run-tests 'clojure-rte.rte-canonicalize))
+  ;; To run one test (clojure.test/test-vars [#'rte-canonicalize/the-test])
+  (clojure.test/run-tests 'rte-canonicalize))
