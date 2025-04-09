@@ -78,7 +78,7 @@
       [{$A_2$},
         [{$A_2  A_3$},
           [{$A_2 A_3 A_4$},
-            [{$A_2 A_3 A_4$},edge=dashed ] ]
+            [{$A_2 A_3 A_4$},edge=dashed, edge label={node[midway,left,font=\scriptsize,color=red]{cut=$A_5$}} ] ]
           [{$A_2 A_3 \compl{A_4}$}, edge=dashed
             [{$A_2 A_3 \compl{A_4}$}, edge=dashed ] ] ]
         [{$A_2  \compl{A_3}$}, edge=dashed
@@ -112,10 +112,10 @@
   \begin{minipage}{\textwidth}
 \begin{forest}%cut with A_4
   [$\Sigma$
-    [{$A_1$},edge label={node[midway,left,font=\scriptsize]{cut=$A_1$}}
-      [{$A_2$},edge label={node[midway,left,font=\scriptsize]{$A_2$}}
-        [{$A_2  A_3$},edge label={node[midway,left,font=\scriptsize]{$A_3$}}
-          [{$A_2 A_3 A_4$},edge label={node[midway,left,font=\scriptsize]{$A_4$}} ]
+    [{$A_1$}
+      [{$A_2$}
+        [{$A_2  A_3$}
+          [{$A_2 A_3 A_4$},edge label={node[midway,left,font=\scriptsize,color=red]{cut=$A_4$}} ]
           [{$A_2 A_3 \compl{A_4}$}, edge=dashed  ] ]
         [{$A_2  \compl{A_3}$}, edge=dashed
           [{$A_2 \compl{A_3} A_4$} ]
@@ -142,9 +142,9 @@
   \begin{minipage}{\textwidth}
 \begin{forest}%cut with A_3
   [$\Sigma$
-    [{$A_1$},edge label={node[midway,left,font=\scriptsize]{cut=$A_1$}}
-      [{$A_2$},edge label={node[midway,left,font=\scriptsize]{$A_2$}}
-        [{$A_2  A_3$},edge label={node[midway,left,font=\scriptsize]{$A_3$}}] 
+    [{$A_1$}
+      [{$A_2$}
+        [{$A_2  A_3$},edge label={node[midway,left,color=red,font=\scriptsize]{cut=$A_3$}}] 
         [{$A_2  \compl{A_3}$}, edge=dashed ] ]
       [{$A_1  \compl{A_2}$}, edge=dashed,
         [{$\compl{A_2} A_3  $} ]
@@ -164,8 +164,8 @@
   \begin{minipage}{\textwidth}
 \begin{forest}
   [$\Sigma$
-    [{$A_1$},edge label={node[midway,left,font=\scriptsize]{cut=$A_1$}}
-      [{$A_2$},edge label={node[midway,left,font=\scriptsize]{$A_2$}}]
+    [{$A_1$}
+      [{$A_2$},edge label={node[midway,left,color=red,font=\scriptsize]{cut=$A_2$}}]
       [{$A_1  \compl{A_2}$}, edge=dashed] ]
     [{$\compl{A_1}$}, edge=dashed
       [{$\compl{A_1}$}, edge=dashed ] ] ]
@@ -180,7 +180,7 @@
   \begin{minipage}{\textwidth}
 \begin{forest}
   [$\Sigma$
-    [{$A_1$},edge label={node[midway,left,font=\scriptsize]{cut=$A_1$}}]
+    [{$A_1$},edge label={node[midway,left,color=red,font=\scriptsize]{cut=$A_1$}}]
     [{$\compl{A_1}$}, edge=dashed ] ]
 \end{forest}
   \end{minipage}
