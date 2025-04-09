@@ -8,7 +8,7 @@ I0 [label="", style=invis, width=0]
 I0 -> p0;
 // 2 final states
 // all 4 states
-p3 [label="p3",shape="doublecircle"]
+p3 [label="p3",shape="doublecircle",fillcolor="yellow",style="filled"]
 p3 -> p3 [label="t9",style=invis]
 p3 -> p1 [label="t11",style=invis]
 p3 -> p2 [label="t7",style=invis]
@@ -16,7 +16,7 @@ p3 -> p0 [label="t8",style=invis]
 p0 [label="p0",shape="doublecircle"]
 p0 -> p1 [label="t3"]
 p0 -> p2 [label="t2"]
-p2 [label="p2",fillcolor="yellow",style="filled"]
+p2 [label="p2"]
 p2 -> p3 [label="t4",style=dashed]
 p2 -> p1 [label="t10"]
 p2 -> p2 [label="t6"]

@@ -21,6 +21,6 @@ p2 -> p3 [label="t4",style=invis]
 p2 -> p1 [label="t10",style=invis]
 p2 -> p2 [label="t6",style=invis]
 p2 -> p0 [label="t5",style=invis]
-p1 [label="p1"]
+p1 [label="p1",fillcolor="yellow",style="filled"]
 p1 -> p1 [label="t1"]
 }
