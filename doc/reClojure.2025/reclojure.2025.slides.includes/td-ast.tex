@@ -12,11 +12,11 @@
     \tikzstyle{level 1}=[sibling distance=40mm]
     \tikzstyle{level 2}=[sibling distance=40mm]
     \tikzstyle{level 3}=[sibling distance=40mm]
-  \node {SOr}
-    child { node [bottom color=blue!20] {SAtomic(classOf[Double])} }
-    child { node {SAnd}
-      child { node [bottom color=blue!20] {SSatisfies(oddp)} }
-      child { node {SNot} 
-        child { node [bottom color=blue!20] {SEql(13)} } } } ;
+  \node {\code{or}}
+    child { node [bottom color=blue!20] {\code{Float}} }
+    child { node {\code{and} }
+      child { node [bottom color=blue!20] {\code{(satisfies oddp)} } }
+      child { node {\code{not} }
+        child { node [bottom color=blue!20] {\code{(= 13)} } } } };
 \end{tikzpicture}
 \end{document}

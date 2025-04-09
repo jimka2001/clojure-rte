@@ -11,12 +11,12 @@
     top color=white, bottom color=orange!20}]]
     \tikzstyle{level 2}=[sibling distance=28mm]
     \tikzstyle{level 4}=[sibling distance=45mm]
-  \node {$Star~*$}
-  child { node { $Cat~++$ } 
-    child { node [bottom color=blue!20] {\text{Atomic(ClassOf[Int])} }}
-    child { node {$Plus~+$} 
-      child { node {$Or~|$}
-        child { node [bottom color=blue!20] {\text{Atomic(ClassOf[Float])}} }
-        child { node [bottom color=blue!20] {\text{Satisfies(oddp)}} } } } } ;
+  \node {\code{:*}}
+  child { node { \code{:cat} } 
+    child { node [bottom color=blue!20] {\code{Integer} } }
+    child { node {\code{:+}} 
+      child { node {\code{:or}}
+        child { node [bottom color=blue!20] {\code{Float} } }
+        child { node [bottom color=blue!20] {\code{(satisfies oddp)} } } } } } ;
 \end{tikzpicture}
 \end{document}
