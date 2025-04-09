@@ -25,7 +25,7 @@
        \bigskip
 
        Does the sequence match the pattern?
-       \textcolor{greeny}{${(Int \cdot ( Double^{+} ~\vee String^{+}))^{+}}$}
+       \textcolor{greeny}{${(Int \cdot ( Float^{+} ~\vee String^{+}))^{+}}$}
 
        \bigskip
 
@@ -35,10 +35,10 @@
        \bigskip
        
        \Challenge{3} How to construct a finite automaton from an RTE? \Emph{Compile-time}}%
-     \only<3,17,18>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( Double^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
-     \only<4,7,11,15>{\textcolor{greeny}{\LARGE $pattern={{(\Emph{Int} \cdot ( Double^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
-     \only<5,6,12-14,16>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( \Emph{Double}^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
-     \only<8,9,10>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( Double^{+} ~\vee \Emph{String}^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<3,17,18>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( Float^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<4,7,11,15>{\textcolor{greeny}{\LARGE $pattern={{(\Emph{Int} \cdot ( Float^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<5,6,12-14,16>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( \Emph{Float}^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<8,9,10>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( Float^{+} ~\vee \Emph{String}^{+}))^{+}}}$}\leavevmode\\[2cm]}%
      \only<3-16>{\textcolor{orange}{\LARGE Does the sequence match the pattern?} \Emph{Run-time}}%
      \only<17>{\Emph{\LARGE Yes, it's a match!}}%
      \only<18>{\includegraphics[height=3.cm]{exploding-head}}
@@ -47,18 +47,18 @@
      \only<2,18>{\scalebox{0.95}{\input{fig-3}}}%
      \only<3>{\scalebox{0.95}{\input{fig-3-0}}}%
      \only<4>{\scalebox{0.95}{\input{fig-3-0-int}}}%
-     \only<5>{\scalebox{0.95}{\input{fig-3-1-double}}}%
-     \only<6>{\scalebox{0.95}{\input{fig-3-2-double}}}%
+     \only<5>{\scalebox{0.95}{\input{fig-3-1-float}}}%
+     \only<6>{\scalebox{0.95}{\input{fig-3-2-float}}}%
      \only<7>{\scalebox{0.95}{\input{fig-3-2-int}}}%
      \only<8>{\scalebox{0.95}{\input{fig-3-1-String}}}%
      \only<9>{\scalebox{0.95}{\input{fig-3-3-String}}}%
      \only<10>{\scalebox{0.95}{\input{fig-3-3-String}}}%
      \only<11>{\scalebox{0.95}{\input{fig-3-3-int}}}%
-     \only<12>{\scalebox{0.95}{\input{fig-3-1-double}}}%
-     \only<13>{\scalebox{0.95}{\input{fig-3-2-double}}}%
-     \only<14>{\scalebox{0.95}{\input{fig-3-2-double}}}%
+     \only<12>{\scalebox{0.95}{\input{fig-3-1-float}}}%
+     \only<13>{\scalebox{0.95}{\input{fig-3-2-float}}}%
+     \only<14>{\scalebox{0.95}{\input{fig-3-2-float}}}%
      \only<15>{\scalebox{0.95}{\input{fig-3-2-int}}}%
-     \only<16>{\scalebox{0.95}{\input{fig-3-1-double}}}%
+     \only<16>{\scalebox{0.95}{\input{fig-3-1-float}}}%
      \only<17>{\scalebox{0.95}{\input{fig-3-2}}}%
    \end{column}
  \end{columns}
