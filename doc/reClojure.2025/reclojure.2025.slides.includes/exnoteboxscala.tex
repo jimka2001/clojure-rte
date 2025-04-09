@@ -1,0 +1,8 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val I:Rte = Atomic(classOf[Int])
+val F:Rte = Atomic(classOf[Float])
+val odd:Rte = Satisfies(oddp, "odd")
+
+val re:Rte = (I ++ (F | odd).+ ).*
+\end{lstlisting}

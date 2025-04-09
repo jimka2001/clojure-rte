@@ -1,0 +1,9 @@
+\begin{lstlisting}[style=reclojureScala]
+val r1:Rte = EmptySeq | Int | str
+val r2:Rte = Cat(Int, Str, r1)
+val r2:Rte = Int ++ str ++ r1
+
+r2.contains(List(42, "hello")) // returns true
+r2.contains(List(42, "hello", 42)) // returns true
+r2.contains(List("hello", 42)) // returns false
+\end{lstlisting}

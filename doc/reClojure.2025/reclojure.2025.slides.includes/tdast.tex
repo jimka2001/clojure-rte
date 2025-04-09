@@ -1,0 +1,6 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val Int      = SAtomic(classOf[Int])
+val Double = SAtomic(classOf[Double])
+val td:SimpleTypeD = SOr(Double, SAnd(Int, SNot(SEql("X"))))
+\end{lstlisting}

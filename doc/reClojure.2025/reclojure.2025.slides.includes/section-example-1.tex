@@ -1,0 +1,123 @@
+\begin{frame}[t]{Example: How does a pattern predicate work?}
+  \only<1-17>{sequence=}%
+  \only<1-2>{\tt \textcolor{blue}{[13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}}%
+  \only<3>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<4>{\tt [\colorbox{orange!30}{\Large 13} 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<5>{\tt [13 \colorbox{orange!30}{\Large 2.0} 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<6>{\tt [13 2.0 \colorbox{orange!30}{\Large 6.0} 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<7>{\tt [13 2.0 6.0 \colorbox{orange!30}{\Large 4} "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<8>{\tt [13 2.0 6.0 4 \colorbox{orange!30}{\Large "a"} "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<9>{\tt [13 2.0 6.0 4 "a" \colorbox{orange!30}{\Large "an"} "the" -5 2.0 3.0 4.0 7 8.0]}%
+  \only<10>{\tt [13 2.0 6.0 4 "a" "an" \colorbox{orange!30}{\Large "the"} -5 2.0 3.0 4.0 7 8.0]}%
+  \only<11>{\tt [13 2.0 6.0 4 "a" "an" "the" \colorbox{orange!30}{\Large -5} 2.0 3.0 4.0 7 8.0]}%
+  \only<12>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 \colorbox{orange!30}{\Large 2.0} 3.0 4.0 7 8.0]}%
+  \only<13>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 \colorbox{orange!30}{\Large 3.0} 4.0 7 8.0]}%
+  \only<14>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 \colorbox{orange!30}{\Large 4.0} 7 8.0]}%
+  \only<15>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 \colorbox{orange!30}{\Large 7} 8.0]}%
+  \only<16>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 \colorbox{orange!30}{\Large 8.0}]}%
+  \only<17>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
+ \only<18>{\textcolor{blue}{Decision procedure is $O(n)$,\Emph{independent of syntactical complexity} of the RTE.}}%
+
+ \begin{columns}
+   \begin{column}{0.4\textwidth}
+     \only<2>{
+
+       \bigskip
+
+       Does the sequence match the pattern?
+       \textcolor{greeny}{${(Int \cdot ( Double^{+} ~\vee String^{+}))^{+}}$}
+
+       \bigskip
+
+     
+       We \textcolor{blue}{construct~a finite automaton} (DFA).
+       
+       \bigskip
+       
+       \Challenge{3} How to construct a finite automaton from an RTE? \Emph{Compile-time}}%
+     \only<3,17,18>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( Double^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<4,7,11,15>{\textcolor{greeny}{\LARGE $pattern={{(\Emph{Int} \cdot ( Double^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<5,6,12-14,16>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( \Emph{Double}^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<8,9,10>{\textcolor{greeny}{\LARGE $pattern={{(Int \cdot ( Double^{+} ~\vee \Emph{String}^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<3-16>{\textcolor{orange}{\LARGE Does the sequence match the pattern?} \Emph{Run-time}}%
+     \only<17>{\Emph{\LARGE Yes, it's a match!}}%
+     \only<18>{\includegraphics[height=3.cm]{exploding-head}}
+   \end{column}
+   \begin{column}{0.6\textwidth}
+     \only<2,18>{\scalebox{0.95}{\input{fig-3}}}%
+     \only<3>{\scalebox{0.95}{\input{fig-3-0}}}%
+     \only<4>{\scalebox{0.95}{\input{fig-3-0-int}}}%
+     \only<5>{\scalebox{0.95}{\input{fig-3-1-double}}}%
+     \only<6>{\scalebox{0.95}{\input{fig-3-2-double}}}%
+     \only<7>{\scalebox{0.95}{\input{fig-3-2-int}}}%
+     \only<8>{\scalebox{0.95}{\input{fig-3-1-String}}}%
+     \only<9>{\scalebox{0.95}{\input{fig-3-3-String}}}%
+     \only<10>{\scalebox{0.95}{\input{fig-3-3-String}}}%
+     \only<11>{\scalebox{0.95}{\input{fig-3-3-int}}}%
+     \only<12>{\scalebox{0.95}{\input{fig-3-1-double}}}%
+     \only<13>{\scalebox{0.95}{\input{fig-3-2-double}}}%
+     \only<14>{\scalebox{0.95}{\input{fig-3-2-double}}}%
+     \only<15>{\scalebox{0.95}{\input{fig-3-2-int}}}%
+     \only<16>{\scalebox{0.95}{\input{fig-3-1-double}}}%
+     \only<17>{\scalebox{0.95}{\input{fig-3-2}}}%
+   \end{column}
+ \end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Deterministic (DFA) vs Non-deterministic (NFA)}
+
+  %% \only<1>{1}%
+  %% \only<2>{2}%
+  %% \only<3>{3}%
+  %% \only<4>{4}%
+  %% \only<5>{5}%
+  %% \only<6>{6}%
+  %% \only<7>{7}%
+  %% \only<8>{8}%
+  %% \only<9>{9}%
+  %% \only<10>{10}%
+  \only<1,9>{Suppose sequence = \code{[2,  3, 5.6F]}}%
+  %\only<10>{Suppose sequence = \code{[2,  3, 5.6F]}}%
+  \only<2,4,6,7>{Suppose sequence = \code{[2,  \colorbox{orange!30}{\Large 3}, 5.6F]}}%
+  \only<3,5,8>{Suppose sequence = \code{[2,  3, \colorbox{orange!30}{\Large 5.6F}]}}%
+
+  \begin{columns}[T]
+    \begin{column}{0.3\textwidth}
+      \centering
+      
+      \only<1-9>{\begin{align*}
+        Int&\subseteq Number\\
+        Int &\cap Number \neq \emptyset
+      \end{align*}%
+      \scalebox{0.8}{\input{tikz-int-float}}}%
+      %% \only<11>{\begin{align*}
+      %%   Int&\subseteq Int\\
+      %%   Int &\cap String = \emptyset
+      %%   \end{align*}
+      %%   \scalebox{1}{\input{tikz-int-odd}}}
+    \end{column}%
+    \begin{column}{0.7\textwidth}
+      \only<1>{\scalebox{0.95}{\input{fig-nfa-subtype}}}%
+      \only<2>{\scalebox{0.95}{\input{fig-nfa-subtype-1-2-Int}}}%
+      \only<3>{\scalebox{0.95}{\input{fig-nfa-subtype-2-3}}}%
+      \only<4>{\scalebox{0.95}{\input{fig-nfa-subtype-1-4-Number}}}%
+      \only<5>{\scalebox{0.95}{\input{fig-nfa-subtype-4-5}}}%
+      
+      \only<4,5>{\includegraphics[height=1.5cm]{red-head}\LARGE Backtracking $\implies O(2^n)$}%
+      \only<6>{\scalebox{0.95}{\input{fig-dfa-subtype}}\\
+      Deterministic Choice between $Int$ vs $Number\cap\overline{Int}$}%2
+      \only<7>{\scalebox{0.95}{\input{fig-dfa-subtype-1-2}}}%
+      \only<8>{\scalebox{0.95}{\input{fig-dfa-subtype-2-5}}}%
+      \only<9>{\scalebox{0.8}{\input{fig-dfa-subtype}}}%
+      %\only<10>{\scalebox{0.8}{\input{fig-dfa-subtype}}}%
+      %\only<11>{\scalebox{0.8}{\input{fig-dfa-subtype-habitation}}}%
+      \only<9->{}
+      \only<9>{\Challenge{4} How to partition types? \\
+        \Eg, type decomposition\\\quad\textcolor{greeny}{$\{String,Int,Number\}\to\{String,Int,Number\cap\overline{Int}\}$}}%
+      %\only<10>{\Challenge{5} How to optimize run-time type checks?}%
+      %\only<11>{\Challenge{6} How to check habitation?\\In spite of \emph{indeterminate} transitions.}%
+    \end{column}
+  \end{columns}
+\end{frame}

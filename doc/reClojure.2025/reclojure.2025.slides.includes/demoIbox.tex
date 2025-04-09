@@ -1,0 +1,10 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val pat1 = (S ++ Even.*).*
+val pat2 = (S ++ (I & Even).*).*
+val pat3 = (S ++ (I & Even & Large).*).*
+
+// emptyset if pat1 subset of pat2
+val diff12 = pat1 - pat2
+dfaView(diff12.toDfa())
+\end{lstlisting}

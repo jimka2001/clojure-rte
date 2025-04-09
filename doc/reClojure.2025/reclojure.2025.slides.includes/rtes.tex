@@ -1,0 +1,95 @@
+\section{Regular Type Expressions (RTEs) by Example}
+
+{  %% chapter slide
+  \setbeamercolor{background canvas}{bg=chaptercolor}
+\begin{frame}{Example}{Regular Type Expressions (RTEs)}
+  \centering
+  
+  \includegraphics[width=0.9\textwidth]{regexp.png}
+\end{frame}
+}
+
+\begin{frame}[t]{Regular Type Expressions (RTEs)}
+
+  We'd like to recognize sequences with  \Emph{regular patterns}.
+
+  \medskip
+  
+  \only<1,2,3>{{\LARGE [ {1}, \quad
+      {2.3},\quad
+      {9.3},\quad
+      {3},\quad
+      {1.5F},\quad
+      {6.5},\quad
+      {4.8F},\quad
+      {2},\quad
+      {2.3}]}
+  }%
+%  \only<4>{{\LARGE \centering {\tt "\textcolor{greeny}{i}\textcolor{blue}{D}\textcolor{blue}{D}\textcolor{greeny}{i}\textcolor{blue}{F}\textcolor{blue}{D}\textcolor{blue}{F}\textcolor{greeny}{i}\textcolor{blue}{D}"}}
+%}%
+  \only<5>{{\LARGE [ \textcolor{greeny}{1},
+    \textcolor{blue}{2.3},
+    \textcolor{blue}{9.3},
+    \quad \textcolor{greeny}{3},
+    \textcolor{blue}{1.5F},
+    \textcolor{blue}{6.5},
+    \textcolor{blue}{4.8F},
+    \quad \textcolor{greeny}{2},
+    \textcolor{blue}{2.3}]}
+  }%
+  \only<2,3>{
+
+  \bigskip
+
+    {\LARGE What's the pattern?}  }%
+
+  \only<3>{{\Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$},
+    \textcolor{blue}{$\underbrace{2.3, 9.3}_{\text{floating points}}$},
+    \quad \textcolor{greeny}{$\overbrace{3}^{integer}$},
+    \textcolor{blue}{$\underbrace{1.5F, 6.5, 4.8F}_{\text{floating points}}$},
+    \quad \textcolor{greeny}{$\overbrace{2}^{integer}$},
+    \textcolor{blue}{$\underbrace{2.3}_{\text{floating points}}$}]}
+  }%    
+
+
+  \bigskip
+
+  %%\only<4>{{\Large String-based \textcolor{blue}{regular expressions}}}
+  \only<5>{{\Large We propose \textcolor{greeny}{Regular Type Expressions (RTEs)}}}
+
+  \medskip
+  
+  \begin{columns}
+    \begin{column}{0.75\textwidth}
+      %% \only<4>{
+      %%   \begin{itemize}
+      %%   \item We use surface syntax: \code{"(i(D|F)+)*"}:
+      %%   \item ... representing expression: $(i\cdot (D\vee F)^+)^*$.
+      %%   \item ... as Abstract Syntax Tree (AST).
+      %%   \end{itemize}%
+      %% }
+      %
+      \only<5>{
+        \begin{itemize}
+        \item Regular type expression:
+          $($
+          \textcolor{greeny}{Int}
+          $\cdot~ ($
+          \textcolor{blue}{Double}
+          $\cup$
+          \textcolor{blue}{Float}
+          $) {}^{+} )^{*}$
+        \item \Challenge{1} We need a surface syntax (and AST).
+        \item \Challenge{2} How to support \textcolor{greeny}{$Int\cap\overline{Number}$} in a PL?
+        \end{itemize}
+      }%
+    \end{column}%
+    \begin{column}{0.25\textwidth}
+      \only<5>{\scalebox{0.7}{\input{strex}}}%
+    \end{column}%
+  \end{columns}
+\end{frame}
+
+
+
+

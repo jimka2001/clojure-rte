@@ -1,0 +1,9 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val r1:Rte = Or(EmptySeq, Int, Str)
+val re:Rte = EmptySeq | Int | Str
+      
+re.contains(List(42)) // returns true
+re.contains(List("hello")) // returns true
+re.contains(List(42, "hello")) // returns false
+\end{lstlisting}

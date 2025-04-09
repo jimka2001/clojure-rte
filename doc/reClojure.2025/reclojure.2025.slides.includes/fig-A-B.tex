@@ -1,0 +1,14 @@
+\documentclass{standalone}
+  \usepackage{tikz}
+  \usetikzlibrary{arrows.meta, automata, bending, positioning, shapes.misc}
+  \tikzstyle{automaton}=[shorten >=1pt, >={Stealth[bend,round]}, initial text=]
+
+\begin{document}
+\begin{tikzpicture}[automaton, auto, thick]
+  \node[state,initial,rounded rectangle] (0) {$0$};
+  \node[state,rounded rectangle] (1) [above right=3mm and 30mm of 0] {$1$};
+  \node[state,rounded rectangle] (2) [below right=3mm and 30mm of 0] {$2$};
+  \path[->] (0) edge[color=deterministic,line width=3] node {$A$} (1);
+  \path[->] (0) edge[color=deterministic,line width=3] node[swap] {$B$} (2);
+\end{tikzpicture}
+\end{document}

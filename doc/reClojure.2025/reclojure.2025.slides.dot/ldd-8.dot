@@ -1,0 +1,65 @@
+digraph G {
+node [ fontsize=14];
+bgcolor="#ffffff00" # RGBA (with alpha)
+
+9 [shape=box,label="I",fontname="Courier"]
+
+9 -> n8p [style=solid,color=green,penwidth=2]
+9 -> n8n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n8n [shape=box,label="N",fontname="Courier"]
+n8p [shape=box,label="STop",fontname="Courier"]
+
+{rank=same n8n n8p }
+
+
+n8p -> n1pp [style=solid,color=green,penwidth=2]
+n8p -> n6np [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n8n -> n1pn [style=solid,color=green,penwidth=2]
+n8n -> n6nn [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+{rank=same n1pp n6np n1pn n6nn }
+
+n1pp [shape=box,label="SEmpty",fontname="Courier"]
+n2pp [shape=plain,label="Some(1)",fontname="Courier"]
+n3pp [shape=box,label="STop",fontname="Courier"]
+n4pp [shape=plain,label="Some(2)",fontname="Courier"]
+n7pp [shape=plain,label="None",fontname="Courier"]
+{rank=same n2pp n3pp }
+{rank=same n4pp n7pp }
+
+n1pn [shape=box,label="STop",fontname="Courier"]
+n2pn [shape=plain,label="Some(1)",fontname="Courier"]
+n3pn [shape=box,label="SEmpty",fontname="Courier"]
+n4pn [shape=plain,label="Some(2)",fontname="Courier"]
+n7pn [shape=plain,label="None",fontname="Courier"]
+{rank=same n2pn n3pn }
+{rank=same n4pn n7pn }
+
+
+n1pp -> n2pp [style=solid,color=green,penwidth=2]
+n1pp -> n3pp [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n3pp -> n4pp [style=solid,color=green,penwidth=2]
+n3pp -> n7pp [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+
+n6np [shape=plain,label="Some(3)",fontname="Courier"]
+
+
+n1pn -> n2pn [style=solid,color=green,penwidth=2]
+n1pn -> n3pn [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n3pn -> n4pn [style=solid,color=green,penwidth=2]
+n3pn -> n7pn [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+
+n6nn [shape=plain,label="Some(3)",fontname="Courier"]
+
+
+
+
+
+
+}

@@ -1,0 +1,11 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val Str:SimpleTypeD = SAtomic(classOf[String])
+val Int:SimpleTypeD = SAtomic(classOf[Int])
+val Num:SimpleTypeD = SAtomic(classOf[Number])
+val odd:SimpleTypeD = SSatisfies(oddp, "oddp")
+
+Int.subtypep(Num)  // returns Some(true) -- Yes
+Str.subtypep(Int)  // returns Some(false) -- No
+SSatisfies(oddp).subtypep(Int) // returns None -- Dont-know
+\end{lstlisting}

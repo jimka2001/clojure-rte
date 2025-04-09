@@ -1,0 +1,16 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+def large(n:Any):Boolean = {
+  n match {
+    case n: Int => n > 127
+    case _ => false
+  }
+}
+
+def even(n:Any):Boolean = {
+  n match {
+    case n: Int => n % 2 == 0
+    case _ => false
+  }
+}
+\end{lstlisting}

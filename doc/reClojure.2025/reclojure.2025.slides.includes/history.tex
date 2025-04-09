@@ -1,0 +1,46 @@
+\section{History}
+{  %% chapter slide
+  \setbeamercolor{background canvas}{bg=chaptercolor}
+\begin{frame}{History}
+  \centering
+  %% image from https://patimes.org/history-and-its-relevance-to-public-administration/  
+  \includegraphics[width=0.8\textwidth]{reclojure-history.jpg}
+\end{frame}
+}
+\begin{frame}{Publication History}
+  \begin{itemize}
+  \item Regular Type Expressions (RTEs) ELS 2016
+  \item PhD Thesis 2018 for theoretical, implementation, and performance details
+    \url{https://www.lrde.epita.fr/wiki/Publications/newton.18.phd}
+    
+  \item \textit{A Portable, Simple, Embeddable Type System} [Newton, Pommellet] 2021 ELS
+
+  \item \textit{An Elegant and Fast Algorithm for Partitioning Types} [Newton] 2023 ELS
+  \item \textit{Type-Checking Heterogeneous Sequences in a Simple Embeddable Type System} [Newton] 2025 PADL
+  \item   RTE Available:
+
+    \medskip
+    
+  \begin{tabular}{ll}
+    Scala & \url{https://github.com/jimka2001/scala-rte}\\
+    Clojure & \url{https://github.com/jimka2001/clojure-rte}\\
+    Python & \url{https://github.com/jimka2001/python-rte}\\
+    Common Lisp & \url{https://github.com/jimka2001/cl-rte}    
+  \end{tabular}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Goal}
+  \begin{itemize}
+  \item Efficiently recognize \emph{regular patterns} in mixed-type sequences.
+  \item Supported in various programming languages:
+    \begin{itemize}
+    \item Scala as \code{Seq[Any]}
+    \item Python as \code{list}, \code{generator}
+    \item Clojure as \code{seq}
+    \item Common Lisp as \code{SEQUENCE}
+    \end{itemize}
+
+  \end{itemize}
+\end{frame}

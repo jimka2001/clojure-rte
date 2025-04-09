@@ -1,0 +1,48 @@
+\newcommand\etc{\textit{etc.}\xspace}
+\newcommand\eg{\textit{e.g.}\xspace}
+\newcommand\Eg{\textit{E.g.}\xspace}
+\newcommand\ie{\textit{i.e.}\xspace}
+\newcommand\Ie{\textit{I.e.}\xspace}
+\newcommand\etal{\textit{et al.}\xspace}
+\newcommand\vs{\textit{vs.}\xspace}
+\newcommand*\nodecirc[1]{%
+  \begin{tikzpicture}
+      \node[draw,circle,inner sep=1pt] {\footnotesize #1};
+   \end{tikzpicture}}
+
+
+\newcommand*\from{\colon}
+
+\newcommand*\xor{\oplus}
+\newcommand\code[1]{\textcolor{code}{\texttt{#1}}\xspace}
+\newcommand\Emph[1]{\colorbox{yellow!30}{\emph{#1}\xspace}}
+\newcommand\Challenge[1]{\colorbox{pink!30}{\Large\emph{Challenge \textnumero #1:}\xspace}}
+\DeclarePairedDelimiter{\sem}{\llbracket}{\rrbracket}
+\newcommand{\deriv}[2]{\partial_{#1\,}{#2}}
+\newcommand{\tybignum}{\mathit{bignum}}
+\newcommand{\tyfixnum}{\mathit{fixnum}}
+\newcommand{\tyfloat}{\mathit{float}}
+\newcommand{\tyint}{\mathit{int}}
+\newcommand{\tynumber}{\mathit{number}}
+\newcommand{\tyrational}{\mathit{rational}}
+\newcommand{\tyreal}{\mathit{real}}
+\newcommand{\tysequence}{\mathit{sequence}}
+\newcommand{\tystring}{\mathit{str}}
+\newcommand{\tyeven}{\mathit{even}}
+\newcommand{\tyodd}{\mathit{odd}}
+\newcommand{\compl}[1]{{\vphantom{{\overline{#1}}^{2}}}{\overline{\,#1\,}}}
+\newcommand\renot[1]{{!}#1}
+\newcommand\tynot[1]{\compl{#1}}
+\newcommand\setnot[1]{\compl{#1}}
+\newcommand\tysem[1]{\sem{#1}}
+\newcommand\resem[1]{\sem{#1}}
+\newcommand\typevar{\nu}
+\newcommand\typevart{\mu}
+\newcommand\singleton[1]{\lfloor{#1}\rfloor}
+\newcommand\reand{\mathop{\&}}
+\newcommand\setand{\cap}
+\newcommand\tyand{\cap}
+\newcommand\reor{+}
+\newcommand\setor{\cup}
+\newcommand\tyor{\cup}
+

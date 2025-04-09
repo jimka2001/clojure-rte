@@ -1,0 +1,17 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val bad   = Seq("C", 100, 200, 300,
+                 "M", 10.0, 20.0,
+                 "M",
+                 "C", 1, ~~2.0~~, 3, // VIOLATES PATTERN
+                 "C", 1, 3, 7, 8)
+
+val F:Rte = Atomic(classOf[Double]) | Atomic(classOf[Float])
+val I:Rte = Atomic(classOf[Int])
+val keyM:Rte = Eql("M")
+val keyC:Rte = Eql("C")
+
+val re:Rte = ((keyC ++ I.*) | (keyM ++ F.*)).*
+
+re.contains(~~bad~~) // returns false
+\end{lstlisting}

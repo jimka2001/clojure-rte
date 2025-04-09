@@ -1,0 +1,11 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val re:Rte = And(Int.*, Odd ++ Sigma.* ++ Even)
+      
+re.contains(List(41,42)) // returns true
+re.contains(List(1,2,3,4)) // returns true
+re.contains(List(42, "hello")) // returns false
+
+// intersection, Demorgan's equality
+assert( r1 & r2 == !(!r1 | !r2)) // for all r1, r2
+\end{lstlisting}

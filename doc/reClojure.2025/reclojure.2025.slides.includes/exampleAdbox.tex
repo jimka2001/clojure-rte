@@ -1,0 +1,9 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val F = Atomic(classOf[Double]) | Atomic(classOf[Float])
+val I = Atomic(classOf[Int])
+val keyM = Eql("M")
+val keyC = Eql("C")
+
+val re:Rte = ((keyC ++ I.*) | (keyM ++ F.*)).*
+\end{lstlisting}

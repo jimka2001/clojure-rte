@@ -1,0 +1,53 @@
+digraph G {
+node [ fontsize=14];
+bgcolor="#ffffff00" # RGBA (with alpha)
+
+8 [shape=box,label="N",fontname="Courier"]
+
+8 -> n1p [style=solid,color=green,penwidth=2]
+8 -> n1n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+{rank=same n1p n1n }
+
+n1p [shape=box,label="N & !I",fontname="Courier"]
+n2p [shape=plain,label="Some(1)",fontname="Courier"]
+n3p [shape=box,label="I",fontname="Courier"]
+n4p [shape=plain,label="Some(2)",fontname="Courier"]
+n5p [shape=box,label="!N",fontname="Courier"]
+n6p [shape=plain,label="Some(3)",fontname="Courier"]
+n7p [shape=plain,label="None",fontname="Courier"]
+{rank=same n2p n3p }
+{rank=same n4p n5p }
+{rank=same n6p n7p }
+
+n1p -> n2p [style=solid,color=green,penwidth=2]
+n1p -> n3p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n3p -> n4p [style=solid,color=green,penwidth=2]
+n3p -> n5p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n5p -> n6p [style=solid,color=green,penwidth=2]
+n5p -> n7p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+
+n1n [shape=box,label="N & !I",fontname="Courier"]
+n2n [shape=plain,label="Some(1)",fontname="Courier"]
+n3n [shape=box,label="I",fontname="Courier"]
+n4n [shape=plain,label="Some(2)",fontname="Courier"]
+n5n [shape=box,label="!N",fontname="Courier"]
+n6n [shape=plain,label="Some(3)",fontname="Courier"]
+n7n [shape=plain,label="None",fontname="Courier"]
+{rank=same n2n n3n }
+{rank=same n4n n5n }
+{rank=same n6n n7n }
+
+n1n -> n2n [style=solid,color=green,penwidth=2]
+n1n -> n3n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n3n -> n4n [style=solid,color=green,penwidth=2]
+n3n -> n5n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n5n -> n6n [style=solid,color=green,penwidth=2]
+n5n -> n7n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+}

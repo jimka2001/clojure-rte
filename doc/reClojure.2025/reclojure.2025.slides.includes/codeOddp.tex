@@ -1,0 +1,21 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+def oddp(a:Any):Boolean = {
+  a match {
+    case a:Int => a % 2 != 0
+    case _ => false
+  }
+}
+
+val Odd:SimpleTypeD = SSatisfies(oddp, "Odd")
+
+Odd.typep(7) // true
+Odd.typep(4) // false
+Odd.typep(7.0) // false
+Odd.typep("seven") // false
+
+Odd.subtypep(classOf[Number]) // None
+Odd.subtypep(classOf[Int]) // None
+SAtomic(classOf[Int]).subtypep(Odd) // None
+SAtomic(classOf[Int]).subtypep(classOf[Number]) // Some(true)
+\end{lstlisting}

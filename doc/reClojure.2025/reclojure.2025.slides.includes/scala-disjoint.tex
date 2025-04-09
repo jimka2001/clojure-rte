@@ -1,0 +1,43 @@
+\begin{frame}{Determining whether two classes are disjoint}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \usebox\classbox  
+    \end{column}%
+    \begin{column}{0.55\textwidth}
+      \only<1>{\scalebox{0.95}{\input{fig-A-B}}}%
+      \only<2>{\scalebox{0.95}{\input{fig-C-D}}}%
+      \only<3,4>{\scalebox{0.95}{\input{fig-G-E}}}%
+
+  \only<1>{{\LARGE \[\textcolor{blue}{A\cap B = \emptyset}\]}}%
+  \only<2>{{\LARGE \[\textcolor{blue}{C\cap D = unknown}\]}}%
+  \only<3>{{\LARGE \[\textcolor{blue}{G\subset E \implies G\cap E \neq \emptyset}\]}}%
+  \only<4>{{\LARGE \[\textcolor{blue}{E\cap F \neq \emptyset}\]}}%
+    \end{column}%
+  \end{columns}
+  \only<1>{Both are \code{final}; they have no common \Emph{inhabited} subclass.}%
+  \only<2>{\medskip
+
+    Is there a class \Emph{somewhere} which inherits from both?
+   }%
+
+  \only<3>{Explicit subtype relation.}%
+
+  \only<4>{\code{G} inherits from \code{E} and \code{F}.
+}
+\end{frame}
+
+
+\begin{frame}{Determining whether two classes are disjoint: Caveats}
+
+  \begin{itemize}
+    \medskip
+    \item If \Emph{currently} no subclass exists, JVM might \Emph{later} run-time
+      load \code{subclass.jar}
+
+    \item Closed world-view: assume current set of classes is complete
+
+    \item Open world-view: assume more classes exist than are findable.
+
+  \end{itemize}
+
+\end{frame}

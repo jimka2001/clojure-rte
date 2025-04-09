@@ -1,0 +1,20 @@
+\documentclass{standalone}
+  \usepackage{tikz}
+  \usetikzlibrary{arrows.meta, automata, bending, positioning, shapes.misc}
+  \tikzstyle{automaton}=[shorten >=1pt, >={Stealth[bend,round]}, initial text=]
+
+\begin{document}
+\begin{tikzpicture}[automaton, auto, thick]
+  \node[state,initial,rounded rectangle] (0) {$0$};
+  \node[state,rounded rectangle] (1) [right=10mm of 0] {$1$};
+  \node[state,rounded rectangle] (2) [fill=yellow,above right=7mm and 20mm of 1] {$2$};
+  \node[state,accepting] (3) [fill=yellow, right=20mm of 2] {$3$};
+  \node[state,rounded rectangle] (4) [below right=7mm and 20mm of 1] {$4$};
+  \node[state,accepting] (5) [right=20mm of 4] {$5$};
+  \path[->] (0) edge node {$Int$} (1);
+  \path[->] (1) edge[bend left=15]  node[pos=.8] {$Int$} (2);
+  \path[->] (2) edge[dashed, line width=3pt, color=red]  node {$\cancel{String}$} (3);
+  \path[->] (1) edge[bend right=15] node[swap] {$Number$} (4);
+  \path[->] (4) edge  node {$Float$} (5);
+\end{tikzpicture}
+\end{document}

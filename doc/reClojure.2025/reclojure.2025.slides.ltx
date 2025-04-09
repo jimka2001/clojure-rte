@@ -1,0 +1,67 @@
+\documentclass[compress,aspectratio=169]{beamer}
+%% \mode<presentation>{
+%%   \usetheme{Madrid}
+%% }
+\addtobeamertemplate{navigation symbols}{}{ \hspace{1em}    \usebeamerfont{footline}%
+    \insertframenumber / \inserttotalframenumber }
+\usepackage{xspace}
+\usepackage{pgf}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes.arrows}
+\tikzstyle{accepting}=[accepting by double]
+%%\tikzset{outer sep=2mm, accepting/.style={double distance=3.5mm}}
+\usepackage{appendixnumberbeamer}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage{color}
+\usepackage[subpreambles=true]{standalone}
+\usepackage{cancel}
+\usepackage{mathtools}
+\usepackage{stmaryrd}
+\usepackage{forest}
+
+\input{reclojure-colors}
+\input{reclojure-commands}
+\input{reclojure-listings}
+
+
+\title[]{Recognizing Regular Patterns in Mixed-Type Sequences using Symbolic Finite Automata}
+\author[]{Jim E. Newton}
+\institute[]{EPITA Research Laboratory, Le Kremlin Bic\^etre, FRANCE}
+
+\usepackage{textpos}
+
+
+\begin{document}
+
+{  
+
+\begin{frame}
+\titlepage
+\end{frame}
+}
+
+\begin{frame}{Overview}
+\tableofcontents
+\end{frame}
+
+
+\input{history}
+\input{rtes}
+\input{section-example-1} % matching (a 1 1.0 b "a" "an" "the" -5 2 22 222 d 2/3)
+\input{theoretic-problems}
+\input{challenge-1}
+\input{challenge-2}
+\input{challenge-3}
+\input{challenge-4}
+\input{conclusion}
+\input{scala-disjoint}
+\input{challenge-5}
+\input{challenge-6}
+
+
+
+
+\end{document}

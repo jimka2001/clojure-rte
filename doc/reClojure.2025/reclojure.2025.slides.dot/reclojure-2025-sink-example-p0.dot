@@ -1,0 +1,26 @@
+digraph G {
+  fontname=courier;
+  rankdir=LR; graph[labeljust=l,nojustify=true]
+  node [fontname=Arial, fontsize=25];
+  edge [fontsize=25];
+// Initial state
+I0 [label="", style=invis, width=0]
+I0 -> p0;
+// 2 final states
+// all 4 states
+p3 [label="", style=invis, width=0]
+p3 -> p3 [label="t9",style=invis]
+p3 -> p1 [label="t11",style=invis]
+p3 -> p2 [label="t7",style=invis]
+p3 -> p0 [label="t8",style=invis]
+p0 [label="p0",shape="doublecircle"]
+p0 -> p1 [label="t3"]
+p0 -> p2 [label="t2"]
+p2 [label="p2"]
+p2 -> p3 [label="t4",style=invis]
+p2 -> p1 [label="t10",style=invis]
+p2 -> p2 [label="t6",style=invis]
+p2 -> p0 [label="t5",style=invis]
+p1 [label="p1"]
+p1 -> p1 [label="t1",style=invis]
+}

@@ -1,0 +1,228 @@
+%\subsection{Vacuity: Habitation Checks}
+
+{  %% chapter slide
+  \setbeamercolor{background canvas}{bg=sectioncolor}
+\begin{frame}{\Challenge{6} How to detect habitation/vacuity in a DFA}
+
+  \centering
+  \includegraphics[width=\linewidth]{p4-p3}
+\end{frame}
+}
+
+\newsavebox\demoAbox
+\begin{lrbox}{\demoAbox}
+  \begin{minipage}{8cm}
+    \input{demoAbox}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\demoBbox
+\begin{lrbox}{\demoBbox}
+  \begin{minipage}{8cm}
+    \input{demoBbox}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\demoCbox
+\begin{lrbox}{\demoCbox}
+  \begin{minipage}{8cm}
+    \input{demoCbox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\begin{frame}{Setup}{Declaration Scala Code}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \usebox\demoBbox
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<1>{\usebox\demoAbox}%
+      \only<2>{\usebox\demoCbox}%
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\newsavebox\demoDbox
+\begin{lrbox}{\demoDbox}
+  \begin{minipage}{8cm}
+    \input{demoDbox}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\demoEbox
+\begin{lrbox}{\demoEbox}
+  \begin{minipage}{8cm}
+    \input{demoEbox}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\demoFbox
+\begin{lrbox}{\demoFbox}
+  \begin{minipage}{8cm}
+    \input{demoFbox}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\demoGbox
+\begin{lrbox}{\demoGbox}
+  \begin{minipage}{8cm}
+    \input{demoGbox}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\demoHbox
+\begin{lrbox}{\demoHbox}
+  \begin{minipage}{8cm}
+    \input{demoHbox}
+  \end{minipage}
+\end{lrbox}
+
+
+\newsavebox\demoIbox
+\begin{lrbox}{\demoIbox}
+  \begin{minipage}{8cm}
+    \input{demoIbox}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\demoJbox
+\begin{lrbox}{\demoJbox}
+  \begin{minipage}{8cm}
+    \input{demoJbox}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\demoKbox
+\begin{lrbox}{\demoKbox}
+  \begin{minipage}{8cm}
+    \input{demoKbox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+
+\begin{frame}{DFAs}
+  \only<1>{\usebox\demoDbox}%
+  \only<2>{\usebox\demoEbox}%
+  \only<3>{\usebox\demoFbox}%
+
+  \only<1>{\Large
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{S | Even}}
+    \end{align*}}%
+  \only<2>{\Large
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{S | (I \& Even)}}
+    \end{align*}}%
+  \only<3>{\Large
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{S | (I \& Even \& Large)}}
+    \end{align*}}
+
+  \only<1>{\centering\includegraphics[width=8cm]{pat1}}%
+  \only<2>{\centering\includegraphics[width=8cm]{pat2}}%
+  \only<3>{\centering\includegraphics[width=8cm]{pat3}}%
+\end{frame}
+
+\begin{frame}{Inclusion Checks}
+  \usebox\demoGbox
+
+  By inspection we see that \[\sem{pat3} \subsetneq \sem{pat2} = \sem{pat1}\,.\]
+  Can we determine this programmatically?
+\end{frame}
+
+
+
+\begin{frame}{Inclusion Checks}
+
+
+  \only<1>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \subset~ \sem{pat1}~ =~ YES}\]}%
+  \only<2>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \supset~ \sem{pat1}~ =~ DONT-KNOW}\]}%
+  \only<3>{\[\underbrace{\sem{pat3} \subsetneq \sem{pat2}}_{YES} = \sem{pat1}\]}%
+  \only<4>{\[\sem{pat2} \cap \overline{\sem{pat3}}\]}%
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \only<1>{\usebox\demoHbox}%
+      \only<2>{\usebox\demoIbox}%
+      \only<3>{\usebox\demoJbox}%
+      \only<4>{\usebox\demoKbox}%
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<1>{
+        \begin{align*}
+          t_0 &= \text{\code{S}}\\
+          t_1 &= \text{\code{S | (I \& Even)}}
+        \end{align*}
+        %                          [trim={left bottom right top},clip]
+        \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p1}
+      }%
+      \only<2>{
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{!I \& !S \& Even}} && Indeterminate\\
+      t_2 &= \text{\code{S | (I \& Even)}}\\
+      t_3 &= \text{\code{S | Even}}
+    \end{align*}
+    %                          [trim={left bottom right top},clip]
+    \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p1-p2}
+      }%
+      \only<3>{
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{S | (I \& Even, Large)}}
+    \end{align*}
+    %                          [trim={left bottom right top},clip]
+    \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p3-p2}
+      }%
+      \only<4>{
+        \begin{align*}
+          t_0 &= \text{\code{S}}\\
+          t_1 &= \text{\code{I \& Even \& !Large}}\\
+          t_2 &= \text{\code{S | (I \& Even \& Large)}}\\
+          t_3 &= \text{\code{S | (I \& Even)}}\\
+        \end{align*}
+        %                          [trim={left bottom right top},clip]
+        \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p3}
+      }
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Habitation Check}
+
+  Is the language of the DFA inhabited?
+  \begin{itemize}
+  \item YES -- satisfiable path to accepting state
+  \item NO -- no path to accepting state
+  \item DONT-KNOW -- only indeterminate paths to accepting state
+  \end{itemize}
+
+  \includegraphics[width=\linewidth]{p4-p3}
+
+\end{frame}
+
+
+\begin{frame}{Habitation Check}
+
+  How do Dijkstra weights work?
+
+  \only<1>{\scalebox{0.8}{\input{fig-4-dijkstra}}}%
+  \only<2,3>{\scalebox{0.8}{\input{fig-4-dijkstra-weighted-1}}}%
+  \only<4->{\scalebox{0.8}{\input{fig-4-dijkstra-weighted-2}}}%
+
+  \begin{itemize}
+  \item<2->{Satisfiable transitions have weight \textcolor{blue}{$W\!=1$}.}
+  \item<3->{Unsatisfiable transitions have weight \textcolor{red}{$W\!=\infty$}.}
+  \item<4->{Indeterminate transitions have weight \textcolor{red}{$W\!=5$} (number of states).}
+  \item<5>{Shortest path is $\nodecirc{0} \xrightarrow{1} \nodecirc{3} \xrightarrow{1} \nodecirc{4}  \xrightarrow{1} \nodecirc{2}$; length is $3$\\
+  Longer path is $\nodecirc{0}\xrightarrow{5}\nodecirc{1}\xrightarrow{1}\nodecirc{2}$; length is $6$}
+  \end{itemize}
+\end{frame}
+
+
+

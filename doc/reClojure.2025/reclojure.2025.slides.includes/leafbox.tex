@@ -1,0 +1,15 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+EmpySet   // empty set of sequences.
+Sigma     // singleton sequences.
+EmptySeq  // empty sequences.
+
+// singleton sequences of Int and of String
+val Int:Rte = Atomic(classOf[Int])    
+val Str:Rte = Atomic(classOf[String])
+
+Int.contains(List(42))      // returns true
+Int.contains(List("hello")) // returns false
+Str.contains(List("hello")) // returns true
+Str.contains(List())        // returns true
+\end{lstlisting}

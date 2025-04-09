@@ -1,0 +1,107 @@
+\subsection{Representation: RTE as AST}
+
+
+{  \setbeamercolor{background canvas}{bg=sectioncolor}
+\begin{frame}{\Challenge{1} RTE Representation}
+
+  How to represent an RTE in Scala, Python, etc...?
+
+
+  \medskip
+  
+  %% \begin{itemize}
+  %% \item Surface syntax: declarative, expressive, composable
+  %% \item Programmatic interface: reflective, algebraic manipulation
+  %% \end{itemize}
+\end{frame}
+}
+
+\newsavebox\exnoteboxscala
+\begin{lrbox}{\exnoteboxscala}
+  \begin{minipage}{6.5cm}
+    \input{exnoteboxscala}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\exnoteboxclojure
+\begin{lrbox}{\exnoteboxclojure}
+  \begin{minipage}{6.5cm}
+    \input{exnoteboxclojure}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\exnoteboxpython
+\begin{lrbox}{\exnoteboxpython}
+  \begin{minipage}{6.5cm}
+    \input{exnoteboxpython}
+  \end{minipage}
+\end{lrbox}
+
+
+\begin{frame}[t]{RTEs}{PL Declarative, Composable Syntax}
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+  \begin{itemize}
+  \item Mathematical notation:\\
+  \quad\textcolor{greeny}{$(Int \cdot (Double \cup odd)^+)^*$}
+
+  \item Leaf nodes interface to native type system
+
+  \item \only<1>{ Scala notation:\\
+    \usebox\exnoteboxscala}%
+  \only<2>{ Python notation:\\
+    \usebox\exnoteboxpython}%
+  \only<3>{ Clojure notation:\\
+    \usebox\exnoteboxclojure}%
+  \end{itemize}
+    \end{column}%
+    \begin{column}{0.45\textwidth}
+      \scalebox{0.7}{\input{strex-scala}}
+    \end{column}%
+  \end{columns}%
+\end{frame}
+
+
+\newsavebox\exampleAbox
+\begin{lrbox}{\exampleAbox}
+  \begin{minipage}{12cm}
+    \input{exampleAbox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\newsavebox\exampleAbbox
+\begin{lrbox}{\exampleAbbox}
+  \begin{minipage}{12cm}
+    \input{exampleAbbox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\newsavebox\exampleAcbox
+\begin{lrbox}{\exampleAcbox}
+  \begin{minipage}{12cm}
+    \input{exampleAcbox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\newsavebox\exampleAdbox
+\begin{lrbox}{\exampleAdbox}
+  \begin{minipage}{12cm}
+    \input{exampleAdbox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+
+\newsavebox\extendedbox
+\begin{lrbox}{\extendedbox}
+  \begin{minipage}{12cm}
+  \input{extendedbox}
+  \end{minipage}
+\end{lrbox}

@@ -1,0 +1,11 @@
+
+\begin{lstlisting}[style=reclojureScala]
+abstact class SimpleTypeD {...}
+case class SNot(s: SimpleTypeD) extends SimpleTypeD {...}
+case class SOr(override val tds: SimpleTypeD*) extends SimpleTypeD {...}
+case class SAnd(override val tds: SimpleTypeD*) extends SimpleTypeD {...}
+case class SAtomic(ct: Class[_]) extends SimpleTypeD {...}
+object SEmpty extends SimpleTypeD {...}
+object STop extends SimpleTypeD {...}
+case class SSatisfies(f: Any => Boolean, printable:String) extends SimpleTypeD {...}
+\end{lstlisting}

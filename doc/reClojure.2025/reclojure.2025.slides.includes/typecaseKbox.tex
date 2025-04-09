@@ -1,0 +1,12 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val N = SAtomic(classOf[Number])
+val I = SAtomic(classOf[Int])
+
+if I.typep(x)
+  Some(2)
+else if N.typep(x)
+    Some(1)
+else
+  Some(3)
+\end{lstlisting}

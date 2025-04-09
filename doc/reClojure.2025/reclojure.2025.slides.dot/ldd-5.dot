@@ -1,0 +1,30 @@
+digraph G {
+node [ fontsize=14];
+bgcolor="#ffffff00" # RGBA (with alpha)
+
+8 [shape=box,label="N",fontname="Courier"]
+
+8 -> n1p [style=solid,color=green,penwidth=2]
+8 -> n6n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+{rank=same n1p n6n }
+
+n1p [shape=box,label="!I",fontname="Courier"]
+n2p [shape=plain,label="Some(1)",fontname="Courier"]
+n3p [shape=box,label="I",fontname="Courier"]
+n4p [shape=plain,label="Some(2)",fontname="Courier"]
+n7p [shape=plain,label="None",fontname="Courier"]
+{rank=same n2p n3p }
+{rank=same n4p n7p }
+
+n1p -> n2p [style=solid,color=green,penwidth=2]
+n1p -> n3p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+n3p -> n4p [style=solid,color=green,penwidth=2]
+n3p -> n7p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+
+n6n [shape=plain,label="Some(3)",fontname="Courier"]
+
+
+}

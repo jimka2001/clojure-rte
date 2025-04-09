@@ -1,0 +1,20 @@
+\documentclass{standalone}
+  \usepackage{tikz}
+  \usetikzlibrary{arrows.meta, automata, bending, positioning, shapes.misc}
+  \tikzstyle{automaton}=[shorten >=1pt, >={Stealth[bend,round]}, initial text=]
+
+\begin{document}
+\begin{tikzpicture}[automaton, auto, thick]
+  \node[state,initial,rounded rectangle] (0) {$0$};
+  \node[state,rounded rectangle] (1) [right=10mm of 0] {$1$};
+  \node[state,rounded rectangle] (2) [below right=25mm and 40mm of 1] {$2$};
+  \node[state,rounded rectangle] (3) [above right=25mm and 40mm of 1] {$3$};
+  \node[state,rounded rectangle] (4) [above right=5mm and 55mm of 1] {$4$};
+  \node[state,rounded rectangle] (5) [below right=5mm and 55mm of 1] {$5$};
+  \path[->] (0) edge node {$Int$} (1);
+  \path[->] (1) edge[color=deterministic, line width=3pt, bend right=15]  node[pos=.7,swap] {$Int \cap Odd$} (2);
+  \path[->] (1) edge[color=deterministic, line width=3pt, bend left=15]  node[pos=.8] {$Int~ \cap ~!Odd $} (3);
+  \path[->] (1) edge[color=deterministic, line width=3pt, bend left=15]  node[pos=.5,swap] {$!Int \cap Odd$} (4);
+  \path[->] (1) edge[color=deterministic, line width=3pt, bend right=15]  node[pos=.5] {$!Int~ \cap~ !Odd$} (5);
+\end{tikzpicture}
+\end{document}

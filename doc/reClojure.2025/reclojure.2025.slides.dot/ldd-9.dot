@@ -1,0 +1,28 @@
+digraph G {
+node [ fontsize=14];
+bgcolor="#ffffff00" # RGBA (with alpha)
+
+I [shape=box,label="I",fontname="Courier"]
+
+I -> S2 [style=solid,color=green,penwidth=2]
+I -> In [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+In [shape=box,label="N",fontname="Courier"]
+S2 [shape=plain,label="Some(2)",fontname="Courier"]
+
+{rank=same S2 In }
+
+
+
+
+In -> S1 [style=solid,color=green,penwidth=2]
+In -> S3 [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+
+
+S3 [shape=plain,label="Some(3)",fontname="Courier"]
+S1 [shape=plain,label="Some(1)",fontname="Courier"]
+
+{rank=same S3 S1}
+
+}

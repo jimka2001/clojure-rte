@@ -1,0 +1,8 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+val Int:Rte      = Atomic(classOf[Int])
+val Double:Rte   = Atomic(classOf[Double])
+val Float:Rte    = Atomic(classOf[Float])
+
+val re:Rte = Int ++ (Double | Float).*
+\end{lstlisting}

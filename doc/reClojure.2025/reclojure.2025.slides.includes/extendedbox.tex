@@ -1,0 +1,14 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureScala]
+// binary infix operators
+r1 & r2 == And(r1,r2)
+r1 | r2 == Or(r1,r2)
+r1 ++ r2 == Cat(r1,r2)
+!re == Not(re)
+
+re.* == Star(re) // zero or more
+
+re.+ == re ++ re.* // one or more
+
+re.? == EmptySeq | re // zero or one
+\end{lstlisting}

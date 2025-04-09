@@ -1,0 +1,18 @@
+digraph G {
+  fontname=courier;
+  rankdir=LR; graph[labeljust=l,nojustify=true]
+  node [fontname=Arial, fontsize=25];
+  edge [fontsize=20];
+// Initial state
+I0 [label="", style=invis, width=0]
+I0 -> 0;
+// 1 final states
+// all 4 states
+0 [label="0"]
+0 -> 2 [label="t0"]
+2 [label="2"]
+2 -> 3 [label="t1"]
+2 -> 2 [label="t2"]
+3 [shape=doublecircle, label="3"]
+3 -> 3 [label="t3"]
+}
