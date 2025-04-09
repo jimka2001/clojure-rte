@@ -61,7 +61,7 @@
   Returns [s d] if the shortest path to a final state is to s, and
   where d is the shortest distance."
   [start f finals]
-  (letfn [(f [v] (dissoc (f v) v))]
+  (letfn [(f-no-self-loop [v] (dissoc (f v) v))]
     (loop [q (priority-map start 0)
            r {}
            p {}]
@@ -74,7 +74,7 @@
           [v d (find-path start v p)]
 
           :otherwise
-          (let [dist (-> (f v) (remove-keys r) (update-vals #(+ d %)))
+          (let [dist (-> (f-no-self-loop v) (remove-keys r) (update-vals #(+ d %)))
                 [q p] (reduce-kv (fn [[q p] n d]
                                    (let [curr-d (q n)]
                                      (if (or (nil? curr-d) (< d curr-d))
