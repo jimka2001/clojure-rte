@@ -13,10 +13,18 @@
 (defn remove-keys [m pred]
   (select-keys m (remove pred (keys m))))
 
-(defn find-path [start v p]
-  (if (= v start)
-    [start]
-    (conj (find-path start (get p v) p) v)))
+(defn find-path 
+  "return a list starting with `start` ending with `v` which represents
+  the shortest path from `start` to `v` as indicated in the `p` map.
+  The map `p` is the precedence map created by the `dijkstra` function
+  and likewise by `dijkstra-to-final`."
+  [start v p]
+  (loop [v v
+         path (list)]
+    (if (= v start)
+      (conj path start)
+      (recur (get p v) (conj path v)))))
+
 
 (defn dijkstra
   "Computes single-source shortest path distances in a directed graph.
@@ -25,22 +33,27 @@
   as keys and their (non-negative) distance from n as vals.
 
   Returns a vector with a map from nodes to their distance from start
-  and a map of prev nodes."
+  and a map of vector to delay object, which will yield a path from
+  start to the node in question."
   [start f]
-  (loop [q (priority-map start 0)
-         r {}
-         p {}]
-    (if-let [[v d] (peek q)]
-      (let [dist (-> (f v) (remove-keys r) (update-vals #(+ d %)))
-            [q p] (reduce-kv (fn [[q p] n d]
-                               (let [curr-d (q n)]
-                                 (if (or (nil? curr-d) (< d curr-d))
-                                   [(assoc q n d) (assoc p n v)]
-                                   [q p])))
-                             [(pop q) p]
-                             dist)]
-        (recur q (assoc r v d) p))
-      [r p])))
+  (letfn [(f-no-self-loop [v] (dissoc (f v) v))]
+    ;; f-no-self-loop is now a function which wraps the given function, `f`
+    ;;   but removes self loops from its return values
+    (loop [q (priority-map start 0)
+           r {}
+           p {}]
+      (if-let [[v d] (peek q)]
+        (let [dist (-> (f-no-self-loop v) (remove-keys r) (update-vals #(+ d %)))
+              [q p] (reduce-kv (fn [[q p] n d]
+                                 (let [curr-d (q n)]
+                                   (if (or (nil? curr-d) (< d curr-d))
+                                     [(assoc q n d) (assoc p n v)]
+                                     [q p])))
+                               [(pop q) p]
+                               dist)]
+          (recur q (assoc r v d) p))
+        [r (into {} (for [k (keys p)]
+                          [k (delay (find-path start k p))]))]))))
 
 (defn dijkstra-to-final
   "Like `dijkstra` function above, except that the search aborts
@@ -48,25 +61,26 @@
   Returns [s d] if the shortest path to a final state is to s, and
   where d is the shortest distance."
   [start f finals]
-  (loop [q (priority-map start 0)
-         r {}
-         p {}]
-    (let [[v d :as found] (peek q)]
-      (cond
-        (not found)
-        nil
+  (letfn [(f [v] (dissoc (f v) v))]
+    (loop [q (priority-map start 0)
+           r {}
+           p {}]
+      (let [[v d :as found] (peek q)]
+        (cond
+          (not found)
+          nil
 
-        (member v finals)
-        [v d (find-path start v p)]
+          (member v finals)
+          [v d (find-path start v p)]
 
-        :otherwise
-        (let [dist (-> (f v) (remove-keys r) (update-vals #(+ d %)))
-              [q p] (reduce-kv (fn [[q p] n d]
-                                 (let [curr-d (q n)]
-                                   (if (or (nil? curr-d) (< d curr-d))
-                                     [(assoc q n d) (assoc p n v)]
-                                     [q p])))
-                               [(pop q) p]
-                               dist)
-              ]
-          (recur q (assoc r v d) p))))))
+          :otherwise
+          (let [dist (-> (f v) (remove-keys r) (update-vals #(+ d %)))
+                [q p] (reduce-kv (fn [[q p] n d]
+                                   (let [curr-d (q n)]
+                                     (if (or (nil? curr-d) (< d curr-d))
+                                       [(assoc q n d) (assoc p n v)]
+                                       [q p])))
+                                 [(pop q) p]
+                                 dist)
+                ]
+            (recur q (assoc r v d) p)))))))
