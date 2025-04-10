@@ -4,26 +4,17 @@
       \usebox\classbox  
     \end{column}%
     \begin{column}{0.55\textwidth}
-      \only<1>{\scalebox{0.95}{\input{fig-A-B}}}%
-      \only<2>{\scalebox{0.95}{\input{fig-C-D}}}%
-      \only<3,4>{\scalebox{0.95}{\input{fig-G-E}}}%
 
-  \only<1>{{\LARGE \[\textcolor{blue}{A\cap B = \emptyset}\]}}%
-  \only<2>{{\LARGE \[\textcolor{blue}{C\cap D = unknown}\]}}%
-  \only<3>{{\LARGE \[\textcolor{blue}{G\subset E \implies G\cap E \neq \emptyset}\]}}%
-  \only<4>{{\LARGE \[\textcolor{blue}{E\cap F \neq \emptyset}\]}}%
+      \bigskip
+      
+      \begin{itemize}
+      \item<1->{Explicit subtype relation; not disjoint.}
+      \item<2->{Else if either is \code{:final}; they have no common \Emph{inhabited} subclass.}%
+      \item<3>{Else if either is \code{:interface}, there may be class which inherits from both?   }%
+      \item<3>{etc \ldots }%
+      \end{itemize}
     \end{column}%
   \end{columns}
-  \only<1>{Both are \code{final}; they have no common \Emph{inhabited} subclass.}%
-  \only<2>{\medskip
-
-    Is there a class \Emph{somewhere} which inherits from both?
-   }%
-
-  \only<3>{Explicit subtype relation.}%
-
-  \only<4>{\code{G} inherits from \code{E} and \code{F}.
-}
 \end{frame}
 
 

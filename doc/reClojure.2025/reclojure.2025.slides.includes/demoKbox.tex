@@ -3,7 +3,7 @@
 (let [pat-1 '(:* (:cat String (:* (? even))))
       pat-2 '(:* (:cat String (:* (and Integer (? even)))))
       pat-3 '(:* (:cat String (:* (and Integer (? even) (? large)))))
-      diff-23 (template (and ~pat-2 (not ~pat-3)))]
+      diff-23 (gns/- pat-2 pat-3)]
 
    ;; Example of element in pat2 but not pat3
    (dfa-to-dot diff-23 :view true))

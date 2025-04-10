@@ -3,8 +3,7 @@
 (let [pat-1 '(:* (:cat String (? even)))
       pat-2 '(:* (:cat String (and Integer
                                    (? even))))
-      diff-21 (template (and ~pat-2 
-                             (not ~pat-1)))]
+      diff-21 (gns/- pat-2 pat-1)]
 
  ;; emptyset if pat2 subset of pat1
  (dfa-to-dot diff-21 :view true))

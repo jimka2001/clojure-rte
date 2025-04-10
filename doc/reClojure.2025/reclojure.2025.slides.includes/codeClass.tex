@@ -1,13 +1,14 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=reclojureScala]
-final class A() {}
-final class B() {}
+\begin{lstlisting}[style=reclojureClojure]
+(isa? Integer Number) ;; true
+(isa? Number Integer) ;; false
 
-class C() {}
-trait D() {}
+(:flags (refl/type-reflect Number))
+;; --> #{:public :abstract}
 
-abstract class E() {}
-trait F {}
+(:flags (refl/type-reflect Integer))
+;; --> #{:public :final}
 
-class G() extends E with F {}
+(:flags (refl/type-reflect IPersistentVector)) 
+;; --> #{:interface :public :abstract}
 \end{lstlisting}
