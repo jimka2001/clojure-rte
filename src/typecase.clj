@@ -154,10 +154,17 @@
   (optimized-typep 234 xyzzy)
   --> (gns/typep 234 'xyzzy)"
   [v t]
-  (if (gns/satisfies? t)
-    (let [[_ pred] t]
-      `(boolean (~pred ~v)))
-    `(gns/typep ~v '~t)))
+  (cond (gns/satisfies? t)
+        (let [[_ pred] t]
+          `(boolean (~pred ~v)))
+
+        (gns/not? t)
+        (let [[_not ty] t]
+        `(not (optimized-typep ~v ~ty)))
+
+        :otherwise
+        `(gns/typep ~v '~t)))
+
 
 (defmacro typecase 
   "Takes an expression and a set of clauses
