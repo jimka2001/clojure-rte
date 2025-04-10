@@ -196,12 +196,14 @@
 
   Is the language of the DFA inhabited?
   \begin{itemize}
-  \item YES -- satisfiable path to accepting state
-  \item NO -- no path to accepting state
-  \item DONT-KNOW -- only indeterminate paths to accepting state
+  \item<1->{YES -- satisfiable path to accepting state}
+  \item<2->{NO -- no path to accepting state}
+  \item<3->{DONT-KNOW -- only indeterminate paths to accepting state}
+  \item<4>{Find shortest path using Dijkstra weighted-graph search}
   \end{itemize}
 
-  \includegraphics[width=\linewidth]{p4-p3}
+  \only<1>{\includegraphics[width=\linewidth]{p4-p3}}%
+  \only<2>{\includegraphics[width=\linewidth]{p4-p3-dij}}%
 
 \end{frame}
 
