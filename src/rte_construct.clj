@@ -2183,3 +2183,31 @@
               (= false final-state) false
               (:accepting (state-vec final-state)) ((:exit-map dfa) final-state)
               :else false)))))))
+
+(defmulti valid-rte? type-dispatch)
+(defmethod valid-rte? :or [[_ & args]]
+  (every? valid-rte? args))
+(defmethod valid-rte? :and [[_ & args]]
+  (every? valid-rte? args))
+(defmethod valid-rte? :or [[_ & args]]
+  (every? valid-rte? args))
+(defmethod valid-rte? :not [[arg]]
+  (valid-rte? arg))
+(defmethod valid-rte? :* [[arg]]
+  (valid-rte? arg))
+(defmethod valid-rte? :empty-word []
+  true)
+(defmethod valid-rte? :sigma []
+  true)
+(defmethod valid-rte? :empty-set []
+  true)
+(defmethod valid-rte? :default [type-designator]
+  (gns/valid-type? type-designator))
+
+(defn assert-valid-rte [rte]
+  (if (valid-rte? rte)
+    rte
+    (throw (ex-info "invalid rte"
+                    {:error-type :invalid-rte
+                     :rte rte}))))
+
