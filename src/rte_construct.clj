@@ -37,7 +37,7 @@
             [backtick :refer [template]]
             [genus-spec :as gs]
             )
-  (:refer-clojure :exclude [compile])
+  (:refer-clojure :exclude [compile + *])
 )
 
 ;; allow rte/ prefix even in this file.
@@ -350,6 +350,9 @@
   pattern)
 
 (defmethod expand-1 'satisfies method-expand-1-satisfies [pattern _functions]
+  (gns/expand-satisfies pattern))
+
+(defmethod expand-1 '? method-expand-1-satisfies [pattern _functions]
   (gns/expand-satisfies pattern))
 
 (defmethod expand-1 :? method-expand-1-question [pattern functions]
@@ -2211,3 +2214,38 @@
                     {:error-type :invalid-rte
                      :rte rte}))))
 
+
+;; programmatic constructors
+(def rte/And
+  (fn [& args]
+    (assert-valid-rte (template (:and ~@args)))))
+
+(def rte/Or
+  (fn [& args]
+    (assert-valid-rte (template (:or ~@args)))))
+
+(def rte/Not
+  (fn [arg]
+    (assert-valid-rte (template (:not ~arg)))))
+
+(def rte/*
+  (fn [arg]
+    (assert-valid-rte (template (:* ~arg)))))
+
+(def rte/Cat
+  (fn [arg]
+    (assert-valid-rte (template (:cat ~arg)))))
+
+(def rte/+
+  (fn [arg]
+    (assert-valid-rte (template (:cat ~arg (:* ~arg))))))
+
+(def rte/-
+  (fn [arg & args]
+    (assert-valid-rte (rte/And arg (rte/Not (apply rte/Or args))))))
+
+
+(def rte/?
+  (fn [arg]
+    (assert-valid-rte (template (:or :epsilon
+                                     ~arg)))))

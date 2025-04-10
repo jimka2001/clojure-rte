@@ -362,3 +362,16 @@
 ;;       (is (= (gns/canonicalize-type (template (not (and (or ~a ~b) (or ~x ~y)))) :dnf)
 ;;              nil)
 ;;           661))))
+
+
+(deftest t-construction
+  (testing "programmatic type construction"
+    (is (gns/And Integer))
+    (is (gns/And Integer String))
+    (is (gns/Or Integer String))
+    (is (gns/Not Integer))
+    (is (gns/Not 'Integer))
+    (is (gns/satisfies even?))
+
+    (is (thrown? Exception (gns/Not 'Integer 'String)))
+))
