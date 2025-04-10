@@ -53,7 +53,8 @@
     (is (gns/typep 3 '(not String)))
     (is (gns/typep 3 '(= 3)))
     (is (gns/typep 3 '(member 1 2 3 4)))
-    (is (gns/typep 3 '(satisfies integer?)))))
+    (is (gns/typep 3 '(satisfies integer?)))
+    (is (gns/typep 3 '(? integer?)))))
 
 (deftest t-member
   (testing "member type"
@@ -106,6 +107,9 @@
 
     (is (thrown? Exception (gns/expand-satisfies '(satisfies))) "test 2a")
     (is (thrown? Exception (gns/expand-satisfies '(satisfies f1 f2))) "test 2b")
+
+    (is (thrown? Exception (gns/expand-satisfies '(?))) "test 2c")
+    (is (thrown? Exception (gns/expand-satisfies '(? f1 f2))) "test 2d")
 
     (is (= (gns/expand-satisfies '(satisfies no-such-function))
            '(satisfies no-such-function)) "test 3")
@@ -195,6 +199,16 @@
                           (not (or (= a)
                                    (= 1)))))
                431)
+
+        (check '(and (and (and (or (member a b c 1 2 3) (= 1))
+                               (not (member a b c a b c)))
+                          (not (and java.lang.CharSequence
+                                    (? ratio?))))
+                     (and (not (and (? symbol?)
+                                    (? ratio?)))
+                          (not (or (= a)
+                                   (= 1)))))
+               432)
         ;; (check '(and (and (or (member a b c 1 2 3) (= 1))
         ;;                   (not (member a b c a b c))
         ;;                   (not (and java.lang.CharSequence
@@ -232,20 +246,38 @@
                          (and java.lang.Number))
                      java.lang.CharSequence)
                4655)
+        (check '(and (or (? int?)
+                         (and java.lang.Number))
+                     java.lang.CharSequence)
+               46551)
         (check '(and (or (and (satisfies int?))
                          (and java.lang.Number))
                      java.lang.CharSequence)
                4654)
+        (check '(and (or (and (? int?))
+                         (and java.lang.Number))
+                     java.lang.CharSequence)
+               46541)
         (check '(and (or (and (satisfies int?))
                          (and java.lang.Number))
                      java.lang.CharSequence)
                4653)
+        (check '(and (or (and (? int?))
+                         (and java.lang.Number))
+                     java.lang.CharSequence)
+               46531)
         (check '(and (or (and (satisfies symbol?)
                               (satisfies int?))
                          (and java.lang.Number))
                      (satisfies integer?)
                      java.lang.CharSequence)
                4652)
+        (check '(and (or (and (? symbol?)
+                              (? int?))
+                         (and java.lang.Number))
+                     (? integer?)
+                     java.lang.CharSequence)
+               46521)
         (check '(and (or (and (satisfies symbol?)
                               (satisfies int?))
                          (and java.lang.Number
@@ -253,6 +285,13 @@
                      (satisfies integer?)
                      java.lang.CharSequence)
                4651)
+        (check '(and (or (and (? symbol?)
+                              (? int?))
+                         (and java.lang.Number
+                              java.io.Serializable))
+                     (? integer?)
+                     java.lang.CharSequence)
+               46511)
         (check '(and (or (and (satisfies symbol?)
                               (satisfies int?))
                          (and java.lang.Number
@@ -261,6 +300,14 @@
                      java.lang.CharSequence)
                465)
 
+        (check '(and (or (and (? symbol?)
+                              (? int?))
+                         (and java.lang.Number
+                              java.io.Serializable))
+                     (not (not (? integer?)))
+                     java.lang.CharSequence)
+               4651)
+
         (check '(and (and (or (and (satisfies symbol?)
                                    (satisfies int?))
                               (and java.lang.Number
@@ -268,6 +315,13 @@
                           (not (not (satisfies integer?))))
                      java.lang.CharSequence)
                466)
+        (check '(and (and (or (and (? symbol?)
+                                   (? int?))
+                              (and java.lang.Number
+                                   java.io.Serializable))
+                          (not (not (? integer?))))
+                     java.lang.CharSequence)
+               4661)
         (check '(and (and (or (member a b c 1 2 3)
                               (= 1))
                           (not (member a b c a b c))
