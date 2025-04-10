@@ -22,7 +22,7 @@
 (ns typecase-test
   (:require [typecase :as sut]
             [genus]
-            [clojure.test :as t]))
+            [clojure.test :as t :refer [is]]))
 
 (defn -main []
   (clojure.test/run-tests 'typecase-test))
@@ -30,104 +30,102 @@
 (t/deftest test-substitute-1-type
   (t/testing "substitute-1-type"
     (let [substitute-1-type @#'sut/substitute-1-type]
-      (assert (= (substitute-1-type 'a :empty-set '(or a b a c))
-                 '(or :empty-set b :empty-set c)))
-      (assert (= (substitute-1-type 'a :empty-set '(and a b a c))
-                 '(and :empty-set b :empty-set c)))
-      (assert (= (substitute-1-type 'a :empty-set '(not (and a b a c)))
-                 '(not (and :empty-set b :empty-set c)))))))
+      (is (= (substitute-1-type 'a :empty-set '(or a b a c))
+             '(or :empty-set b :empty-set c)))
+      (is (= (substitute-1-type 'a :empty-set '(and a b a c))
+             '(and :empty-set b :empty-set c)))
+      (is (= (substitute-1-type 'a :empty-set '(not (and a b a c)))
+             '(not (and :empty-set b :empty-set c)))))))
 
 (t/deftest test-collect-leaf-types
   (t/testing "collect-leaf-types"
-    (assert (= (@#'sut/collect-leaf-types '((or a b a c)
-                                         (and a b a c)
-                                         (not (and a b a c))))
-               '(a b a c
-                   a b a c
-                   a b a c)))))
+    (is (= (@#'sut/collect-leaf-types '((or a b a c)
+                                        (and a b a c)
+                                        (not (and a b a c))))
+           '(a b a c
+               a b a c
+               a b a c)))))
 
 (defn odd-int? [x]
   (and (int? x)
        (odd? x)))
 
 
-
-
 (t/deftest test-typecase-optimization
   (t/testing "typcase optimization"
-    (assert (= (sut/typecase "hello"
-                             (or String Double) 42
-                             ;; TODO need a way to avoid using fully qualified name here.
-                             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
-                             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
-                         45)
-               42))
-    (assert (= (sut/typecase 1.0
-                         (or String Double) 42
-                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
-                         45)
-               42))
-    (assert (= (sut/typecase 1
-                         (or String Double) 42
-                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
-                         45)
-               43))
-    (assert (= (sut/typecase 2
-                         (or String Double) 42
-                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
-                         45)
-               44))
-    (assert (= (sut/typecase -2
-                         (or String Double) 42
-                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
-                         45)
-               45))
-    (assert (= (sut/typecase -1
-                         (or String Double) 42
-                         (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
-                         (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
-                         45)
-               43))
+    (is (= (sut/typecase "hello"
+             (or String Double) 42
+             ;; TODO need a way to avoid using fully qualified name here.
+             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
+             45)
+           42))
+    (is (= (sut/typecase 1.0
+             (or String Double) 42
+             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
+             45)
+           42))
+    (is (= (sut/typecase 1
+             (or String Double) 42
+             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
+             45)
+           43))
+    (is (= (sut/typecase 2
+             (or String Double) 42
+             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
+             45)
+           44))
+    (is (= (sut/typecase -2
+             (or String Double) 42
+             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
+             45)
+           45))
+    (is (= (sut/typecase -1
+             (or String Double) 42
+             (and (satisfies int?) (satisfies typecase-test/odd-int?)) 43
+             (and (satisfies int?) (not (satisfies typecase-test/odd-int?)) (not (satisfies neg?))) 44
+             45)
+           43))
     ))            
 
 (t/deftest test-typecase
   (t/testing "typecase"
-    (assert (= (sut/typecase 3)
-               nil))
-    (assert (= (sut/typecase 3 :sigma 4)
-               4))
-    (assert (= (sut/typecase 3 :empty-set 4)
-               nil))
-    (assert (= (sut/typecase 3
-                         :empty-set 4
-                         :sigma 5)
-               5))
-    (assert (= (sut/typecase "hello"
-                             Number 1
-                             String 2
-                             (satisfies int?) 3)
-               2))
+    (is (= (sut/typecase 3)
+           nil))
+    (is (= (sut/typecase 3 :sigma 4)
+           4))
+    (is (= (sut/typecase 3 :empty-set 4)
+           nil))
+    (is (= (sut/typecase 3
+             :empty-set 4
+             :sigma 5)
+           5))
+    (is (= (sut/typecase "hello"
+             Number 1
+             String 2
+             (satisfies int?) 3)
+           2))
 
-    (assert (= (sut/typecase 1.0
-                             Number 1
-                             String 2
-                             (satisfies int?) 3)
-               1))
+    (is (= (sut/typecase 1.0
+             Number 1
+             String 2
+             (satisfies int?) 3)
+           1))
 
-    (assert (= (sut/typecase 1.0
-                             (or String Number) 1
-                             String 2
-                             Number 3
-                             (satisfies int?) 4)
-               1))
-    (assert (= (sut/typecase 1.0
-                             String 2
-                             (or String Number) 1
-                             
-                             Number 3
-                             (satisfies int?) 4)
-               1))))
+    (is (= (sut/typecase 1.0
+             (or String Number) 1
+             String 2
+             Number 3
+             (satisfies int?) 4)
+           1))
+    (is (= (sut/typecase 1.0
+             String 2
+             (or String Number) 1
+             
+             Number 3
+             (satisfies int?) 4)
+           1))))
