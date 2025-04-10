@@ -20,6 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-construct
+  (:refer-clojure :exclude [compile])
   (:require [genus :as gns]
             [util :refer [member exists setof forall
                                       call-with-collector defn-memoized defmulti-memoized defmethod-memoized
@@ -37,7 +38,6 @@
             [backtick :refer [template]]
             [genus-spec :as gs]
             )
-  (:refer-clojure :exclude [compile + *])
 )
 
 ;; allow rte/ prefix even in this file.
@@ -2228,7 +2228,7 @@
   (fn [arg]
     (assert-valid-rte (template (:not ~arg)))))
 
-(def rte/*
+(def rte/Star
   (fn [arg]
     (assert-valid-rte (template (:* ~arg)))))
 
@@ -2236,16 +2236,16 @@
   (fn [arg]
     (assert-valid-rte (template (:cat ~arg)))))
 
-(def rte/+
+(def rte/Plus
   (fn [arg]
     (assert-valid-rte (template (:cat ~arg (:* ~arg))))))
 
-(def rte/-
+(def rte/And-not
   (fn [arg & args]
     (assert-valid-rte (rte/And arg (rte/Not (apply rte/Or args))))))
 
 
-(def rte/?
+(def rte/Question
   (fn [arg]
     (assert-valid-rte (template (:or :epsilon
                                      ~arg)))))

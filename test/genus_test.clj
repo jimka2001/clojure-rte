@@ -436,7 +436,7 @@
     (is (gns/Or Integer String))
     (is (gns/Not Integer))
     (is (gns/Not 'Integer))
-    (is (gns/satisfies even?))
+    (is (gns/Satisfies even?))
 
     (is (thrown? Exception (gns/Not 'Integer 'String)))
 ))

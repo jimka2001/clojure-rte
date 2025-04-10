@@ -2173,15 +2173,15 @@
   (fn [arg & args]
     (assert-valid-type (template (and ~arg (not (or ~@ args)))))))
 
-(def gns/satisfies
+(def gns/Satisfies
   (fn [arg]
     (assert-valid-type (template (satisfies ~arg)))))
 
-(def gns/?
+(def gns/Question
   (fn [arg]
     (assert-valid-type (template (satisfies ~arg)))))
 
-(def gns/==
+(def gns/Equal
   (fn [arg]
     (assert-valid-type (template (= ~arg)))))
 
