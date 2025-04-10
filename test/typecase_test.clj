@@ -92,6 +92,13 @@
            43))
     ))            
 
+;; (sut/typecase -1
+;;   String 100
+;;   (or String Number) 200
+;;   Integer 300
+;;    (satisfies evenp) 500)
+
+
 (t/deftest test-typecase
   (t/testing "typecase"
     (is (= (sut/typecase 3)

@@ -136,12 +136,23 @@
     (is (not (gns/typep 3 '(satisfies genus-test/test-predicate)))
         "test 0")
 
+    (is (not (gns/typep 3 '(? genus-test/test-predicate)))
+        "test 0b")
+
     (is (gns/typep 13 '(satisfies genus-test/test-predicate))
         "test 1")
 
+    (is (gns/typep 13 '(? genus-test/test-predicate))
+        "test 1b")
+
     ;; cannot use satisfies with undecorated function name
     ;;   from local name space.
-    (is (thrown? Exception (gns/typep 13 '(satisfies test-predicate))))))
+    (is (thrown? Exception (gns/typep 13 '(satisfies test-predicate))))
+
+    ;; cannot use ? with undecorated function name
+    ;;   from local name space.
+    (is (thrown? Exception (gns/typep 13 '(? test-predicate))))
+    ))
   
 
 (deftest t-canonicalize-and

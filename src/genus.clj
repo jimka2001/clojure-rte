@@ -106,21 +106,31 @@
 
 (def gns/satisfies?
   "Detect sequence starting with the simple symbol satisfies"
-  (seq-matcher 'satisfies))
+  (let [f1 (seq-matcher 'satisfies)
+        f2 (seq-matcher '?)]
+    (fn [x]
+      (or (f1 x) (f2 x)))))
 
 (defn class-designator?
-  "Predicate to determine whether the given symbol designates a java class."
+  "Predicate to determine whether the given object is a class or a
+  symbol designates a java class."
   [t]
-  (and (symbol? t)
-       (resolve t)
-       (class? (resolve t))))
+  (or (class? t)
+      (and (symbol? t)
+           (resolve t)
+           (class? (resolve t)))))
 
 (defn find-class
   "Given a valid class-designator, return the (java) class or nil if not found."
   [class-name]
-  (if (class-designator? class-name)
-    (resolve class-name)
-    nil))
+  (cond (class? class-name)
+        class-name
+
+        (class-designator? class-name)
+        (resolve class-name)
+
+        :othewise
+        nil))
 
 (defn-memoized [type-equivalent? type-equivalent?-impl]
   "Test whether two type designators represent the same type."
@@ -162,9 +172,10 @@
   type-dispatch)
 
 (defn callable-designator? [f]
-  (and (symbol? f)
-       (resolve f)
-       (fn? (deref (resolve f)))))
+  (or (fn? f)
+      (and (symbol? f)
+           (resolve f)
+           (fn? (deref (resolve f))))))
 
 (def ^:dynamic *pseudo-type-functions*
   "List of function designators which will be trusted as operand of satisfies
@@ -311,7 +322,8 @@
    (empty? type-designator)
    type-designator
 
-   (not= 'satisfies (first type-designator))
+   (and (not= 'satisfies (first type-designator))
+        (not= '? (first type-designator)))
    type-designator
 
    (empty? (rest type-designator))
@@ -401,6 +413,9 @@
 (defmethod typep 'and [a-value [_a-type & others]]
   (every? (fn [t1]
             (typep a-value t1)) others))
+
+(defmethod typep '? [a-value [a-type f]]
+  (typep a-value (template (satisfies ~f))))
 
 (defmethod typep 'satisfies [a-value [a-type f]]
   (boolean (cond (fn? f)
@@ -495,6 +510,11 @@
 (defmethod -canonicalize-type 'satisfies method-canonicalize-type-satisfies
   [type-designator _nf]
   (expand-satisfies type-designator))
+
+(defmethod -canonicalize-type '? method-canonicalize-type-?
+  [type-designator nf]
+  (-canonicalize-type (cons 'satisfies (rest type-designator))
+                      nf))
 
 (defmethod -canonicalize-type 'not method-canonicalize-type-not
   [type-designator nf]
@@ -1302,11 +1322,23 @@
   (or (member f *pseudo-type-functions*)
       (callable-designator? f)))
 
+(defmethod valid-type? '? [[_ f]]
+  (valid-type? (template (satisfies ~f))))
+
 (defmethod valid-type? '= [[_ & args]]
   (boolean (= 1 (count args))))
 
 (defmethod valid-type? 'member [[_ & _]]
   true)
+
+
+(defn assert-valid-type [td]
+  (if (valid-type? td)
+    td
+    (throw (ex-info "invalid type designator"
+                    {:error-type :invalid-type-designator
+                     :type-designator td}))))
+          
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implementation of disjoint? and -disjoint?
