@@ -2,12 +2,12 @@ digraph G {
 node [ fontsize=14];
 bgcolor="#ffffff00" # RGBA (with alpha)
 1 [shape=box,label="N & !I",fontname="Courier"]
-2 [shape=plain,label="Some(1)",fontname="Courier"]
+2 [shape=plain,label="1",fontname="Courier"]
 3 [shape=box,label="I",fontname="Courier"]
-4 [shape=plain,label="Some(2)",fontname="Courier"]
+4 [shape=plain,label="2",fontname="Courier"]
 5 [shape=box,label="!N",fontname="Courier"]
-6 [shape=plain,label="Some(3)",fontname="Courier"]
-7 [shape=plain,label="None",fontname="Courier"]
+6 [shape=plain,label="3",fontname="Courier"]
+7 [shape=plain,label="nil",fontname="Courier"]
 {rank=same 2 3}
 {rank=same 4 5}
 {rank=same 6 7}

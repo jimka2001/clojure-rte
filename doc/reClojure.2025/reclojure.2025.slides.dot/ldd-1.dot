@@ -1,21 +1,21 @@
 digraph G {
-node [ fontsize=14];
+node [ fontsize=14,fontname="Courier"];
 bgcolor="#ffffff00" # RGBA (with alpha)
 
-8 [shape=box,label="N",fontname="Courier"]
+8 [shape=box,label="N"]
 
-8 -> n1p [style=solid,color=green,penwidth=2]
-8 -> n1n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+subgraph cluster_1 {
+label = "copy 1"
 
-{rank=same n1p n1n }
-
-n1p [shape=box,label="N & !I",fontname="Courier"]
-n2p [shape=plain,label="Some(1)",fontname="Courier"]
-n3p [shape=box,label="I",fontname="Courier"]
-n4p [shape=plain,label="Some(2)",fontname="Courier"]
-n5p [shape=box,label="!N",fontname="Courier"]
-n6p [shape=plain,label="Some(3)",fontname="Courier"]
-n7p [shape=plain,label="None",fontname="Courier"]
+style=filled
+color=lavenderblush1
+n1p [shape=box,label="N & !I"]
+n2p [shape=plain,label="1"]
+n3p [shape=box,label="I"]
+n4p [shape=plain,label="2"]
+n5p [shape=box,label="!N"]
+n6p [shape=plain,label="3"]
+n7p [shape=plain,label="nil"]
 {rank=same n2p n3p }
 {rank=same n4p n5p }
 {rank=same n6p n7p }
@@ -28,15 +28,21 @@ n3p -> n5p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,di
 
 n5p -> n6p [style=solid,color=green,penwidth=2]
 n5p -> n7p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+}
 
+subgraph cluster_2 {
+label = "copy 2"
 
-n1n [shape=box,label="N & !I",fontname="Courier"]
-n2n [shape=plain,label="Some(1)",fontname="Courier"]
-n3n [shape=box,label="I",fontname="Courier"]
-n4n [shape=plain,label="Some(2)",fontname="Courier"]
-n5n [shape=box,label="!N",fontname="Courier"]
-n6n [shape=plain,label="Some(3)",fontname="Courier"]
-n7n [shape=plain,label="None",fontname="Courier"]
+style=filled
+color=honeydew
+
+n1n [shape=box,label="N & !I"]
+n2n [shape=plain,label="1"]
+n3n [shape=box,label="I"]
+n4n [shape=plain,label="2"]
+n5n [shape=box,label="!N"]
+n6n [shape=plain,label="3"]
+n7n [shape=plain,label="nil"]
 {rank=same n2n n3n }
 {rank=same n4n n5n }
 {rank=same n6n n7n }
@@ -49,5 +55,12 @@ n3n -> n5n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,di
 
 n5n -> n6n [style=solid,color=green,penwidth=2]
 n5n -> n7n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
+
+}
+
+#{rank=same n1p n1n }
+
+8 -> n1p [style=solid,color=green,penwidth=2]
+8 -> n1n [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
 
 }

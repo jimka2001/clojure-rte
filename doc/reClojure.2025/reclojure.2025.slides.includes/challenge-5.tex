@@ -201,7 +201,7 @@
     \begin{column}{0.5\textwidth}  %%
       \only<1>{\usebox\typecaseAbox}%
       \only<2>{\usebox\typecaseKbox}
-    \end{column}    
+    \end{column}
   \end{columns}
 
   \begin{itemize}
@@ -256,7 +256,7 @@
 
 
 \begin{frame}{Rewrite: $\colorbox{orange!30}{\Huge 1}\to 2\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}%1
-  Duplicate tree, and introduce \colorbox{pink!30}{\code{if N.typep(x) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x N) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
 
   \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -269,15 +269,15 @@
 \end{frame}
 
 \begin{frame}{Rewrite: $\colorbox{orange!30}{\Huge 1}\to 2\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}%1
-  Duplicate tree, and introduce \colorbox{pink!30}{\code{if N.typep(x) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x N) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
   
   \centerline{  \includegraphics[height=0.8\textheight]{ldd-1.pdf}}
 \end{frame}
 
 \begin{frame}{Rewrite: $1\to \colorbox{orange!30}{\Huge 2}\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}
   \begin{tabular}{ll}
-  In \code{\textcolor{greeny}{then}} part: \colorbox{pink!30}{Supertypes of \code{N} $\to$ \code{STop}}. &
-  In \code{\textcolor{red}{else}} part: \colorbox{pink!30}{Subtypes of \code{N} $\to$ \code{SEmpty}}.
+  In \code{\textcolor{greeny}{then}} part: \colorbox{pink!30}{Supertypes of \code{N} $\to$ \code{:sigma}}. &
+  In \code{\textcolor{red}{else}} part: \colorbox{pink!30}{Subtypes of \code{N} $\to$ \code{:empty-set}}.
   \end{tabular}
   
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-1.pdf}}}%
@@ -286,7 +286,7 @@
 
 \begin{frame}{Rewrite: $1\to 2\to \colorbox{orange!30}{\Huge 3}\to 4\to 5\to 6\to 7\to 8\to 9$}
   \begin{tabular}{ll}
-    \colorbox{pink!30}{\code{!STop} $\to$ \code{SEmpty}} &       \colorbox{pink!30}{\code{!SEmpty} $\to$ \code{STop}}    
+    \colorbox{pink!30}{\code{(not :sigma)} $\to$ \code{:empty-set}} &       \colorbox{pink!30}{\code{(not :empty-set)} $\to$ \code{:sigma}}    
   \end{tabular}
 
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-2.pdf}}}%
@@ -295,7 +295,7 @@
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to \colorbox{orange!30}{\Huge 4}\to 5\to 6\to 7\to 8\to 9$}
   \begin{tabular}{ll}
-    \colorbox{pink!30}{\code{(STop \& x)} $\to$ \code{x}} &       \colorbox{pink!30}{\code{(SEmpty \& x)} $\to$ \code{SEmpty}}
+    \colorbox{pink!30}{\code{(:sigma \& x)} $\to$ \code{x}} &       \colorbox{pink!30}{\code{(:empty-set \& x)} $\to$ \code{:empty-set}}
   \end{tabular}
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-3.pdf}}}%
   \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-4.pdf}}}
@@ -305,14 +305,14 @@
 \newsavebox\boxstop
 \begin{lrbox}{\boxstop}
 \begin{tikzpicture}
-\node[draw,text width=0.7cm] at (2,-2) {\code{STop}};
+\node[draw,text width=1.2cm] at (2,-2) {\code{:sigma}};
 \end{tikzpicture}
 \end{lrbox}
 
 \newsavebox\boxsempty
 \begin{lrbox}{\boxsempty}
 \begin{tikzpicture}
-\node[draw,text width=1.2cm] at (2,-2) {\code{SEmpty}};
+\node[draw,text width=2.0cm] at (2,-2) {\code{:empty-set}};
 \end{tikzpicture}
 \end{lrbox}
 
@@ -330,7 +330,7 @@
 
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to \colorbox{orange!30}{\Huge 6}\to 7\to 8\to 9$}
-  Duplicate tree, and introduce \colorbox{pink!30}{\code{if I.typep(x) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x I) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
 
   \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -344,7 +344,7 @@
 \end{frame}
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to \colorbox{orange!30}{\Huge 6}\to 7\to 8\to 9$}
-  Duplicate tree, and introduce \colorbox{pink!30}{\code{if I.typep(x) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x I) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
 
   \centerline{\includegraphics[height=0.8\textheight]{ldd-6.pdf}}  %
 \end{frame}
@@ -352,8 +352,8 @@
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to 6\to \colorbox{orange!30}{\Huge 7}\to 8\to 9$}
   \begin{tabular}{ll}
-  In \code{\textcolor{greeny}{then}} part: \colorbox{pink!30}{Supertypes of \code{I} $\to$ \code{STop}}.&
-  In \code{\textcolor{red}{else}} part: \colorbox{pink!30}{Subtypes of \code{I} $\to$ \code{SEmpty}}.
+  In \code{\textcolor{greeny}{then}} part: \colorbox{pink!30}{Supertypes of \code{I} $\to$ \code{:sigma}}.&
+  In \code{\textcolor{red}{else}} part: \colorbox{pink!30}{Subtypes of \code{I} $\to$ \code{:empty-set}}.
   \end{tabular}
 
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-6.pdf}}}%
@@ -363,8 +363,8 @@
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to 6\to 7\to \colorbox{orange!30}{\Huge 8}\to 9$}
   \begin{tabular}{ll}
-      \colorbox{pink!30}{\code{!STop} $\to$ \code{SEmpty}} &    
-      \colorbox{pink!30}{\code{!SEmpty} $\to$ \code{STop}}
+      \colorbox{pink!30}{\code{(not :sigma)} $\to$ \code{:empty-set}} &    
+      \colorbox{pink!30}{\code{(not :empty-set)} $\to$ \code{:sigma}}
   \end{tabular}
 
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-7.pdf}}}%
@@ -396,7 +396,7 @@
     \end{column}
   \end{columns}
 
-  And it is clear the code never returns \code{None}.
+  And it is clear the code never returns \code{nil}.
 
 \end{frame}
 

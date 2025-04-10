@@ -10,10 +10,10 @@ bgcolor="#ffffff00" # RGBA (with alpha)
 {rank=same n1p n6n }
 
 n1p [shape=box,label="!I",fontname="Courier"]
-n2p [shape=plain,label="Some(1)",fontname="Courier"]
+n2p [shape=plain,label="1",fontname="Courier"]
 n3p [shape=box,label="I",fontname="Courier"]
-n4p [shape=plain,label="Some(2)",fontname="Courier"]
-n7p [shape=plain,label="None",fontname="Courier"]
+n4p [shape=plain,label="2",fontname="Courier"]
+n7p [shape=plain,label="nil",fontname="Courier"]
 {rank=same n2p n3p }
 {rank=same n4p n7p }
 
@@ -24,7 +24,7 @@ n3p -> n4p [style=solid,color=green,penwidth=2]
 n3p -> n7p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
 
 
-n6n [shape=plain,label="Some(3)",fontname="Courier"]
+n6n [shape=plain,label="3",fontname="Courier"]
 
 
 }

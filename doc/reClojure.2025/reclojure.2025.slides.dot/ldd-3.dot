@@ -9,13 +9,13 @@ bgcolor="#ffffff00" # RGBA (with alpha)
 
 {rank=same n1p n1n }
 
-n1p [shape=box,label="STop & !I",fontname="Courier"]
-n2p [shape=plain,label="Some(1)",fontname="Courier"]
+n1p [shape=box,label=":sigma & !I",fontname="Courier"]
+n2p [shape=plain,label="1",fontname="Courier"]
 n3p [shape=box,label="I",fontname="Courier"]
-n4p [shape=plain,label="Some(2)",fontname="Courier"]
-n5p [shape=box,label="SEmpty",fontname="Courier"]
-n6p [shape=plain,label="Some(3)",fontname="Courier"]
-n7p [shape=plain,label="None",fontname="Courier"]
+n4p [shape=plain,label="2",fontname="Courier"]
+n5p [shape=box,label=":empty-set",fontname="Courier"]
+n6p [shape=plain,label="3",fontname="Courier"]
+n7p [shape=plain,label="nil",fontname="Courier"]
 {rank=same n2p n3p }
 {rank=same n4p n5p }
 {rank=same n6p n7p }
@@ -30,13 +30,13 @@ n5p -> n6p [style=solid,color=green,penwidth=2]
 n5p -> n7p [style=dashed,color=red,penwidth=2,arrowhead=normal,arrowtail=odot,dir=both]
 
 
-n1n [shape=box,label="SEmpty & STop",fontname="Courier"]
-n2n [shape=plain,label="Some(1)",fontname="Courier"]
-n3n [shape=box,label="SEmpty",fontname="Courier"]
-n4n [shape=plain,label="Some(2)",fontname="Courier"]
-n5n [shape=box,label="STop",fontname="Courier"]
-n6n [shape=plain,label="Some(3)",fontname="Courier"]
-n7n [shape=plain,label="SEmptyone",fontname="Courier"]
+n1n [shape=box,label=":empty-set & :sigma",fontname="Courier"]
+n2n [shape=plain,label="1",fontname="Courier"]
+n3n [shape=box,label=":empty-set",fontname="Courier"]
+n4n [shape=plain,label="2",fontname="Courier"]
+n5n [shape=box,label=":sigma",fontname="Courier"]
+n6n [shape=plain,label="3",fontname="Courier"]
+n7n [shape=plain,label="nil",fontname="Courier"]
 {rank=same n2n n3n }
 {rank=same n4n n5n }
 {rank=same n6n n7n }
