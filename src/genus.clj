@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns genus
-  (:refer-clojure :exclude [satisfies?])
+  (:refer-clojure :exclude [satisfies? == * +])
   (:require [clojure.set :refer [subset?]]
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
@@ -2155,3 +2155,36 @@
             gns/type-equivalent? (gc-friendly-memoize gns/type-equivalent?-impl)
             ]
   (thunk)))
+
+;; programmatic constructors
+(def gns/And
+  (fn [& args]
+    (assert-valid-type (template (and ~@args)))))
+
+(def gns/Or
+  (fn [& args]
+    (assert-valid-type (template (or ~@args)))))
+
+(def gns/Not
+  (fn [arg]
+    (assert-valid-type (template (not ~arg)))))
+
+(def gns/And-not
+  (fn [arg & args]
+    (assert-valid-type (template (and ~arg (not (or ~@ args)))))))
+
+(def gns/satisfies
+  (fn [arg]
+    (assert-valid-type (template (satisfies ~arg)))))
+
+(def gns/?
+  (fn [arg]
+    (assert-valid-type (template (satisfies ~arg)))))
+
+(def gns/==
+  (fn [arg]
+    (assert-valid-type (template (= ~arg)))))
+
+(def gns/Member
+  (fn [& args]
+    (assert-valid-type (template (member ~@args)))))
