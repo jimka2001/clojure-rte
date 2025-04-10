@@ -2,5 +2,5 @@
 \begin{lstlisting}[style=reclojureClojure]
 (subtypep 'Integer 'Number) ;; returns true
 (subtypep 'String 'Integer) ;; returns false
-(subtypep '(satisfies oddp) 'Integer) ;; returns :dont-know
+(subtypep '(satisfies odd?) 'Integer) ;; returns :dont-know
 \end{lstlisting}

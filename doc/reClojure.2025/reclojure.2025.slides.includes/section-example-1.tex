@@ -78,7 +78,7 @@
   %% \only<8>{8}%
   %% \only<9>{9}%
   %% \only<10>{10}%
-  \only<1,9>{Suppose sequence = \code{[2,  3, 5.6]}}%
+  \only<1>{Suppose sequence = \code{[2,  3, 5.6]}}%
   \only<2,4,6,7>{Suppose sequence = \code{[2,  \colorbox{orange!30}{\Large 3}, 5.6]}}%
   \only<3,5,8>{Suppose sequence = \code{[2,  3, \colorbox{orange!30}{\Large 5.6}]}}%
 
@@ -86,16 +86,11 @@
     \begin{column}{0.3\textwidth}
       \centering
       
-      \only<1-9>{\begin{align*}
+      \only<1-11>{\begin{align*}
         Int&\subseteq Number\\
         Int &\cap Number \neq \emptyset
       \end{align*}%
-      \scalebox{0.8}{\input{tikz-int-float}}}%
-      %% \only<11>{\begin{align*}
-      %%   Int&\subseteq Int\\
-      %%   Int &\cap String = \emptyset
-      %%   \end{align*}
-      %%   \scalebox{1}{\input{tikz-int-odd}}}
+      \only<1-8>{\scalebox{0.8}{\input{tikz-int-float}}}}%
     \end{column}%
     \begin{column}{0.7\textwidth}
       \only<1>{\scalebox{0.95}{\input{fig-nfa-subtype}}}%
@@ -109,14 +104,14 @@
       Deterministic Choice between $Int$ vs $Number\cap\overline{Int}$}%2
       \only<7>{\scalebox{0.95}{\input{fig-dfa-subtype-1-2}}}%
       \only<8>{\scalebox{0.95}{\input{fig-dfa-subtype-2-5}}}%
-      \only<9>{\scalebox{0.8}{\input{fig-dfa-subtype}}}%
+      \only<9-10>{\scalebox{0.95}{\input{fig-dfa-subtype}}}%
+      \only<11>{\scalebox{0.95}{\input{fig-dfa-subtype-indet}}}%
       %\only<10>{\scalebox{0.8}{\input{fig-dfa-subtype}}}%
       %\only<11>{\scalebox{0.8}{\input{fig-dfa-subtype-habitation}}}%
-      \only<9->{}
-      \only<9>{\Challenge{4} How to partition types? \\
-        \Eg, type decomposition\\\quad\textcolor{greeny}{$\{String,Int,Number\}\to\{String,Int,Number\cap\overline{Int}\}$}}%
-      %\only<10>{\Challenge{5} How to optimize run-time type checks?}%
-      %\only<11>{\Challenge{6} How to check habitation?\\In spite of \emph{indeterminate} transitions.}%
     \end{column}
   \end{columns}
+  \only<9->{\Challenge{4} How to partition/decompose types?\\}
+  \only<9>{\quad\textcolor{greeny}{$\{String,Int,Number\}\to\{String,Int,Number\cap\overline{Int}\}$}}%
+  \only<10->{\Challenge{5} How to optimize run-time type checks?\\}%
+  \only<11->{\Challenge{6} How to check habitation? Despite \emph{indeterminate} transitions.}%
 \end{frame}
