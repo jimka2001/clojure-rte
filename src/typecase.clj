@@ -203,7 +203,8 @@
     (let [canonicalized-pairs (prune-pairs (canonicalize-pairs pairs))]
       (if (empty? canonicalized-pairs)
         nil
-        (let [[most-freq influence disjoints proper-supers proper-subs] (maximize-influence canonicalized-pairs)]
+        (let [[most-freq influence disjoints proper-supers proper-subs]
+              (maximize-influence canonicalized-pairs)]
           (cond
             (and (= 1 (count canonicalized-pairs))
                  (= :sigma (first (first canonicalized-pairs))))
