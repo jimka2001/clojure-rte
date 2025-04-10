@@ -143,7 +143,16 @@
   
 (defmacro optimized-typep
   "Macro used to optimize the a call such as (typep x '(satisfies y))
-  to (y x)"
+  to (y x)
+
+  (optimized-typep 234 (not (satisfies y)))
+  --> (not (optimized-typep 234 (satisfies y)))
+
+  (optimized-typep 234 (satisfies y))
+  --> (boolean (y 234))
+
+  (optimized-typep 234 xyzzy)
+  --> (gns/typep 234 'xyzzy)"
   [v t]
   (if (gns/satisfies? t)
     (let [[_ pred] t]
@@ -152,9 +161,24 @@
 
 (defmacro typecase 
   "Takes an expression and a set of clauses
-  type-descriptor consequent
+  of the form ... type-designator consequent ...
   and an optional final default value.
-  The type-descriptors are those as specified in clojure.rte-genus
+
+  The evaluation semantics are the following:
+  The first (type-designator consequent) value is chosen
+  for which the given value is of that type (as per genus/typep),
+  and the consequent is evaluated.  If multiple type-designators
+  match the value, only the first consequent is evaluated.
+
+  E.g.,
+  (typecase 42
+    String (println 100)
+    (or String (satisfies oddp)) (println 200)
+    (and Integer (satisfies evenp)) (println 300) ;; <-- this is chosen and evaluated
+    (or String Integer) (println 400)
+    (println 500))
+
+  The type-designators are those as specified in genus.
   The given expression is evaluated a maximum of once, but in some
   optimized cases it may not be evaluated at all.  If none of the type
   designators designate a type for which the given value is a member,
