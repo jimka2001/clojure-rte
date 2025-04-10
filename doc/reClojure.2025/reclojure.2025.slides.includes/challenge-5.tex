@@ -212,7 +212,7 @@
 \end{frame}
 
 \begin{frame}{Decision Tree Structure}
-  We programmatically manipulate \code{if \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...} using a lazy decision tree.
+  We programmatically manipulate \code{if \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...} using a decision tree.
 
   \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -275,9 +275,9 @@
 \end{frame}
 
 \begin{frame}{Rewrite: $1\to \colorbox{orange!30}{\Huge 2}\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}
-  \begin{tabular}{ll}
-  In \code{\textcolor{greeny}{then}} part: \colorbox{pink!30}{Supertypes of \code{N} $\to$ \code{:sigma}}. &
-  In \code{\textcolor{red}{else}} part: \colorbox{pink!30}{Subtypes of \code{N} $\to$ \code{:empty-set}}.
+\begin{tabular}{ll}
+  In \code{\textcolor{greeny}{then}}: \colorbox{pink!30}{Supertypes of \code{N} $\to$ \code{:sigma}}. &
+  In \code{\textcolor{red}{else}}: \colorbox{pink!30}{Subtypes of \code{N} $\to$ \code{:empty-set}}.
   \end{tabular}
   
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-1.pdf}}}%
@@ -352,8 +352,8 @@
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to 6\to \colorbox{orange!30}{\Huge 7}\to 8\to 9$}
   \begin{tabular}{ll}
-  In \code{\textcolor{greeny}{then}} part: \colorbox{pink!30}{Supertypes of \code{I} $\to$ \code{:sigma}}.&
-  In \code{\textcolor{red}{else}} part: \colorbox{pink!30}{Subtypes of \code{I} $\to$ \code{:empty-set}}.
+  In \code{\textcolor{greeny}{then}}: \colorbox{pink!30}{Supertypes of \code{I} $\to$ \code{:sigma}}.&
+  In \code{\textcolor{red}{else}}: \colorbox{pink!30}{Subtypes of \code{I} $\to$ \code{:empty-set}}.
   \end{tabular}
 
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-6.pdf}}}%

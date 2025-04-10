@@ -8,7 +8,7 @@ subgraph cluster_1 {
 label = "copy 1"
 
 style=filled
-color=lavenderblush1
+color=honeydew
 
 
 n3pn [shape=box,label="I",fontname="Courier"]
@@ -35,7 +35,7 @@ subgraph cluster_2 {
 label = "copy 2"
 
 style=filled
-color=honeydew
+color=lavenderblush1
 
 n8p [shape=box,label="N",fontname="Courier"]
 
