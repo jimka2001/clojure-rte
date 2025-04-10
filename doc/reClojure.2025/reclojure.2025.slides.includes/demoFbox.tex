@@ -1,5 +1,5 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=reclojureScala]
-pat3 = (S ++ (I & Even & Large).*).*
-dfaView(pat3.toDfa())
+\begin{lstlisting}[style=reclojureClojure]
+(let [pat-3 '(:* (:cat String (:* (and Integer (? even) (? large)))))]
+  (dfa-to-dot pat-3 :view true))
 \end{lstlisting}

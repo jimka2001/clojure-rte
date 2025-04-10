@@ -1,11 +1,11 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=reclojureScala]
-// returns true
-SAtomic(classOf[Int]).typep(-42) 
+\begin{lstlisting}[style=reclojureClojure]
+;; returns true
+(typep -42 'Integer)
 
-// returns true
-(SAtomic(classOf[String]) || SAtomic(classOf[Int])).typep(7)
+;; returns true
+(typep 7 '(or String Integer))
 
-// returns false
-SSatisfies(oddp).typep(36)
+;; returns false
+(typep 32 '(satisfies oddp))
 \end{lstlisting}

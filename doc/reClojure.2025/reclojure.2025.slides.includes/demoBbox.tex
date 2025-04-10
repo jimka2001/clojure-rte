@@ -1,11 +1,15 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=reclojureScala]
-val S = Atomic(classOf[String])
-val I = Atomic(classOf[Int])
-val Even = Satisfies(even, "Even")
-val Large = Satisfies(large, "Large")
-
-val pat1 = (S ++ Even.*).*
-val pat2 = (S ++ (I & Even).*).*
-val pat3 = (S ++ (I & Even & Large).*).*
+\begin{lstlisting}[style=reclojureClojure]
+(def pat-1
+  '(:* (:cat String
+             (:* (? even)))))
+(def pat-2
+  '(:* (:cat String
+             (:* (and Integer 
+                      (? even))))))
+(def pat-3
+  '(:* (:cat String
+             (:* (and Integer
+                      (? even)
+                      (? large))))))
 \end{lstlisting}

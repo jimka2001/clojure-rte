@@ -1,10 +1,9 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=reclojureScala]
-val pat1 = (S ++ Even.*).*
-val pat2 = (S ++ (I & Even).*).*
-val pat3 = (S ++ (I & Even & Large).*).*
+\begin{lstlisting}[style=reclojureClojure]
+(let [pat-1 '(:* (:cat String (? even)))
+      pat-2 '(:* (:cat String (and Integer (? even))))
+      diff-12 `(and ~pat-1 (not ~pat-2))]
 
-// emptyset if pat1 subset of pat2
-val diff12 = pat1 - pat2
-dfaView(diff12.toDfa())
+ ;; emptyset if pat1 subset of pat2
+ (dfa-to-dot diff-12 :view true))
 \end{lstlisting}

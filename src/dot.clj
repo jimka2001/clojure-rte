@@ -24,6 +24,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]
+            [rte-construct :refer [rte-to-dfa]]
             [cl-compat :as cl]
             [xymbolyco :as xym]
             [util :refer [member]]
@@ -92,7 +93,9 @@
   represented by the given dfa.  dfa is a value as returned from function
   rte/compile, or rte-to-dfa.
   For Mac OS, the :view option may be used to display the image
-  interactively."
+  interactively.
+  dfa-to-dot also accepts an rte (as dfa) in which case it will be converted
+  to a Dfa using rte-to-dfa."
   [dfa & {:keys [title view abbrev draw-sink state-legend]
           :as all-optionals
           :or {title "no-title"
@@ -108,7 +111,13 @@
                                       :abbrev abbrev
                                       :state-legend state-legend)]
            (apply dot-view dot-string (mapcat identity all-optionals)))
-    :else
+
+    
+    (seq? dfa)
+    (apply dfa-to-dot (rte-to-dfa dfa)
+           all-optionals)
+
+    :otherwise ;; if dfa is of type Dfa
     (let [sink-states (xym/find-sink-states dfa)
           visible-states (if draw-sink
                            (xym/states-as-seq dfa)

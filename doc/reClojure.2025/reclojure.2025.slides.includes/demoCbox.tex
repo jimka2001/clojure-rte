@@ -1,16 +1,12 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=reclojureScala]
-val data:Seq[Any] = 
-  Seq("Lorem",
-      "ipsum", 2, 4, 8,
-      "dolor", 10, 20)
+\begin{lstlisting}[style=reclojureClojure]
+(def data ["Lorem" "ipsum"
+           2 4 8
+           "dolor" 10 20])
 
-pat1.contains(data)
-// --> true
+(rte/match pat-1 data) ;; --> true
 
-pat2.contains(data)
-// --> true
+(rte/match pat-2 data) ;; --> true
 
-pat3.contains(data)
-// --> false
+(rte/match pat-3 data) ;; --> false
 \end{lstlisting}

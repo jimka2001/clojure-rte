@@ -46,25 +46,25 @@
 
 \newsavebox\demoDbox
 \begin{lrbox}{\demoDbox}
-  \begin{minipage}{8cm}
+  \begin{minipage}{16cm}
     \input{demoDbox}
   \end{minipage}
 \end{lrbox}
 \newsavebox\demoEbox
 \begin{lrbox}{\demoEbox}
-  \begin{minipage}{8cm}
+  \begin{minipage}{16cm}
     \input{demoEbox}
   \end{minipage}
 \end{lrbox}
 \newsavebox\demoFbox
 \begin{lrbox}{\demoFbox}
-  \begin{minipage}{8cm}
+  \begin{minipage}{16cm}
     \input{demoFbox}
   \end{minipage}
 \end{lrbox}
 \newsavebox\demoGbox
 \begin{lrbox}{\demoGbox}
-  \begin{minipage}{8cm}
+  \begin{minipage}{16cm}
     \input{demoGbox}
   \end{minipage}
 \end{lrbox}
@@ -108,18 +108,18 @@
 
   \only<1>{\Large
     \begin{align*}
-      t_0 &= \text{\code{S}}\\
-      t_1 &= \text{\code{S | Even}}
+      t_0 &= \text{\code{String}}\\
+      t_1 &= \text{\code{(or String (? even))}}
     \end{align*}}%
   \only<2>{\Large
     \begin{align*}
-      t_0 &= \text{\code{S}}\\
-      t_1 &= \text{\code{S | (I \& Even)}}
+      t_0 &= \text{\code{String}}\\
+      t_1 &= \text{\code{(or String (and Integer (? even)))}}
     \end{align*}}%
   \only<3>{\Large
     \begin{align*}
-      t_0 &= \text{\code{S}}\\
-      t_1 &= \text{\code{S | (I \& Even \& Large)}}
+      t_0 &= \text{\code{String}}\\
+      t_1 &= \text{\code{(or String (and Integer (? even) (? large)))}}
     \end{align*}}
 
   \only<1>{\centering\includegraphics[width=8cm]{pat1}}%
@@ -138,7 +138,6 @@
 
 \begin{frame}{Inclusion Checks}
 
-
   \only<1>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \subset~ \sem{pat1}~ =~ YES}\]}%
   \only<2>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \supset~ \sem{pat1}~ =~ DONT-KNOW}\]}%
   \only<3>{\[\underbrace{\sem{pat3} \subsetneq \sem{pat2}}_{YES} = \sem{pat1}\]}%
@@ -154,8 +153,8 @@
     \begin{column}{0.5\textwidth}
       \only<1>{
         \begin{align*}
-          t_0 &= \text{\code{S}}\\
-          t_1 &= \text{\code{S | (I \& Even)}}
+          t_0 &= \text{\code{String}}\\
+          t_1 &= \text{\code{(or String (and Integer (? even)))}}
         \end{align*}
         %                          [trim={left bottom right top},clip]
         \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p1}
