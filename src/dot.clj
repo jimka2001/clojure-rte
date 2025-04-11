@@ -24,6 +24,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]
+            [genus :as gns]
             [rte-construct :refer [rte-to-dfa]]
             [cl-compat :as cl]
             [xymbolyco :as xym]
@@ -179,12 +180,19 @@
                                    (for [td type-desigs]
                                      (cl-format false "t~a" (abbrevs td)))
                                    type-desigs)
-                          label (str/join "," labels)]]
+                          label (str/join "," labels)
+                          ;; draw indeterminate transitions as dashed lines
+                          inh-text (if (some (fn [td] (gns/inhabited? td false)) type-desigs)
+                                     ""
+                                     ",style=dashed")
+                          ]]
               (cl/cl-cond
                ((and (member (xym/state-by-index dfa next-state) sink-states)
                      (not draw-sink)))
                (:else
-                (cl-format *out* "   q~D -> q~D [label=\"~a\"];~%" (:index q) next-state label)))))))
+
+                (cl-format *out* "   q~D -> q~D [label=\"~a\"~a];~%"
+                           (:index q) next-state label inh-text)))))))
         
         (cl-format *out* "}~%")))))
 
