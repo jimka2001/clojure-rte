@@ -226,7 +226,7 @@ The first *consequent* is evaluated for which the *pattern* matches the given ex
     (another-side-effect)
     14)
 
-  [[^Number  a b [c d]] {}]
+  [^Number  a b [c d]]
   15
 )
 ```
