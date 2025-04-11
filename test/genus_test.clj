@@ -458,5 +458,10 @@
     (is (gns/valid-type? '(or Integer String)))
     (is (gns/valid-type? '(member 1 2 3)))
     (is (gns/valid-type? '(= 1)))
-    (is (gns/valid-type? '(rte (:cat String :sigma))))))
+    (is (gns/valid-type? '(rte (:cat String :sigma))))
+    (is (gns/valid-type? '(satisfies even?)))
+    (is (gns/valid-type? (gns/Satisfies even?)))
+
+
+))
     

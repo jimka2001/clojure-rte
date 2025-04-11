@@ -2237,8 +2237,8 @@
     (assert-valid-rte (template (:* ~arg)))))
 
 (def rte/Cat
-  (fn [arg]
-    (assert-valid-rte (template (:cat ~arg)))))
+  (fn [& args]
+    (assert-valid-rte (template (:cat ~@args)))))
 
 (def rte/Plus
   (fn [arg]

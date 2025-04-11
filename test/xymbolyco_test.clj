@@ -26,6 +26,7 @@
             [xymbolyco :as xym]
             [bdd :as bdd]
             [clojure.pprint :refer [cl-format]]
+            [genus :as gns]
             [util :refer [member]]
             [dot :refer [dfa-to-dot]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
@@ -419,3 +420,15 @@
 
       ;;(dfa-to-dot dfa-x :draw-sink true :title "union 4" :view true)
       )))
+(deftest t-reclojure-1
+  (testing "reClojure 2025"
+    (is (gns/valid-type? (gns/Satisfies even?)))
+    (is (rte/valid-rte? (gns/Satisfies even?)))
+    (is (rte/valid-rte? Integer))
+    (is (rte/valid-rte? (rte/Star String)))
+    (let [pat (rte/Star (rte/Cat Integer (rte/Star String) (gns/Satisfies even?)))
+          rte (rte-to-dfa pat)]
+
+      (is pat)
+      (is rte)
+      (dfa-to-dot pat :draw-sink true :title "reClojure 1" :view true))))
