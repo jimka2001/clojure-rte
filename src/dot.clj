@@ -104,7 +104,6 @@
                abbrev true
                view false
                state-legend true}}]
-
   (cond
     view (let [dot-string (dfa-to-dot dfa
                                       :title title
@@ -143,17 +142,20 @@
         (cl-format *out* "  fontname=courier;~%")
         (when abbrev
           (cl-format *out* "  label=\"~a\\l\"~%"
-                     (str/join
-                      "" (concat (map (fn [index]
-                                        (cl-format false "\\lt~a= ~a" index (line-wrap (labels index))))
-                                      (range (count (keys labels))))
-                                 ["\\l"]
-                                 (if state-legend
-                                   (for [q visible-states
-                                         :when (boolean (:pattern q))]
-                                     (cl-format false "\\lq~a= ~a"
-                                                (:index q) (line-wrap (:pattern q))))
-                                   [""])))))
+                     (str/replace
+                      (str/join
+                       "" (concat (map (fn [index]
+                                         (cl-format false "\\lt~a= ~a"
+                                                    index (line-wrap (labels index))))
+                                       (range (count (keys labels))))
+                                  ["\\l"]
+                                  (if state-legend
+                                    (for [q visible-states
+                                          :when (boolean (:pattern q))]
+                                      (cl-format false "\\lq~a= ~a"
+                                                 (:index q) (line-wrap (:pattern q))))
+                                    [""])))
+                      "\"" "\\\"")))
         (cl-format *out* "  graph [labeljust=l,nojustify=true];~%")
         (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
         (cl-format *out* "  edge [fontname=Helvetica, fontsize=20];~%")
