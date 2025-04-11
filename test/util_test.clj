@@ -217,6 +217,15 @@
            (list (list 1 2 3) (list 1 2 3 4))))))
     
 
+(deftest t-sort-operands-5
+  (testing "sort-operands 5"
+    (is (sort-operands (list even? odd? even?)))
+    (is (sort-operands (list 1 3 2 6)))
+    (is (sort-operands [1 3 2 6]))
+    (is (sort-operands (list Integer String Number)))
+))
+
+
 (deftest t-sort-operands-3
   (testing "sort-operands 3"
     (let [a-cons `(1 2 3) ;; clojure.lang.Cons

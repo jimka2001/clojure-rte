@@ -145,6 +145,15 @@
               (compare (.getName (type a))
                        (.getName (type b)))
 
+
+              ;; if we are sorting a sequence which contains objects of type
+              ;; java.lang.Class, then the underlying java function `compare`
+              ;; does not implement Comparable for this type.
+              (or (not (isa? (type a) Comparable))
+                  (not (isa? (type b) Comparable)))
+              (compare (format "%s" a)
+                       (format "%s" b))
+
               :else
               (compare a b)))]
     (try (sort cmp operands)
