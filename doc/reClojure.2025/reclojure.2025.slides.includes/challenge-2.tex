@@ -72,17 +72,30 @@
 
 
 \begin{frame}{Subtype Predicate}{$\tysem{\typevar}\subset\tysem{\typevart} \to \{true,false,\text{dont-know}\}$}
-
-  \Emph{Semi-Boolean} Subtype predicate \Emph{sometimes unanswerable}.
-
-  \usebox\subtypebox
-
-  Unanswerable because:
   \begin{itemize}
-  \item Impossible to compute, \eg \code{satisfies}.
-  \item Code is incomplete.
-  \item Loading classes at run-time.
-  \end{itemize}
+    
+  \item   \Emph{Semi-Boolean} Subtype predicate \Emph{sometimes unanswerable}.
+    
+    \usebox\subtypebox
+    
+  \item Unanswerable because:
+    \begin{itemize}
+    \item Impossible to compute, \eg \code{satisfies}.
+    \item Code is incomplete.
+    \item Loading classes at run-time.
+    \end{itemize}
+    
+  \item Determine habitation/vacuity
+    \begin{itemize}
+    \item $A \subset \emptyset$
+    \end{itemize}
 
+  \item Determine disjointness
+    \begin{itemize}
+    \item Disjoint:  $A \subset \compl{B}$
+    \item Disjoint: $A\cap B \subset \emptyset$
+    \end{itemize}
+  \end{itemize}
+  
 \end{frame}
 
