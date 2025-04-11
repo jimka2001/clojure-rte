@@ -440,3 +440,23 @@
 
     (is (thrown? Exception (gns/Not 'Integer 'String)))
 ))
+
+(deftest t-valid-type
+  (testing "valid-type?"
+    (is (gns/valid-type? Integer))
+    (is (gns/valid-type? 'Integer))
+    (is (gns/valid-type? '(not Integer)))
+    (is (gns/valid-type? (list 'not Integer)))
+    (is (not (gns/valid-type? '(:not Integer))))
+    (is (not (gns/valid-type? '(:and Integer))))
+    (is (not (gns/valid-type? '(:or Integer))))
+    (is (gns/valid-type? '(and)))
+    (is (gns/valid-type? '(or)))
+    (is (gns/valid-type? '(and Integer)))
+    (is (gns/valid-type? '(or Integer)))
+    (is (gns/valid-type? '(and Integer String)))
+    (is (gns/valid-type? '(or Integer String)))
+    (is (gns/valid-type? '(member 1 2 3)))
+    (is (gns/valid-type? '(= 1)))
+    (is (gns/valid-type? '(rte (:cat String :sigma))))))
+    

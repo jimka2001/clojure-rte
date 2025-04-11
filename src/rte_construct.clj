@@ -2187,6 +2187,8 @@
 (defmulti valid-rte? type-dispatch)
 (defmethod valid-rte? :or [[_ & args]]
   (every? valid-rte? args))
+(defmethod valid-rte? :cat [[_ & args]]
+  (every? valid-rte? args))
 (defmethod valid-rte? :and [[_ & args]]
   (every? valid-rte? args))
 (defmethod valid-rte? :or [[_ & args]]
@@ -2198,11 +2200,11 @@
 (defmethod valid-rte? :* [[_ & args]]
   (and (= 1 (count args))
        (valid-rte? (first args))))
-(defmethod valid-rte? :empty-word []
+(defmethod valid-rte? :empty-word [_]
   true)
-(defmethod valid-rte? :sigma []
+(defmethod valid-rte? :sigma [_]
   true)
-(defmethod valid-rte? :empty-set []
+(defmethod valid-rte? :empty-set [_]
   true)
 (defmethod valid-rte? :default [type-designator]
   (gns/valid-type? type-designator))

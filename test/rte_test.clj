@@ -669,6 +669,30 @@
       (check-extraction-cycle (gen-rte depth *test-types*) (fn [expr message]
                                                              (is expr message))))))
             
+(deftest t-valid-rte
+  (testing "valid-rte?"
+    (is (rte/valid-rte? Integer))
+    (is (rte/valid-rte? 'Integer))
+    (is (rte/valid-rte? '(:not Integer)))
+    (is (rte/valid-rte? (list :not Integer)))
+    (is (rte/valid-rte? '(not Integer)))
+    (is (rte/valid-rte? '(and Integer)))
+    (is (rte/valid-rte? '(or Integer)))
+    (is (rte/valid-rte? '(:cat)))
+    (is (rte/valid-rte? '(:and)))
+    (is (rte/valid-rte? '(:or)))
+    (is (rte/valid-rte? '(:cat Integer)))
+    (is (rte/valid-rte? '(:and Integer)))
+    (is (rte/valid-rte? '(:or Integer)))
+    (is (rte/valid-rte? '(:cat Integer String)))
+    (is (rte/valid-rte? '(:and Integer String)))
+    (is (rte/valid-rte? '(:or Integer String)))
+    (is (rte/valid-rte? '(member 1 2 3)))
+    (is (rte/valid-rte? '(= 1)))
+    (is (rte/valid-rte? 'String))
+    (is (rte/valid-rte? :sigma))
+    (is (rte/valid-rte? '(:cat String :sigma)))))
+
 
 
 (defn -main []
