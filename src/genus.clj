@@ -111,14 +111,21 @@
     (fn [x]
       (or (f1 x) (f2 x)))))
 
+(defn safe-resolve
+  "Sometimes resolve throws a ClassCastException,
+  rather than doing this, we simply return nil"
+  [t]
+  (try (resolve t)
+       (catch ClassCastException e nil)))
+
 (defn class-designator?
   "Predicate to determine whether the given object is a class or a
   symbol designates a java class."
   [t]
   (or (class? t)
       (and (symbol? t)
-           (resolve t)
-           (class? (resolve t)))))
+           (safe-resolve t)
+           (class? (safe-resolve t)))))
 
 (defn find-class
   "Given a valid class-designator, return the (java) class or nil if not found."
@@ -127,7 +134,7 @@
         class-name
 
         (class-designator? class-name)
-        (resolve class-name)
+        (safe-resolve class-name)
 
         :othewise
         nil))
@@ -174,8 +181,8 @@
 (defn callable-designator? [f]
   (or (fn? f)
       (and (symbol? f)
-           (resolve f)
-           (fn? (deref (resolve f))))))
+           (safe-resolve f)
+           (fn? (deref (safe-resolve f))))))
 
 (def ^:dynamic *pseudo-type-functions*
   "List of function designators which will be trusted as operand of satisfies
@@ -390,22 +397,22 @@
                      :a-value a-value
                      }))
 
-    (not (resolve a-type))
+    (not (safe-resolve a-type))
     (throw (ex-info (format "typep: [179] invalid type %s, no resolvable value" a-type)
                     {:error-type :invalid-type-designator
                      :a-type a-type
                      :a-value a-value
                      }))
 
-    (not (class? (resolve a-type)))
+    (not (class? (safe-resolve a-type)))
     (throw (ex-info (format "typep: [180] invalid type of %s, does not resolve to a class, got %s of type %s"
-                            a-type (resolve a-type) (type (resolve a-type)))
+                            a-type (safe-resolve a-type) (type (safe-resolve a-type)))
                     {:error-type :invalid-type-designator
                      :a-type a-type
                      :a-value a-value
                      }))
     :else
-    (isa? (type a-value) (resolve a-type))))
+    (isa? (type a-value) (safe-resolve a-type))))
 
 (defmethod typep 'not [a-value [_a-type t]]
   (not (typep a-value t)))
@@ -421,11 +428,11 @@
   (boolean (cond (fn? f)
                  (f a-value)
 
-                 (resolve f)
-                 (try ((resolve f) a-value)
+                 (safe-resolve f)
+                 (try ((safe-resolve f) a-value)
                       (catch Exception _e
                         (cl-format true "gns/typep 'satisfies ~A returning false because of exception~%"
-                                   [(resolve f) a-value])
+                                   [(safe-resolve f) a-value])
                         false))
 
                  :else
