@@ -125,9 +125,6 @@
   (and (sequential? a-value)
        (rte/match pattern a-value)))
 
-(defmethod gns/valid-type? 'rte [[_ pattern]]
-  (boolean (rte/compile pattern)))
-
 (defmethod gns/-inhabited? 'rte [t1]
   (if (rte? t1)
     (boolean (rte-inhabited? (rte/compile (second t1))))
@@ -2214,6 +2211,8 @@
                     {:error-type :invalid-rte
                      :rte rte}))))
 
+(defmethod gns/valid-type? 'rte [[_ pattern]]
+  (rte/valid-rte? pattern))
 
 ;; programmatic constructors
 (def rte/And
