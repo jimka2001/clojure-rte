@@ -104,6 +104,7 @@
                abbrev true
                view false
                state-legend true}}]
+
   (cond
     view (let [dot-string (dfa-to-dot dfa
                                       :title title
@@ -131,8 +132,9 @@
           abbrevs (zipmap transition-labels (range (count transition-labels)))
           labels (clojure.set/map-invert abbrevs)
           exit-map (:exit-map dfa)
-          all-final-true (every? (fn [q] (= true (get exit-map (:index q))))
+          all-final-true (every? (fn [q] (= true (exit-map (:index q))))
                                  (filter :accepting (xym/states-as-seq dfa)))]
+
       (with-out-str
         (cl-format *out* "digraph G {~%")
         (when title

@@ -1992,13 +1992,14 @@
          triples (map (fn [[primative wrt deriv]]
                         [(index-map primative) wrt (index-map deriv)]
                         ) triples)
-         grouped-by-src (group-by first triples)]
+         grouped-by-src (group-by first triples)
+         exit-value-function (constantly exit-value)]
 
      (xym/extend-with-sink-state
       (xym/map->Dfa
        {:pattern given-pattern
         :canonicalized pattern
-        :exit-map (constantly exit-value)
+        :exit-map exit-value-function
         :combine-labels rte-combine-labels
         :states
         (into {}
@@ -2194,7 +2195,6 @@
 (defmethod valid-rte? :or [[_ & args]]
   (every? valid-rte? args))
 (defmethod valid-rte? :not [[_not & args]]
-  (println [:valid? :not :args args])
   (and (= 1 (count args))
        (valid-rte? (first args))))
 (defmethod valid-rte? :* [[_ & args]]
