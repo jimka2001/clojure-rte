@@ -151,8 +151,7 @@
               ;; does not implement Comparable for this type.
               (or (not (isa? (type a) Comparable))
                   (not (isa? (type b) Comparable)))
-              (compare (format "%s" a)
-                       (format "%s" b))
+              (compare (str a) (str b))
 
               :else
               (compare a b)))]
