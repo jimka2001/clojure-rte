@@ -111,12 +111,15 @@
                                       :view false
                                       :abbrev abbrev
                                       :state-legend state-legend)]
-           (apply dot-view dot-string (mapcat identity all-optionals)))
+           (dot-view dot-string all-optionals)
+           ;;(apply dot-view dot-string (mapcat identity all-optionals))
+           )
 
     
     (seq? dfa)
-    (apply dfa-to-dot (rte-to-dfa dfa)
-           all-optionals)
+    (dfa-to-dot (rte-to-dfa dfa) all-optionals)
+    ;; (apply dfa-to-dot (rte-to-dfa dfa)
+    ;;        (mapcat identity all-optionals))
 
     :otherwise ;; if dfa is of type Dfa
     (let [sink-states (xym/find-sink-states dfa)
