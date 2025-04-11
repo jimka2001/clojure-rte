@@ -1,0 +1,20 @@
+\begin{frame}{Determining whether two classes are disjoint}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \usebox\classbox  
+    \end{column}%
+    \begin{column}{0.55\textwidth}
+
+      \bigskip
+      
+      \begin{itemize}
+      \item<1->{Explicit subtype relation \code{isa?}.}%
+      \item<2->{Else if either is \code{:final}; they have no common \Emph{inhabited} subclass.}%
+      \item<3->{Else if either is \code{:interface}, there may be class which inherits from both?}%
+      \item<4>{If \Emph{currently} no subclass exists, JVM might \Emph{later} run-time
+      load \code{subclass.jar} }%
+      \end{itemize}
+    \end{column}%
+  \end{columns}
+\end{frame}
+

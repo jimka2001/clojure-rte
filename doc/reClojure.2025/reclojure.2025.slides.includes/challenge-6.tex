@@ -34,17 +34,6 @@
 \end{lrbox}
 
 
-\begin{frame}{Setup}{Declaration Clojure Code}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \usebox\demoBbox
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \only<1>{\usebox\demoAbox}%
-      \only<2>{\usebox\demoCbox}%
-    \end{column}
-  \end{columns}
-\end{frame}
 
 \newsavebox\demoDbox
 \begin{lrbox}{\demoDbox}
@@ -102,98 +91,6 @@
 
 
 
-
-\begin{frame}{DFAs}
-  \only<1>{\usebox\demoDbox}%
-  \only<2>{\usebox\demoEbox}%
-  \only<3>{\usebox\demoFbox}%
-
-  \only<1>{\Large
-    \begin{align*}
-      t_0 &= \text{\code{String}}\\
-      t_1 &= \text{\code{(or String (? even))}}
-    \end{align*}}%
-  \only<2>{\Large
-    \begin{align*}
-      t_0 &= \text{\code{String}}\\
-      t_1 &= \text{\code{(or String (and Integer (? even)))}}
-    \end{align*}}%
-  \only<3>{\Large
-    \begin{align*}
-      t_0 &= \text{\code{String}}\\
-      t_1 &= \text{\code{(or String (and Integer (? even) (? large)))}}
-    \end{align*}}
-
-  \only<1>{\centering\includegraphics[width=8cm]{pat1}}%
-  \only<2>{\centering\includegraphics[width=8cm]{pat2}}%
-  \only<3>{\centering\includegraphics[width=8cm]{pat3}}%
-\end{frame}
-
-\begin{frame}{Inclusion Checks}
-  \usebox\demoGbox
-
-  By inspection we see that \[\sem{pat3} \subsetneq \sem{pat2} = \sem{pat1}\,.\]
-  Can we determine this programmatically?
-\end{frame}
-
-
-
-\begin{frame}{Inclusion Checks}
-
-  \only<1>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \subset~ \sem{pat1}~ =~ YES}\]}%
-  \only<2>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \supset~ \sem{pat1}~ =~ DONT-KNOW}\]}%
-  \only<3>{\[\underbrace{\sem{pat3} \subsetneq \sem{pat2}}_{YES} = \sem{pat1}\]}%
-  \only<4>{\[\sem{pat2} \cap \overline{\sem{pat3}}\]}%
-
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \only<1>{\usebox\demoHbox}%
-      \only<2>{\usebox\demoIbox}%
-      \only<3>{\usebox\demoJbox}%
-      \only<4>{\usebox\demoKbox}%
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \only<1>{
-        \begin{align*}
-          t_0 &= \text{\code{String}}\\
-          t_1 &= \text{\code{(or String (and Integer (? even)))}}
-        \end{align*}
-        %                          [trim={left bottom right top},clip]
-        \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p1}
-      }%
-      \only<2>{
-    \begin{align*}
-      t_0 &= \text{\code{S}}\\
-      t_1 &= \text{\code{!I \& !S \& Even}} && Indeterminate\\
-      t_2 &= \text{\code{S | (I \& Even)}}\\
-      t_3 &= \text{\code{S | Even}}
-    \end{align*}
-    %                          [trim={left bottom right top},clip]
-    \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p1-p2}
-      }%
-      \only<3>{
-    \begin{align*}
-      t_0 &= \text{\code{S}}\\
-      t_1 &= \text{\code{S | (I \& Even, Large)}}
-    \end{align*}
-    %                          [trim={left bottom right top},clip]
-    \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p3-p2}
-      }%
-      \only<4>{
-        \begin{align*}
-          t_0 &= \text{\code{S}}\\
-          t_1 &= \text{\code{I \& Even \& !Large}}\\
-          t_2 &= \text{\code{S | (I \& Even \& Large)}}\\
-          t_3 &= \text{\code{S | (I \& Even)}}\\
-        \end{align*}
-        %                          [trim={left bottom right top},clip]
-        \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p3}
-      }
-    \end{column}
-  \end{columns}
-\end{frame}
-
-
 \begin{frame}{Habitation Check}
 
   Is the language of the DFA inhabited?
@@ -207,24 +104,3 @@
   \only<1-3>{\includegraphics[width=\linewidth]{p4-p3}}%
   \only<4>{\includegraphics[width=\linewidth]{p4-p3-dij}}%
 \end{frame}
-
-
-\begin{frame}{Habitation Check}
-
-  How do Dijkstra weights work?
-
-  \only<1>{\scalebox{0.8}{\input{fig-4-dijkstra}}}%
-  \only<2,3>{\scalebox{0.8}{\input{fig-4-dijkstra-weighted-1}}}%
-  \only<4->{\scalebox{0.8}{\input{fig-4-dijkstra-weighted-2}}}%
-
-  \begin{itemize}
-  \item<2->{Satisfiable transitions have weight \textcolor{blue}{$W\!=1$}.}
-  \item<3->{Unsatisfiable transitions have weight \textcolor{red}{$W\!=\infty$}.}
-  \item<4->{Indeterminate transitions have weight \textcolor{red}{$W\!=5$} (number of states).}
-  \item<5>{Shortest path is $\nodecirc{0} \xrightarrow{1} \nodecirc{3} \xrightarrow{1} \nodecirc{4}  \xrightarrow{1} \nodecirc{2}$; length is $3$\\
-  Longer path is $\nodecirc{0}\xrightarrow{5}\nodecirc{1}\xrightarrow{1}\nodecirc{2}$; length is $6$}
-  \end{itemize}
-\end{frame}
-
-
-

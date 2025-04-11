@@ -1,0 +1,321 @@
+
+\begin{frame}{Decision Tree Structure}
+  We programmatically manipulate \code{if \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...} using a decision tree.
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[height=0.8\textheight]{ldd-0.pdf}
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%
+      \usebox\typecaseAbox
+    \end{column}    
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Decision Tree, Before and After}
+  Viewing the decision tree before/after
+
+  \medskip
+  
+  Rewrite: $1 \to 2\to 3\to 4\to 5\to 6\to 7\to 8\to 9$
+
+  \medskip
+  
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[height=0.8\textheight]{ldd-0.pdf}
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%
+      \includegraphics[height=0.8\textheight]{ldd-9.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+%% Thanks to John Wickerson, https://tex.stackexchange.com/users/25356/john-wickerson
+%% for this arrow
+%% https://tex.stackexchange.com/questions/113228/how-can-i-add-a-big-arrow
+\def\myLeftArrow{\smash{
+  \begin{tikzpicture}[baseline=-2mm]
+    \useasboundingbox (-2,0);
+    \node[single arrow,draw=black,fill=red!10,minimum width=5cm,minimum height=7cm,shape border rotate=180] at (0,-1) {};
+  \end{tikzpicture}
+}}
+
+
+\begin{frame}{Rewrite: $\colorbox{orange!30}{\Huge 1}\to 2\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}%1
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x N) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \only<1,2>{\includegraphics[height=0.8\textheight]{ldd-0.pdf}}%
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%
+      \only<2>{\includegraphics[height=0.8\textheight]{ldd-1.pdf}}%
+    \end{column}    
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Rewrite: $\colorbox{orange!30}{\Huge 1}\to 2\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}%1
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x N) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+  
+  \centerline{  \includegraphics[height=0.8\textheight]{ldd-1.pdf}}
+\end{frame}
+
+\begin{frame}{Rewrite: $1\to \colorbox{orange!30}{\Huge 2}\to 3\to 4\to 5\to 6\to 7\to 8\to 9$}
+\begin{tabular}{ll}
+  In \code{\textcolor{greeny}{then}}: \colorbox{pink!30}{Supertypes of \code{N} $\to$ \code{:sigma}}. &
+  In \code{\textcolor{red}{else}}: \colorbox{pink!30}{Subtypes of \code{N} $\to$ \code{:empty-set}}.
+  \end{tabular}
+  
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-1.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-2.pdf}}}
+\end{frame}
+
+\begin{frame}{Rewrite: $1\to 2\to \colorbox{orange!30}{\Huge 3}\to 4\to 5\to 6\to 7\to 8\to 9$}
+  \begin{tabular}{ll}
+    \colorbox{pink!30}{\code{(not :sigma)} $\to$ \code{:empty-set}} &       \colorbox{pink!30}{\code{(not :empty-set)} $\to$ \code{:sigma}}    
+  \end{tabular}
+
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-2.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-3.pdf}}}
+\end{frame}
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to \colorbox{orange!30}{\Huge 4}\to 5\to 6\to 7\to 8\to 9$}
+  \begin{tabular}{ll}
+    \colorbox{pink!30}{\code{(:sigma \& x)} $\to$ \code{x}} &       \colorbox{pink!30}{\code{(:empty-set \& x)} $\to$ \code{:empty-set}}
+  \end{tabular}
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-3.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-4.pdf}}}
+  
+\end{frame}
+
+\newsavebox\boxstop
+\begin{lrbox}{\boxstop}
+\begin{tikzpicture}
+\node[draw,text width=1.2cm] at (2,-2) {\code{:sigma}};
+\end{tikzpicture}
+\end{lrbox}
+
+\newsavebox\boxsempty
+\begin{lrbox}{\boxsempty}
+\begin{tikzpicture}
+\node[draw,text width=2.0cm] at (2,-2) {\code{:empty-set}};
+\end{tikzpicture}
+\end{lrbox}
+
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to 4\to\colorbox{orange!30}{\Huge 5}\to 6\to 7\to 8\to 9$}
+  \begin{tabular}{ll}
+    Replace \usebox\boxstop~with \code{\textcolor{greeny}{then}} branch. &
+    Replace \usebox\boxsempty~with \code{\textcolor{red}{else}} branch.
+  \end{tabular}
+
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-4.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-5.pdf}}}
+  
+\end{frame}
+
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to \colorbox{orange!30}{\Huge 6}\to 7\to 8\to 9$}
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x I) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[height=0.8\textheight]{ldd-5.pdf}%
+    \end{column}
+
+    \begin{column}{0.5\textwidth}  %%
+      \includegraphics[height=0.8\textheight]{ldd-6.pdf}%
+    \end{column}    
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to \colorbox{orange!30}{\Huge 6}\to 7\to 8\to 9$}
+  Duplicate tree, and introduce \colorbox{pink!30}{\code{if (typep x I) \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...}}
+
+  \centerline{\includegraphics[height=0.8\textheight]{ldd-6.pdf}}  %
+\end{frame}
+
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to 6\to \colorbox{orange!30}{\Huge 7}\to 8\to 9$}
+  \begin{tabular}{ll}
+  In \code{\textcolor{greeny}{then}}: \colorbox{pink!30}{Supertypes of \code{I} $\to$ \code{:sigma}}.&
+  In \code{\textcolor{red}{else}}: \colorbox{pink!30}{Subtypes of \code{I} $\to$ \code{:empty-set}}.
+  \end{tabular}
+
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-6.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-7.pdf}}}
+\end{frame}
+
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to 6\to 7\to \colorbox{orange!30}{\Huge 8}\to 9$}
+  \begin{tabular}{ll}
+      \colorbox{pink!30}{\code{(not :sigma)} $\to$ \code{:empty-set}} &    
+      \colorbox{pink!30}{\code{(not :empty-set)} $\to$ \code{:sigma}}
+  \end{tabular}
+
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-7.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-8.pdf}}}
+\end{frame}
+
+\begin{frame}{Rewrite: $1\to 2\to 3\to 4\to 5\to 6\to 7\to 8\to \colorbox{orange!30}{\Huge 9}$}
+  \begin{tabular}{ll}
+    Replace \usebox\boxstop~ with \code{\textcolor{greeny}{then}} branch. &
+    Replace \usebox\boxsempty~ with \code{\textcolor{red}{else}} branch.
+  \end{tabular}
+
+  \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-8.pdf}}}%
+  \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-9.pdf}}}
+  
+
+\end{frame}
+
+
+\begin{frame}{Rewrite: Summary}
+  Code has been rewritten so that \Emph{any type check occurs no more than once}.
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \usebox\typecaseAbox
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%
+      \usebox\typecaseKbox
+    \end{column}
+  \end{columns}
+
+  And it is clear the code never returns \code{nil}.
+
+\end{frame}
+
+
+
+
+%% --------------------
+
+
+
+\begin{frame}{Setup}{Declaration Clojure Code}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \usebox\demoBbox
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<1>{\usebox\demoAbox}%
+      \only<2>{\usebox\demoCbox}%
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{DFAs}
+  \only<1>{\usebox\demoDbox}%
+  \only<2>{\usebox\demoEbox}%
+  \only<3>{\usebox\demoFbox}%
+
+  \only<1>{\Large
+    \begin{align*}
+      t_0 &= \text{\code{String}}\\
+      t_1 &= \text{\code{(or String (? even))}}
+    \end{align*}}%
+  \only<2>{\Large
+    \begin{align*}
+      t_0 &= \text{\code{String}}\\
+      t_1 &= \text{\code{(or String (and Integer (? even)))}}
+    \end{align*}}%
+  \only<3>{\Large
+    \begin{align*}
+      t_0 &= \text{\code{String}}\\
+      t_1 &= \text{\code{(or String (and Integer (? even) (? large)))}}
+    \end{align*}}
+
+  \only<1>{\centering\includegraphics[width=8cm]{pat1}}%
+  \only<2>{\centering\includegraphics[width=8cm]{pat2}}%
+  \only<3>{\centering\includegraphics[width=8cm]{pat3}}%
+\end{frame}
+
+\begin{frame}{Inclusion Checks}
+  \usebox\demoGbox
+
+  By inspection we see that \[\sem{pat3} \subsetneq \sem{pat2} = \sem{pat1}\,.\]
+  Can we determine this programmatically?
+\end{frame}
+
+
+
+\begin{frame}{Inclusion Checks}
+
+  \only<1>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \subset~ \sem{pat1}~ =~ YES}\]}%
+  \only<2>{\[\sem{pat3} \subsetneq \underbrace{\sem{pat2} = \sem{pat1}}_{\sem{pat2}~ \supset~ \sem{pat1}~ =~ DONT-KNOW}\]}%
+  \only<3>{\[\underbrace{\sem{pat3} \subsetneq \sem{pat2}}_{YES} = \sem{pat1}\]}%
+  \only<4>{\[\sem{pat2} \cap \overline{\sem{pat3}}\]}%
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \only<1>{\usebox\demoHbox}%
+      \only<2>{\usebox\demoIbox}%
+      \only<3>{\usebox\demoJbox}%
+      \only<4>{\usebox\demoKbox}%
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<1>{
+        \begin{align*}
+          t_0 &= \text{\code{String}}\\
+          t_1 &= \text{\code{(or String (and Integer (? even)))}}
+        \end{align*}
+        %                          [trim={left bottom right top},clip]
+        \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p1}
+      }%
+      \only<2>{
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{!I \& !S \& Even}} && Indeterminate\\
+      t_2 &= \text{\code{S | (I \& Even)}}\\
+      t_3 &= \text{\code{S | Even}}
+    \end{align*}
+    %                          [trim={left bottom right top},clip]
+    \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p1-p2}
+      }%
+      \only<3>{
+    \begin{align*}
+      t_0 &= \text{\code{S}}\\
+      t_1 &= \text{\code{S | (I \& Even, Large)}}
+    \end{align*}
+    %                          [trim={left bottom right top},clip]
+    \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p3-p2}
+      }%
+      \only<4>{
+        \begin{align*}
+          t_0 &= \text{\code{S}}\\
+          t_1 &= \text{\code{I \& Even \& !Large}}\\
+          t_2 &= \text{\code{S | (I \& Even \& Large)}}\\
+          t_3 &= \text{\code{S | (I \& Even)}}\\
+        \end{align*}
+        %                          [trim={left bottom right top},clip]
+        \includegraphics[width=8cm,trim={0 0 0 15mm},clip]{p2-p3}
+      }
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Habitation Check}
+
+  How do Dijkstra weights work?
+
+  \only<1>{\scalebox{0.8}{\input{fig-4-dijkstra}}}%
+  \only<2,3>{\scalebox{0.8}{\input{fig-4-dijkstra-weighted-1}}}%
+  \only<4->{\scalebox{0.8}{\input{fig-4-dijkstra-weighted-2}}}%
+
+  \begin{itemize}
+  \item<2->{Satisfiable transitions have weight \textcolor{blue}{$W\!=1$}.}
+  \item<3->{Unsatisfiable transitions have weight \textcolor{red}{$W\!=\infty$}.}
+  \item<4->{Indeterminate transitions have weight \textcolor{red}{$W\!=5$} (number of states).}
+  \item<5>{Shortest path is $\nodecirc{0} \xrightarrow{1} \nodecirc{3} \xrightarrow{1} \nodecirc{4}  \xrightarrow{1} \nodecirc{2}$; length is $3$\\
+  Longer path is $\nodecirc{0}\xrightarrow{5}\nodecirc{1}\xrightarrow{1}\nodecirc{2}$; length is $6$}
+  \end{itemize}
+\end{frame}
+
+
+

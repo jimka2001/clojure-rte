@@ -1,35 +1,3 @@
-\subsection{Determinism: Type Partitioning}
-
-{  %% chapter slide
-  \setbeamercolor{background canvas}{bg=sectioncolor}
-\begin{frame}{\Challenge{4} Type Partitioning: Deterministic State Machines}
-
-  How to assure DFAs are deterministic by construction?
-
-  \begin{itemize}
-  \item   Compute a \Emph{sufficient} partition of a given set of type designators,
-  \item   ... assure that $\deriv{\typevar}{r}$ be computable,
-  \item   ... even (especially) when subtype relation is unknown,
-  \item   ... correct run-time checks despite curse of subtype ambiguity.
-  \end{itemize}
-
-\end{frame}
-}
-
-
-
-\begin{frame}{MDTD: Maximal Disjoint Type Decomposition}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \only<1,2>{\scalebox{0.98}{\input{pgf-a1-a8.tex}}}%
-      \only<3->{\includegraphics[scale=0.18]{venn-x1-x13.png}}%
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \only<2->{\scalebox{0.98}{\input{pgf-x1-x13.tex}}}%
-    \end{column}
-  \end{columns}
-\end{frame}
-
 \newsavebox\boxforestAnu
 \begin{lrbox}{\boxforestAnu}
   \begin{minipage}{\textwidth}
@@ -186,87 +154,175 @@
   \end{minipage}
 \end{lrbox}
 
+\newsavebox\classbox
+\begin{lrbox}{\classbox}
+  \begin{minipage}{7cm}
+    \input{codeClass}
+  \end{minipage}
+\end{lrbox}
+
+
+\subsection{Determinism: Type Partitioning}
+
+{  %% chapter slide
+  \setbeamercolor{background canvas}{bg=sectioncolor}
+\begin{frame}{\Challenge{4} Type Partitioning: Deterministic State Machines}
+
+  How to assure DFAs are deterministic by construction?
+
+  \begin{itemize}
+  \item   Compute a \Emph{sufficient} partition of a given set of type designators,
+  \item   ... assure that $\deriv{\typevar}{r}$ be computable,
+  \item   ... even (especially) when subtype relation is unknown,
+  \item   ... correct run-time checks despite curse of subtype ambiguity.
+  \end{itemize}
+
+\end{frame}
+}
+
+
+
+\begin{frame}{MDTD: Maximal Disjoint Type Decomposition}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \only<1,2>{\scalebox{0.98}{\input{pgf-a1-a8.tex}}}%
+      \only<3->{\includegraphics[scale=0.18]{venn-x1-x13.png}}%
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<2->{\scalebox{0.98}{\input{pgf-x1-x13.tex}}}%
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+
+\input{clojure-disjoint}
+
+
 
 
 \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
-  \only<1>{\scalebox{2.0}{\usebox\boxforestE}
-    
-    \medskip
+  \scalebox{2.0}{\usebox\boxforestE}
+  
+  \medskip
+  
+  Start with $\Sigma=Universe$, and intersect with $A_1$ and $\compl{A_1}$.
+\end{frame}
 
-    Start with $\Sigma=Universe$, and intersect with $A_1$ and $\compl{A_1}$.
-  }
-  \only<2>{%
-    \begin{columns}
-      \begin{column}{0.6\textwidth}
-        \scalebox{1.5}{\usebox\boxforestD}%    
-      \end{column}
-      \begin{column}{0.4\textwidth}
-        {\scalebox{0.7}{\input{pgf-a1-a8.tex}}}%
-      \end{column}
-    \end{columns}%
-      
+
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \scalebox{1.5}{\usebox\boxforestD}%    
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      {\scalebox{0.7}{\input{pgf-a1-a8.tex}}}%
+    \end{column}
+  \end{columns}%
+  
   Intersect each leaf with $A_2$ and $\compl{A_2}$.
   \begin{align*}
     A_2 \subset A_1 &\implies A_1\cap A_2 = A_2 & SIMPLIFY\\
     A_2 \subset A_1 &\implies \compl{A_1}\cap A_2 = \emptyset & PRUNE\\
     A_2 \subset A_1 &\implies \compl{A_1}\cap \compl{A_2} = \compl{A_1} & SIMPLIFY
   \end{align*}
-  }
-  \only<3>{%
-    \begin{columns}
-      \begin{column}{0.6\textwidth}
-        \scalebox{1.1}{\usebox\boxforestC}
-      \end{column}
-      \begin{column}{0.4\textwidth}
-        {\scalebox{0.7}{\input{pgf-a1-a8.tex}}}%
-      \end{column}
-    \end{columns}%
-      
-    
-    \medskip
-    
-    Intersect each leaf with $A_3$ and $\compl{A_3}$.
-    
-    \begin{align*}
-      A_3 \subset A_1 &\implies \compl{A_1} A_3 = \emptyset & PRUNE
-    \end{align*}
-  }
-  \only<4>{\scalebox{0.8}{\usebox\boxforestB}
-    
-    \medskip
-    
-    Intersect each leaf with $A_4$ and $\compl{A_4}$.
-  }
-  \only<5>{\scalebox{0.7}{\usebox\boxforestA}
-    
-    \medskip
-    
-    Intersect each leaf with $A_5$ and $\compl{A_5}$.
-    
-    \begin{align*}
-      A_2 \cap A_5 = \emptyset &\implies A_2A_3A_4A_5 = \emptyset & PRUNE\\
-      A_5 \subset A_4 &\implies A_1\compl{A_2}~\compl{A_3}~\compl{A_2} \cap A_5=\emptyset & PRUNE\\
-    \end{align*}
-  }
-  \only<6>{\scalebox{0.7}{\usebox\boxforestAnu}
-
-    \medskip
-
-    $MDTD=\Pi \xrightarrow{\leq O(2^n)} \{\typevar_1, \typevar_2, \ldots, \typevar_{10}\} = \{A_2 A_3 A_4,~ A_2 A_3 \compl{A_4}, ~\ldots,~ \compl{A_1}\}$.
-  }%
-  \only<7>{\scalebox{0.7}{\usebox\boxforestAnu}
-    
-    \medskip
-    
-    \begin{itemize}
-    \item \Emph{By Construction:} either $\typevar_i \subseteq A_j$ or $\typevar_i \subseteq \tynot{A_j}$.
-    \item \Emph{By Construction:} $\{\typevar_1, \typevar_2, \ldots, \typevar_{10}\}$ mutually disjoint.
-    \item \Emph{By Construction:} $\bigcup_{i=1}^5\typevar_i=\Sigma$.
-    \item Exactly the properties we need to compute $\deriv{\typevar}{\singleton{A_i}}$.
-    \end{itemize}
-  }
 \end{frame}
 
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \begin{columns}
+%%     \begin{column}{0.6\textwidth}
+%%       \scalebox{1.1}{\usebox\boxforestC}
+%%     \end{column}
+%%     \begin{column}{0.4\textwidth}
+%%       {\scalebox{0.7}{\input{pgf-a1-a8.tex}}}%
+%%     \end{column}
+%%   \end{columns}%
+  
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_3$ and $\compl{A_3}$.
+  
+%%   \begin{align*}
+%%     A_3 \subset A_1 &\implies \compl{A_1} A_3 = \emptyset & PRUNE
+%%   \end{align*}
+%% \end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \scalebox{0.8}{\usebox\boxforestB}
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_4$ and $\compl{A_4}$.
+%% \end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \scalebox{0.7}{\usebox\boxforestA}
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_5$ and $\compl{A_5}$.
+  
+%%   \begin{align*}
+%%     A_2 \cap A_5 = \emptyset &\implies A_2A_3A_4A_5 = \emptyset & PRUNE\\
+%%     A_5 \subset A_4 &\implies A_1\compl{A_2}~\compl{A_3}~\compl{A_2} \cap A_5=\emptyset & PRUNE\\
+%%   \end{align*}
+%% \end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \scalebox{0.7}{\usebox\boxforestA}
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_5$ and $\compl{A_5}$.
+  
+%%   \begin{align*}
+%%     A_2 \cap A_5 = \emptyset &\implies A_2A_3A_4A_5 = \emptyset & PRUNE\\
+%%     A_5 \subset A_4 &\implies A_1\compl{A_2}~\compl{A_3}~\compl{A_2} \cap A_5=\emptyset & PRUNE\\
+%%   \end{align*}
+%% \end{frame}
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \scalebox{0.7}{\usebox\boxforestAnu}
+  
+  \medskip
+  
+  $MDTD=\Pi \xrightarrow{\leq O(2^n)} \{\typevar_1, \typevar_2, \ldots, \typevar_{10}\} = \{A_2 A_3 A_4,~ A_2 A_3 \compl{A_4}, ~\ldots,~ \compl{A_1}\}$.  
+\end{frame}
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \scalebox{0.65}{\usebox\boxforestAnu}
+  
+  \medskip
+  
+  \begin{itemize}
+  \item \Emph{By Construction:} either $\typevar_i \subseteq A_j$ or $\typevar_i \subseteq \tynot{A_j}$.
+  \item\Emph{By Construction:} $\{\typevar_1, \typevar_2, \ldots, \typevar_{10}\}$ mutually disjoint.
+  \item \Emph{By Construction:} $\bigcup_{i=1}^5\typevar_i=\Sigma$.
+  \item Exactly the properties we need to compute $\deriv{\typevar}{\singleton{A_i}}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Are there dire Consequences?}
+
+  \begin{itemize}
+  \item   Recall: $\{\typevar_1, \typevar_2, \ldots, \typevar_{10}\}$ mutually disjoint by construction.
+
+  \item   However, BUT some $\typevar_i$ may be unknowingly vacuous.
+
+  \item   Nevertheles $\emptyset$ is disjoint with every set, including itself.
+
+  \item   Thus transitions may be \Emph{indeterminate/unsatisfiable}.
+
+  \item   What is the consequence transitions which are  \Emph{indeterminate} and \Emph{unsatisfiable}?
+
+
+  \end{itemize}
+
+
+\end{frame}
 
 \begin{frame}{Non-determinism by subtype}
   \begin{columns}[T]
@@ -287,7 +343,7 @@
 \end{frame}
 
 
-\begin{frame}{Non-determinism by \code{SSatisfies}}
+\begin{frame}{Non-determinism by \code{(satisfies f)}}
   \begin{columns}[T]
     \begin{column}{0.35\textwidth}
       \centering
@@ -306,7 +362,6 @@
 
 
 
-
 % Double and Odd + Double and Even
 
 
@@ -316,12 +371,7 @@
 % if A and B are in a subtype relation, then either A &! B or B & !A is empty
 
 
-\newsavebox\classbox
-\begin{lrbox}{\classbox}
-  \begin{minipage}{7cm}
-    \input{codeClass}
-  \end{minipage}
-\end{lrbox}
+
 
 \begin{frame}{Unsatisfiable Transitions}
 
@@ -355,6 +405,4 @@
   \end{itemize}
   }
 \end{frame}
-
-
 
