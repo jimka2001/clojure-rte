@@ -2191,10 +2191,13 @@
   (every? valid-rte? args))
 (defmethod valid-rte? :or [[_ & args]]
   (every? valid-rte? args))
-(defmethod valid-rte? :not [[arg]]
-  (valid-rte? arg))
-(defmethod valid-rte? :* [[arg]]
-  (valid-rte? arg))
+(defmethod valid-rte? :not [[_not & args]]
+  (println [:valid? :not :args args])
+  (and (= 1 (count args))
+       (valid-rte? (first args))))
+(defmethod valid-rte? :* [[_ & args]]
+  (and (= 1 (count args))
+       (valid-rte? (first args))))
 (defmethod valid-rte? :empty-word []
   true)
 (defmethod valid-rte? :sigma []
