@@ -58,6 +58,29 @@
         :else
         index))
 
+
+(defn rte-case-fn
+  "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
+  This function is used in the macro expansion of rte-case but
+  can also be used on its own.
+  `rte-case-fn` returns a unary function which can be falled with
+  a sequence.  The sequence is matched against the rtes in order
+  and the first one that matches, the corresponding 0-ary-function
+  is called and its value is returned.
+  The sequence is traversed a maximum of once, but may not traverse
+  entirely if it is determined early that no rte matches."
+  [pairs]
+  (let [dfa (xym/synchronized-union
+             (reduce xym/synchronized-union 
+                     (for [[rte thunk] pairs]
+                       (do (assert (rte/valid-rte? rte)
+                                   (format "%s is not a valid rte" rte))
+                           (assert (fn? thunk))
+                           (rte-to-dfa rte thunk))))
+             (rte-to-dfa sigma-* (fn [] nil)))]
+    (fn [s]
+      ((rte/match dfa s)))))
+  
 (defmacro rte-case
   "Takes an expression, and a set of clauses.
   The expression should evaluate to an object which is `sequential?`.
@@ -74,31 +97,11 @@
   is more efficient than a sequence of consecutive calls to
   rte/match."
   [sequence & clauses]
-  (letfn [(compile-clauses [clauses]
-            (loop [remaining-clauses clauses
-                   index 0
-                   used-rtes ()
-                   acc-int-rte-pairs []
-                   acc-fns []]
-              (cond
-                (empty? remaining-clauses)
-                [acc-fns acc-int-rte-pairs]
+  (assert (even? (count clauses)))
 
-                :else
-                (let [[rte consequent & more] remaining-clauses]
-                  (recur more
-                         (inc index)
-                         (cons rte used-rtes)
-                         (conj acc-int-rte-pairs [index (canonicalize-pattern `(:and ~rte (:not (:or ~@used-rtes))))])
-                         (conj acc-fns `(fn [] ~consequent)))))))]
-    (when (odd? (count clauses))
-      (throw (IllegalArgumentException. (str "rte-case, odd number of clauses is not supported. No matching clause: " (last clauses)))))
-    
-    (let [[fns int-rte-pairs] (compile-clauses clauses)
-          num-fns (count fns)]
-      `((~fns (ensure-fns-index (rte/match (rte-case-clauses-to-dfa '~int-rte-pairs) ~sequence
-                                           :promise-disjoint true)
-                                ~num-fns))))))
+  (let [pairs (into [] (for [[rte expr] (partition 2 2 clauses)]
+                         `['~rte (fn [] ~expr)]))]
+    `((rte-case-fn ~pairs) ~sequence)))
 
 (defn lambda-list-to-rte
   "Helper function for destructuring-case macro.
