@@ -65,7 +65,7 @@ assured that the side-effects will be achieved.
 
 ## Installation
 
-Download from [LRDE](https://www.lrde.epita.fr/wiki/Home) GitLab 
+Download from [LRE](https://gitlab.lre.epita.fr/jnewton) GitLab 
 
 ```
 git clone git@gitlab.lrde.epita.fr:jnewton/clojure-rte.git)
@@ -74,6 +74,13 @@ git clone git@gitlab.lrde.epita.fr:jnewton/clojure-rte.git)
 ```
 git clone https://gitlab.lrde.epita.fr/jnewton/clojure-rte.git
 ```
+
+Download from [GitHub](https://github.com/jimka2001)
+
+```
+git clone https://github.com/jimka2001/clojure-rte.git
+```
+
 
 ## RTE in more depth
 
