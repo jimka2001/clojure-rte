@@ -2248,6 +2248,11 @@
   (fn [arg & args]
     (assert-valid-rte (rte/And arg (rte/Not (apply rte/Or args))))))
 
+(def rte/Xor
+  (fn [arg1 arg2]
+    (assert-valid-rte (rte/Or (rte/And-not arg1 arg2)
+                              (rte/And-not arg2 arg1)))))
+
 
 (def rte/Question
   (fn [arg]

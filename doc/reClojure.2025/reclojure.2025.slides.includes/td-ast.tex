@@ -13,9 +13,9 @@
     \tikzstyle{level 2}=[sibling distance=40mm]
     \tikzstyle{level 3}=[sibling distance=40mm]
   \node {\code{or}}
-    child { node [bottom color=blue!20] {\code{Float}} }
+    child { node [bottom color=blue!20] {\code{Double}} }
     child { node {\code{and} }
-      child { node [bottom color=blue!20] {\code{(satisfies oddp)} } }
+      child { node [bottom color=blue!20] {\code{(satisfies odd?)} } }
       child { node {\code{not} }
         child { node [bottom color=blue!20] {\code{(= 13)} } } } };
 \end{tikzpicture}

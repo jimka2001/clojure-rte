@@ -230,8 +230,10 @@
             ;; we expand to two cases, one where the type is matched, and one where
             ;; the complement of the type is not matched.
             (let [if-true  (substitute-types disjoints :empty-set
-                                             (substitute-types (cons most-freq proper-supers) :sigma canonicalized-pairs))
-                  if-false (substitute-types (cons most-freq proper-subs) :empty-set canonicalized-pairs)]
+                                             (substitute-types (cons most-freq proper-supers)
+                                                               :sigma canonicalized-pairs))
+                  if-false (substitute-types (cons most-freq proper-subs)
+                                             :empty-set canonicalized-pairs)]
               `(optimized-let [value# ~value]
                               (if (optimized-typep value# ~most-freq)
                                 (typecase value# ~@(mapcat identity if-true))

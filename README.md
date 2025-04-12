@@ -266,8 +266,8 @@ but `[2 4]` is not a factor.
   )
 ```
 
-* `(:contains-every ...)` ---  Takes 0 or more operands.  Matches a sequence if it for each pattern
-the sequence contains a factor which matches the pattern.
+* `(:contains-every ...)` ---  Takes 0 or more operands.  Matches a sequence if, for each pattern,
+the sequence contains a factor which matches that pattern.
 
 ```clojure
 (let [rte (rte/compile '(:contains-every (satisfies integer?)))]

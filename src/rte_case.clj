@@ -77,6 +77,10 @@
                                    (format "%s is not a valid rte" rte))
                            (assert (fn? thunk))
                            (rte-to-dfa rte thunk))))
+             ;; add a final dfa at the end matching sigma-* which will
+             ;;  serve as a default value.  thus (rte/match dfa s)
+             ;;  will always return a 0-ary function even if the sequence
+             ;;  s does not match.
              (rte-to-dfa sigma-* (fn [] nil)))]
     (fn [s]
       ((rte/match dfa s)))))
