@@ -318,7 +318,7 @@
   Methods take two arguments [pattern functions]
   pattern is the entire rte pattern being expanded, which might be sequence or otherwise.
     E.g., pattern = (:and A B C)
-    or    pather = :empty-set
+    or    pattern = :empty-set
   A method may return either a transformed version of the pattern,
   or may return the pattern itself.   This function is called within
   a call to fixed-point which will keep calling the function until it
