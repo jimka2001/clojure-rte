@@ -2212,7 +2212,6 @@
 (defmethod valid-rte? :? [args]
   (valid-rte? (expand args)))
 (defmethod valid-rte? :exp [args]
-  (println [:valid-rte? args :expand (expand args)])
   (valid-rte? (expand args)))
 (defmethod valid-rte? :permute [args]
   (valid-rte? (expand args)))
