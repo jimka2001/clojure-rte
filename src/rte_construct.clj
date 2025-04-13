@@ -405,6 +405,8 @@
   ;;    as implemented it is equivalent to (:not :epsilon) which seems wierd.
   `(:not (:contains-any ~@(rest pattern))))
 
+
+
 (defmethod expand-1 :exp method-expand-1-exp [pattern functions]
   (letfn [(expand [n m pattern]
             (assert (>= n 0) (format "pattern %s is limited to n >= 0, not %s" pattern n))
@@ -451,6 +453,8 @@
 
 (defn expand ; rte/expand
   "Repeat calls to expand-1 until a fixed point is found."
+  ([given-pattern]
+   (rte/expand given-pattern (assoc *traversal-functions* :client (fn [& args] (first args)))))
   ([given-pattern functions]
    (rte/expand given-pattern functions true))
   ([given-pattern functions verbose]
@@ -488,6 +492,8 @@
   ([given-pattern functions]
    (traverse-pattern 0 given-pattern functions))
   ([depth given-pattern functions]
+   (assert (map? functions)
+           (format "functions should be a map, not %s" functions))
    (when (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
                 depth given-pattern))
@@ -2200,14 +2206,36 @@
 (defmethod valid-rte? :* [[_ & args]]
   (and (= 1 (count args))
        (valid-rte? (first args))))
-(defmethod valid-rte? :empty-word [_]
+
+(defmethod valid-rte? :+ [args]
+  (valid-rte? (expand args)))
+(defmethod valid-rte? :? [args]
+  (valid-rte? (expand args)))
+(defmethod valid-rte? :exp [args]
+  (println [:valid-rte? args :expand (expand args)])
+  (valid-rte? (expand args)))
+(defmethod valid-rte? :permute [args]
+  (valid-rte? (expand args)))
+(defmethod valid-rte? :contains-any [args]
+  (valid-rte? (expand args)))
+(defmethod valid-rte? :contains-every [args]
+  (valid-rte? (expand args)))
+(defmethod valid-rte? :contains-none [args]
+  (valid-rte? (expand args)))
+
+(defmethod valid-rte? :epsilon [_]
   true)
+(defmethod valid-rte? :empty-word [_]
+  false)
+
 (defmethod valid-rte? :sigma [_]
   true)
 (defmethod valid-rte? :empty-set [_]
   true)
 (defmethod valid-rte? :default [type-designator]
   (gns/valid-type? type-designator))
+
+
 
 (defn assert-valid-rte [rte]
   (if (valid-rte? rte)

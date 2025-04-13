@@ -671,15 +671,26 @@
             
 (deftest t-valid-rte
   (testing "valid-rte?"
+    (is (rte/valid-rte? :sigma))
+    (is (rte/valid-rte? :epsilon))
+    (is (rte/valid-rte? :empty-set))
     (is (rte/valid-rte? Integer))
     (is (rte/valid-rte? 'Integer))
+
+    ;; :not
     (is (rte/valid-rte? '(:not Integer)))
     (is (rte/valid-rte? (list :not Integer)))
     (is (rte/valid-rte? '(not Integer)))
     (is (rte/valid-rte? '(and Integer)))
     (is (rte/valid-rte? '(or Integer)))
+
+    ;; :cat
     (is (rte/valid-rte? '(:cat)))
+
+    ;; :and
     (is (rte/valid-rte? '(:and)))
+
+    ;; :or
     (is (rte/valid-rte? '(:or)))
     (is (rte/valid-rte? '(:cat Integer)))
     (is (rte/valid-rte? '(:and Integer)))
@@ -691,9 +702,25 @@
     (is (rte/valid-rte? '(= 1)))
     (is (rte/valid-rte? 'String))
     (is (rte/valid-rte? :sigma))
-    (is (rte/valid-rte? '(:cat String :sigma)))))
+    (is (rte/valid-rte? '(:cat String :sigma)))
+    (is (rte/valid-rte? '(:? String)))
+    (is (rte/valid-rte? '(:+ String)))
+    (is (rte/valid-rte? '(:* String)))
+    (is (rte/valid-rte? '(:cat (:* Number) (:+ String) (:* Boolean))))
+
+    (is (rte/valid-rte? '(:cat String String String)))
+    (is (rte/valid-rte? '(:exp 3 Integer)))
+    (is (rte/valid-rte? '(:permute Integer String)))
+    (is (rte/valid-rte? '(:contains-none Integer String)))
+    (is (rte/valid-rte? '(:contains-any Integer String)))
+    (is (rte/valid-rte? '(:contains-every Integer String)))
 
 
+    (is (rte/valid-rte? '(:cat (:contains-every Integer String)
+                               (:exp 3 Integer)
+                               (:? String))))
+
+))
 
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'rte-test/the-test])
