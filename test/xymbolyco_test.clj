@@ -31,6 +31,8 @@
             [dot :refer [dfa-to-dot]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
+(def testing-view false)
+
 (defn -main []
   (clojure.test/run-tests 'xymbolyco-test))
 
@@ -361,7 +363,7 @@
                  ]]
 
       (let [dfa (rte-to-dfa rte)]
-        ;;(println [:view (dfa-to-dot dfa :title (gensym "bdd") :view true :verbose true)])
+        (dfa-to-dot dfa :title (gensym "bdd") :view testing-view :verbose false)
         (is (xym/dfa-inhabited? dfa))))))
 
 (deftest t-spanning-paths
@@ -384,7 +386,7 @@
              {-11 [:satisfiable '(0 35 6)],
               12 [:satisfiable '(0 20 13 9 28)],
              42 [:indeterminate '(0 16 45 37)]}))
-      ;; (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view true)
+       (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view)
       )))
 
 
@@ -418,17 +420,20 @@
                    [:satisfiable String] 
                    [:satisfiable String]]]}))
 
-      ;;(dfa-to-dot dfa-x :draw-sink true :title "union 4" :view true)
+      (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view)
       )))
+
 (deftest t-reclojure-1
   (testing "reClojure 2025"
     (is (gns/valid-type? (gns/Satisfies even?)))
     (is (rte/valid-rte? (gns/Satisfies even?)))
     (is (rte/valid-rte? Integer))
     (is (rte/valid-rte? (rte/Star String)))
-    (let [pat (rte/Star (rte/Cat Integer (rte/Star String) (gns/Satisfies even?)))
-          rte (rte-to-dfa pat)]
+    (let [pat-1 (rte/Star (rte/Cat Integer (rte/Star String) (gns/Satisfies even?)))
+          pat-2 '(:* (:cat Integer (:* String) (satisfies even?)))
+          rte (rte-to-dfa pat-1)]
 
-      (is pat)
+      (is pat-1)
       (is rte)
-      (dfa-to-dot pat :draw-sink true :title "reClojure 1" :view true))))
+      (dfa-to-dot pat-1 :draw-sink true :title "reClojure 1" :view testing-view)
+      (dfa-to-dot pat-2 :draw-sink true :title "reClojure 2" :view testing-view))))
