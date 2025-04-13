@@ -28,6 +28,8 @@
 (defn -main []
   (clojure.test/run-tests 'genus-statistics-test))
 
+(def testing-verbose false)
+
 (defmacro testing
   [string & body]
   (let [verbose (gensym)]
@@ -95,9 +97,12 @@
               (map (fn [[k v]] [k
                                 (/ (* 100.0 v) n)]) m)))]
     (let [computability (measure-subtype-computability nreps 3)]
-      (doall (map println computability))
-      (println "--------------------")
-      computability)))
+      (let [str (with-out-str
+                  (doall (map println computability))
+                  (println "--------------------"))]
+        (when testing-verbose
+          (print str))
+        computability))))
 
 (deftest t-statistics
   (testing "statistics"
