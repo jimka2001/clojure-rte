@@ -227,7 +227,8 @@
                            :unparsed others})))))
 
 (defmacro destructuring-case
-  "After evaluating the expression (only once) determine whether its return value
+  "After evaluating the expression (only once) determine whether its return
+  value
   conforms to any of the given lambda lists and type restrictions.  If so,
   bind the variables as if by let, and evaluate the corresponding form."
   [expr & operands]
@@ -283,7 +284,9 @@
         (let [pairs (partition 2 operands)
               cases (mapcat conv-1-case-clause pairs)]
           `(let [~var ~expr]
-             (rte-case ~var ~@cases ~sigma-* nil)))))))
+             (rte-case ~var ~@cases ~sigma-* 
+                       (throw (ex-info "No pattern matching given list"
+                                       {:args ~var})))))))))
 
 (defmacro dscase
   "Semantically similar to destructuring-case but arguably simpler syntax.
@@ -429,3 +432,6 @@
       :else
       `(destructuring-fn
         ~@(map process forms)))))
+
+(defmacro dsdef [name & forms]
+  `(def ~name (dsfn ~@forms)))

@@ -1,4 +1,4 @@
-;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21,25 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -147,7 +147,7 @@
                                  ))
         "test 2")
 
-    (is (= nil (destructuring-case '(true [3 3] true)
+    (is (thrown? Exception (destructuring-case '(true [3 3] true)
                                    [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
                                    1
 
@@ -172,7 +172,7 @@
                                2 ;; this is returned
                                ))
         "test 5")
-    (is (= nil
+    (is (thrown? Exception
            (destructuring-case '(true ["hello" xyz] true false 1 2 3)
                                [[^Boolean _a [^String _b _c] & ^Boolean _d]  {_d Number}]
                                1 ;; this is NOT returned
@@ -314,7 +314,7 @@
 
 (deftest t-destructuring-fn
   (testing "destructuring-fn"
-    (is (= nil
+    (is (thrown? Exception
            (let [f (destructuring-fn
                     ([[_a [_b _c] & _d]  {a Boolean _b String d Boolean}]
                      1)
@@ -343,7 +343,7 @@
                      ))]
              (apply f '(true ["hello" xyz] true false 1 2 3))))
         "test 5")
-    (is (= nil
+    (is (thrown? Exception
            (let [f (destructuring-fn
                     ([[^Boolean _a [^String _b _c] & ^Boolean _d]  {d Number}]
                      1 ;; this is NOT returned
@@ -585,7 +585,7 @@
                true '(2 "three") 4))
         "test 3")
 
-    (is (= nil ((destructuring-fn 
+    (is (thrown? Exception ((destructuring-fn 
                 ([[[^Boolean _a _b] _c _d] {}]  12)
                 ([[^Boolean _a [_b _c] _d] {}] 13)
                 ([[^Boolean _a _b [_c _d]] {}] 14))
@@ -612,12 +612,12 @@
   (testing "dsfn"
     (is (= 42
            (let [f (dsfn
-                    ^{_a Boolean _b String d Boolean}
-                    [_a [_b _c] & _d]
-                    42)]
+                     ^{_a Boolean _b String d Boolean}
+                     [_a [_b _c] & _d]
+                     42)]
              (f true ["hello" 3] true true)))
         "test 612")
-
+    
     (is (= 42
            (let [f (dsfn fake-name
                          ^{_a Boolean _b String d Boolean}
@@ -625,7 +625,7 @@
                          42)]
              (f true ["hello" 3] true true)))
         "test 613")
-
+    
     (is (= 42
            (let [f (dsfn fake-name
                          (^{_a Boolean _b String d Boolean}
@@ -633,7 +633,7 @@
                           42))]
              (f true ["hello" 3] true true)))
         "test 614")
-
+    
     (is (= 42
            ;; test recursive anonymous function
            (let [f (dsfn fake-name
@@ -641,50 +641,50 @@
                           41)
                          ([^Long a]
                           (+ 1 (fake-name (+ 0.0 a)))))]
-
+             
              (f 12)))
         "test 615")
-
-    (is (= nil
-           (let [f (dsfn
-                    (^{_a Boolean _b String d Boolean}
-                     [_a [_b _c] & _d]
-                     1)
-
-                    (^{_a Boolean _b (or String Boolean)}
-                     [_a _b]
-                     2))]
-             (apply f  '(true [3 3] true))))
+    
+    (is (thrown? Exception
+                 (let [f (dsfn
+                           (^{_a Boolean _b String d Boolean}
+                            [_a [_b _c] & _d]
+                            1)
+                           
+                           (^{_a Boolean _b (or String Boolean)}
+                            [_a _b]
+                            2))]
+                   (apply f  '(true [3 3] true))))
         "test 3")
-
+    
     (is (= 1
            (let [f (dsfn
-                    ([^Boolean _a [^String _b _c] & ^Boolean _d]
-                     1 ;; this is returned
-                     )
-                    (^{_a Boolean _b (or String Boolean)} [_a _b]
-                     2))]
+                     ([^Boolean _a [^String _b _c] & ^Boolean _d]
+                      1 ;; this is returned
+                      )
+                     (^{_a Boolean _b (or String Boolean)} [_a _b]
+                      2))]
              (apply f '(true ["hello" xyz] true false true))))
         "test 4")
     (is (= 2
            (let [f (dsfn
-                    ([^Boolean _a [^String _b _c] & ^Boolean _d]
-                     1)
-                    ([^Boolean _a [^String _b _c] & _d]
-                     2 ;; this is returned
-                     ))]
+                     ([^Boolean _a [^String _b _c] & ^Boolean _d]
+                      1)
+                     ([^Boolean _a [^String _b _c] & _d]
+                      2 ;; this is returned
+                      ))]
              (apply f '(true ["hello" xyz] true false 1 2 3))))
         "test 5")
-    (is (= nil
-           (let [f (dsfn
-                    (^{d Number}
-                     [^Boolean _a [^String _b _c] & ^Boolean _d]
-                     1 ;; this is NOT returned
-                     )
-                    (^{d Boolean} [^Boolean _a [^String _b _c] & ^Number _d]
-                     2 ;; this is NOT returned
-                     ))]
-             (apply f '(true ["hello" xyz] true false 1 2 3))))
+    (is (thrown? Exception
+                 (let [f (dsfn
+                           (^{d Number}
+                            [^Boolean _a [^String _b _c] & ^Boolean _d]
+                            1 ;; this is NOT returned
+                            )
+                           (^{d Boolean} [^Boolean _a [^String _b _c] & ^Number _d]
+                            2 ;; this is NOT returned
+                            ))]
+                   (apply f '(true ["hello" xyz] true false 1 2 3))))
         "test 6")
 
     (is (= 1
@@ -792,7 +792,7 @@
                    ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
              :bar "hello")))
 
-  (is (= nil ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
+  (is (thrown? Exception ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                     ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                     ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
                     ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44))))))
@@ -836,7 +836,7 @@
                      ))
         "test 2")
 
-    (is (= nil (dscase '(true [3 3] true)
+    (is (thrown? Exception (dscase '(true [3 3] true)
                        ^{_a Boolean _b String d Boolean} [_a [_b _c] & _d]
                        1
 
@@ -861,7 +861,7 @@
                    2 ;; this is returned
                    ))
         "test 5")
-    (is (= nil
+    (is (thrown? Exception
            (dscase '(true ["hello" xyz] true false 1 2 3)
                    ^{d Number} [^Boolean _a [^String _b _c] & ^Boolean _d]
                    1 ;; this is NOT returned
