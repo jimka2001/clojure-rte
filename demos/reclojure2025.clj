@@ -23,7 +23,7 @@
 )
 
 
-(rte-case (for [x [1 2 true 2 3 false]
+(rte-case (for [x [1 2 true 2 3 false 'a-symbol 'b-symbol]
                 ]
             (do (println [:generating :x x])
                 x))
@@ -32,6 +32,18 @@
 
   (:* (:cat (:* Number) (:or Boolean String)))
   2
+)
+
+
+(rte-case (for [x (range 40)
+                ]
+            (do (println [:generating :x x])
+                2.1))
+  (:* Number)
+  1
+
+  (:*  (:or Boolean String))
+  2
   )
 
 (def mf (rte-case-fn [['(:* (:cat (:* Number) Boolean))
@@ -39,7 +51,6 @@
                       ['(:* (:cat (:* Number) (:or Boolean String)))
                        (fn [] 2)]]))
 
-(partition 2 2 '[a b c d e f g])
 
 
 (mf (for [x [1 2 true 2 3 false "hello" []
