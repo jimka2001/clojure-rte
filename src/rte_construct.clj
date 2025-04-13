@@ -2181,7 +2181,7 @@
           (let [final-state (reduce consume 0 items)]
             ;; final-state may be integer desgnating the state which was
             ;;  reached on iterating successfully through the input
-            ;;  sequence, items.  Or final-state may false, if the
+            ;;  sequence, items.  Or final-state may be false, if the
             ;;  iteration finished without iterating through the entire
             ;;  sequence, either because we found ourselves in a
             ;;  sink-state, or we encountered a item for which no transition
