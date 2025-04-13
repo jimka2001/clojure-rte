@@ -6,6 +6,24 @@
 ))
 
 (dscase '(1 2 (3 4)) ;; '(true 2 ("3" "4"))
+[[ a b] c d]
+12
+
+[ a [b c]  d]
+13
+
+[ a b [ c  d]]
+(do
+  (println "hello")
+  (println "this is the 3rd case")
+  14)
+
+[  a b [c d]]
+15
+)
+
+
+(dscase '(1 2 (3 4)) ;; '(true 2 ("3" "4"))
   [[^Boolean a b] c d]
   12
 
