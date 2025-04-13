@@ -609,7 +609,6 @@
   (assertion expr)
   expr)
 
-
 (defn call-with-found
   "Call the given predicate, pred, on successive elements of the collection
   until the first time pred returns a truthy value, at which time if-found
