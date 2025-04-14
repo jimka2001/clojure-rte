@@ -133,36 +133,37 @@ This macro call expands to code equivalent to the following.  To make the
 code more human readable we have replaced machine generated symbols with `v1`.
 
 ```clojure
-(let [v1 (+ 1 2 3)]
-  (if (gns/typep v1 'Double)
-    42
-    (if (gns/typep v1 'String)
-      42
-      (if (gns/typep v1 'Byte)
-        (if (odd? v1)
-          43
-          (if (neg? v1)
-              45
-              44))
-        (if (gns/typep v1 'Short)
-          (if (odd? v1)
-            43
-            (if (neg? v1)
-                45
-                44))
-          (if (gns/typep v1 'Integer)
-            (if (odd? v1)
-              43
-              (if (neg? v1)
-                  45
-                  44))
-            (if (odd? v1)
-              (if (gns/typep v1 'Long)
-                  43
-                  45)
-              (if (gns/typep v1 '(and Long (not (satisfies neg?))))
-                  44
-                  45))))))))
+(typecase/optimized-let
+ [v1 (+ 1 2 3)]
+ (if (instance? String v1)
+   42
+   (if (instance? Double v1)
+     42
+     (if (instance? Short v1)
+       (if (odd? v1)
+         43
+         (if (neg? v1)
+           45
+           44))
+       (if (instance? Long v1)
+         (if (odd? v1)
+           43
+           (if (neg? v1)
+             45
+             44))
+         (if (instance? Integer v1)
+           (if (odd? v1)
+             43
+             (if (neg? v1)
+               45
+               44))
+           (if (instance? Byte v1)
+             (if (odd? v1)
+               43
+               (if (neg? v1)
+                 45
+                 44))
+             45)))))))
 ```
 
 ## How to extend the type system
