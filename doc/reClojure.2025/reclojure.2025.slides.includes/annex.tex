@@ -1,3 +1,113 @@
+\input{clojure-disjoint}
+
+
+
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \scalebox{2.0}{\usebox\boxforestE}
+  
+  \medskip
+  
+  Start with $\Sigma=Universe$, and intersect with $A_1$ and $\compl{A_1}$.
+\end{frame}
+
+
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \scalebox{1.5}{\usebox\boxforestD}%    
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      {\scalebox{0.7}{\input{pgf-a1-a8.tex}}}%
+    \end{column}
+  \end{columns}%
+  
+  Intersect each leaf with $A_2$ and $\compl{A_2}$.
+  \begin{align*}
+    A_2 \subset A_1 &\implies A_1\cap A_2 = A_2 & SIMPLIFY\\
+    A_2 \subset A_1 &\implies \compl{A_1}\cap A_2 = \emptyset & PRUNE\\
+    A_2 \subset A_1 &\implies \compl{A_1}\cap \compl{A_2} = \compl{A_1} & SIMPLIFY
+  \end{align*}
+\end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \begin{columns}
+%%     \begin{column}{0.6\textwidth}
+%%       \scalebox{1.1}{\usebox\boxforestC}
+%%     \end{column}
+%%     \begin{column}{0.4\textwidth}
+%%       {\scalebox{0.7}{\input{pgf-a1-a8.tex}}}%
+%%     \end{column}
+%%   \end{columns}%
+  
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_3$ and $\compl{A_3}$.
+  
+%%   \begin{align*}
+%%     A_3 \subset A_1 &\implies \compl{A_1} A_3 = \emptyset & PRUNE
+%%   \end{align*}
+%% \end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \scalebox{0.8}{\usebox\boxforestB}
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_4$ and $\compl{A_4}$.
+%% \end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \scalebox{0.7}{\usebox\boxforestA}
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_5$ and $\compl{A_5}$.
+  
+%%   \begin{align*}
+%%     A_2 \cap A_5 = \emptyset &\implies A_2A_3A_4A_5 = \emptyset & PRUNE\\
+%%     A_5 \subset A_4 &\implies A_1\compl{A_2}~\compl{A_3}~\compl{A_2} \cap A_5=\emptyset & PRUNE\\
+%%   \end{align*}
+%% \end{frame}
+
+%% \begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+%%   \scalebox{0.7}{\usebox\boxforestA}
+  
+%%   \medskip
+  
+%%   Intersect each leaf with $A_5$ and $\compl{A_5}$.
+  
+%%   \begin{align*}
+%%     A_2 \cap A_5 = \emptyset &\implies A_2A_3A_4A_5 = \emptyset & PRUNE\\
+%%     A_5 \subset A_4 &\implies A_1\compl{A_2}~\compl{A_3}~\compl{A_2} \cap A_5=\emptyset & PRUNE\\
+%%   \end{align*}
+%% \end{frame}
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \scalebox{0.7}{\usebox\boxforestAnu}
+  
+  \medskip
+  
+  $MDTD=\Pi \xrightarrow{\leq O(2^n)} \{\typevar_1, \typevar_2, \ldots, \typevar_{10}\} = \{A_2 A_3 A_4,~ A_2 A_3 \compl{A_4}, ~\ldots,~ \compl{A_1}\}$.  
+\end{frame}
+
+\begin{frame}[t]{$MDTD( \{A_1, A_2, \ldots, A_5\})\to\Pi$}
+  \scalebox{0.65}{\usebox\boxforestAnu}
+  
+  \medskip
+  
+  \begin{itemize}
+  \item \Emph{By Construction:} either $\typevar_i \subseteq A_j$ or $\typevar_i \subseteq \tynot{A_j}$.
+  \item\Emph{By Construction:} $\{\typevar_1, \typevar_2, \ldots, \typevar_{10}\}$ mutually disjoint.
+  \item \Emph{By Construction:} $\bigcup_{i=1}^5\typevar_i=\Sigma$.
+  \item Exactly the properties we need to compute $\deriv{\typevar}{\singleton{A_i}}$.
+  \end{itemize}
+\end{frame}
+
+
+
 
 \begin{frame}{Decision Tree Structure}
   We programmatically manipulate \code{if \code{\textcolor{greeny}{then}} ... \code{\textcolor{red}{else}} ...} using a decision tree.
