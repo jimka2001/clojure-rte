@@ -1,45 +1,48 @@
 (ns reclojure2025
-  (:require [rte-case :refer [rte-case dscase rte-case-fn]]
+  (:require [rte-case :refer [rte-case dscase rte-case-fn dsdef]]
             [rte-construct :as rte]
             [typecase :refer [typecase]]
             [dot])
-))
-
-(dscase '(1 2 (3 4)) ;; '(true 2 ("3" "4"))
-[[ a b] c d]
-12
-
-[ a [b c]  d]
-13
-
-[ a b [ c  d]]
-(do
-  (println "hello")
-  (println "this is the 3rd case")
-  14)
-
-[  a b [c d]]
-15
 )
 
+(defn f
+  ([[a b] c d]   12)
+  ([a [b c] d]   13)
+  ([a b [c d]]   14))
 
-(dscase '(1 2 (3 4)) ;; '(true 2 ("3" "4"))
-  [[^Boolean a b] c d]
-  12
+(defn f
+  ([a]   12)
+  ([^Boolean a b]   13)
+  ([a b [c d]]   14))
 
-  [^Boolean a [b c] ^String d]
-  13
+(f 1 2)
 
-  [^Boolean a b [^String c ^String d]]
-  (do
-    (println "hello")
-    (println "this is the 3rd case")
-    14)
+(dsdef f 
+       ([[a b] c d] 12)
+       ([a [b c] d] 13)
+       ([a b [c d]] 14)
+       ([a b [c d]] 15))
 
-  [^Number  a b [c d]]
-  15
+(f 1 [10 20] 3)
+
+
+
+(dsdef f 
+       ([[a b] c d]  12)
+       ([a [b c] d] 13)
+       ([^Boolean a b [c d]] 14)
+       ([^Number  a b [c d]] 15))
+
+(f 1 2 3)
+
+
+(rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
+  (:* (:cat (:* Number) Boolean))
+  1
+
+  (:* (:cat (:* Number) (:or Boolean String)))
+  2
 )
-
 
 (rte-case (for [x [1 2 true 2 3 false 'a-symbol 'b-symbol]
                 ]
