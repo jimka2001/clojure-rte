@@ -1,14 +1,14 @@
 (ns reclojure2025
-  (:require [rte-case :refer [rte-case dscase rte-case-fn dsdef]]
+  (:require [rte-case :refer [rte-case dscase rte-case-fn dsdefn]]
             [rte-construct :as rte]
             [typecase :refer [typecase]]
             [dot])
 )
 
-(defn f
-  ([[a b] c d]   12)
-  ([a [b c] d]   13)
-  ([a b [c d]]   14))
+;; (defn f
+;;   ([[a b] c d]   12)
+;;   ([a [b c] d]   13)
+;;   ([a b [c d]]   14))
 
 (defn f
   ([a]   12)
@@ -17,24 +17,37 @@
 
 (f 1 2)
 
-(dsdef f 
+
+(defn f
+  ([a]   12)
+  ([a b]   13)
+  ([a b  [c d]]   14))
+
+
+(dsdefn f 
        ([[a b] c d] 12)
        ([a [b c] d] 13)
        ([a b [c d]] 14)
        ([a b [c d]] 15))
 
-(f 1 [10 20] 3)
+(f 1 2 [10.0 20])
 
-
-
-(dsdef f 
-       ([[a b] c d]  12)
+(dsdefn f 
+       ([[a b] c d] 12)
        ([a [b c] d] 13)
-       ([^Boolean a b [c d]] 14)
-       ([^Number  a b [c d]] 15))
+       ([a b [^Ratio c d]] 14)
+       ([a b [^Integer c d]] 14)
+       ([a b [^Double c d]] 16))
 
-(f 1 2 3)
+match
 
+
+(f 1 2 [10.0 20])
+(f 1 2 [10 20])
+(f 1 2 [2/3 3])
+
+(instance? Integer 10)
+(instance? Long 10)
 
 (rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
   (:* (:cat (:* Number) Boolean))
@@ -86,6 +99,10 @@
 
 (rte/match '(:* Number)
            demo-seq)
+
+(println Number)
+
+(instance? Number 10)
 
 ;; what about a seqence of numbers which contains a Ratio
 

@@ -433,5 +433,7 @@
       `(destructuring-fn
         ~@(map process forms)))))
 
-(defmacro dsdef [name & forms]
+(defmacro dsdefn [name & forms]
   `(def ~name (dsfn ~@forms)))
+
+
