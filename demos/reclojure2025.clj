@@ -106,7 +106,7 @@ match
 
 ;; what about a seqence of numbers which contains a Ratio
 
-(rte/match '(:cat (:* Number) clojure.lang.Ratio (:* Number))
+(rte/match '(:cat (:* Number) Ratio (:* Number))
            demo-seq)
 
 
@@ -118,19 +118,19 @@ match
 
 ;; what about a seqence of numbers which contains a Double AND a Ratio
 
-(rte/match '(:or (:cat (:* Number) Double (:* Number) clojure.lang.Ratio (:* Number))
-                 (:cat (:* Number) clojure.lang.Ratio (:* Number) Double (:* Number)))
+(rte/match '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
+                 (:cat (:* Number) Ratio (:* Number) Double (:* Number)))
            demo-seq)
 
 (rte/match '(:and (:cat (:* Number) Double (:* Number))
-                  (:cat (:* Number) clojure.lang.Ratio (:* Number)))
+                  (:cat (:* Number) Ratio (:* Number)))
            demo-seq)
 
 
 ;; what about contains Double and Ratio in either order
 
 (def rte-1 '(:and (:cat (:* Number) Double (:* Number))
-                  (:cat (:* Number) clojure.lang.Ratio (:* Number))))
+                  (:cat (:* Number) Ratio (:* Number))))
 
 (dot/dfa-to-dot rte-1 :title "first dfa"
                 :view true)
@@ -138,8 +138,8 @@ match
 
 ;; what about contains Double and Ratio in either order
 
-(def rte-2 '(:or (:cat (:* Number) Double (:* Number) clojure.lang.Ratio (:* Number))
-                 (:cat (:* Number) clojure.lang.Ratio (:* Number) Double (:* Number))))
+(def rte-2 '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
+                 (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
 
 (dot/dfa-to-dot rte-2 :title "second dfa" 
                 :view true)
