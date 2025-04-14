@@ -154,7 +154,7 @@ match
 
 ;; show example of expansion of (satisfies integer?)
 
-(typecase x
+(typecase 12
   Boolean "it is a boolean"
   (satisfies integer?) "it is an integer"
   (satisfies number?) "it is a number"
