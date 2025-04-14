@@ -112,11 +112,20 @@
       (or (f1 x) (f2 x)))))
 
 (defn safe-resolve
-  "Sometimes resolve throws a ClassCastException,
+  "Try to resolve a symbol coming from java.lang or clojure.lang.
+  E.g., (safe-resolve 'Number) --> java.lang.Number
+        (safe-resolve 'Ratio)  --> clojure.lang.Ratio
+
+  Sometimes resolve throws a ClassCastException,
   rather than doing this, we simply return nil"
   [t]
-  (try (resolve t)
-       (catch ClassCastException e nil)))
+  (or (try (resolve t)
+           (catch ClassCastException e nil))
+      ;;(try (resolve (symbol (str "clojure.lang." t)))
+      ;; (catch ClassCastException e nil))
+      (try (Class/forName (str "clojure.lang." t))
+           (catch ClassCastException e nil))
+      ))
 
 (defn class-designator?
   "Predicate to determine whether the given object is a class or a
