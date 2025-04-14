@@ -214,15 +214,25 @@
             (let [[[type consequent] & others] canonicalized-pairs]
               ;; canonicalized-pairs ([type consequent] [type consequent] ...)
               (if (gns/not? type)
-                `(optimized-let [value# ~value]
-                                ;; if the type is (not x), then strip off the not, and swap the then/else
-                                (if (optimized-typep value# ~(second type))
-                                  (typecase value# ~@(mapcat identity others))
-                                  ~consequent))
-                `(optimized-let [value# ~value]
-                                (if (optimized-typep value# ~type)
-                                  ~consequent
-                                  (typecase value# ~@(mapcat identity others))))))
+                (if (symbol? value)
+                  ;; if the type is (not x), then strip off the not, and swap the then/else
+                  `(if (optimized-typep ~value ~(second type))
+                     (typecase ~value ~@(mapcat identity others))
+                     ~consequent)
+                  `(optimized-let [value# ~value]
+                                  ;; if the type is (not x), then strip off the not, and swap the then/else
+                                  (if (optimized-typep value# ~(second type))
+                                    (typecase value# ~@(mapcat identity others))
+                                    ~consequent)))
+                (if (symbol? value)
+                  `(if (optimized-typep ~value ~type)
+                     ~consequent
+                     (typecase ~value ~@(mapcat identity others)))
+                  
+                  `(optimized-let [value# ~value]
+                                  (if (optimized-typep value# ~type)
+                                    ~consequent
+                                    (typecase value# ~@(mapcat identity others)))))))
 
             :else
             ;; most-freq is a leaf-level type which appears multiple times, either
@@ -234,7 +244,11 @@
                                                                :sigma canonicalized-pairs))
                   if-false (substitute-types (cons most-freq proper-subs)
                                              :empty-set canonicalized-pairs)]
-              `(optimized-let [value# ~value]
-                              (if (optimized-typep value# ~most-freq)
-                                (typecase value# ~@(mapcat identity if-true))
-                                (typecase value# ~@(mapcat identity if-false)))))))))))
+              (if (symbol? value)
+                `(if (optimized-typep ~value ~most-freq)
+                   (typecase ~value ~@(mapcat identity if-true))
+                   (typecase ~value ~@(mapcat identity if-false)))
+                `(optimized-let [value# ~value]
+                                (if (optimized-typep value# ~most-freq)
+                                  (typecase value# ~@(mapcat identity if-true))
+                                  (typecase value# ~@(mapcat identity if-false))))))))))))
