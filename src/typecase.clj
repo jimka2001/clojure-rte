@@ -162,6 +162,11 @@
         (let [[_not ty] t]
         `(not (optimized-typep ~v ~ty)))
 
+        (and (symbol? t)
+             (gns/safe-resolve t)
+             (class? (resolve t)))
+        `(instance? ~t ~v)
+
         :otherwise
         `(gns/typep ~v '~t)))
 
