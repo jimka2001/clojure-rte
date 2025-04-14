@@ -164,7 +164,7 @@
 
         (and (symbol? t)
              (gns/safe-resolve t)
-             (class? (resolve t)))
+             (class? (gns/safe-resolve t)))
         `(instance? ~t ~v)
 
         :otherwise
