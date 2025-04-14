@@ -163,8 +163,11 @@
         `(not (optimized-typep ~v ~ty)))
 
         (and (symbol? t)
-             (gns/safe-resolve t)
-             (class? (gns/safe-resolve t)))
+             (resolve t) ;; not gns/safe-resolve because Ratio
+             ;; (and the like) will not resolve with resolve.
+             ;; we don't want to output (instance? Ratio ...)
+             ;; because that will be an undefined variable.
+             (class? (resolve t)))
         `(instance? ~t ~v)
 
         :otherwise

@@ -157,6 +157,7 @@ match
 (typecase 12
   Boolean "it is a boolean"
   (satisfies integer?) "it is an integer"
+  Ratio "it is a ratio"
   (satisfies number?) "it is a number"
   String "it is a string")
 

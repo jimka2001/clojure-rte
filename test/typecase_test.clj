@@ -136,3 +136,10 @@
              Number 3
              (satisfies int?) 4)
            1))))
+
+(t/deftest test-typecase-Ratio
+  (t/testing "typecase Ratio"
+    (is (= 1 (sut/typecase 2/3
+             Ratio 1
+             Number 2
+             :sigma 3)))))
