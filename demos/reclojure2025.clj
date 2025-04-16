@@ -1,14 +1,15 @@
 (ns reclojure2025
   (:require [rte-case :refer [rte-case dscase rte-case-fn dsdefn]]
             [rte-construct :as rte]
+            [xymbolyco :as xym]
             [typecase :refer [typecase]]
             [dot])
 )
 
-;; (defn f
-;;   ([[a b] c d]   12)
-;;   ([a [b c] d]   13)
-;;   ([a b [c d]]   14))
+(defn f
+   ([[a b] c d]   12)
+   ([a [b c] d]   13)
+   ([a b [c d]]   14))
 
 (defn f
   ([a]   12)
@@ -30,7 +31,7 @@
        ([a b [c d]] 14)
        ([a b [c d]] 15))
 
-(f 1 2 [10.0 20])
+;;(f 1 2 [10.0 20])
 
 (dsdefn f 
        ([[a b] c d] 12)
@@ -39,15 +40,28 @@
        ([a b [^Integer c d]] 14)
        ([a b [^Double c d]] 16))
 
-match
 
-
-(f 1 2 [10.0 20])
-(f 1 2 [10 20])
-(f 1 2 [2/3 3])
+;;(f 1 2 [10.0 20])
+;;(f 1 2 [10 20])
+;;(f 1 2 [2/3 3])
 
 (instance? Integer 10)
 (instance? Long 10)
+
+(rte-case [nil nil nil 1 nil nil nil]
+  (:and (:cat (:* :sigma) Number (:* :sigma))
+        (:cat (:* :sigma) String (:* :sigma)))
+  0
+
+  (:cat (:* :sigma) Number (:* :sigma))
+  1
+
+  (:cat (:* :sigma) String (:* :sigma))
+  2
+)
+
+
+
 
 (rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
   (:* (:cat (:* Number) Boolean))
@@ -133,7 +147,8 @@ match
                   (:cat (:* Number) Ratio (:* Number))))
 
 (dot/dfa-to-dot rte-1 :title "first dfa"
-                :view true)
+                :view true
+                :state-legend false)
 
 
 ;; what about contains Double and Ratio in either order
@@ -142,23 +157,39 @@ match
                  (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
 
 (dot/dfa-to-dot rte-2 :title "second dfa" 
-                :view true)
+                :view true
+                :state-legend false)
 
 ;; are the rtes the same?  do have match the same language?
 
 (dot/dfa-to-dot (rte/Xor rte-1 rte-2)
-                :title "xor dfa"
+                :title "xor 1-2 dfa"
                 :state-legend false
                 :view true)                         
 
+
+
+(def rte-3 '(:and (:* Number)
+                  (:cat (:* :sigma) Ratio (:* :sigma))
+                  (:cat (:+ :sigma) Double (:* :sigma))))
+
+(dot/dfa-to-dot rte-3 :title "third dfa" 
+                :view true
+                :state-legend false)
+
+
+(dot/dfa-to-dot (xym/trim (rte/rte-to-dfa (rte/And-not rte-3 rte-1)))
+                :title "xor 1-3 dfa"
+                :state-legend false
+                :view true)
 
 ;; show example of expansion of (satisfies integer?)
 
 (typecase 12
   Boolean "it is a boolean"
+  Short "it is a short"
   (satisfies integer?) "it is an integer"
-  Ratio "it is a ratio"
-  (satisfies number?) "it is a number"
+  (or Ratio Boolean) "it is a ratio"
   String "it is a string")
 
 
