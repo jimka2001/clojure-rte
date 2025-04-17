@@ -111,30 +111,44 @@
     (fn [x]
       (or (f1 x) (f2 x)))))
 
-(defn safe-resolve
-  "Try to resolve a symbol coming from java.lang or clojure.lang.
-  E.g., (safe-resolve 'Number) --> java.lang.Number
-        (safe-resolve 'Ratio)  --> clojure.lang.Ratio
+(defn safe-resolve 
+  "resolve a symbol if possible, return nil otherwise"
+  [t]
+  (and (symbol? t)
+       (try (resolve t)
+            (catch Exception _e nil))))
 
+(defn resolve-class
+  "Try to resolve a symbol coming from java.lang or clojure.lang.
+  E.g., (resolve-class 'Number) --> java.lang.Number
+        (resolve-class 'Ratio)  --> clojure.lang.Ratio
+        (resolve-class true) --> false
+        (resolve-class 42) --> false
+        (resolve-class odd?) --> false
+        (resolve-class '(satisfies odd?)) --> false
+        (resolve-class Number) --> false
+       
   Sometimes resolve throws a ClassCastException,
   rather than doing this, we simply return nil"
   [t]
-  (or (try (resolve t)
-           (catch ClassCastException e nil))
-      ;;(try (resolve (symbol (str "clojure.lang." t)))
-      ;; (catch ClassCastException e nil))
-      (try (Class/forName (str "clojure.lang." t))
-           (catch ClassCastException e nil))
-      ))
+  (cond (not (symbol? t))
+        nil
+
+        (class? (safe-resolve t))
+        (safe-resolve t)
+
+        :otherwise 
+        ;;(try (resolve (symbol (str "clojure.lang." t)))
+        ;; (catch ClassCastException e nil))
+        (try (Class/forName (str "clojure.lang." t))
+             (catch ClassCastException e nil))))
 
 (defn class-designator?
   "Predicate to determine whether the given object is a class or a
   symbol designates a java class."
   [t]
   (or (class? t)
-      (and (symbol? t)
-           (safe-resolve t)
-           (class? (safe-resolve t)))))
+      (resolve-class t)))
 
 (defn find-class
   "Given a valid class-designator, return the (java) class or nil if not found."
@@ -142,11 +156,11 @@
   (cond (class? class-name)
         class-name
 
-        (class-designator? class-name)
-        (safe-resolve class-name)
+        :otherwise
+        (resolve-class class-name)))
 
-        :othewise
-        nil))
+(resolve-class 'Number)
+(resolve-class 'Ratio)
 
 (defn-memoized [type-equivalent? type-equivalent?-impl]
   "Test whether two type designators represent the same type."
@@ -406,22 +420,15 @@
                      :a-value a-value
                      }))
 
-    (not (safe-resolve a-type))
-    (throw (ex-info (format "typep: [179] invalid type %s, no resolvable value" a-type)
+    (not (resolve-class a-type))
+    (throw (ex-info (format "typep: [179] invalid type %s" a-type)
                     {:error-type :invalid-type-designator
                      :a-type a-type
                      :a-value a-value
                      }))
 
-    (not (class? (safe-resolve a-type)))
-    (throw (ex-info (format "typep: [180] invalid type of %s, does not resolve to a class, got %s of type %s"
-                            a-type (safe-resolve a-type) (type (safe-resolve a-type)))
-                    {:error-type :invalid-type-designator
-                     :a-type a-type
-                     :a-value a-value
-                     }))
     :else
-    (isa? (type a-value) (safe-resolve a-type))))
+    (isa? (type a-value) (resolve-class a-type))))
 
 (defmethod typep 'not [a-value [_a-type t]]
   (not (typep a-value t)))
