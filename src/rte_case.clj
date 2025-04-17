@@ -104,7 +104,9 @@
   (assert (even? (count clauses)))
 
   (let [pairs (into [] (for [[rte expr] (partition 2 2 clauses)]
-                         `['~rte (fn [] ~expr)]))]
+                         ;; we have to use ~'rte-fn because we don't want backquote to slap
+                         ;; a namespace on the symbol
+                         `['~rte (fn ~'rte-fn [] ~expr)]))]
     `((rte-case-fn ~pairs) ~sequence)))
 
 (defn lambda-list-to-rte
