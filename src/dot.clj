@@ -134,9 +134,15 @@
           abbrevs (zipmap transition-labels (range (count transition-labels)))
           labels (clojure.set/map-invert abbrevs)
           exit-map (:exit-map dfa)
+          accepting-states (filter :accepting (xym/states-as-seq dfa))
+          all-final-function (every? (fn [q] (fn? (exit-map (:index q))))
+                                     accepting-states)
+          function-table (if all-final-function
+                           (into {}
+                                 (for [q accepting-states]
+                                   [(exit-map (:index q)) (format "fn-%d" (:index q))])))
           all-final-true (every? (fn [q] (= true (exit-map (:index q))))
-                                 (filter :accepting (xym/states-as-seq dfa)))]
-
+                                 accepting-states)]
       (with-out-str
         (cl-format *out* "digraph G {~%")
         (when title
@@ -173,10 +179,18 @@
               (cl-format *out* "   q~D [shape=doublecircle] ;~%" (:index q))
               ;; if all exit values are explicitly true, the don't draw
               ;; any exit arrows.
-              (when (not all-final-true)
-                (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
-                           (:index q) (get exit-map (:index q)))
-                (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))))
+              (cond all-final-true
+                    nil
+
+                    all-final-function
+                    (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
+                        (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%"
+                                   (:index q) (function-table (get exit-map (:index q)))))
+
+                    :otherwise
+                    (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
+                    (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
+                               (:index q) (get exit-map (:index q))))))
             (when (:initial q)
               (cl-format *out* "   H~D [label=\"\", style=invis, width=0]~%" (:index q))
               (cl-format *out* "   H~D -> q~D;~%" (:index q) (:index q)))
