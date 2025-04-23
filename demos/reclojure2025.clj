@@ -6,53 +6,85 @@
             [dot])
 )
 
+;; Definition of multiple-arity function
+(defn f
+  ([a]   12)
+  ([a b]   13)
+  ([a b [c d]]   14))
+
+
+(f 0 0)
+
+
+
+;; Vain attempt to define destructuring function
 (defn f
    ([[a b] c d]   12)
    ([a [b c] d]   13)
    ([a b [c d]]   14))
+
 
 (defn f
   ([a]   12)
   ([^Boolean a b]   13)
   ([a b [c d]]   14))
 
+(f true 2)
 (f 1 2)
 
 
-(defn f
-  ([a]   12)
-  ([a b]   13)
-  ([a b  [c d]]   14))
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [c d]] 14)
+  ([a b [c d]] 15))
 
 
 (dsdefn f 
-       ([[a b] c d] 12)
-       ([a [b c] d] 13)
-       ([a b [c d]] 14)
-       ([a b [c d]] 15))
+  ([[a b] c d] (println 12))
+  ([a [b c] d] (println 13))
+  ([a b [c d]] (println 14))
+  ([a b [c d]] (println 15)))
 
-;;(f 1 2 [10.0 20])
+(f 1 2 [10.0 20])
 
 (dsdefn f 
-       ([[a b] c d] 12)
-       ([a [b c] d] 13)
-       ([a b [^Ratio c d]] 14)
-       ([a b [^Integer c d]] 14)
-       ([a b [^Double c d]] 16))
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^Integer c d]] 15)
+  ([a b [^Number c d]] 16)
+  ([a b [^Double c d]] 17))
 
 
-;;(f 1 2 [10.0 20])
-;;(f 1 2 [10 20])
-;;(f 1 2 [2/3 3])
+(f 1 2 [10.0 20])
+(f 1 2 [2/3 3])
 
+
+(f 1 2 [10 20])
 (instance? Integer 10)
 (instance? Long 10)
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  (^{c (satisfies integer?)} [a b [c d]] 14)
+  ([a b [^Double c d]] 16))
+
+(f 1 2 [10 20])
+
+
+
 
 (rte-case [nil nil nil 1 nil nil nil]
   (:and (:cat (:* :sigma) Number (:* :sigma))
         (:cat (:* :sigma) String (:* :sigma)))
   0
 
+  (:contains-any Number)
+  1
+  
   (:cat (:* :sigma) Number (:* :sigma))
   1
 
@@ -60,7 +92,7 @@
   2
 )
 
-
+(fn rte-case-fn [] nil)
 
 
 (rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
