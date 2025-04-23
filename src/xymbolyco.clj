@@ -900,15 +900,20 @@
               ;; `states` is a seq of States, we want to choose the one
               ;;   with the minimum distance as per the `d` map.
               (let [best-q (apply min-key (fn [q] (get d (:index q))) states)
-                    best-path @(get p (:index best-q))
+                    best-path-delayed (get p (:index best-q))
+                    best-path (when best-path-delayed
+                                @best-path-delayed)
                     satisfiability (if (< (get d (:index best-q))
                                           indeterminate-weight)
                                      :satisfiable
                                      :indeterminate)]
-                (assoc acc ev [satisfiability best-path])))
+                (if best-path
+                  (assoc acc ev [satisfiability best-path])
+                  acc)))
             {}
             (group-by (fn [q] (exit-value dfa q))
                       (filter :accepting states)))))
+
 (defn find-trace-map
   "Return a map from exit-value to [satisfiability path]
   where path is a sequence of pairs [satisfiability type-designator]"
@@ -930,7 +935,7 @@
                                [(sat-label td)
                                 td]))
                        (rest id-path))
-)))
+                )))
           ]
     (reduce (fn [acc [ev [satisfiability id-path]]]
               (assoc acc ev [satisfiability (path-to-tds id-path)]))

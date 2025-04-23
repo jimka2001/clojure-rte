@@ -21,6 +21,7 @@
 
 (ns rte-case
   (:require [xymbolyco :as xym]
+            [dot]
             [genus :as gns]
             [util :refer [defn-memoized member non-empty?]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
@@ -59,7 +60,7 @@
         index))
 
 
-(defn rte-case-fn
+(defn rte-case-fn-int
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
   This function is used in the macro expansion of rte-case but
   can also be used on its own.
@@ -69,22 +70,32 @@
   is called and its value is returned.
   The sequence is traversed a maximum of once, but may not traverse
   entirely if it is determined early that no rte matches."
-  [pairs]
+  [pairs expected-exits code-exprs]
   (let [dfa (xym/synchronized-union
              (reduce xym/synchronized-union 
                      (for [[rte thunk] pairs]
                        (do (assert (rte/valid-rte? rte)
                                    (format "%s is not a valid rte" rte))
-                           (assert (fn? thunk))
+                           (assert (integer? thunk))
                            (rte-to-dfa rte thunk))))
              ;; add a final dfa at the end matching sigma-* which will
              ;;  serve as a default value.  thus (rte/match dfa s)
              ;;  will always return a 0-ary function even if the sequence
              ;;  s does not match.
-             (rte-to-dfa sigma-* (fn [] nil)))]
+             (rte-to-dfa sigma-* (fn [] nil)))
+        traces (xym/find-spanning-map dfa)
+        ]
+    (doseq [ev expected-exits
+            :when (not (traces ev))]
+      (binding [*out* *err*]
+        (printf "Unreachable code: %s\n" (nth code-exprs ev))))
+    ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
     (fn [s]
-      ((rte/match dfa s)))))
-  
+      (rte/match dfa s))))
+
+(def rte-case-fn (memoize rte-case-fn-int))
+
+
 (defmacro rte-case
   "Takes an expression, and a set of clauses.
   The expression should evaluate to an object which is `sequential?`.
@@ -101,13 +112,36 @@
   is more efficient than a sequence of consecutive calls to
   rte/match."
   [sequence & clauses]
-  (assert (even? (count clauses)))
 
-  (let [pairs (into [] (for [[rte expr] (partition 2 2 clauses)]
-                         ;; we have to use ~'rte-fn because we don't want backquote to slap
-                         ;; a namespace on the symbol
-                         `['~rte (fn ~'rte-fn [] ~expr)]))]
-    `((rte-case-fn ~pairs) ~sequence)))
+  ;; if odd number of clauses, then don't complain if the final
+  ;;   clause is unreachable
+  (let [odd-clauses (odd? (count clauses))
+        clauses (if odd-clauses
+                  `(~@(butlast clauses)
+                    ~sigma-* ~(last clauses))
+                  clauses)]
+
+    (let [parts (partition 2 2 clauses)
+          n-parts (count parts)
+          n-parts-to-check (if odd-clauses
+                             (dec n-parts)
+                             n-parts)
+          pairs (into [] (for [k (range n-parts)
+                               :let [[rte _] (nth parts k)]]
+                           `['~rte ~k]))
+          code-exprs (for [[_ expr] parts]
+                       expr)
+          fs (into [] (for [[_ expr] parts]
+                        ;; we have to use ~'rte-fn because we don't want backquote to slap
+                        ;; a namespace on the symbol
+                        `(fn ~'rte-fn [] ~expr)))
+          ]
+      `(let [fs# ~fs
+             f# (rte-case-fn ~pairs (range ~n-parts-to-check) '~code-exprs)
+             i# (f# ~sequence)
+             thunk# (fs# i#)
+             ]
+         (thunk#)))))
 
 (defn lambda-list-to-rte
   "Helper function for destructuring-case macro.
@@ -286,9 +320,10 @@
         (let [pairs (partition 2 operands)
               cases (mapcat conv-1-case-clause pairs)]
           `(let [~var ~expr]
-             (rte-case ~var ~@cases ~sigma-* 
+             (rte-case ~var ~@cases
                        (throw (ex-info "No pattern matching given list"
-                                       {:args ~var})))))))))
+                        {:args ~var}))
+                       )))))))
 
 (defmacro dscase
   "Semantically similar to destructuring-case but arguably simpler syntax.
@@ -342,15 +377,14 @@
         `(-destructuring-fn-many nil ~@args)
 
         :else
-        (let [var (gensym "fn-var-")
-              [name & given-clauses] args
+        (let [[name & given-clauses] args
               clauses (mapcat (fn [[structured-lambda-list & exprs]]
                                 `(~structured-lambda-list (do ~@exprs))) given-clauses)
               ]
           `(fn
              ~@(if name (list name) nil) ;; either name or nothing
-             [& ~var]
-             (destructuring-case ~var
+             [& seq#]
+             (destructuring-case seq#
                                  ~@clauses)))))
 
 
@@ -435,7 +469,25 @@
       `(destructuring-fn
         ~@(map process forms)))))
 
-(defmacro dsdefn [name & forms]
+(defmacro dsdefn 
+  "E.g.,
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^Integer c d]] 14)
+  ([a b [^Double c d]] 16))
+
+  or
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  (^{c (satisfies integer?)} [a b [c d]] 14)
+  ([a b [^Double c d]] 16))
+"
+  [name & forms]
   `(def ~name (dsfn ~@forms)))
 
 
