@@ -121,6 +121,20 @@
                     ~sigma-* ~(last clauses))
                   clauses)]
 
+    ;; This macro expansion may seem a bit more complicated that it
+    ;; needs to be.  I think there's a way to avoid the complication
+    ;; but I have thus far not been able to do so.
+    ;; We need the Dfa to be constructed only once.  This one-time construction
+    ;; is accomplished by the (let ...) in the macro expansion making
+    ;; a call to rte-case-fn, which is a memoized function.
+    ;; In order for the memoization to work the arguments passed to
+    ;; must be all static, i.e., containing no function objects.
+    ;; Therefore we cannot put (fn [...] ....) into the call rte-case-fn.
+    ;; Instead, we replace the clojures with indexes into an array
+    ;; of closures which also sits in the (let [...] ...)
+    ;; rte-case-fn returns a function which can be called with a sequence,
+    ;; and will return an index into the array.  The index is used to
+    ;; grab a 0-ary function from the array and call it.
     (let [parts (partition 2 2 clauses)
           n-parts (count parts)
           n-parts-to-check (if odd-clauses
