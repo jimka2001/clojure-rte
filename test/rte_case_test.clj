@@ -580,14 +580,33 @@
                                  ))
         "test 404")))
 
+(deftest t-destructuring-fn-583b
+  (testing "special case which was failing 583b"
+    (let [f (destructuring-fn
+              ([[a b] {}]
+               [a b]))]
+      (is (= [2 3] (f '(2 3))) "test 583b"))))
+
+
+(deftest t-destructuring-fn-582
+  (testing "special case which was failing 964"
+    (let [f (destructuring-fn
+              ([[a] {a (satisfies seq?)}]
+               300)
+             ([[& _other] {}]
+              200)
+             )]
+      (is (= 300 (f '(1 2 3))) "test 964"))))
+
 (deftest t-destructuring-fn-583
   (testing "special case which was failing 583"
     (let [f (destructuring-fn
-             ([[_a _b]          {_a Boolean _b (or String Boolean)}]
+              ([[_a _b]          {_a Boolean
+                                  _b (or String Boolean)}]
               0)
-             ([[_a [_b _c] & _d]  {_a (and (not Number) Boolean)
-                               _b String
-                               d Boolean}]
+             ([[_a [_b _c] & _d]  {_a Boolean
+                                   _b String
+                                   d Boolean}]
               1)
              ([[& _other] {}]
               2))]

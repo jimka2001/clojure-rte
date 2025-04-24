@@ -460,6 +460,9 @@
     ;;   gns/typep 'rte
     (is (get (methods gns/typep) 'rte) "test 625")
     
+    (is (= true (gns/inhabited? '(rte (:cat String :sigma)) :dont-know)))
+    ;; TODO: currently failing, can this be made to pass?  not sure
+    (is (= true (gns/inhabited? '(not (rte (:cat String :sigma))) :dont-know)))
     (is (= true (boolean (rte-inhabited? '(:cat String :sigma)))) "test 630")
     (is (= true (gns/inhabited? '(rte (:cat String :sigma)) :dont-know)) "test 631")
     (is (= true (gns/disjoint? '(rte (:cat String :sigma)) '(rte (:cat Character)) :dont-know)) "test 632")
@@ -721,6 +724,8 @@
                                (:? String))))
 
 ))
+
+
 
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'rte-test/the-test])
