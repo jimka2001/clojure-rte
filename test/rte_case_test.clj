@@ -25,9 +25,10 @@
             [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [rte-case :refer [rte-case destructuring-case
-                                          rte-case-clauses-to-dfa ;;rte-case-clauses-to-dfa-impl
-                                          dsfn dscase
-                                          -destructuring-fn-many destructuring-fn]]
+                              rte-case-clauses-to-dfa ;;rte-case-clauses-to-dfa-impl
+                              dsfn dscase
+                              conv-1-case-clause lambda-list-to-rte
+                              -destructuring-fn-many destructuring-fn]]
 ))
 
 (defn -main []
@@ -120,30 +121,76 @@
               [false "world"]))
         "case-3")))
     
+(deftest t-lambda-list-to-rte
+  (testing "lambda-list-to-rte"
+    (is (= (lambda-list-to-rte '[[a b] c d] {})
+           '(:cat
+             (rte (:cat (and :sigma :sigma) (and :sigma :sigma)))
+             (and :sigma :sigma)
+             (and :sigma :sigma))))
 
+    (is (= (lambda-list-to-rte '[a [b c] d] {})
+           '(:cat
+       (and :sigma :sigma)
+       (rte (:cat (and :sigma :sigma) (and :sigma :sigma)))
+       (and :sigma :sigma))))
 
+    (is (= (lambda-list-to-rte '[a b [c d]] {})
+           '(:cat
+             (and :sigma :sigma)
+             (and :sigma :sigma)
+             (rte (:cat (and :sigma :sigma) (and :sigma :sigma))))))))
 
+(deftest t-rte-case-clauses-to-dfa
+  (testing "rte-case-clauses-to-dfa"
+    (let [dfa (rte-case-clauses-to-dfa [[0 '(:cat :sigma :sigma)]
+                                        [1 '(:cat :sigma :sigma :sigma)]
+                                        [3 '(:cat :sigma)]
+                                        [2 '(:cat :sigma :sigma :sigma :sigma)]])]
+      (is (= 0 (rte/match dfa '(a b) :promise-disjoint true)))
+      (is (= 1 (rte/match dfa '(a b c) :promise-disjoint true)))
+      (is (= 3 (rte/match dfa '(a) :promise-disjoint true)))
+      (is (= 2 (rte/match dfa '(a b c d) :promise-disjoint true)))
+      (is (= false (rte/match dfa '() :promise-disjoint true))))))
+    
 
+(deftest t-conv-1-case-clause
+  (testing "conv-1-case-clause"
+    (is (= (conv-1-case-clause '[[[a b] c d] {}]
+                               '(12))
+           ['(:cat
+              (rte (:cat (and :sigma :sigma) (and :sigma :sigma)))
+              (and :sigma :sigma)
+              (and :sigma :sigma))
+            `(fn ~'[[[a b] c d]]
+               12)]))
+    (is (= (conv-1-case-clause '[[[a b] c d] {a Boolean}]
+                               '(12))
+           ['(:cat
+              (rte (:cat (and :sigma Boolean) (and :sigma :sigma)))
+              (and :sigma :sigma)
+              (and :sigma :sigma))
+            `(fn ~'[[[a b] c d]]
+               12)]))
+))
 
 (deftest t-destructuring-case
   (testing "destructuring-case"
-    (is (= 1 (destructuring-case '(true ["hello" 3] true)
+    (is (= 100 (destructuring-case '(true ["hello" 3] true)
                                  [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
-                                 1
+                                 100
 
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                                 2))
+                                 200))
         "test 1")
 
-    (is (= 1 (destructuring-case '(true ["hello" 3] true)
+    (is (= 100 (destructuring-case '(true ["hello" 3] true)
 
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                                 2
+                                 200
                                  
                                  [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
-                                 1
-
-
+                                 100
                                  ))
         "test 2")
 
@@ -155,64 +202,64 @@
                                    2))
         "test 3")
 
-    (is (= 1
+    (is (= 100
            (destructuring-case '(true ["hello" xyz] true false true)
                                [[^Boolean _a [^String _b _c] & ^Boolean _d]  {}]
-                               1 ;; this is returned
+                               100 ;; this is returned
 
                                [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                               2))
+                               200))
         "test 4")
-    (is (= 2
+    (is (= 200
            (destructuring-case '(true ["hello" xyz] true false 1 2 3)
                                [[^Boolean _a [^String _b _c] & ^Boolean _d]  {}]
-                               1
+                               100
 
                                [[^Boolean _a [^String _b _c] & _d]  {}]
-                               2 ;; this is returned
+                               200 ;; this is returned
                                ))
         "test 5")
     (is (thrown? Exception
            (destructuring-case '(true ["hello" xyz] true false 1 2 3)
                                [[^Boolean _a [^String _b _c] & ^Boolean _d]  {_d Number}]
-                               1 ;; this is NOT returned
+                               100 ;; this is NOT returned
 
                                [[^Boolean _a [^String _b _c] & ^Number _d]  {_d Boolean}]
-                               2 ;; this is NOT returned
+                               200 ;; this is NOT returned
                                ))
         "test 6")
 
-    (is (= 1 (destructuring-case '(true ["3" 3] true)
+    (is (= 100 (destructuring-case '(true ["3" 3] true)
                                  [[_a [_b _c] & _d]  {[_a _d] Boolean _b String}]
-                                 1
+                                 100
 
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                                 2))
+                                 200))
         "test 7")
 
-    (is (= 1 (destructuring-case '(true ["3" 3] true)
+    (is (= 100 (destructuring-case '(true ["3" 3] true)
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                                 2
+                                 200
 
                                  [[_a [_b _c] & _d]  {[_a _d] Boolean _b String}]
-                                 1
+                                 100
                                  ))
         "test 8")
 
-    (is (= 1 (destructuring-case '(true ["3" 3] true)
+    (is (= 100 (destructuring-case '(true ["3" 3] true)
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                                 2
+                                 200
 
                                  [[_a [_b _c] & _d]  {[_a _d] Boolean _a (not Number) _b String}]
-                                 1
+                                 100
                                  ))
         "test 9")
-    (is (= 1 (destructuring-case '(true ["3" 3] true)
+    (is (= 100 (destructuring-case '(true ["3" 3] true)
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
-                                 2
+                                 200
 
                                  [[_a [_b _c] & _d]  {[_a _d] (not Number) _a Boolean _b String}]
-                                 1
+                                 100
                                  ))
         "test 10")))
 
@@ -533,6 +580,19 @@
                                  ))
         "test 404")))
 
+(deftest t-destructuring-fn-583
+  (testing "special case which was failing 583"
+    (let [f (destructuring-fn
+             ([[_a _b]          {_a Boolean _b (or String Boolean)}]
+              0)
+             ([[_a [_b _c] & _d]  {_a (and (not Number) Boolean)
+                               _b String
+                               d Boolean}]
+              1)
+             ([[& _other] {}]
+              2))]
+      (is (= 2 (f '(1 2 3))) "test 9"))))
+
 (deftest t-destructuring-fn-401
   (testing "special case which was failing 401"
     (let [f (destructuring-fn
@@ -607,6 +667,19 @@
         "test 5")
     ))
 
+(deftest t-dsfn-recursive
+  (testing "dsfn-recursive"
+    (is (= 42
+           ;; test recursive anonymous function
+           (let [f (dsfn fake-name-686
+                         ([^Double _a]
+                          41)
+                         ([^Long a]
+                          ;; recursive call with Double as argument
+                          (+ 1 (fake-name-686 (+ 0.0 a)))))]
+             
+             (f 12)))
+        "test 615")))
 
 (deftest t-dsfn
   (testing "dsfn"
@@ -619,7 +692,7 @@
         "test 612")
     
     (is (= 42
-           (let [f (dsfn fake-name
+           (let [f (dsfn fake-name-669
                          ^{_a Boolean _b String d Boolean}
                          [_a [_b _c] & _d]
                          42)]
@@ -627,23 +700,14 @@
         "test 613")
     
     (is (= 42
-           (let [f (dsfn fake-name
+           (let [f (dsfn fake-name-677
                          (^{_a Boolean _b String d Boolean}
                           [_a [_b _c] & _d]
                           42))]
              (f true ["hello" 3] true true)))
         "test 614")
     
-    (is (= 42
-           ;; test recursive anonymous function
-           (let [f (dsfn fake-name
-                         ([^Double _a]
-                          41)
-                         ([^Long a]
-                          (+ 1 (fake-name (+ 0.0 a)))))]
-             
-             (f 12)))
-        "test 615")
+
     
     (is (thrown? Exception
                  (let [f (dsfn
