@@ -162,7 +162,7 @@
               (rte (:cat (and :sigma :sigma) (and :sigma :sigma)))
               (and :sigma :sigma)
               (and :sigma :sigma))
-            `(fn ~'[[a b] c d]
+            `(fn ~'conv-1 ~'[[a b] c d]
                12)]))
     (is (= (conv-1-case-clause '[[[a b] c d] {a Boolean}]
                                '(12))
@@ -170,7 +170,7 @@
               (rte (:cat (and :sigma Boolean) (and :sigma :sigma)))
               (and :sigma :sigma)
               (and :sigma :sigma))
-            `(fn ~'[[a b] c d]
+            `(fn ~'conv-1 ~'[[a b] c d]
                12)]))
 ))
 

@@ -45,7 +45,7 @@
   "
   [pairs]
   (reduce xym/synchronized-union
-          (map (fn [[index rte]]
+          (map (fn reduce-synchronized-union [[index rte]]
                  (rte-to-dfa rte index))
                pairs)))
 
@@ -90,7 +90,7 @@
              ;;  serve as a default value.  thus (rte/match dfa s)
              ;;  will always return a 0-ary function even if the sequence
              ;;  s does not match.
-             (rte-to-dfa sigma-* (fn [] nil)))
+             (rte-to-dfa sigma-* (fn sigma-*-returning-nil [] nil)))
         traces (xym/find-spanning-map dfa)
         ]
     (doseq [ev expected-exits
@@ -98,7 +98,7 @@
       (binding [*out* *err*]
         (printf "Unreachable code: %s\n" (nth code-exprs ev))))
     ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
-    (fn [s]
+    (fn f-101 [s]
       (rte/match dfa s))))
 
 (def rte-case-fn (memoize rte-case-fn-int))
@@ -336,9 +336,11 @@
 
 (defn conv-1-case-clause [[lambda-list types-map] consequences]
   (assert (map? types-map)
-          (cl-format false "destructuring-case expecting a map, not ~A" types-map))
+          (cl-format false "expecting a map, not ~A" types-map))
+  (assert (vector? lambda-list)
+          (cl-format false "expecting a vector, not ~A" lambda-list))
   [(lambda-list-to-rte lambda-list types-map)
-   `(fn ~(remove-extra-syntax lambda-list)
+   `(fn ~'conv-1 ~(remove-extra-syntax lambda-list)
       ~@consequences)])
 
 
@@ -440,7 +442,7 @@
                           (map rest given-clauses))
               fns (into [] (map second parsed))
               code-exprs (into [] (map rest given-clauses))
-              pairs (map-indexed (fn [idx [[lambda-list types-map] _]]
+              pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
                                    [idx (lambda-list-to-rte lambda-list types-map)])
                                  given-clauses)
               ]
