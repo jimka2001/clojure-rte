@@ -126,7 +126,7 @@
 
 (defmethod gns/-inhabited? 'rte [t1]
   (if (rte? t1)
-    (boolean (rte-inhabited? (rte/compile (second t1))))
+    (rte-inhabited? (rte/compile (second t1)) :dont-know)
     :dont-know))
 
 (defmethod gns/-inhabited? :not-rte [t1]
@@ -162,7 +162,7 @@
         (rte? t2)
         (let [[_ pat1] t1
               [_ pat2] t2]
-          (rte-vacuous? (rte/compile `(:and ~pat1 ~pat2))))
+          (rte-vacuous? (rte/compile `(:and ~pat1 ~pat2)) :dont-know))
 
         ;; (disjoint? (rte ...) clojure.lang.IPersistentVector )
         (and (gns/class-designator? t2)
@@ -174,12 +174,12 @@
              (rte? (second t2)))
         (let [[_ pat1] t1
               [_ [_ pat2]] t2]
-          (rte-vacuous? (rte/compile `(:and ~pat1 (:not ~pat2)))))
+          (rte-vacuous? (rte/compile `(:and ~pat1 (:not ~pat2))) :dont-know))
         
         (and (gns/class-designator? t2)
              (isa? (gns/find-class t2) java.lang.CharSequence))
         (let [[_ pat1] t1]
-          (rte-vacuous? (rte/compile `(:and ~pat1 (:* java.lang.Character)))))
+          (rte-vacuous? (rte/compile `(:and ~pat1 (:* java.lang.Character))) :dont-know))
         
         (and (gns/class-designator? t2)
              (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
@@ -199,7 +199,7 @@
                (rte? super-designator))
           (let [[_ pat-sub] sub-designator
                 [_ pat-super] super-designator]
-            (rte-vacuous? (rte/compile `(:and ~pat-sub (:not ~pat-super)))))
+            (rte-vacuous? (rte/compile `(:and ~pat-sub (:not ~pat-super))) :dont-know))
           
           (and (rte? super-designator)
                (gns/class-designator? sub-designator)
@@ -2073,18 +2073,25 @@
       (recurring 0 [] ()))))
 
 (defmulti-memoized [rte-inhabited? rte-inhabited?-impl]
-  "Interface to determine whether the language of an rte is non-vacuous"
-  (fn [rte]
+  "Interface to determine whether the language of an rte is non-vacuous.
+   calls to rte-inhabited? return true/false/:dont-know"
+  (fn [rte _]
     (dispatch rte 'rte-inhabited?)))
 
-(defmethod-memoized rte-inhabited? :pattern [pattern]
-  (rte-inhabited? (rte/compile pattern)))
+(defmethod-memoized rte-inhabited? :pattern [pattern default]
+  (rte-inhabited? (rte/compile pattern) default))
 
-(defmethod-memoized rte-inhabited? :Dfa [dfa]
-  (boolean (some :accepting (xym/states-as-seq dfa))))
+(defmethod-memoized rte-inhabited? :Dfa [dfa default]
+  (case (xym/dfa-inhabited? dfa)
+    (true) true
+    (false) false
+    (:dont-know) default))
 
-(defn rte-vacuous? [dfa]
-  (not (rte-inhabited? dfa)))
+(defn rte-vacuous? [dfa default]
+  (case (rte-inhabited? dfa default)
+    (true) false
+    (false) true
+    (:dont-know) :dont-know))
 
 (defmulti rte/match
   "(rte/match rte sequence :promise-disjoint true|false)
@@ -2139,7 +2146,7 @@
                        ;;    Dfa, or when the same Dfa is used to match different
                        ;;    input sequences.
                        ;; TODO -- the value of promise-disjoint should really come from
-                       ;;    a slot in the dfa.  when the dfa is created, it should me
+                       ;;    a slot in the dfa.  when the dfa is created, it should be
                        ;;    *marked* as being disjoint.  I believe it already is always
                        ;;    disjoint.
                        ;;    

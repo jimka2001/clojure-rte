@@ -65,7 +65,6 @@
 
 (deftest t-subtype?
   (testing "subtype?"
-    ;; adding failing test, TODO need to fix
     (is (not (gns/subtype? 'Long '(not Long) :dont-know)))
     (is (gns/subtype? 'Long '(not Double) false))
 

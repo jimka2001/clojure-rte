@@ -843,8 +843,8 @@
   ([dfa]
    (paths-to-accepting dfa false))
   ([dfa allow-maybe-satisfiable]
-  ;; TODO - this finds only paths for which ALL labels are satisfyable.  However,
-  ;;   There might be a path for which some label is maybe-satisfyable, ie., for which
+  ;; TODO - this finds only paths for which ALL labels are satisfiable.  However,
+  ;;   There might be a path for which some label is maybe-satisfiable, ie., for which
   ;;   (inhabited? td :dont-know) returns :dont-know
   ;;   We need to also be able to find such paths.
    (letfn [(extend-path-1 [path]
