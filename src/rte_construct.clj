@@ -139,7 +139,6 @@
 
 (defmethod gns/-disjoint? :not-rte [t1 t2]
   ;; (disjoint? (not (rte ...)) clojure.lang.IPersistentVector )
-
   (cond (not (and (gns/not? t1)
                   (rte? (second t1))))
         :dont-know
