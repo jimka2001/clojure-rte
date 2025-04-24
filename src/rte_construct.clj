@@ -2120,7 +2120,7 @@
 (defmethod rte/match :Dfa
   [dfa items & {:keys [
                        ;; if the caller promises that never are two transitions in
-                       ;;   the Dfa labeled with intersecting types, the use
+                       ;;   the Dfa labeled with intersecting types, then use
                        ;;   :promise-disjoint true, in this case rte/match
                        ;;   can be more efficient and can assume that the
                        ;;   clauses can be tested in any order.  If the transitions
