@@ -76,7 +76,6 @@
                canonicalize-pattern (gc-friendly-memoize canonicalize-pattern-impl)
                rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
                nullable? (gc-friendly-memoize nullable?-impl)
-               ;; rte-case-clauses-to-dfa (gc-friendly-memoize rte-case-clauses-to-dfa-impl)
                gs/spec-to-rte (gc-friendly-memoize gs/spec-to-rte-impl)]
        (thunk)))))
 

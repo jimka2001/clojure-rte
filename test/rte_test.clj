@@ -450,6 +450,7 @@
     ;;   gns/-disjoint? :rte
     (is (get (methods gns/-disjoint?) 'rte) "test 615")
     (is (:not-rte (methods gns/-disjoint?)) "test 616")
+    (is (:not-rte (methods gns/-inhabited?)) "test 617")
 
     ;;   gns/-subtype? :rte
     (is (get (methods gns/-subtype?) 'rte) "test 619")
