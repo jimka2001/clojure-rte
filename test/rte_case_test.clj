@@ -162,7 +162,7 @@
               (rte (:cat (and :sigma :sigma) (and :sigma :sigma)))
               (and :sigma :sigma)
               (and :sigma :sigma))
-            `(fn ~'[[[a b] c d]]
+            `(fn ~'[[a b] c d]
                12)]))
     (is (= (conv-1-case-clause '[[[a b] c d] {a Boolean}]
                                '(12))
@@ -170,20 +170,24 @@
               (rte (:cat (and :sigma Boolean) (and :sigma :sigma)))
               (and :sigma :sigma)
               (and :sigma :sigma))
-            `(fn ~'[[[a b] c d]]
+            `(fn ~'[[a b] c d]
                12)]))
 ))
 
-(deftest t-destructuring-case
-  (testing "destructuring-case"
+(deftest t-destructuring-case-failure-177
+  (testing "destructuring-case 177"
     (is (= 100 (destructuring-case '(true ["hello" 3] true)
                                  [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
                                  100
 
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
                                  200))
-        "test 1")
+        "test 1")))
 
+
+
+(deftest t-destructuring-case
+  (testing "destructuring-case"
     (is (= 100 (destructuring-case '(true ["hello" 3] true)
 
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
@@ -204,7 +208,7 @@
 
     (is (= 100
            (destructuring-case '(true ["hello" xyz] true false true)
-                               [[^Boolean _a [^String _b _c] & ^Boolean _d]  {}]
+                               [[^Boolean _a [^String _b _c] & _d]  {}]
                                100 ;; this is returned
 
                                [[_a _b]          {_a Boolean _b (or String Boolean)}]
@@ -212,19 +216,19 @@
         "test 4")
     (is (= 200
            (destructuring-case '(true ["hello" xyz] true false 1 2 3)
-                               [[^Boolean _a [^String _b _c] & ^Boolean _d]  {}]
+                               [[^Boolean _a [^String _b _c] & _d]  {_d String}]
                                100
 
-                               [[^Boolean _a [^String _b _c] & _d]  {}]
+                               [[^Boolean _a [^String _b _c] & _d]  {_d (or Boolean Long)}]
                                200 ;; this is returned
                                ))
         "test 5")
     (is (thrown? Exception
            (destructuring-case '(true ["hello" xyz] true false 1 2 3)
-                               [[^Boolean _a [^String _b _c] & ^Boolean _d]  {_d Number}]
+                               [[^Boolean _a [^String _b _c] & _d]  {_d Number}]
                                100 ;; this is NOT returned
 
-                               [[^Boolean _a [^String _b _c] & ^Number _d]  {_d Boolean}]
+                               [[^Boolean _a [^String _b _c] & _d]  {_d Boolean}]
                                200 ;; this is NOT returned
                                ))
         "test 6")
@@ -293,11 +297,11 @@
   (let [f
 
         (-destructuring-fn-many
-         ([[_a _b]          {_a Boolean _b (or String Boolean)}]
+         ([[_a _b]            {_a Boolean _b (or String Boolean)}]
           2)
-         ([[_a [_b _c] & _d]  {_a Boolean _b String d Boolean}]
+         ([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
           1))]
-     (apply f  '(true ["hello" 3] true))
+    (is (= 1 (apply f  '(true ["hello" 3] true))))
     )
 
   (let [f
@@ -315,7 +319,7 @@
 
                       (:* :sigma)
                       nil)))]
-    (apply f  '(true ["hello" 3] true)))
+    (is (= 1 (apply f  '(true ["hello" 3] true)))))
 
   (let [f
         (fn [& fn-var-41956]
@@ -356,8 +360,8 @@
                 (rte/match
                  dfa
                  v41977))))))]
-    (apply f  '(true ["hello" 3] true)))
-  )
+    (is (= 1 (apply f  '(true ["hello" 3] true))))
+  ))
 
 (deftest t-destructuring-fn
   (testing "destructuring-fn"
@@ -373,7 +377,7 @@
 
     (is (= 1
            (let [f (destructuring-fn
-                    ([[^Boolean _a [^String _b _c] & ^Boolean _d]  {}]
+                    ([[^Boolean _a [^String _b _c] & _d]  {}]
                      1 ;; this is returned
                      )
                     ([[_a _b]          {a Boolean _b (or String Boolean)}]
@@ -382,20 +386,20 @@
         "test 4")
     (is (= 2
            (let [f (destructuring-fn
-                    ([[^Boolean _a [^String _b _c] & ^Boolean _d]  {}]
+                    ([[^Boolean _a [^String _b _c] & _d]  {_d Boolean}]
                      1
                      )
-                    ([[^Boolean _a [^String _b _c] & _d]  {}]
+                    ([[^Boolean _a [^String _b _c] & _d]  {_d (or Boolean Long)}]
                      2 ;; this is returned
                      ))]
              (apply f '(true ["hello" xyz] true false 1 2 3))))
         "test 5")
     (is (thrown? Exception
            (let [f (destructuring-fn
-                    ([[^Boolean _a [^String _b _c] & ^Boolean _d]  {d Number}]
+                    ([[^Boolean _a [^String _b _c] & _d]  {_d Number}]
                      1 ;; this is NOT returned
                      )
-                    ([[^Boolean _a [^String _b _c] & ^Number _d]  {d Boolean}]
+                    ([[^Boolean _a [^String _b _c] & _d]  {_d Boolean}]
                      2 ;; this is NOT returned
                      ))]
              (apply f '(true ["hello" xyz] true false 1 2 3))))
@@ -440,7 +444,7 @@
            (let [f (destructuring-fn
                     ([[_a _b]          {a Boolean _b (or String Boolean)}]
                      2)
-                    ([[_a [_b _c] & ^Boolean _d]  {[_a _d] (not Number) _a Boolean _b String}]
+                    ([[_a [_b _c] & _d]  {[_a _d] (not Number) _a Boolean _b String}]
                      1))]
              (apply f  '(true ["3" 3] true))))
         "test 11")
@@ -448,17 +452,15 @@
            (let [f (destructuring-fn
                     ([[_a _b]          {a Boolean _b (or String Boolean)}]
                      2)
-                    ([[_a [_b _c] & ^Boolean _d]  {[_a _d] (not Number) _a Boolean _b String}]
+                    ([[_a [_b _c] & _d]  {[_a _d] (not Number) _a Boolean _b String}]
                      1))]
              (apply f  '(true ["3" 3] true false true))))
         "test 12")
     (is (= 3 
            (let [f (destructuring-fn
-                    ([[_a _b]          {a Boolean _b (or String Boolean)}]
+                    ([[_a _b]            {_a Boolean _b (or String Boolean)}]
                      2)
-                    ;; TODO, not sure if [[& ^Boolean _d] {d (not number)}] works properly.
-                    ;;  still need to debug this test case
-                    ([[_a [_b _c] & ^Boolean _d]  {[_a _d] (not Number) _a Boolean _b String}]
+                    ([[_a [_b _c] & _d]  {[_a _d] (not Number) _a Boolean _d Boolean _b String}]
                      1)
                     ([[& _others] {}]
                      3))]
@@ -470,7 +472,7 @@
     (let [f (destructuring-fn
              ([[_a _b]          {a Boolean _b (or String Boolean)}]
               2)
-             ([[_a [_b _c] & ^Boolean _d]  {[_a _d] (not Number) _a Boolean _b String}]
+             ([[_a [_b _c] & _d]  {[_a _d] (not Number) _a Boolean _b String}]
               1)
              ([[& _other] {}]
               3))]
@@ -583,7 +585,7 @@
 (deftest t-destructuring-fn-583b
   (testing "special case which was failing 583b"
     (let [f (destructuring-fn
-              ([[a b] {}]
+              ([[[a b]] {}]
                [a b]))]
       (is (= [2 3] (f '(2 3))) "test 583b"))))
 
@@ -742,7 +744,7 @@
     
     (is (= 1
            (let [f (dsfn
-                     ([^Boolean _a [^String _b _c] & ^Boolean _d]
+                     ([^Boolean _a [^String _b _c] & _d]
                       1 ;; this is returned
                       )
                      (^{_a Boolean _b (or String Boolean)} [_a _b]
@@ -751,20 +753,20 @@
         "test 4")
     (is (= 2
            (let [f (dsfn
-                     ([^Boolean _a [^String _b _c] & ^Boolean _d]
+                     ([^Boolean _a [^String _b ^Long _c] & _d]
                       1)
-                     ([^Boolean _a [^String _b _c] & _d]
+                     ([^Boolean _a [^String _b ^Symbol _c] & _d]
                       2 ;; this is returned
                       ))]
              (apply f '(true ["hello" xyz] true false 1 2 3))))
         "test 5")
     (is (thrown? Exception
                  (let [f (dsfn
-                           (^{d Number}
-                            [^Boolean _a [^String _b _c] & ^Boolean _d]
+                           (^{_d Number}
+                            [^Boolean _a [^String _b _c] & _d]
                             1 ;; this is NOT returned
                             )
-                           (^{d Boolean} [^Boolean _a [^String _b _c] & ^Number _d]
+                           (^{_d Boolean} [^Boolean _a [^String _b _c] & _d]
                             2 ;; this is NOT returned
                             ))]
                    (apply f '(true ["hello" xyz] true false 1 2 3))))
@@ -809,7 +811,7 @@
            (let [f (dsfn
                     (^{_a Boolean _b (or String Boolean)} [_a _b]
                      2)
-                    (^{[_a _d] (not Number) _a Boolean _b String} [_a [_b _c] & ^Boolean _d]
+                    (^{[_a _d] (not Number) _a Boolean _b String} [_a [_b _c] & _d]
                      1))]
              (apply f  '(true ["3" 3] true))))
         "test 11")
@@ -817,7 +819,7 @@
            (let [f (dsfn
                     (^{_a Boolean _b (or String Boolean)} [_a _b]
                      2)
-                    (^{[_a _d] (not Number) _a Boolean _b String} [_a [_b _c] & ^Boolean _d]
+                    (^{[_a _d] (not Number) _a Boolean _b String} [_a [_b _c] &  _d]
                      1))]
              (apply f  '(true ["3" 3] true false true))))
         "test 12")
@@ -825,9 +827,7 @@
            (let [f (dsfn
                     (^{_a Boolean _b (or String Boolean)} [_a _b]
                      2)
-                    ;; TODO, not sure if [[& ^Boolean _d] {d (not number)}] works properly.
-                    ;;  still need to debug this test case
-                    (^{[_a _d] (not Number) _a Boolean _b String} [_a [_b _c] & ^Boolean _d]
+                    (^{[_a _d] (not Number) _a Boolean _b String} [_a [^Long _b _c] & _d]
                      1)
                     ([& _other]
                      3))]
@@ -835,7 +835,6 @@
         "test 13")))
 
 
-(def test-verbose false)
 (deftest t-dsfn-assoc
   (is (= 41 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys false}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
@@ -899,6 +898,13 @@
              :foo 12))
       "test 797"))
 
+(dscase '(true ["3" 3] true)
+  ^{[_a _d] Boolean _b String} [_a [_b _c] & _d]
+  1
+
+  ^{_a Boolean _b (or String Boolean)} [_a _b]
+  2)
+
 (deftest t-dscase
   (testing "dscase"
     (is (= 1 (dscase '(true ["hello" 3] true)
@@ -929,30 +935,13 @@
 
     (is (= 1
            (dscase '(true ["hello" xyz] true false true)
-                   [^Boolean _a [^String _b _c] & ^Boolean _d]
+                   [^Boolean _a [^String _b _c] & _d]
                    1 ;; this is returned
 
                    ^{_a Boolean _b (or String Boolean)} [_a _b]
                    2))
         "test 4")
-    (is (= 2
-           (dscase '(true ["hello" xyz] true false 1 2 3)
-                   [^Boolean _a [^String _b _c] & ^Boolean _d]
-                   1
 
-                   [^Boolean _a [^String _b _c] & _d]
-                   2 ;; this is returned
-                   ))
-        "test 5")
-    (is (thrown? Exception
-           (dscase '(true ["hello" xyz] true false 1 2 3)
-                   ^{d Number} [^Boolean _a [^String _b _c] & ^Boolean _d]
-                   1 ;; this is NOT returned
-
-                   ^  {d Boolean} [^Boolean _a [^String _b _c] & ^Number _d]
-                   2 ;; this is NOT returned
-                   ))
-        "test 6")
 
     (is (= 1 (dscase '(true ["3" 3] true)
                      ^{[_a _d] Boolean _b String} [_a [_b _c] & _d]
