@@ -130,6 +130,13 @@
     (boolean (rte-inhabited? (rte/compile (second t1))))
     :dont-know))
 
+(defmethod gns/-inhabited? :not-rte [t1]
+  ;; (not (rte ...)) is inhabited. because there are objects which are not sequences.
+  (if (and (gns/not? t1)
+           (rte? (second t1)))
+    true
+    :dont-know))
+
 (defmethod gns/-disjoint? :not-rte [t1 t2]
   ;; (disjoint? (not (rte ...)) clojure.lang.IPersistentVector )
 
