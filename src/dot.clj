@@ -88,8 +88,8 @@
           (println dot-string))
         stat))))
   
-(defn line-wrap [data]
-  (binding [clojure.pprint/*print-right-margin* 120]
+(defn line-wrap [data right-margin]
+  (binding [clojure.pprint/*print-right-margin* right-margin]
     (clojure.string/replace
      (clojure.string/trim-newline (with-out-str
                                     (pprint data *out*)))
@@ -105,12 +105,13 @@
   interactively.
   dfa-to-dot also accepts an rte (as dfa) in which case it will be converted
   to a Dfa using rte-to-dfa."
-  [dfa & {:keys [title view abbrev draw-sink state-legend dot-file-cb png-file-cb]
+  [dfa & {:keys [title view abbrev draw-sink right-margin state-legend dot-file-cb png-file-cb]
           :as all-optionals
           :or {title "no-title"
                draw-sink false
                abbrev true
                view false
+               right-margin 120
                state-legend true
                dot-file-cb (fn [_file_name] nil)
                png-file-cb (fn [_file_name] nil)}}]
@@ -160,7 +161,7 @@
                       (str/join
                        "" (concat (map (fn [index]
                                          (cl-format false "\\lt~a= ~a"
-                                                    index (line-wrap (labels index))))
+                                                    index (line-wrap (labels index) right-margin)))
                                        (range (count (keys labels))))
                                   ["\\l"]
                                   (if state-legend

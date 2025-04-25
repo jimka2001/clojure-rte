@@ -7,6 +7,12 @@
 )
 
 
+
+
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  rte/match
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -20,6 +26,11 @@
 
 (instance? Number 10)
 
+(rte/match '(:* String)
+           demo-seq)
+
+(rte/match '(:* Ratio)
+           demo-seq)
 
 
 ;; What about a seqence of numbers which contains a Ratio
@@ -31,6 +42,9 @@
 ;; What about a seqence of numbers which contains a Double
 
 (rte/match '(:cat (:* Number) Double (:* Number))
+           demo-seq)
+
+(rte/match '(:cat (:* Number) Float (:* Number))
            demo-seq)
 
 
