@@ -68,7 +68,7 @@
         index))
 
 
-(defn rte-case-fn-int
+(defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
   This function is used in the macro expansion of rte-case but
   can also be used on its own.
@@ -78,31 +78,24 @@
   is called and its value is returned.
   The sequence is traversed a maximum of once, but may not traverse
   entirely if it is determined early that no rte matches."
-  [pairs expected-exits code-exprs]
-  (let [dfa (xym/synchronized-union
-             (reduce xym/synchronized-union 
-                     (for [[rte thunk] pairs]
-                       (do (assert (rte/valid-rte? rte)
-                                   (format "%s is not a valid rte" rte))
-                           (assert (integer? thunk))
-                           (rte-to-dfa rte thunk))))
-             ;; add a final dfa at the end matching sigma-* which will
-             ;;  serve as a default value.  thus (rte/match dfa s)
-             ;;  will always return a 0-ary function even if the sequence
-             ;;  s does not match.
-             (rte-to-dfa sigma-* (fn sigma-*-returning-nil [] nil)))
+  [pairs code-exprs]
+  (let [dfa (reduce xym/synchronized-union 
+                    (for [[rte thunk] pairs]
+                      (do (assert (rte/valid-rte? rte)
+                                  (format "%s is not a valid rte" rte))
+                          (assert (fn? thunk))
+                          (rte-to-dfa rte thunk))))
         traces (xym/find-spanning-map dfa)
         ]
-    (doseq [ev expected-exits
-            :when (not (traces ev))]
-      (binding [*out* *err*]
-        (printf "Unreachable code: %s\n" (nth code-exprs ev))))
+    (when *warn-on-unreachable-code*
+      (doall (map (fn [[rte thunk] code-expr]
+                    (when (not (traces thunk))
+                      (binding [*out* *err*]
+                        (printf "Unreachable code: %s\n" code-expr))))
+                  pairs code-exprs)))
     ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
     (fn f-101 [s]
       (rte/match dfa s))))
-
-(def rte-case-fn (memoize rte-case-fn-int))
-
 
 (defmacro rte-case
   "Takes an expression, and a set of clauses.
