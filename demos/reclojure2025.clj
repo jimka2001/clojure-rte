@@ -18,7 +18,7 @@
 
 
 ;; Vain attempt to define destructuring function
-(defn f
+#_(defn f
    ([[a b] c d]   12)
    ([a [b c] d]   13)
    ([a b [c d]]   14))
@@ -65,16 +65,69 @@
 (instance? Integer 10)
 (instance? Long 10)
 
+;; Vain attempt
 (dsdefn f 
   ([[a b] c d] 12)
   ([a [b c] d] 13)
   ([a b [^Ratio c d]] 14)
-  (^{c (satisfies integer?)} [a b [c d]] 14)
+  ([a b [^integer? c d]] 15)
+  ([a b [^Number c d]] 16)
+  ([a b [^Double c d]] 17))
+
+(def f
+  (let [dfa__51157__auto__ (rte-case/clauses-to-dfa
+                            '([0
+                               (:cat
+                                (rte
+                                 (:cat
+                                  (and :sigma :sigma)
+                                  (and :sigma :sigma)))
+                                (and :sigma :sigma)
+                                (and :sigma :sigma))]
+                              [1
+                               (:cat
+                                (and :sigma :sigma)
+                                (rte
+                                 (:cat
+                                  (and :sigma :sigma)
+                                  (and :sigma :sigma)))
+                                (and :sigma :sigma))]
+                              [2
+                               (:cat
+                                (and :sigma :sigma)
+                                (and :sigma :sigma)
+                                (rte
+                                 (:cat
+                                  (and Ratio :sigma)
+                                  (and :sigma :sigma))))]))]
+    (fn [& seq__51158__auto__]
+      (let [fns__51159__auto__ [(fn conv-1 [[^integer? a ^integer? b] c d] 12)
+                                (fn conv-1 [a [b c] d] 13)
+                                (fn conv-1 [a b [^Ratio c ^integer? d]] 14)]
+            ind__51160__auto__ (rte/match
+                                dfa__51157__auto__
+                                seq__51158__auto__
+                                :promise-disjoint
+                                true)]
+        (if ind__51160__auto__
+          (apply
+           (fns__51159__auto__ ind__51160__auto__)
+           seq__51158__auto__)
+          (throw
+           (ex-info
+            "No pattern matching given list"
+            {:sequence seq__51158__auto__})))))))
+
+(fn [a b [c d]] nil)
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  (^{c (satisfies integer?)} [a b [c d]] 15)
   ([a b [^Double c d]] 16))
 
 (f 1 2 [10 20])
-
-
 
 
 (rte-case [nil nil nil 1 nil nil nil]
@@ -82,18 +135,14 @@
         (:cat (:* :sigma) String (:* :sigma)))
   0
 
-  (:contains-any Number)
-  1
-  
+  ;; (:contains-any Number)
   (:cat (:* :sigma) Number (:* :sigma))
   1
 
+  ;; (:contains-any String)
   (:cat (:* :sigma) String (:* :sigma))
   2
 )
-
-(fn rte-case-fn [] nil)
-
 
 (rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
   (:* (:cat (:* Number) Boolean))
@@ -103,50 +152,12 @@
   2
 )
 
-(rte-case (for [x [1 2 true 2 3 false 'a-symbol 'b-symbol]
-                ]
-            (do (println [:generating :x x])
-                x))
-  (:* (:cat (:* Number) Boolean))
-  1
-
-  (:* (:cat (:* Number) (:or Boolean String)))
-  2
-)
-
-
-(rte-case (for [x (range 40)
-                ]
-            (do (println [:generating :x x])
-                2.1))
-  (:* Number)
-  1
-
-  (:*  (:or Boolean String))
-  2
-  )
-
-(def mf (rte-case-fn [['(:* (:cat (:* Number) Boolean))
-                       (fn [] 1)]
-                      ['(:* (:cat (:* Number) (:or Boolean String)))
-                       (fn [] 2)]]))
-
-
-
-(mf (for [x [1 2 true 2 3 false "hello" []
-             ]
-          ]
-      (do (println [:generating :x x])
-          x)))
-
 ;; we want to match a sequence of numbers.
 
 (def demo-seq [1 2 4/3 4 5 6.5 3 2])
 
 (rte/match '(:* Number)
            demo-seq)
-
-(println Number)
 
 (instance? Number 10)
 
@@ -163,7 +174,7 @@
 
 
 ;; what about a seqence of numbers which contains a Double AND a Ratio
-
+;; in either order
 (rte/match '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
                  (:cat (:* Number) Ratio (:* Number) Double (:* Number)))
            demo-seq)
@@ -173,8 +184,8 @@
            demo-seq)
 
 
-;; what about contains Double and Ratio in either order
-
+;; First way to express seq of Number which contains both a Ratio
+;; and a Double in either order.
 (def rte-1 '(:and (:cat (:* Number) Double (:* Number))
                   (:cat (:* Number) Ratio (:* Number))))
 
@@ -183,7 +194,8 @@
                 :state-legend false)
 
 
-;; what about contains Double and Ratio in either order
+;; Second way to express seq of Number which contains both a Ratio
+;; and a Double in either order.
 
 (def rte-2 '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
                  (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
@@ -200,6 +212,7 @@
                 :view true)                         
 
 
+;; Third way of expression the same thing (with suble error)
 
 (def rte-3 '(:and (:* Number)
                   (:cat (:* :sigma) Ratio (:* :sigma))
@@ -209,18 +222,45 @@
                 :view true
                 :state-legend false)
 
+(xym/find-trace-map (rte/rte-to-dfa (rte/Xor rte-1 rte-3)))
 
-(dot/dfa-to-dot (xym/trim (rte/rte-to-dfa (rte/And-not rte-3 rte-1)))
+(dot/dfa-to-dot (rte/rte-to-dfa (rte/Xor rte-1 rte-3))
                 :title "xor 1-3 dfa"
                 :state-legend false
                 :view true)
 
+;; a sequence of numbers which contains an odd and a Ratio
+(def rte-4 '(:and (:* Number)
+                  (:cat (:* :sigma) Ratio (:* :sigma))
+                  (:cat (:+ :sigma) (satisfies odd?) (:* :sigma))))
+
+(xym/find-trace-map (rte/rte-to-dfa rte-4))
+
+(dot/dfa-to-dot rte-4
+                :title "odd and ratio"
+                :state-legend false
+                :view true)
+
+;; a sequence of numbers which contains an integer and a Ratio
+
+(def rte-5 '(:and (:* Number)
+                  (:cat (:* :sigma) Ratio (:* :sigma))
+                  (:cat (:+ :sigma) (satisfies int?) (:* :sigma))))
+
+(xym/find-trace-map (rte/rte-to-dfa rte-5))
+
+(dot/dfa-to-dot rte-5
+                :title "intr and ratio"
+                :state-legend false
+                :view true)
+
+
 ;; show example of expansion of (satisfies integer?)
 
 (typecase 12
-  Boolean "it is a boolean"
   Short "it is a short"
-  (satisfies integer?) "it is an integer"
+  Boolean "it is a boolean"
+  (satisfies int?) "it is an fixed-width integer"
   (or Ratio Boolean) "it is a ratio"
   String "it is a string")
 
