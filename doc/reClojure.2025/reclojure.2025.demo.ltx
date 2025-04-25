@@ -11,7 +11,22 @@
   heightrounded, % to avoid spurious underfull messages
 ]{geometry} 
 
-\title{RECLOJURE Demo}
+\usepackage{xspace}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage{color}
+\usepackage[subpreambles=true]{standalone}
+\usepackage{cancel}
+\usepackage{mathtools}
+\usepackage{stmaryrd}
+\usepackage{forest}
+
+\input{reclojure-colors}
+\input{reclojure-commands}
+\input{reclojure-listings}
+
+
+\title{DEMO: Recognizing Regular Patterns in Mixed-Type Sequences using Symbolic Finite Automata}
 \author{Jim Newton}
 
 
@@ -20,6 +35,92 @@
 \maketitle
 
 \section{Introduction}
+
+\section{Clojure Multiple-arity Functions}
+
+The Clojure language supports functions of multiple arity.  At the run-time selects which arity of the function to call.
+
+\newsavebox\multarityA
+\begin{lrbox}{\multarityA}
+  \begin{minipage}{7cm}
+    \input{multarityA}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityA
+
+
+Multiple-arity function definition also supports destructuring.
+
+\newsavebox\multarityB
+\begin{lrbox}{\multarityB}
+  \begin{minipage}{7cm}
+    \input{multarityB}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityB
+
+However Clojure does not discriminate on the basis of structure, only on basis
+of arity.  The following example contains two definitions for arity 3.
+
+\newsavebox\multarityC
+\begin{lrbox}{\multarityC}
+  \begin{minipage}{7cm}
+    \input{multarityC}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityC
+
+An attempt to define such a function will result in a compilation error.
+
+\noindent\includegraphics[width=0.8\textwidth]{error-2-arity-overloads.png}
+
+So-called \emph{type hints} may be specified but they have no semantic effect at run-time.
+The following type hint \code{Boolean} is ignored if the function is called with a first
+argument which is not of type \code{Boolean}.
+
+\newsavebox\multarityD
+\begin{lrbox}{\multarityD}
+  \begin{minipage}{7cm}
+    \input{multarityD}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityD
+
+Some types are valid, some are not. E.g., \code{Ratio} is not
+recognized (rather you must use the verbose name
+\code{clojure.lang.Ratio}), and \code{int?} is a type \code{predicate}
+not type name.
+
+\newsavebox\multarityE
+\begin{lrbox}{\multarityE}
+  \begin{minipage}{7cm}
+    \input{multarityE}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityE
+
+The use of invalid type hints usually results in compilation errors.
+
+\noindent\includegraphics[width=0.8\textwidth]{invalid-type-hint-ratio.png}
+\noindent\includegraphics[width=0.8\textwidth]{invalid-type-hint-int.png}
+
+However, some invalid type hints are silently ignored and seem to have no
+effect on the resulting code.
+
+\newsavebox\multarityF
+\begin{lrbox}{\multarityF}
+  \begin{minipage}{7cm}
+    \input{multarityF}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityF
+
 
 
 \end{document}
