@@ -1,4 +1,4 @@
-;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21,25 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -48,6 +48,7 @@
           (map (fn reduce-synchronized-union [[index rte]]
                  (rte-to-dfa rte index))
                pairs)))
+
 
 (defn ensure-fns-index
   "Internal function used in macro expansion of rte-case, to assure the index is in range
@@ -142,21 +143,26 @@
                              (dec n-parts)
                              n-parts)
           pairs (into [] (for [k (range n-parts)
-                               :let [[rte _] (nth parts k)]]
-                           `['~rte ~k]))
+                               :let [[rte expr] (nth parts k)
+                                     name (symbol (format "rte-case-fn-%s" k))]]
+                           ;; we have to use ~'rte-fn because we don't
+                           ;; want backquote to slap a namespace on
+                           ;; the symbol
+                           `['~rte (fn ~name [] ~expr)]))
           code-exprs (for [[_ expr] parts]
                        expr)
-          fs (into [] (for [[_ expr] parts]
-                        ;; we have to use ~'rte-fn because we don't want backquote to slap
-                        ;; a namespace on the symbol
-                        `(fn ~'rte-fn [] ~expr)))
           ]
-      `(let [fs# ~fs
-             f# (rte-case-fn ~pairs (range ~n-parts-to-check) '~code-exprs)
-             i# (f# ~sequence)
-             thunk# (fs# i#)
+      `(let [f# (rte-case-fn ~pairs '~code-exprs)
+             seq# ~sequence
+             thunk# (f# seq#)
              ]
-         (thunk#)))))
+         (if (fn? thunk#)
+           ;; f# has returned false if the sequence didn't match
+           ;; any of the rtes.  Otherwise it returned a 0-ary function,
+           ;; so we can call this 0-ary function.
+           (thunk#)
+           (throw (ex-info "No pattern matching given sequence"
+                           {:sequence seq#})))))))
 
 (defn remove-extra-syntax 
   "lambda-list is a vector which is almost compatible with the
@@ -327,14 +333,15 @@
                                :unparsed others})))))))
 
 
-(defn conv-1-case-clause [[lambda-list types-map] consequences]
+(defn conv-1-case-clause [[lambda-list types-map] consequences k]
   (assert (map? types-map)
           (cl-format false "expecting a map, not ~A" types-map))
   (assert (vector? lambda-list)
           (cl-format false "expecting a vector, not ~A" lambda-list))
-  [(lambda-list-to-rte lambda-list types-map)
-   `(fn ~'conv-1 ~(remove-extra-syntax lambda-list)
-      ~@consequences)])
+  (let [name (symbol (format "conv-1-%d" k))]
+    [(lambda-list-to-rte lambda-list types-map)
+     `(fn ~name ~(remove-extra-syntax lambda-list)
+        ~@consequences)]))
 
 
 (defmacro destructuring-case
@@ -432,7 +439,8 @@
         (let [[name & given-clauses] args
               parsed (map conv-1-case-clause
                           (map first given-clauses)
-                          (map rest given-clauses))
+                          (map rest given-clauses)
+                          (range (count given-clauses)))
               fns (into [] (map second parsed))
               code-exprs (into [] (map rest given-clauses))
               pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
@@ -459,7 +467,7 @@
                  (if ind#
                    ;; get function out of vector fns# and call it
                    (apply (fns# ind#) seq#)
-                   (throw (ex-info "No pattern matching given list"
+                   (throw (ex-info "No pattern matching given sequence"
                                    {:sequence seq#}))
                    )))))))
 
