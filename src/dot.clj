@@ -78,7 +78,8 @@
       (with-open [wrtr (io/writer dot-file-name)]
         (.write wrtr dot-string))
       (dot-file-cb dot-file-name))
-    (png-file-cb png-file-name)
+    (when png-file-cb
+      (png-file-cb png-file-name))
     (when (= "Mac OS X" (System/getProperty "os.name"))
       (swap! tmp-files conj png-file-name)
       ;; -g => don't bring Preview to forground, and thus don't steal focus
@@ -111,7 +112,7 @@
                abbrev true
                view false
                state-legend true
-               dot-file-cb nil
+               dot-file-cb (fn [_file_name] nil)
                png-file-cb (fn [_file_name] nil)}}]
   (cond
     view (let [dot-string (dfa-to-dot dfa (assoc all-optionals :view false))]
