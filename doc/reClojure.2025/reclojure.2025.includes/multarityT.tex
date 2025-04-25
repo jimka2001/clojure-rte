@@ -1,0 +1,11 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(def rte-4 '(:and (:* Number)
+                  (:cat (:* :sigma) Ratio (:* :sigma))
+                  (:cat (:+ :sigma) (satisfies odd?) (:* :sigma))))
+
+(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-1 rte-4)))
+;; => {true [:indeterminate [[:satisfiable Ratio]
+;;                           [:indeterminate (and (not (satisfies odd?))
+;;                                                Double)]]]}  
+\end{lstlisting}

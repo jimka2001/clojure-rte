@@ -1,0 +1,9 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(def demo-seq [1 2 4/3 4 5 6.5 3 2])
+
+(def rte-2 '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
+                 (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
+
+(rte/match rte-2 demo-seq) ;; => true
+\end{lstlisting}
