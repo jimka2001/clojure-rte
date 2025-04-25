@@ -121,6 +121,131 @@ effect on the resulting code.
 
 \usebox\multarityF
 
+\section{Introducting \code{dsdefn} Destructuring Define Function}
+
+The simplest form of \code{dsdefn} allows the programmer to select the
+expressions to evaluate based on arity and structure.
+
+\newsavebox\multarityG
+\begin{lrbox}{\multarityG}
+  \begin{minipage}{7cm}
+    \input{multarityG}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityG
+
+If multiple desturing lambda lists are identical, a warning is issued.
+But when called, the function selects the first matching function to evaluate.
+
+\newsavebox\multarityH
+\begin{lrbox}{\multarityH}
+  \begin{minipage}{7cm}
+    \input{multarityH}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityH
+
+\code{dsdefn} also allows type hints with semantics.  At function call time
+the first matter which matches the types of the given argument values is
+selected and evaluated.
+
+\newsavebox\multarityI
+\begin{lrbox}{\multarityI}
+  \begin{minipage}{7cm}
+    \input{multarityI}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityI
+
+Attention the value \code{10} is not of type \code{Integer} in Clojure.  Rather to match
+an integer we must use a type predicate:
+\code{int?} (to exclude big-nums) or perhaps \code{integer?} (to include big-nums).
+
+
+\newsavebox\multarityJ
+\begin{lrbox}{\multarityJ}
+  \begin{minipage}{7cm}
+    \input{multarityJ}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityJ
+
+
+\noindent\includegraphics[width=0.8\textwidth]{vain-attempt-int.png}
+
+Rather than a raw type predicate we have to use an alternate
+syntax. \code{(satisfies int?)}.  Unfortunately, we cannot use
+\code{(satisfies int?)} directly in the Clojure type-hint syntax.
+Clojure does not allow us to use a non-symbol a as type-hint.
+
+
+\newsavebox\multarityK
+\begin{lrbox}{\multarityK}
+  \begin{minipage}{7cm}
+    \input{multarityK}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityK
+
+\noindent\includegraphics[width=0.8\textwidth]{illegal-meta-data.png}
+
+Because of this limitation, we provide an alternative/supplementary syntax.
+We may preceed the argument list vector with a hash as meta data.  The
+hash associates variable names declared in the argument vector with
+type declarations.
+
+\newsavebox\multarityL
+\begin{lrbox}{\multarityL}
+  \begin{minipage}{7cm}
+    \input{multarityL}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityL
+
+\begin{verbatim}
+1. Unhandled clojure.lang.ExceptionInfo
+   No pattern matching given sequence
+   {:sequence (1 2 [false 20])}
+                      REPL:  109  reclojure2025/fn/fn
+               RestFn.java:  439  clojure.lang.RestFn/invoke
+                      REPL:  119  reclojure2025/eval65437
+                      REPL:  119  reclojure2025/eval65437
+             Compiler.java: 7700  clojure.lang.Compiler/eval
+    interruptible_eval.clj:  106  nrepl.middleware.interruptible-eval/evaluator/run/fn
+    interruptible_eval.clj:  101  nrepl.middleware.interruptible-eval/evaluator/run
+               session.clj:  230  nrepl.middleware.session/session-exec/session-loop
+        SessionThread.java:   21  nrepl.SessionThread/run
+\end{verbatim}
+
+In selecting which clause to evaluate, a computation is done using a
+Dfa.  The Dfa is build by the macro expansion (when the macro expansion
+is evaluated).  When the function \code{f} is called the Dfa is traversed
+once to determine which piece of code to evalu
+
+\newsavebox\multarityM
+\begin{lrbox}{\multarityM}
+  \begin{minipage}{7cm}
+    \input{multarityM}
+  \end{minipage}
+\end{lrbox}
+
+\usebox\multarityM
+
+\noindent\includegraphics[width=\textwidth]{dsdefn.pdf}
+
+
+
+\section{The \code{rte-case} Macro}
+
+The \code{rte-case} macro is used like \code{case} except that each
+clause is distinguished by an RTE (regular type expression).  The given
+sequence 
 
 
 \end{document}

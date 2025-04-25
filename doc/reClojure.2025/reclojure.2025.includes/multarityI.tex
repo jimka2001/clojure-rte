@@ -1,0 +1,20 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^Integer c d]] 15)
+  ([a b [^Number c d]] 16)
+  ([a b [^Double c d]] 17))
+
+
+(f 1 2 [10.0 20]) ;; --> 16 
+(f 1 2 [2/3 3])   ;; --> 14
+
+(f 1 2 [10 20])   ;; --> 16  !! ATTENTION !!
+
+(instance? Integer 10) ;; --> false
+(instance? Long 10)    ;; --> true
+(instance? Number 10)  ;; --> true
+\end{lstlisting}
