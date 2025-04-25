@@ -157,22 +157,23 @@
 (deftest t-conv-1-case-clause
   (testing "conv-1-case-clause"
     (is (= (conv-1-case-clause '[[[a b] c d] {}]
-                               '(12))
+                               '(12) 3)
            ['(:cat
               (rte (:cat (and :sigma :sigma) (and :sigma :sigma)))
               (and :sigma :sigma)
               (and :sigma :sigma))
-            `(fn ~'conv-1 ~'[[a b] c d]
+            `(fn ~'conv-1-3 ~'[[a b] c d]
                12)]))
     (is (= (conv-1-case-clause '[[[a b] c d] {a Boolean}]
-                               '(12))
+                               '(12)
+                               7)
            ['(:cat
               (rte (:cat (and :sigma Boolean) (and :sigma :sigma)))
               (and :sigma :sigma)
               (and :sigma :sigma))
-            `(fn ~'conv-1 ~'[[a b] c d]
-               12)]))
-))
+            `(fn ~'conv-1-7 ~'[[a b] c d]
+               12)]))))
+
 
 (deftest t-destructuring-case-failure-177
   (testing "destructuring-case 177"
@@ -183,7 +184,6 @@
                                  [[_a _b]          {_a Boolean _b (or String Boolean)}]
                                  200))
         "test 1")))
-
 
 
 (deftest t-destructuring-case
