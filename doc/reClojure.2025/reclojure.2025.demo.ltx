@@ -1,15 +1,16 @@
-\documentclass{extarticle}
+\documentclass[compress,aspectratio=169]{beamer}
+%%\documentclass{extarticle}
 %% usepackage taken from https://tex.stackexchange.com/a/327136/135365
 %%   thanks https://tex.stackexchange.com/users/4427/egreg
-\usepackage[
-  top=2cm,
-  bottom=2cm,
-  left=3cm,
-  right=2cm,
-  headheight=27pt, % as per the warning by fancyhdr
-  %includehead,includefoot,
-  heightrounded, % to avoid spurious underfull messages
-]{geometry} 
+%% \usepackage[
+%%   top=2cm,
+%%   bottom=2cm,
+%%   left=3cm,
+%%   right=2cm,
+%%   headheight=27pt, % as per the warning by fancyhdr
+%%   %includehead,includefoot,
+%%   heightrounded, % to avoid spurious underfull messages
+%% ]{geometry} 
 
 \usepackage{xspace}
 \usepackage{pgfplots}
@@ -31,14 +32,12 @@
 
 
 \begin{document}
-\sloppy
+
+\begin{frame}
 \maketitle
+\end{frame}
 
-\section{Introduction}
 
-\section{Clojure Multiple-arity Functions}
-
-The Clojure language supports functions of multiple arity.  At the run-time selects which arity of the function to call.
 
 \newsavebox\multarityA
 \begin{lrbox}{\multarityA}
@@ -47,10 +46,17 @@ The Clojure language supports functions of multiple arity.  At the run-time sele
   \end{minipage}
 \end{lrbox}
 
+\section{Clojure Multiple-arity Functions}
+
+\begin{frame}{Clojure Multiple-arity Functions}
+
 \usebox\multarityA
+  
+\medskip
 
-
-Multiple-arity function definition also supports destructuring.
+The Clojure language supports functions of multiple arity.  At the
+run-time selects which arity of the function to call.
+\end{frame}
 
 \newsavebox\multarityB
 \begin{lrbox}{\multarityB}
@@ -59,10 +65,13 @@ Multiple-arity function definition also supports destructuring.
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityB
 
-However Clojure does not discriminate on the basis of structure, only on basis
-of arity.  The following example contains two definitions for arity 3.
+\begin{frame}
+\usebox\multarityB
+  
+Multiple-arity function definition also supports destructuring.
+
+\end{frame}
 
 \newsavebox\multarityC
 \begin{lrbox}{\multarityC}
@@ -71,15 +80,21 @@ of arity.  The following example contains two definitions for arity 3.
   \end{minipage}
 \end{lrbox}
 
+\begin{frame}
 \usebox\multarityC
 
+
+However Clojure does not discriminate on the basis of structure, only on basis
+of arity.  The following example contains two definitions for arity 3.
+  
+\end{frame}
+
+\begin{frame}
 An attempt to define such a function will result in a compilation error.
 
 \noindent\includegraphics[width=0.8\textwidth]{error-2-arity-overloads.png}
-
-So-called \emph{type hints} may be specified but they have no semantic effect at run-time.
-The following type hint \code{Boolean} is ignored if the function is called with a first
-argument which is not of type \code{Boolean}.
+  
+\end{frame}
 
 \newsavebox\multarityD
 \begin{lrbox}{\multarityD}
@@ -88,12 +103,20 @@ argument which is not of type \code{Boolean}.
   \end{minipage}
 \end{lrbox}
 
+
+
+\begin{frame}
+
 \usebox\multarityD
 
-Some types are valid, some are not. E.g., \code{Ratio} is not
-recognized (rather you must use the verbose name
-\code{clojure.lang.Ratio}), and \code{int?} is a type \code{predicate}
-not type name.
+
+
+So-called \emph{type hints} may be specified but they have no semantic effect at run-time.
+The following type hint \code{Boolean} is ignored if the function is called with a first
+argument which is not of type \code{Boolean}.
+\end{frame}
+
+
 
 \newsavebox\multarityE
 \begin{lrbox}{\multarityE}
@@ -102,15 +125,29 @@ not type name.
   \end{minipage}
 \end{lrbox}
 
+
+
+\begin{frame}
+
 \usebox\multarityE
+
+Some types are valid, some are not. E.g., \code{Ratio} is not
+recognized (rather you must use the verbose name
+\code{clojure.lang.Ratio}), and \code{int?} is a type \code{predicate}
+not type name.
+\end{frame}
+
+\begin{frame}
+
+
 
 The use of invalid type hints usually results in compilation errors.
 
 \noindent\includegraphics[width=0.8\textwidth]{invalid-type-hint-ratio.png}
 \noindent\includegraphics[width=0.8\textwidth]{invalid-type-hint-int.png}
+  
+\end{frame}
 
-However, some invalid type hints are silently ignored and seem to have no
-effect on the resulting code.
 
 \newsavebox\multarityF
 \begin{lrbox}{\multarityF}
@@ -119,12 +156,22 @@ effect on the resulting code.
   \end{minipage}
 \end{lrbox}
 
+
+\begin{frame}
+
+
+
+However, some invalid type hints are silently ignored and seem to have no
+effect on the resulting code.
+
+
 \usebox\multarityF
+  
+\end{frame}
+
 
 \section{Introducting \code{dsdefn} Destructuring Define Function}
 
-The simplest form of \code{dsdefn} allows the programmer to select the
-expressions to evaluate based on arity and structure.
 
 \newsavebox\multarityG
 \begin{lrbox}{\multarityG}
@@ -133,23 +180,35 @@ expressions to evaluate based on arity and structure.
   \end{minipage}
 \end{lrbox}
 
+
+\begin{frame}{Introducting \code{dsdefn} Destructuring Define Function}
+
+The simplest form of \code{dsdefn} allows the programmer to select the
+expressions to evaluate based on arity and structure.
+
 \usebox\multarityG
 
-If multiple desturing lambda lists are identical, a warning is issued.
-But when called, the function selects the first matching function to evaluate.
+  
+\end{frame}
 
 \newsavebox\multarityH
 \begin{lrbox}{\multarityH}
-  \begin{minipage}{7cm}
+  \begin{minipage}{9cm}
     \input{multarityH}
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityH
 
-\code{dsdefn} also allows type hints with semantics.  At function call time
-the first matter which matches the types of the given argument values is
-selected and evaluated.
+\begin{frame}
+
+If multiple desturing lambda lists are identical, a warning is issued.
+But when called, the function selects the first matching function to evaluate.
+
+
+\usebox\multarityH
+  
+\end{frame}
+
 
 \newsavebox\multarityI
 \begin{lrbox}{\multarityI}
@@ -158,12 +217,14 @@ selected and evaluated.
   \end{minipage}
 \end{lrbox}
 
+
+\begin{frame}
+\code{dsdefn} also allows type hints with semantics.  At function call time
+the first matter which matches the types of the given argument values is
+selected and evaluated.
+
 \usebox\multarityI
-
-Attention the value \code{10} is not of type \code{Integer} in Clojure.  Rather to match
-an integer we must use a type predicate:
-\code{int?} (to exclude big-nums) or perhaps \code{integer?} (to include big-nums).
-
+\end{frame}
 
 \newsavebox\multarityJ
 \begin{lrbox}{\multarityJ}
@@ -172,16 +233,17 @@ an integer we must use a type predicate:
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityJ
 
 
-\noindent\includegraphics[width=0.8\textwidth]{vain-attempt-int.png}
+\begin{frame}
+Attention the value \code{10} is not of type \code{Integer} in Clojure.  Rather to match
+an integer we must use a type predicate:
+\code{int?} (to exclude big-nums) or perhaps \code{integer?} (to include big-nums).
 
-Rather than a raw type predicate we have to use an alternate
-syntax. \code{(satisfies int?)}.  Unfortunately, we cannot use
-\code{(satisfies int?)} directly in the Clojure type-hint syntax.
-Clojure does not allow us to use a non-symbol a as type-hint.
 
+\only<1>{\usebox\multarityJ}%
+\only<2>{\includegraphics[width=0.8\textwidth]{vain-attempt-int.png}  }
+\end{frame}
 
 \newsavebox\multarityK
 \begin{lrbox}{\multarityK}
@@ -190,14 +252,18 @@ Clojure does not allow us to use a non-symbol a as type-hint.
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityK
 
-\noindent\includegraphics[width=0.8\textwidth]{illegal-meta-data.png}
+\begin{frame}
+Rather than a raw type predicate we have to use an alternate
+syntax. \code{(satisfies int?)}.  Unfortunately, we cannot use
+\code{(satisfies int?)} directly in the Clojure type-hint syntax.
+Clojure does not allow us to use a non-symbol a as type-hint.
 
-Because of this limitation, we provide an alternative/supplementary syntax.
-We may preceed the argument list vector with a hash as meta data.  The
-hash associates variable names declared in the argument vector with
-type declarations.
+
+
+\only<1>{\usebox\multarityK}%
+\only<2>{\includegraphics[width=\textwidth]{illegal-meta-data.png}}
+\end{frame}
 
 \newsavebox\multarityL
 \begin{lrbox}{\multarityL}
@@ -206,27 +272,25 @@ type declarations.
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityL
+\newsavebox\multarityLL
+\begin{lrbox}{\multarityLL}
+  \begin{minipage}{10cm}
+    \input{stack-trace}
+  \end{minipage}
+\end{lrbox}
 
-\begin{verbatim}
-1. Unhandled clojure.lang.ExceptionInfo
-   No pattern matching given sequence
-   {:sequence (1 2 [false 20])}
-                      REPL:  109  reclojure2025/fn/fn
-               RestFn.java:  439  clojure.lang.RestFn/invoke
-                      REPL:  119  reclojure2025/eval65437
-                      REPL:  119  reclojure2025/eval65437
-             Compiler.java: 7700  clojure.lang.Compiler/eval
-    interruptible_eval.clj:  106  nrepl.middleware.interruptible-eval/evaluator/run/fn
-    interruptible_eval.clj:  101  nrepl.middleware.interruptible-eval/evaluator/run
-               session.clj:  230  nrepl.middleware.session/session-exec/session-loop
-        SessionThread.java:   21  nrepl.SessionThread/run
-\end{verbatim}
 
-In selecting which clause to evaluate, a computation is done using a
-Dfa.  The Dfa is build by the macro expansion (when the macro expansion
-is evaluated).  When the function \code{f} is called the Dfa is traversed
-once to determine which piece of code to evalu
+\begin{frame}[fragile]
+Because of this limitation, we provide an alternative/supplementary syntax.
+We may preceed the argument list vector with a hash as meta data.  The
+hash associates variable names declared in the argument vector with
+type declarations.
+
+
+\only<1>{\usebox\multarityL}%
+\only<2>{\usebox\multarityLL}
+\end{frame}
+
 
 \newsavebox\multarityM
 \begin{lrbox}{\multarityM}
@@ -235,20 +299,23 @@ once to determine which piece of code to evalu
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityM
 
-\noindent\includegraphics[width=\textwidth]{dsdefn.pdf}
+\begin{frame}
 
 
+In selecting which clause to evaluate, a computation is done using a
+Dfa.  The Dfa is build by the macro expansion (when the macro expansion
+is evaluated).  When the function \code{f} is called the Dfa is traversed
+once to determine which piece of code to evaluate.
+
+\medskip
+
+\only<1>{\usebox\multarityM}%
+\only<2>{\includegraphics[height=0.7\textheight]{dsdefn.pdf}}
+\end{frame}
 
 
 \section{The \code{rte-case} Macro}
-
-How does matching a sequence against an RTE work?
-
-Let's first define a sequence of numbers to reuse several times.  We
-can use \code{rte/match} to check it is a sequence of \code{Number}, \eg,
-\code{(:* Number)}.
 
 \newsavebox\multarityN
 \begin{lrbox}{\multarityN}
@@ -257,11 +324,20 @@ can use \code{rte/match} to check it is a sequence of \code{Number}, \eg,
   \end{minipage}
 \end{lrbox}
 
+
+\begin{frame}{The \code{rte-case} Macro}
+
+
+How does matching a sequence against an RTE work?
+
+Let's first define a sequence of numbers to reuse several times.  We
+can use \code{rte/match} to check it is a sequence of \code{Number}, \eg,
+\code{(:* Number)}.
+
+
 \usebox\multarityN
 
-
-Let's see whether it is a sequence of numbers which contains a \code{Ratio}?
-What about contains a \code{Double}?
+\end{frame}
 
 \newsavebox\multarityO
 \begin{lrbox}{\multarityO}
@@ -270,12 +346,14 @@ What about contains a \code{Double}?
   \end{minipage}
 \end{lrbox}
 
+\begin{frame}
+  
+
+Let's see whether it is a sequence of numbers which contains a \code{Ratio}?
+What about contains a \code{Double}?
+
 \usebox\multarityO
-
-
-Now we check whether the sequence of numbers contains both a \code{Double}
-and a \code{Ratio}.  There are two ways of doing this.  First we can
-intersect the two RTEs above.
+\end{frame}
 
 \newsavebox\multarityP
 \begin{lrbox}{\multarityP}
@@ -284,11 +362,16 @@ intersect the two RTEs above.
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityP
+\begin{frame}
 
-We could also check whether it is a seqence of number which contains a \code{Double}
-and then a \code{Ratio}, or whether it contains a \code{Ratio}
-and then a \code{Double}.  \Ie, the union of two RTEs.
+Now we check whether the sequence of numbers contains both a \code{Double}
+and a \code{Ratio}.  There are two ways of doing this.  First we can
+intersect the two RTEs above.
+
+
+\usebox\multarityP
+  
+\end{frame}
 
 \newsavebox\multarityQ
 \begin{lrbox}{\multarityQ}
@@ -297,11 +380,19 @@ and then a \code{Double}.  \Ie, the union of two RTEs.
   \end{minipage}
 \end{lrbox}
 
+
+\begin{frame}
+
+We could also check whether it is a seqence of number which contains a \code{Double}
+and then a \code{Ratio}, or whether it contains a \code{Ratio}
+and then a \code{Double}.  \Ie, the union of two RTEs.
+
 \usebox\multarityQ
 
-\section{Visualizing RTEs}
+  
+\end{frame}
 
-Are \code{rte-1} and \code{rte-2} really the same?  We can display the two Dfas corresponding to each.
+\section{Visualizing RTEs}
 
 \newsavebox\multarityR
 \begin{lrbox}{\multarityR}
@@ -310,14 +401,18 @@ Are \code{rte-1} and \code{rte-2} really the same?  We can display the two Dfas 
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityR
 
-\noindent\includegraphics[height=0.45\textheight]{rte-1.pdf}\\
-\noindent\includegraphics[height=0.45\textheight]{rte-2.pdf}
+\begin{frame}{Visualizing RTEs}
 
-The two DFAs look very similar but the type labels are slightly
-different.  We can actually compute the difference of the two Dfas
-by diplaying the XOR of the two RTEs.
+
+Are \code{rte-1} and \code{rte-2} really the same?  Display the two Dfas corresponding to each.
+
+
+\only<1>{\usebox\multarityR}%
+  \only<2>{\noindent\includegraphics[width=0.45\textwidth]{rte-1.pdf}
+\includegraphics[width=0.45\textwidth]{rte-2.pdf}
+}
+\end{frame}
 
 \newsavebox\multarityS
 \begin{lrbox}{\multarityS}
@@ -326,51 +421,84 @@ by diplaying the XOR of the two RTEs.
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityS
 
-\noindent\includegraphics[height=0.45\textheight]{rte-xor.pdf}
+\begin{frame}
+  
 
-We see that the DFA corresponding to the Xor of the two rtes has no
+
+\only<1,2>{The two DFAs look very similar but the type labels are slightly
+different.  We can actually compute the difference of the two Dfas
+by diplaying the XOR of the two RTEs.}%
+\only<3>{We see that the DFA corresponding to the Xor of the two rtes has no
 accepting states, which means its language is empty.  \Ie, there are
 no sequences which match one of the RTEs without also matching the other.
+}
 
-Suppose we had made a mistake and declare an RTE which was not what we wanted.
-Suppose we define \code{rte-4} as below.  We can use the function \code{xym/find-trace-map}
-to describe a sequence which would match \code{rte-1} but not \code{rte-2}.
+\only<1>{\usebox\multarityS\\}%
+\only<2->{\includegraphics[width=0.6\textwidth]{rte-xor.pdf}}
+
+
+\end{frame}
 
 \newsavebox\multarityT
 \begin{lrbox}{\multarityT}
-  \begin{minipage}{11cm}
+  \begin{minipage}{13cm}
     \input{multarityT}
   \end{minipage}
 \end{lrbox}
 
-\usebox\multarityT
 
-We see that \code{xym/find-trace-map} claims that a sequence
+\begin{frame}
+
+\usebox\multarityT\\
+\only<1>{Suppose we had made a mistake and declare an RTE which was not what we wanted.
+Suppose we define \code{rte-4} as below.  We can use the function \code{xym/find-trace-map}
+to describe a sequence which would match \code{rte-1} but not \code{rte-2}.}%
+\only<2>{We see that \code{xym/find-trace-map} claims that a sequence
 consisting of \code{Ratio} followed by \code{(and (not (satisfies
-  odd?)) Dobule)} would be such a sequence.  It specifies that the
+  odd?)) Dobule)} would be such a sequence.}%
+\only<3>{It specifies that the
 result is \code{:indeterminate} because not all the types in the
 sequences are known to be satisfiable.  In particular \code{Ratio} is
 \code{:satisfiable}, but it it not known whether there is a value
 which is \code{Double} and fails to satisfy the predicate \code{odd?}.
 Of course we know that such a value exists, but it cannot be
-determined programmatically.
+determined programmatically.}
 
-How does \code{xym/find-trace-map} work? It takes as argument the Dfa generated by an RTE.
 
-\noindent\includegraphics[width=\textwidth]{rte-and-not.pdf}
 
-Then it asks whether there is a path from the initial state \code{q0}
-and some accepting state.  In particular is there a path which
+
+  
+\end{frame}
+
+\begin{frame}
+  How does \code{xym/find-trace-map} work? 
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \only<1>{\includegraphics[width=0.8\textwidth]{rte-and-not.pdf}}%
+      \only<2->{\includegraphics[width=\textwidth]{rte-and-not-no-legend.pdf}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+\only<1>{\code{xym/find-trace-map} examines the Dfa generated by an RTE.}%
+\only<2>{Then it asks whether there is a path from the initial state \code{q0}
+and some accepting state.}%
+\only<3>{In particular is there a path which
 contains only satisfiable transitions, and if not then is there a path
-with some indeterminate transitions.  It answers this question by
-performing a Dijkstra search on the weighted graph of the DFA.  In the
-Dijkstra, satisfiable transitions have a weight of 1, while
+with some indeterminate transitions.}%
+\only<4>{It answers this question by
+performing a Dijkstra search on the weighted graph of the DFA.}%
+\only<5>{In the
+Dijkstra search, satisfiable transitions have a weight of 1, while
 indeterminate transitions have a weight equal to the number of states,
-8 in the above examples.  Thus any path with a weight less than 8 must
+8 in the above examples.}%
+\only<6>{Thus any path with a weight less than 8 must
 contain no indeterminate transitions, and any path with weight 8 or
-more must have at least one indeterminate transition.
+more must have at least one indeterminate transition.}%
+    \end{column}
+  \end{columns}
+
+\end{frame}
+
 
 \end{document}
 

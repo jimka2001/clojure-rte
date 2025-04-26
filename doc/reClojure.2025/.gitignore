@@ -7,5 +7,6 @@
 *.nav
 *.snm
 *.toc
+*.vrb
 reclojure.2025.demo.pdf
 reclojure.2025.slides.pdf
