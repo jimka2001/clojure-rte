@@ -168,7 +168,7 @@
                                     (for [q visible-states
                                           :when (boolean (:pattern q))]
                                       (cl-format false "\\lq~a= ~a"
-                                                 (:index q) (line-wrap (:pattern q))))
+                                                 (:index q) (line-wrap (:pattern q) right-margin)))
                                     [""])))
                       "\"" "\\\"")))
         (cl-format *out* "  graph [labeljust=l,nojustify=true];~%")
