@@ -223,6 +223,9 @@
         
         (cl-format *out* "}~%")))))
 
+(defn dfa-view [dfa title]
+  (dfa-to-dot dfa :view true :title title :state-legend false))
+
 (defn bdd-to-dot 
   "Create (and possibly display) a graphical image rendering the given Bdd
   For Mac OS, the :view option may be used to display the image

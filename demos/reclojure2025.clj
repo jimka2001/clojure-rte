@@ -13,39 +13,59 @@
 
 
 
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;  rte/match
+;;        _          __               _       _     
+;;   _ __| |_ ___   / / __ ___   __ _| |_ ___| |__  
+;;  | '__| __/ _ \ / / '_ ` _ \ / _` | __/ __| '_ \ 
+;;  | |  | ||  __// /| | | | | | (_| | || (__| | | |
+;;  |_|   \__\___/_/ |_| |_| |_|\__,_|\__\___|_| |_|
+;;                                                
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; we want to match a sequence of numbers.
 
-(def demo-seq [1 2 4/3 4 5 6.5 3 2])
+(def demo-seq-1 [1 2 4/3 4      5 6.5 3 2])
+(def demo-seq-2 [1 2 4/3 "four" 5 6.5 3 2])
+
 
 (rte/match '(:* Number)
-           demo-seq)
+           demo-seq-1)
 
 (instance? Number 10)
 
+
+(rte/match '(:* Number)
+           demo-seq-2)
+
+
 (rte/match '(:* String)
-           demo-seq)
+           demo-seq-1)
 
 (rte/match '(:* Ratio)
-           demo-seq)
+           demo-seq-1)
 
 
 ;; What about a seqence of numbers which contains a Ratio
 
+(rte/match '(:and (:* Number)
+                  (:cat (:* :sigma) Ratio (:* :sigma)))
+           demo-seq-1)
+
 (rte/match '(:cat (:* Number) Ratio (:* Number))
-           demo-seq)
+           demo-seq-1)
+
 
 
 ;; What about a seqence of numbers which contains a Double
 
 (rte/match '(:cat (:* Number) Double (:* Number))
-           demo-seq)
+           demo-seq-1)
 
 (rte/match '(:cat (:* Number) Float (:* Number))
-           demo-seq)
+           demo-seq-1)
 
 
 
@@ -57,13 +77,27 @@
 (def rte-1 '(:and (:cat (:* Number) Double (:* Number))
                   (:cat (:* Number) Ratio (:* Number))))
 
-(rte/match rte-1 demo-seq)
+(rte/match rte-1 demo-seq-1)
 
 
-(dot/dfa-to-dot rte-1 :title "Dfa rte-1"
-                :view true
-                :dot-file-cb println
-                :state-legend false)
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;       _  __                  _               
+;;    __| |/ _| __ _     __   _(_) _____      __
+;;   / _` | |_ / _` |____\ \ / / |/ _ \ \ /\ / /
+;;  | (_| |  _| (_| |_____\ V /| |  __/\ V  V / 
+;;   \__,_|_|  \__,_|      \_/ |_|\___| \_/\_/  
+;;                                              
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(dot/dfa-view rte-1 "Dfa rte-1")
 
 
 ;; Second way to express seq of Number which contains both a Ratio
@@ -72,16 +106,12 @@
 (def rte-2 '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
                  (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
 
-(dot/dfa-to-dot rte-2 :title "Dfa rte-2" 
-                :view true
-                :state-legend false)
+(dot/dfa-view rte-2 "Dfa rte-2" )
 
 ;; are the rtes the same?  do have match the same language?
 
-(dot/dfa-to-dot (rte/Xor rte-1 rte-2)
-                :title "xor 1-2 dfa"
-                :state-legend false
-                :view true)                         
+(dot/dfa-view (rte/Xor rte-1 rte-2)
+              "xor 1-2 dfa")                         
 
 
 ;; Third way of expression the same thing (with suble error)
@@ -89,16 +119,28 @@
 (def rte-3 '(:and (:* Number)
                   (:cat (:* :sigma) (or Ratio Double) (:* :sigma))))
 
-(dot/dfa-to-dot rte-3 :title "third dfa" 
-                :view true
-                :state-legend false)
+(dot/dfa-view rte-3 "third dfa")
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;    __ _           _       _                                                  
+;;   / _(_)_ __   __| |     | |_ _ __ __ _  ___ ___       _ __ ___   __ _ _ __  
+;;  | |_| | '_ \ / _` |_____| __| '__/ _` |/ __/ _ \_____| '_ ` _ \ / _` | '_ \ 
+;;  |  _| | | | | (_| |_____| |_| | | (_| | (_|  __/_____| | | | | | (_| | |_) |
+;;  |_| |_|_| |_|\__,_|      \__|_|  \__,_|\___\___|     |_| |_| |_|\__,_| .__/ 
+;;                                                                       |_|    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (xym/find-trace-map (rte/rte-to-dfa (rte/Xor rte-1 rte-3)))
 
-(dot/dfa-to-dot (rte/rte-to-dfa (rte/Xor rte-1 rte-3))
-                :title "xor 1-3 dfa"
-                :state-legend false
-                :view true)
+(dot/dfa-view (rte/rte-to-dfa (rte/Xor rte-1 rte-3))
+              "xor 1-3 dfa")
 
 ;; a sequence of numbers which contains an odd and a Ratio
 (def rte-4 '(:and (:* Number)
@@ -107,10 +149,8 @@
 
 (xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-1 rte-4)))
 
-(dot/dfa-to-dot (rte/And-not rte-1 rte-4)
-                :title "rte and-not"
-                :state-legend false
-                :view true)
+(dot/dfa-view (rte/And-not rte-1 rte-4)
+              "rte and-not")
 
 ;; A sequence of numbers which contains an integer and a Ratio
 ;; In this case the int? predicate disappears because
@@ -121,18 +161,24 @@
 
 (xym/find-trace-map (rte/rte-to-dfa rte-5))
 
-(dot/dfa-to-dot rte-5
-                :title "int and ratio"
-                :state-legend false
-                :view true)
+(dot/dfa-view rte-5 "int and ratio")
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;  Multi-arity functions
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;   _                                       
+;;  | |_ _   _ _ __   ___  ___ __ _ ___  ___ 
+;;  | __| | | | '_ \ / _ \/ __/ _` / __|/ _ \
+;;  | |_| |_| | |_) |  __/ (_| (_| \__ \  __/
+;;   \__|\__, | .__/ \___|\___\__,_|___/\___|
+;;       |___/|_|                            
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; A multi-branch type can can be compiled in an efficient way
 ;;   so as to avoid checking the same type multiple times.
+
+
 
 ;; Example of expansion of (satisfies int?)
 
@@ -142,6 +188,8 @@
   (satisfies int?) "it is an fixed-width integer"
   (or Ratio Boolean) "it is a ratio"
   String "it is a string")
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -189,8 +237,14 @@
 (f 0 1 ["hello" false]) ;; --> 14
 
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; rte-case
+;;        _                                
+;;   _ __| |_ ___        ___ __ _ ___  ___ 
+;;  | '__| __/ _ \_____ / __/ _` / __|/ _ \
+;;  | |  | ||  __/_____| (_| (_| \__ \  __/
+;;  |_|   \__\___|      \___\__,_|___/\___|
+;;                 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -216,6 +270,16 @@
   2
 )
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;       _         _       __       
+;;    __| |___  __| | ___ / _|_ __  
+;;   / _` / __|/ _` |/ _ \ |_| '_ \ 
+;;  | (_| \__ \ (_| |  __/  _| | | |
+;;   \__,_|___/\__,_|\___|_| |_| |_|
+;;                                  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Functions defined by dsdefn
