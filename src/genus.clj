@@ -1766,7 +1766,7 @@
   If no method returns true or false, then the default is
   returned.
 
-  The methods of 'subtype? must specify a dispatch value.
+  The methods of -subtype? must specify a dispatch value.
   It is conventional that the method responsible for
   checking the subtypeness of (X ...) vs Y, or
   Y vs (X ...) specify a dispatch value of 'X.
@@ -1775,7 +1775,14 @@
   the subtypeness of (not (X ...)), and there is already a method
   whose dispatch value is 'not.  For this reason the implementor
   might wish to add two (or more) methods, one with dispatch value 'X
-  and others whith dispatch values such as :not-X, :X-case-2."
+  and others whith dispatch values such as :not-X, :X-case-2.
+
+  Method declarations of -subtype? look like the following:
+  (defmethod -subtype? some-key aux-name [sub-designator super-designator]
+     ... body ....)
+  aux-name is a name which will be printed in the stacktrace to help
+     identify which method it is.
+  some-key is a unique key, no other method of -subtype? may have this key."
   (fn [sub super]
     (throw (ex-info "-subtype? should not be called directly"
                     {:error-type :should-not-be-called-directly
