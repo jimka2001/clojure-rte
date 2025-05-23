@@ -168,8 +168,11 @@
 
 (xym/find-trace-map (rte/rte-to-dfa rte-5))
 
-(dot/dfa-view rte-5 "int and ratio")
+(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-4 rte-5)))
 
+
+(dot/dfa-view rte-5 "int and ratio")
+(dot/dfa-view (rte/And-not rte-4 rte-5) "4 and not 5")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -191,8 +194,8 @@
 
 (typecase 12
   Short "it is a short"
+  (and (satisfies int?) (satisfies odd?)) "it is an fixed-width even integer"
   Boolean "it is a boolean"
-  (satisfies int?) "it is an fixed-width integer"
   (or Ratio Boolean) "it is a ratio"
   String "it is a string")
 
