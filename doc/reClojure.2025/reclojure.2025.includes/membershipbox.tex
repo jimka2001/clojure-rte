@@ -1,10 +1,10 @@
 %% dont re-indent this file
 \begin{lstlisting}[style=reclojureClojure]
 ;; returns true
-(typep -42 'Integer)
+(typep -42 'Long)
 
 ;; returns true
-(typep 7 '(or String Integer))
+(typep 7 '(or String Long))
 
 ;; returns false
 (typep 32 '(satisfies odd?))

@@ -6,21 +6,13 @@
   Given an RTE, generate a finite automaton.
 
   \begin{itemize}
-  \item Well-known techniques exists to construct DFAs from classical REs
-    \begin{itemize}
-      \item Brzozowski Derivative
-  \end{itemize}
-  \item Adapt them to work with RTEs
-  \item Enforce determinism
+  \item Well-known classical technique: Brzozowski Derivative
+  \item Must be adapted to work with RTEs
   \end{itemize}
 \end{frame}
 }
 
 
-
-\begin{frame}<0>{Demo}{Sample Flow}
-   \includegraphics[height=0.8\textheight]{demo.png}
-\end{frame}
 
 \begin{frame}{RTE Construction: $(int \cdot str^{*} \cdot even)^{*}$}
   \begin{columns}
@@ -54,25 +46,25 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{      State Construction by   Brzozowski Derivative}
-  \begin{columns}
-    \begin{column}{0.4\textwidth}
-      \begin{enumerate}
-      \item Compute RTEs:
-      \[\big\{\deriv{\typevar}{p_0} \mid \typevar \in \Pi(1sts(p_0))\big\}\]
+%% \begin{frame}{      State Construction by   Brzozowski Derivative}
+%%   \begin{columns}
+%%     \begin{column}{0.4\textwidth}
+%%       \begin{enumerate}
+%%       \item Compute RTEs:
+%%       \[\big\{\deriv{\typevar}{p_0} \mid \typevar \in \Pi(1sts(p_0))\big\}\]
 
-      \item 1:1 correspondence state to unique RTE
+%%       \item 1:1 correspondence state to unique RTE
 
-      \item Repeat for newly discovered states
+%%       \item Repeat for newly discovered states
 
-      \end{enumerate}
+%%       \end{enumerate}
 
-    \end{column}
-    \begin{column}{0.6\textwidth}
-      \scalebox{0.8}{\input{dfa-construction}}%
-    \end{column}
-  \end{columns}
-\end{frame}
+%%     \end{column}
+%%     \begin{column}{0.6\textwidth}
+%%       \scalebox{0.8}{\input{dfa-construction}}%
+%%     \end{column}
+%%   \end{columns}
+%% \end{frame}
 
 
 \newsavebox\boxa
@@ -99,7 +91,7 @@
 \begin{align*}
   \deriv{\typevar}{\singleton{\typevart}} &= \varepsilon \quad \text{ if } \sem{\typevar} \subseteq \sem{\typevart} \\
   \deriv{\typevar}{\singleton{\typevart}} &= \emptyset \quad \text{ if } \sem{\typevar} \setand \sem{\typevart}=\emptyset         \\
-  \deriv{\typevar}{\singleton{\typevart}} &\quad   \text{ otherwise, no rule defined}   
+  \deriv{\typevar}{\singleton{\typevart}} &\quad   \text{ otherwise, \textcolor{red}{ERROR!}}
 \end{align*}
   \end{minipage}
 \end{lrbox}

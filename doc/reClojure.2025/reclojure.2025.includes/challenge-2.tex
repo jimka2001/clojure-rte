@@ -1,36 +1,5 @@
 \subsection{Embedding: Complemented Type System Lattice}
 
-{  \setbeamercolor{background canvas}{bg=sectioncolor}
-\begin{frame}{\Challenge{2} Type Lattice}
-
-  How to support types like \textcolor{greeny}{$Int\cap\overline{Number}$} in Clojure, Scala, Python?
-
-  Similar to that build-in to  Common Lisp.
-
-  %% \begin{itemize}
-  %% \item Support \Emph{complemented type lattice}
-  %% \item SETS: Simple Embedded Type System
-  %% \item Embed a dynamic type system into an existing programming language.
-  %% \item Support application-specific predidate as type. \Eg \code{oddp}, \code{negativep}
-  %% \item Answer type membership and subtype questions.
-  %% \end{itemize}
-
-\end{frame}
-}
-
-\begin{frame}{Simple Embedded Type System: SETS}
-
-  \begin{itemize}
-  \item Wrap/embed the PL-built-in type system
-  \item ... with a \Emph{simple} type system
-  \item ... which supports a complemented \Emph{type lattice}
-  \item ... with \Emph{membership Boolean} predicate
-  \item ... with \Emph{subtype semi-Boolean} predicate
-  \item ... which supports \Emph{reflection}
-  \end{itemize}
-
-\end{frame}
-
 
 \newsavebox\tdast
 \begin{lrbox}{\tdast}
@@ -40,12 +9,49 @@
 \end{lrbox}
 
 
-\begin{frame}{Type Designator Expression Tree: AST}
-  \centering
+{  \setbeamercolor{background canvas}{bg=sectioncolor}
+\begin{frame}{\Challenge{2} Type Lattice}
 
-  \scalebox{0.95}{\input{td-ast}}
+\only<1,2,3>{
+  How to support \textcolor{greeny}{$Double\cup(odd\cap\overline{13})$} in Clojure ?
 
+}
+  %% \begin{itemize}
+  %% \item Support \Emph{complemented type lattice}
+  %% \item SETS: Simple Embedded Type System
+  %% \item Embed a dynamic type system into an existing programming language.
+  %% \item Support application-specific predidate as type. \Eg \code{oddp}, \code{negativep}
+  %% \item Answer type membership and subtype questions.
+  %% \end{itemize}
+\only<2,3>{
+  \code{(or Double (and (satisfies odd?) (not (= 13))))}
+
+  \medskip
+  
+}
+\only<3>{
+{  \centering
+
+  \scalebox{0.95}{\input{td-ast}}}
+
+}
 \end{frame}
+}
+
+
+
+%% \begin{frame}{Simple Embedded Type System: SETS}
+
+%%   \begin{itemize}
+%%   \item Wrap/embed the PL-built-in type system
+%%   \item ... with a \Emph{simple} type system
+%%   \item ... which supports a complemented \Emph{type lattice}, \ie Boolean operations
+%%   %% \item ... with \Emph{membership Boolean} predicate
+%%   %% \item ... with \Emph{subtype semi-Boolean} predicate
+%%   %% \item ... which supports \Emph{reflection}
+%%   \end{itemize}
+
+%% \end{frame}
 
 
 

@@ -3,89 +3,104 @@
 \subsection{Determinism: Type Partitioning}
 
 {  %% chapter slide
-  \setbeamercolor{background canvas}{bg=sectioncolor}
-\begin{frame}{\Challenge{4} Type Partitioning: Deterministic State Machines}
-
-  How to assure DFAs are deterministic by construction?
-
-  \begin{itemize}
-  \item   Compute a \Emph{sufficient} partition of a given set of type designators,
-  \item   ... assure that $\deriv{\typevar}{r}$ be computable,
-  \item   ... even (especially) when subtype relation is unknown,
-  \item   ... correct run-time checks despite curse of subtype ambiguity.
-  \end{itemize}
-
-\end{frame}
-}
-
-\begin{frame}{MDTD: Maximal Disjoint Type Decomposition}
+%  \setbeamercolor{background canvas}{bg=sectioncolor}
+\begin{frame}{\Challenge{4} A Sufficient Type Partitioning}{MDTD: Maximal Disjoint Type Decomposition}
+  \only<1>{Given overlapping (super)types $A_1\ldots A_n$ in an RTE}%
+  \only<2>{Construct (sub) types $\typevar_1\ldots \typevar_m$}%
+  \only<3>{Which are disjoint \Emph{by construction}, even if subtype relation is unknown.}%
+  \only<4>{Assures that $\deriv{\typevar}{r}$ is computable.}%
+  \only<5>{But transitions may be \Emph{indeterminate} and \Emph{unsatisfiable}.}%
   \begin{columns}
     \begin{column}{0.5\textwidth}
       \only<1,2>{\scalebox{0.98}{\input{pgf-a1-a8.tex}}}%
       \only<3->{\includegraphics[scale=0.18]{venn-x1-x13.png}}%
-    \end{column}
+    \end{column}%
     \begin{column}{0.5\textwidth}
       \only<2->{\scalebox{0.98}{\input{pgf-x1-x13.tex}}}%
-    \end{column}
-  \end{columns}
-\end{frame}
-
-
-\begin{frame}{Are there dire Consequences?}
-
-  \begin{itemize}
-  \item   $\{\typevar_1, \typevar_2, \ldots, \typevar_{10}\}$ mutually disjoint by construction.
-
-  \item   However, some $\typevar_i$ may be unknowingly vacuous.
-
-  \item   Nevertheles $\emptyset$ is disjoint with every set, including itself.
-
-  \item   Thus transitions may be \Emph{indeterminate/unsatisfiable}.
-
-  \item   What is the consequence transitions which are  \Emph{indeterminate} and \Emph{unsatisfiable}?
-
-
-  \end{itemize}
-
-
-\end{frame}
-
-
-\begin{frame}{Non-determinism by subtype}
-  \begin{columns}[T]
-    \begin{column}{0.4\textwidth}
-      \centering
-      
-      \begin{align*}
-        Int&\subseteq Number\\
-        Int &\cap Number \neq \emptyset
-      \end{align*}%
-      \scalebox{0.8}{\input{tikz-int-float}}%
     \end{column}%
-    \begin{column}{0.6\textwidth}
-      \only<1>{\scalebox{0.9}{\input{fig-nfa-subtype-3}}}%
-      \only<2>{\scalebox{0.8}{\input{fig-nfa-subtype-disjoint}}}%
-    \end{column}
-  \end{columns}
+  \end{columns}%
 \end{frame}
 
 
-\begin{frame}{Non-determinism by \code{(satisfies f)}}
-  \begin{columns}[T]
-    \begin{column}{0.35\textwidth}
-      \centering
+%% \begin{frame}{Are there dire Consequences?}
+
+%%   \begin{itemize}
+%%   \item   $\{\typevar_1, \typevar_2, \ldots, \typevar_{10}\}$ mutually disjoint by construction.
+%%   \item   However, some $\typevar_i$ may be unknowingly vacuous.
+%%   \item   Nevertheles $\emptyset$ is disjoint with every set, including itself.
+%%   \item   Thus transitions may be \Emph{indeterminate/unsatisfiable}.
+%%   \item   What is the consequence transitions which are  \Emph{indeterminate} and \Emph{unsatisfiable}?
+%%   \end{itemize}
+%% \end{frame}
+
+\begin{frame}{RTE Construction: $(int \cdot str^{*} \cdot even)^{*}$}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
       \begin{align*}
-        Odd&\subseteq Int &\text{unknown}\\
-        Odd&~\cap~ !Int = \emptyset &\text{unknown}
+        p_0 &= (int \cdot str^{*} \cdot even)^{*}\\
+        p_1 &= \emptyset\\
+        p_2 &= \tystring^{*} \cdot \tyeven \cdot (\tyint \cdot \tystring^{*} \cdot \tyeven)^{*}\\
+        p_3 &= \tystring^{*}\!\!\cdot\! \tyeven\!\cdot\! (\tyint\! \cdot\! \tystring^{*}\!\!\cdot\! \tyeven)^{*}\! \reor (\tyint\! \cdot\! \tystring^{*}\!\!\cdot\!\! \tyeven)^{*}
       \end{align*}
-      \scalebox{1.0}{\input{tikz-int-odd.tex}}%
-    \end{column}%
-    \begin{column}{0.7\textwidth}
-      \only<1>{\scalebox{0.9}{\input{fig-nfa-satisfies}}}%
-      \only<2>{\scalebox{0.8}{\input{fig-nfa-satisfies-intersections}}}%
+
+
+
+      \includegraphics[width=0.9\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-2}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{align*}
+        t_1 &= \Sigma\\
+        t_2 &= int  \\
+        t_3 &= \compl{int}\\
+        t_4 &= str \cap even\\
+        t_5 &= \compl{str} \cap even\\
+        t_6 &= str \cap \compl{even}\\
+        t_7 &= (int \cap \compl{even}) \cup (str \cap \compl{even})\\
+        t_8   &=\compl{int} \cap \compl{str} \cap even\\
+        t_9 &=(int \cap even) \cup (str \cap even)\\
+        t_{10} &=\compl{str} \cap \compl{even}\\
+        t_{11} &=\compl{int} \cap \compl{str} \cap \compl{even}
+      \end{align*}
     \end{column}
   \end{columns}
 \end{frame}
+
+
+%% \begin{frame}{Non-determinism by subtype}
+%%   \begin{columns}[T]
+%%     \begin{column}{0.4\textwidth}
+%%       \centering
+      
+%%       \begin{align*}
+%%         Int&\subseteq Number\\
+%%         Int &\cap Number \neq \emptyset
+%%       \end{align*}%
+%%       \scalebox{0.8}{\input{tikz-int-float}}%
+%%     \end{column}%
+%%     \begin{column}{0.6\textwidth}
+%%       \only<1>{\scalebox{0.9}{\input{fig-nfa-subtype-3}}}%
+%%       \only<2>{\scalebox{0.8}{\input{fig-nfa-subtype-disjoint}}}%
+%%     \end{column}
+%%   \end{columns}
+%% \end{frame}
+
+
+%% \begin{frame}{Non-determinism by \code{(satisfies f)}}
+%%   \begin{columns}[T]
+%%     \begin{column}{0.35\textwidth}
+%%       \centering
+%%       \begin{align*}
+%%         Odd&\subseteq Int &\text{unknown}\\
+%%         Odd&~\cap~ !Int = \emptyset &\text{unknown}
+%%       \end{align*}
+%%       \scalebox{1.0}{\input{tikz-int-odd.tex}}%
+%%     \end{column}%
+%%     \begin{column}{0.7\textwidth}
+%%       \only<1>{\scalebox{0.9}{\input{fig-nfa-satisfies}}}%
+%%       \only<2>{\scalebox{0.8}{\input{fig-nfa-satisfies-intersections}}}%
+%%     \end{column}
+%%   \end{columns}
+%% \end{frame}
 
 
 
@@ -100,38 +115,38 @@
 
 
 
-\begin{frame}{Unsatisfiable Transitions}
+%% \begin{frame}{Unsatisfiable Transitions}
 
-  \scalebox{0.8}{\input{fig-4-unsat}}
-  \begin{itemize}
-  \item If we (compile-time) determine a type is empty, then the transition is \Emph{unsatisfiable}.
-  \item Thus we \Emph{can eliminate} the transition and unreachable states.
+%%   \scalebox{0.8}{\input{fig-4-unsat}}
+%%   \begin{itemize}
+%%   \item If we (compile-time) determine a type is empty, then the transition is \Emph{unsatisfiable}.
+%%   \item Thus we \Emph{can eliminate} the transition and unreachable states.
 
-  \end{itemize}
-\end{frame}
+%%   \end{itemize}
+%% \end{frame}
 
 
-\begin{frame}{Indeterminate Transitions}
+%% \begin{frame}{Indeterminate Transitions}
 
-  \begin{tabular}{cc}
-    \scalebox{0.7}{\input{fig-4-str-odd}}&\scalebox{0.7}{\input{fig-4-int-odd}}\\
-    Indeterminate, \textcolor{red}{Unsatisfiable} & Indeterminate, \textcolor{greeny}{Satisfiable}
-  \end{tabular}
-  \only<1>{%
-  \begin{itemize}
-  \item   If we cannot determine a type is empty, the transition may
-    \Emph{still be unsatisfiable}. 
-  \item  However, we \Emph{cannot eliminate}    the transition and unreachable states.
-  \end{itemize}
-  }%
-  \only<2>{%
-  \begin{itemize}
-    \item We \Emph{can always} (run-time) determine \Emph{type membership}.
-    \item DFAs with indeterminate transitions \Emph{correctly}
-      match sequences in $O(n)$.
-  \end{itemize}
-  }
-\end{frame}
+%%   \begin{tabular}{cc}
+%%     \scalebox{0.7}{\input{fig-4-str-odd}}&\scalebox{0.7}{\input{fig-4-int-odd}}\\
+%%     Indeterminate, \textcolor{red}{Unsatisfiable} & Indeterminate, \textcolor{greeny}{Satisfiable}
+%%   \end{tabular}
+%%   \only<1>{%
+%%   \begin{itemize}
+%%   \item   If we cannot determine a type is empty, the transition may
+%%     \Emph{still be unsatisfiable}. 
+%%   \item  However, we \Emph{cannot eliminate}    the transition and unreachable states.
+%%   \end{itemize}
+%%   }%
+%%   \only<2>{%
+%%   \begin{itemize}
+%%     \item We \Emph{can always} (run-time) determine \Emph{type membership}.
+%%     \item DFAs with indeterminate transitions \Emph{correctly}
+%%       match sequences in $O(n)$.
+%%   \end{itemize}
+%%   }
+%% \end{frame}
 
 
 \newsavebox\boxforestAnu
