@@ -69,6 +69,15 @@
         index))
 
 
+(defn print-unreachable-warning [code-exprs]
+  (binding [*out* *err*]
+    (printf "Unreachable code: ")
+    (if (sequential? code-exprs)
+      (doseq [word (interpose " " (map str code-exprs))]
+        (printf "%s" word))
+      (printf "%s" code-exprs))
+    (printf "\n")))
+
 (defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
   This function is used in the macro expansion of rte-case but
@@ -91,8 +100,7 @@
     (when *warn-on-unreachable-code*
       (doall (map (fn [[rte thunk] code-expr]
                     (when (not (traces thunk))
-                      (binding [*out* *err*]
-                        (printf "Unreachable code: %s\n" code-expr))))
+                      (print-unreachable-warning code-expr)))
                   pairs code-exprs)))
     ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
     (fn f-101 [s]
@@ -471,12 +479,13 @@
                                    {:sequence seq#}))
                    )))))))
 
+
+
 (defn warn-unreachable [dfa code-exprs]
   (let [traces (xym/find-spanning-map dfa)]
     (doseq [ev (range (count code-exprs))
             :when (not (traces ev))]
-      (binding [*out* *err*]
-        (printf "Unreachable code: %s\n" (nth code-exprs ev))))))
+      (print-unreachable-warning (nth code-exprs ev)))))
 
 (defmacro destructuring-fn
   "params => positional-params* , or positional-params* & next-param
