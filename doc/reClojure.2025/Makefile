@@ -39,7 +39,7 @@ dots:
 deps: $(DEPENDENCIES)
 
 ${ARTICLE}.slides.pdf: dots $(DEPENDENCIES) ${SRC_DIR}/${ARTICLE}.slides.ltx ${INCLUDES_DIR}/* 
-	TEXINPUTS=$(TEXINPUTS):${SRC_DIR}/${INCLUDES_DIR}:${IMAGE_DIR} \
+	TEXINPUTS=$(TEXINPUTS):${SRC_DIR}:${INCLUDES_DIR}:${IMAGE_DIR} \
 	  $(LATEXMK) $(SRC_DIR)/${ARTICLE}.slides.ltx
 
 ${ARTICLE}.demo.pdf: dots $(DEPENDENCIES) ${SRC_DIR}/${ARTICLE}.demo.ltx ${INCLUDES_DIR}/* 
