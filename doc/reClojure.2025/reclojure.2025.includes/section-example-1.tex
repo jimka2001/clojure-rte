@@ -90,12 +90,12 @@
       
       \only<4,5>{\includegraphics[height=1.5cm]{red-head}\LARGE Backtracking $\implies O(2^n)$}%
       \only<6>{\scalebox{0.95}{\input{fig-dfa-subtype}}\\
-      Deterministic Choice between $Int$ vs $Number\cap\overline{Int}$}%2
+      Deterministic choice between $Int$ vs $Number\cap\overline{Long}$}%2
       \only<7>{\scalebox{0.95}{\input{fig-dfa-subtype-1-2}}}%
       \only<8>{\scalebox{0.95}{\input{fig-dfa-subtype-2-5}}}%
       \only<9->{\scalebox{0.95}{\input{fig-dfa-subtype}}}%
     \end{column}
   \end{columns}
   \only<9->{\Challenge{4} How to partition/decompose types?\\}
-  \only<9>{\quad\textcolor{greeny}{$\{String,Int,Number\}\to\{String,Int,Number\cap\overline{Int}\}$}}%
+  \only<9>{\quad\textcolor{greeny}{$\{String,Int,Long\}\to\{String,Long,Number\cap\overline{Long}\}$}}%
 \end{frame}
