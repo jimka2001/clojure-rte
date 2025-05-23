@@ -1888,7 +1888,19 @@
         :else
         :dont-know))
 
-(defmethod -subtype? 'or subtype-or [t1 t2]
+(defmethod -subtype? 'or-t2 subtype-or-t2 [t1 t2]
+  (cond
+    (not (gns/or? t2))
+    :dont-know
+
+    (some (fn [td] (subtype? t1 td false))
+          (rest t2))
+    true
+
+    :else
+    :dont-know))
+
+(defmethod -subtype? 'or-t1 subtype-or-t1 [t1 t2]
   (cond
     (not (gns/or? t1))
     :dont-know
