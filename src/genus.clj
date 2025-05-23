@@ -1898,7 +1898,22 @@
             :else
             :dont-know))))
 
-(defmethod -subtype? 'and subtype-and [t1 t2]
+(defmethod -subtype? 'and-t2 subtype-and [t1 t2]
+  (cond
+    (not (gns/and? t2))
+    :dont-know
+
+    ;; if w <x and w<y and w<z
+    ;; then w < (and x y z)
+    (every? (fn [td]
+              (subtype? t1 td :dont-know))
+            (rest t2))
+    true
+
+    :else
+    :dont-know))
+
+(defmethod -subtype? 'and-t1 subtype-and [t1 t2]
   (if (not (gns/and? t1))
     :dont-know
     (letfn [(cond-a []
