@@ -1,14 +1,15 @@
 (ns reclojure2025
   (:require [rte-case :refer [rte-case dscase rte-case-fn dsdefn]]
+            [genus :as gns]
             [rte-construct :as rte]
             [xymbolyco :as xym]
             [typecase :refer [typecase]]
             [dot])
 )
 
-
-
-
+(gns/typep -42 'Long)
+(gns/subtype? 'Long 'Number)
+(gns/subtype? 'String 'Long)
 
 
 

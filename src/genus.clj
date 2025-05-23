@@ -1739,16 +1739,18 @@
   which case the given default value is interpreted as a binary
   function which is called, and its value returned.  The default value
   of default is one of: true, false, :dont-know or :error."
-  [sub-designator super-designator default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (loop [[k & ks] (sort-method-keys -subtype?)]
-    (let [s ((k (methods -subtype?)) sub-designator super-designator)]
-      (case s
-        (true false) s
-        (if ks
-          (recur ks)
-          default)))))
+  ([sub-designator super-designator]
+   (subtype? sub-designator super-designator :dont-know))
+  ([sub-designator super-designator default]
+   {:pre [(member default '(true false :dont-know))]
+    :post [(member % '(true false :dont-know))]}
+   (loop [[k & ks] (sort-method-keys -subtype?)]
+     (let [s ((k (methods -subtype?)) sub-designator super-designator)]
+       (case s
+         (true false) s
+         (if ks
+           (recur ks)
+           default))))))
 
 (defmulti -subtype?
   "This function should never be called.
