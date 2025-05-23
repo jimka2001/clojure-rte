@@ -28,11 +28,11 @@
 
 
 (f 0 0)
-#_(f 0 0 0)
+(f 0 0 0)
 
 
 ;; Vain attempt to define destructuring function
-#_(defn f
+(defn f
    ([[a b] c d]   12)
    ([a [b c] d]   13)
    ([a b [c d]]   14))
@@ -49,6 +49,16 @@
 (defn f
   ([a]   12)
   ([^Ratio a b]   13)
+  ([a b [c d]]   14))
+
+(defn f
+  ([a]   12)
+  ([^clojure.lang.Ratio a b]   13)
+  ([a b [c d]]   14))
+
+(defn f
+  ([a]   12)
+  ([^int? a b]   13)
   ([a b [c d]]   14))
 
 
@@ -117,7 +127,7 @@
 (f [0 1] 2 3)  ;; --> 12
 (f 0 [1 2] 3)  ;; --> 13
 (f 0 1 [2 3])  ;; --> 14
-
+(f 0)
 
 
 (dsdefn f 
@@ -135,7 +145,7 @@
   ([a b [^Ratio c d]] 14)
   ([a b [^Integer c d]] 15)
   ([a b [^Number c d]] 16)
-  ([a b [^Double c d]] 17))
+  ([a b [^Double c d]] :this-is-unreachable 17))
 
 (gns/subtype? 'Double 'Number)
 
@@ -147,7 +157,7 @@
 (instance? Long 10)
 (gns/subtype? 'Long 'Integer)
 
-;; Vain attempt
+;; Vain attempt to define with int?
 (dsdefn f
   ([[a b] c d] 12)
   ([a [b c] d] 13)
@@ -162,7 +172,7 @@
 (dsdefn f 
   ([[a b] c d] 12)q
   ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
+  ([a b [^Ratio c d]] 14)q
   ([a b [^(satisfies int?) c d]] 15)
   ([a b [^Number c d]] 16)
   ([a b [^Double c d]] 17))
