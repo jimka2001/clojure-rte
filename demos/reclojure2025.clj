@@ -7,9 +7,277 @@
             [dot])
 )
 
-(gns/typep -42 'Long)
-(gns/subtype? 'Long 'Number)
-(gns/subtype? 'String 'Long)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  
+;;                   _ _   _                  _ _         
+;;   _ __ ___  _   _| | |_(_)       __ _ _ __(_) |_ _   _ 
+;;  | '_ ` _ \| | | | | __| |_____ / _` | '__| | __| | | |
+;;  | | | | | | |_| | | |_| |_____| (_| | |  | | |_| |_| |
+;;  |_| |_| |_|\__,_|_|\__|_|      \__,_|_|  |_|\__|\__, |
+;;                                                  |___/ 
+;;  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Definition of multiple-arity function
+(defn f
+  ([a]   12)
+  ([a b]   13)
+  ([a b [c d]]   14))
+
+
+(f 0 0)
+#_(f 0 0 0)
+
+
+;; Vain attempt to define destructuring function
+#_(defn f
+   ([[a b] c d]   12)
+   ([a [b c] d]   13)
+   ([a b [c d]]   14))
+
+
+(defn f
+  ([a]   12)
+  ([^Boolean a b]   13)
+  ([a b [c d]]   14))
+
+(f true 2)
+(f 1 2)
+
+(defn f
+  ([a]   12)
+  ([^Ratio a b]   13)
+  ([a b [c d]]   14))
+
+
+(defn f
+  ([a]   12)
+  ([a b]   13)
+  ([a b [^int? c ^Ratio d]]   14))
+
+(f 0 1 [3 52/17])       ;; --> 14
+(f 0 1 ["hello" false]) ;; --> 14
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;       _         _       __       
+;;    __| |___  __| | ___ / _|_ __  
+;;   / _` / __|/ _` |/ _ \ |_| '_ \ 
+;;  | (_| \__ \ (_| |  __/  _| | | |
+;;   \__,_|___/\__,_|\___|_| |_| |_|
+;;                                  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  Functions defined by dsdefn
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [c d]] 14))
+
+(f [0 1] 2 3)  ;; --> 12
+(f 0 [1 2] 3)  ;; --> 13
+(f 0 1 [2 3])  ;; --> 14
+
+
+
+(dsdefn f 
+  ([[a b] c d] 11)
+  ([a [b c] d] 13)
+  ([a b [c d]] 14)
+  ([a b [c d]] (println "fourth clause") 15)) ;; SEE *out*
+
+
+(f 1 2 [10.0 20])
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^Integer c d]] 15)
+  ([a b [^Number c d]] 16)
+  ([a b [^Double c d]] 17))
+
+(gns/subtype? 'Double 'Number)
+
+
+(f 1 2 [10.0 20])
+(f 1 2 [2/3 3])
+(f 1 2 [10 20])
+(instance? Integer 10)
+(instance? Long 10)
+(gns/subtype? 'Long 'Integer)
+
+;; Vain attempt
+(dsdefn f
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^int? c d]] 15)
+  ([a b [^Number c d]] 16)
+  ([a b [^Double c d]] 17))
+
+
+(f 1 2 [10 20])
+
+(dsdefn f 
+  ([[a b] c d] 12)q
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^(satisfies int?) c d]] 15)
+  ([a b [^Number c d]] 16)
+  ([a b [^Double c d]] 17))
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  (^{c (satisfies int?)
+     d (or (satisfies int?)
+           (and String (not (= ""))))}
+   [a b [c d]] 15)
+  ([a b [^Double c d]] 16))
+
+(f 1 2 [10 20])
+(f 1 2 [10 "twelve"])
+(f 1 2 [10 ""])
+(f 1 2 [10.0 20])
+(f 1 2 [10/3 20])
+(f 1 2 [false 20])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        _                                
+;;   _ __| |_ ___        ___ __ _ ___  ___ 
+;;  | '__| __/ _ \_____ / __/ _` / __|/ _ \
+;;  | |  | ||  __/_____| (_| (_| \__ \  __/
+;;  |_|   \__\___|      \___\__,_|___/\___|
+;;                 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(rte-case [nil nil nil 1 nil nil nil]
+  (:and (:cat (:* :sigma) Number (:* :sigma))
+        (:cat (:* :sigma) String (:* :sigma)))
+  0
+
+  ;; (:contains-any Number)
+  (:cat (:* :sigma) Number (:* :sigma))
+  1
+
+  ;; (:contains-any String)
+  (:cat (:* :sigma) String (:* :sigma))
+  2
+)
+
+(rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
+  (:* (:cat (:* Number) Boolean))
+  1
+
+  (:* (:cat (:* Number) (:or Boolean String)))
+  2
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28,19 +296,25 @@
 
 ;; we want to match a sequence of numbers.
 
+(def demo-seq-0 [])
 (def demo-seq-1 [1 2 4/3 4      5 6.5 3 2])
 (def demo-seq-2 [1 2 4/3 "four" 5 6.5 3 2])
+(def demo-seq-3 ["one" "two" 4/3 "four"])
 
+
+(every? #(instance? Number %) demo-seq-0)
+(every? #(instance? Number %) demo-seq-1)
+(every? #(instance? Number %) demo-seq-2)
+(every? #(instance? Number %) demo-seq-3)
+
+(rte/match '(:* Number)
+           demo-seq-0)
 
 (rte/match '(:* Number)
            demo-seq-1)
 
-(instance? Number 10)
-
-
 (rte/match '(:* Number)
            demo-seq-2)
-
 
 (rte/match '(:* String)
            demo-seq-1)
@@ -49,36 +323,49 @@
            demo-seq-1)
 
 
+
+
+;; Does the sequence contain a Ratio
+(rte/match '(:cat (:* :sigma) Ratio (:* :sigma))
+           demo-seq-1)
+
+(some #(instance? Ratio %)           demo-seq-1)
+(some #(instance? clojure.lang.Ratio %)           demo-seq-1)
+
+(rte/match '(:cat (:* :sigma) Ratio (:* :sigma))
+           demo-seq-2)
+
+(rte/match '(:cat (:* :sigma) Ratio (:* :sigma))
+           demo-seq-3)
+
 ;; What about a seqence of numbers which contains a Ratio
 
 (rte/match '(:and (:* Number)
                   (:cat (:* :sigma) Ratio (:* :sigma)))
            demo-seq-1)
 
+;; traverse sequence twice
+(and (every? #(instance? Number %)           demo-seq-1)
+     (some #(instance? clojure.lang.Ratio %) demo-seq-1))
+
+
+(rte/match '(:and (:* Number)
+                  (:cat (:* :sigma) Ratio (:* :sigma)))
+           demo-seq-3)
+
 (rte/match '(:cat (:* Number) Ratio (:* Number))
            demo-seq-1)
 
+(rte/match '(:cat (:* Number) Ratio (:* Number))
+           demo-seq-3)
+
+;; Existential question: does there exist a sequence which will
+;;  match one pattern but not the other?
+;;
+;; I.e., are the patterns exactly equivalent or does one match
+;;  a subset of the other?
 
 
-;; What about a seqence of numbers which contains a Double
-
-(rte/match '(:cat (:* Number) Double (:* Number))
-           demo-seq-1)
-
-(rte/match '(:cat (:* Number) Float (:* Number))
-           demo-seq-1)
-
-
-
-;; what about a seqence of numbers which contains a Double AND a Ratio
-;; in either order.  
-
-;; First way to express seq of Number which contains both a Ratio
-;; and a Double
-(def rte-1 '(:and (:cat (:* Number) Double (:* Number))
-                  (:cat (:* Number) Ratio (:* Number))))
-
-(rte/match rte-1 demo-seq-1)
 
 
 
@@ -97,6 +384,15 @@
 ;;   \__,_|_|  \__,_|      \_/ |_|\___| \_/\_/  
 ;;                                              
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; First way to express seq of Number which contains both a Ratio
+;; and a Double
+(def rte-1 '(:and (:cat (:* Number) Double (:* Number))
+                  (:cat (:* Number) Ratio (:* Number))))
+
+(rte/match rte-1 demo-seq-1)
+(rte/match rte-1 demo-seq-2)
+(rte/match rte-1 demo-seq-3)
 
 (dot/dfa-view rte-1 "Dfa rte-1")
 
@@ -121,6 +417,20 @@
                   (:cat (:* :sigma) (or Ratio Double) (:* :sigma))))
 
 (dot/dfa-view rte-3 "third dfa")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -175,6 +485,27 @@
 (dot/dfa-view rte-5 "int and ratio")
 (dot/dfa-view (rte/And-not rte-4 rte-5) "4 and not 5")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;   _                                       
@@ -200,193 +531,5 @@
   (or Ratio Boolean) "it is a ratio"
   String "it is a string")
 
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;  
-;;                   _ _   _                  _ _         
-;;   _ __ ___  _   _| | |_(_)       __ _ _ __(_) |_ _   _ 
-;;  | '_ ` _ \| | | | | __| |_____ / _` | '__| | __| | | |
-;;  | | | | | | |_| | | |_| |_____| (_| | |  | | |_| |_| |
-;;  |_| |_| |_|\__,_|_|\__|_|      \__,_|_|  |_|\__|\__, |
-;;                                                  |___/ 
-;;  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Definition of multiple-arity function
-(defn f
-  ([a]   12)
-  ([a b]   13)
-  ([a b [c d]]   14))
-
-
-(f 0 0)
-
-
-
-;; Vain attempt to define destructuring function
-#_(defn f
-   ([[a b] c d]   12)
-   ([a [b c] d]   13)
-   ([a b [c d]]   14))
-
-
-(defn f
-  ([a]   12)
-  ([^Boolean a b]   13)
-  ([a b [c d]]   14))
-
-(f true 2)
-(f 1 2)
-
-(defn f
-  ([a]   12)
-  ([^Ratio a b]   13)
-  ([a b [c d]]   14))
-
-
-(defn f
-  ([a]   12)
-  ([a b]   13)
-  ([a b [^int? c ^Ratio d]]   14))
-
-(f 0 1 [3 52/17])       ;; --> 14
-(f 0 1 ["hello" false]) ;; --> 14
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;        _                                
-;;   _ __| |_ ___        ___ __ _ ___  ___ 
-;;  | '__| __/ _ \_____ / __/ _` / __|/ _ \
-;;  | |  | ||  __/_____| (_| (_| \__ \  __/
-;;  |_|   \__\___|      \___\__,_|___/\___|
-;;                 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(rte-case [nil nil nil 1 nil nil nil]
-  (:and (:cat (:* :sigma) Number (:* :sigma))
-        (:cat (:* :sigma) String (:* :sigma)))
-  0
-
-  ;; (:contains-any Number)
-  (:cat (:* :sigma) Number (:* :sigma))
-  1
-
-  ;; (:contains-any String)
-  (:cat (:* :sigma) String (:* :sigma))
-  2
-)
-
-(rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
-  (:* (:cat (:* Number) Boolean))
-  1
-
-  (:* (:cat (:* Number) (:or Boolean String)))
-  2
-)
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;       _         _       __       
-;;    __| |___  __| | ___ / _|_ __  
-;;   / _` / __|/ _` |/ _ \ |_| '_ \ 
-;;  | (_| \__ \ (_| |  __/  _| | | |
-;;   \__,_|___/\__,_|\___|_| |_| |_|
-;;                                  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;  Functions defined by dsdefn
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [c d]] 14))
-
-(f [0 1] 2 3)  ;; --> 12
-(f 0 [1 2] 3)  ;; --> 13
-(f 0 1 [2 3])  ;; --> 14
-
-
-
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [c d]] 14)
-  ([a b [c d]] (println "fourth clause") 15))
-
-
-(dsdefn f 
-  ([[a b] c d] (println 12))
-  ([a [b c] d] (println 13))
-  ([a b [c d]] (println 14))
-  ([a b [c d]] (println 15)))
-
-(f 1 2 [10.0 20])
-
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
-  ([a b [^Integer c d]] 15)
-  ([a b [^Number c d]] 16)
-  ([a b [^Double c d]] 17))
-
-
-(f 1 2 [10.0 20])
-(f 1 2 [2/3 3])
-
-
-(f 1 2 [10 20])
-(instance? Integer 10)
-(instance? Long 10)
-
-;; Vain attempt
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
-  ([a b [^int? c d]] 15)
-  ([a b [^Number c d]] 16)
-  ([a b [^Double c d]] 17))
-
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
-  ([a b [^(satisfies int?) c d]] 15)
-  ([a b [^Number c d]] 16)
-  ([a b [^Double c d]] 17))
-
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
-  (^{c (satisfies int?)} [a b [c d]] 15)
-  ([a b [^Double c d]] 16))
-
-(f 1 2 [10 20])
-(f 1 2 [10.0 20])
-(f 1 2 [10/3 20])
-(f 1 2 [false 20])
-
-;; In selecting which clause to evaluate, a computation is done using a
-;; Dfa.  The Dfa is build by the macro expansion (when the macro expansion
-;; is evaluated).  When the function f is called the Dfa is traversed
-;; once to determine which piece of code to evalu
-
-(dsdefn f 
-  ([^Number a b] 14)
-  (^{a Boolean
-     c (satisfies int?)} [a b c d] 15)
-  ( [a b ^Double c d] 16))
 
 
