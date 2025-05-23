@@ -9,8 +9,8 @@
   \node[state,accepting,thick,rounded rectangle] (2) [right=30mm of 0] {$2$};
   \node[state,accepting,thick,rounded rectangle] (1) [above right=7mm and 30mm of 0] {$1$};
   \node[state,accepting,thick,rounded rectangle] (3) [below right=7mm and 30mm of 0] {$3$};
-  \path[->] (0) edge node {$Int$} (2);
-  \path[->] (0) edge[bend left=15]  node[pos=.8] {$Number~ \cap~ !Int$} (1);
+  \path[->] (0) edge node {$Long$} (2);
+  \path[->] (0) edge[bend left=15]  node[pos=.8] {$Number~ \cap~ !Long$} (1);
   \path[->] (0) edge[bend right=15] node[swap] {$!~Number$} (3);
 \end{tikzpicture}
 \end{document}
