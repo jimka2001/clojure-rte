@@ -67,34 +67,6 @@
 %% \end{frame}
 
 
-\newsavebox\boxa
-\begin{lrbox}{\boxa}
-  \begin{minipage}{0.4\textwidth}
-\begin{align*}
-  \deriv{\typevar}{(r^{*})}      &= (\deriv{\typevar}{r}) \cdot r^{*}\\
-  \deriv{\typevar}{(r \reor s)}   &= \deriv{\typevar}{r} ~ \reor~ \deriv{\typevar}{s}\\
-  \deriv{\typevar}{(r \reand s)} &= \deriv{\typevar}{r} ~ \reand~  \deriv{\typevar}{s}\\
-  \deriv{\typevar}{(r\!\cdot\! s)} & =\! \begin{cases}
-    \!(\deriv{\typevar}{r})\cdot s & \text{if $()\!\not\in\!\sem{r}$} \\
-    \!(\deriv{\typevar}{r})\cdot s \reor \deriv{\typevar}{s} & \text{if $()\!\in\!\sem{r}$}
-  \end{cases}\\
-  \deriv{\typevar}{\!\renot{r}}  &= \renot{\deriv{\typevar}{r}}
-\end{align*}
-  \end{minipage}
-\end{lrbox}
-
-
-
-\newsavebox\boxb
-\begin{lrbox}{\boxb}
-  \begin{minipage}{0.55\textwidth}
-\begin{align*}
-  \deriv{\typevar}{\singleton{\typevart}} &= \varepsilon \quad \text{ if } \sem{\typevar} \subseteq \sem{\typevart} \\
-  \deriv{\typevar}{\singleton{\typevart}} &= \emptyset \quad \text{ if } \sem{\typevar} \setand \sem{\typevart}=\emptyset         \\
-  \deriv{\typevar}{\singleton{\typevart}} &\quad   \text{ otherwise, \textcolor{red}{ERROR!}}
-\end{align*}
-  \end{minipage}
-\end{lrbox}
 
 
 

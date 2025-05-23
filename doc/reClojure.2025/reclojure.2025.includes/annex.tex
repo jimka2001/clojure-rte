@@ -197,22 +197,7 @@
   \end{tabular}
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-3.pdf}}}%
   \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-4.pdf}}}
-  
 \end{frame}
-
-\newsavebox\boxstop
-\begin{lrbox}{\boxstop}
-\begin{tikzpicture}
-\node[draw,text width=1.2cm] at (2,-2) {\code{:sigma}};
-\end{tikzpicture}
-\end{lrbox}
-
-\newsavebox\boxsempty
-\begin{lrbox}{\boxsempty}
-\begin{tikzpicture}
-\node[draw,text width=2.0cm] at (2,-2) {\code{:empty-set}};
-\end{tikzpicture}
-\end{lrbox}
 
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to\colorbox{orange!30}{\Huge 5}\to 6\to 7\to 8\to 9$}
@@ -302,87 +287,6 @@
 
 
 %% --------------------
-
-\newsavebox\demoBbox
-\begin{lrbox}{\demoBbox}
-  \begin{minipage}{8cm}
-    \input{demoBbox}
-  \end{minipage}
-\end{lrbox}
-
-
-\newsavebox\demoAbox
-\begin{lrbox}{\demoAbox}
-  \begin{minipage}{8cm}
-    \input{demoAbox}
-  \end{minipage}
-\end{lrbox}
-
-
-\newsavebox\demoCbox
-\begin{lrbox}{\demoCbox}
-  \begin{minipage}{8cm}
-    \input{demoCbox}
-  \end{minipage}
-\end{lrbox}
-
-
-
-\newsavebox\demoDbox
-\begin{lrbox}{\demoDbox}
-  \begin{minipage}{16cm}
-    \input{demoDbox}
-  \end{minipage}
-\end{lrbox}
-\newsavebox\demoEbox
-\begin{lrbox}{\demoEbox}
-  \begin{minipage}{16cm}
-    \input{demoEbox}
-  \end{minipage}
-\end{lrbox}
-\newsavebox\demoFbox
-\begin{lrbox}{\demoFbox}
-  \begin{minipage}{16cm}
-    \input{demoFbox}
-  \end{minipage}
-\end{lrbox}
-\newsavebox\demoGbox
-\begin{lrbox}{\demoGbox}
-  \begin{minipage}{16cm}
-    \input{demoGbox}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox\demoHbox
-\begin{lrbox}{\demoHbox}
-  \begin{minipage}{8cm}
-    \input{demoHbox}
-  \end{minipage}
-\end{lrbox}
-
-
-\newsavebox\demoIbox
-\begin{lrbox}{\demoIbox}
-  \begin{minipage}{8cm}
-    \input{demoIbox}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox\demoJbox
-\begin{lrbox}{\demoJbox}
-  \begin{minipage}{8cm}
-    \input{demoJbox}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox\demoKbox
-\begin{lrbox}{\demoKbox}
-  \begin{minipage}{8cm}
-    \input{demoKbox}
-  \end{minipage}
-\end{lrbox}
-
-
 
 
 \begin{frame}{Setup}{Declaration Clojure Code}
@@ -509,3 +413,4 @@
 
 
 
+\input{challenge-5}
