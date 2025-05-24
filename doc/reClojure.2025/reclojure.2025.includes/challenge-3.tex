@@ -14,9 +14,16 @@
 
 
 
-\begin{frame}{RTE Construction: $(int \cdot str^{*} \cdot even)^{*}$}
+\begin{frame}
   \begin{columns}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.55\textwidth}
+      {\large \textcolor{blue}{RTE Construction: $(int \cdot str^{*} \cdot even)^{*}$}}\\
+
+      \only<2,3>{Q: How to compute a transition: $\textcolor{orange}{p_2 \xrightarrow{t_5} p_0}$?
+
+      }%
+  \only<3>{A: Construct $\textcolor{orange}{p_2 \xrightarrow{t_5} p_0}$ that $\textcolor{orange}{p_0 = \deriv{t_5}{p_2}}$}%
+  \only<4>{\Challenge{~4} Determine $t_1, t_2, \ldots t_{13}$.}%
       \begin{align*}
         p_0 &= (int \cdot str^{*} \cdot even)^{*}\\
         p_1 &= \emptyset\\
@@ -24,11 +31,11 @@
         p_3 &= \tystring^{*}\!\!\cdot\! \tyeven\!\cdot\! (\tyint\! \cdot\! \tystring^{*}\!\!\cdot\! \tyeven)^{*}\! \reor (\tyint\! \cdot\! \tystring^{*}\!\!\cdot\!\! \tyeven)^{*}
       \end{align*}
 
-
-
-      \includegraphics[width=0.9\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-2}
+      \only<1>{\includegraphics[width=0.85\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-2}}%
+      \only<2->{\includegraphics[width=0.85\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-p2-t5-p0}}%
     \end{column}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.45\textwidth}
+      \only<1->{%
       \begin{align*}
         t_1 &= \Sigma\\
         t_2 &= int  \\
@@ -37,11 +44,11 @@
         t_5 &= \compl{str} \cap even\\
         t_6 &= str \cap \compl{even}\\
         t_7 &= (int \cap \compl{even}) \cup (str \cap \compl{even})\\
-        t_8   &=\compl{int} \cap \compl{str} \cap even\\
+        t_8 &=\compl{int} \cap \compl{str} \cap even\\
         t_9 &=(int \cap even) \cup (str \cap even)\\
         t_{10} &=\compl{str} \cap \compl{even}\\
         t_{11} &=\compl{int} \cap \compl{str} \cap \compl{even}
-      \end{align*}
+      \end{align*}}%
     \end{column}
   \end{columns}
 \end{frame}
