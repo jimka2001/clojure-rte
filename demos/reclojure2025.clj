@@ -7,7 +7,6 @@
             [dot])
 )
 
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  
@@ -542,4 +541,8 @@
   String "it is a string")
 
 
+
+;; Local Variables:
+;; eval: (setopt show-paren-style 'expression)
+;; End:
 
