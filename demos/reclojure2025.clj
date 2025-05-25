@@ -374,6 +374,31 @@
 ;; I.e., are the patterns exactly equivalent or does one match
 ;;  a subset of the other?
 
+(dot/dfa-view (rte/Xor '(:cat (:* Number) Ratio (:* Number))
+                       '(:and (:* Number)
+                              (:cat (:* :sigma) Ratio (:* :sigma))))
+              "xor example")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -394,6 +419,9 @@
 ;;                                              
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+                       
+
+
 ;; First way to express seq of Number which contains both a Ratio
 ;; and a Double
 (def rte-1 '(:and (:cat (:* Number) Double (:* Number))
@@ -403,7 +431,12 @@
 (rte/match rte-1 demo-seq-2)
 (rte/match rte-1 demo-seq-3)
 
+
 (dot/dfa-view rte-1 "Dfa rte-1")
+
+
+
+
 
 
 ;; Second way to express seq of Number which contains both a Ratio
@@ -474,6 +507,7 @@
                   (:cat (:* :sigma) Ratio (:* :sigma))
                   (:cat (:+ :sigma) (satisfies odd?) (:* :sigma))))
 
+;; A < B if A &! B = 0
 (xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-1 rte-4)))
 
 (dot/dfa-view (rte/And-not rte-1 rte-4)
@@ -487,12 +521,6 @@
                   (:cat (:+ :sigma) (satisfies int?) (:* :sigma))))
 
 (xym/find-trace-map (rte/rte-to-dfa rte-5))
-
-(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-4 rte-5)))
-
-
-(dot/dfa-view rte-5 "int and ratio")
-(dot/dfa-view (rte/And-not rte-4 rte-5) "4 and not 5")
 
 
 
