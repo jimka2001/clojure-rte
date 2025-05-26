@@ -362,17 +362,32 @@
                   (:cat (:* :sigma) Ratio (:* :sigma)))
            demo-seq-3)
 
+;; different RTE for same thing?
 (rte/match '(:cat (:* Number) Ratio (:* Number))
            demo-seq-1)
 
 (rte/match '(:cat (:* Number) Ratio (:* Number))
            demo-seq-3)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;       _  __                  _               
+;;    __| |/ _| __ _     __   _(_) _____      __
+;;   / _` | |_ / _` |____\ \ / / |/ _ \ \ /\ / /
+;;  | (_| |  _| (_| |_____\ V /| |  __/\ V  V / 
+;;   \__,_|_|  \__,_|      \_/ |_|\___| \_/\_/  
+;;                                              
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 ;; Existential question: does there exist a sequence which will
 ;;  match one pattern but not the other?
 ;;
 ;; I.e., are the patterns exactly equivalent or does one match
 ;;  a subset of the other?
+
+(dot/dfa-view '(:cat (:* Number) Ratio (:* Number))
+              "numbers with ratio")
 
 (dot/dfa-view (rte/Xor '(:cat (:* Number) Ratio (:* Number))
                        '(:and (:* Number)
@@ -409,56 +424,26 @@
 
 
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;       _  __                  _               
-;;    __| |/ _| __ _     __   _(_) _____      __
-;;   / _` | |_ / _` |____\ \ / / |/ _ \ \ /\ / /
-;;  | (_| |  _| (_| |_____\ V /| |  __/\ V  V / 
-;;   \__,_|_|  \__,_|      \_/ |_|\___| \_/\_/  
-;;                                              
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
                        
 
 
-;; First way to express seq of Number which contains both a Ratio
-;; and a Double
+;; express seq of Number which contains both a Ratio and a Double
+
+;; which one is wrong?
+
 (def rte-1 '(:and (:cat (:* Number) Double (:* Number))
                   (:cat (:* Number) Ratio (:* Number))))
-
-(rte/match rte-1 demo-seq-1)
-(rte/match rte-1 demo-seq-2)
-(rte/match rte-1 demo-seq-3)
-
-
-(dot/dfa-view rte-1 "Dfa rte-1")
-
-
-
-
-
-
-;; Second way to express seq of Number which contains both a Ratio
-;; and a Double in either order.
-
 (def rte-2 '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
                  (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
-
-(dot/dfa-view rte-2 "Dfa rte-2" )
-
-;; are the rtes the same?  do have match the same language?
-
-(dot/dfa-view (rte/Xor rte-1 rte-2)
-              "xor 1-2 dfa")                         
-
-
-;; Third way of expression the same thing (with suble error)
-
 (def rte-3 '(:and (:* Number)
                   (:cat (:* :sigma) (or Ratio Double) (:* :sigma))))
 
-(dot/dfa-view rte-3 "third dfa")
+
+(dot/dfa-view (rte/Xor rte-1 rte-2)
+              "xor 1-2 dfa")                         
+(dot/dfa-view (rte/rte-to-dfa (rte/Xor rte-1 rte-3))
+              "xor 1-3 dfa")
 
 
 
@@ -498,9 +483,8 @@
 
 
 (xym/find-trace-map (rte/rte-to-dfa (rte/Xor rte-1 rte-3)))
-
-(dot/dfa-view (rte/rte-to-dfa (rte/Xor rte-1 rte-3))
-              "xor 1-3 dfa")
+(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-1 rte-3)))
+(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-3 rte-1)))
 
 ;; a sequence of numbers which contains an odd and a Ratio
 (def rte-4 '(:and (:* Number)
@@ -508,10 +492,12 @@
                   (:cat (:+ :sigma) (satisfies odd?) (:* :sigma))))
 
 ;; A < B if A &! B = 0
-(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-1 rte-4)))
-
 (dot/dfa-view (rte/And-not rte-1 rte-4)
               "rte and-not")
+
+
+(xym/find-trace-map (rte/rte-to-dfa (rte/And-not rte-1 rte-4)))
+
 
 ;; A sequence of numbers which contains an integer and a Ratio
 ;; In this case the int? predicate disappears because
@@ -519,6 +505,9 @@
 (def rte-5 '(:and (:* Number)
                   (:cat (:* :sigma) Ratio (:* :sigma))
                   (:cat (:+ :sigma) (satisfies int?) (:* :sigma))))
+
+(dot/dfa-view (rte/And-not rte-1 rte-5)
+              "1 and not 5")
 
 (xym/find-trace-map (rte/rte-to-dfa rte-5))
 
