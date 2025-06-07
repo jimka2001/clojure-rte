@@ -1984,9 +1984,6 @@
                 (group-by first
                           (first (rte/find-all-derivatives pattern))))))
 
-(defn rte-combine-labels ""
-  [label-1 label-2]
-  (gns/canonicalize-type (gns/create-or [label-1 label-2])))
 
 (defn-memoized [rte/compile rte-to-dfa]
   "Use the Brzozowski derivative aproach to compute a finite automaton
@@ -2011,7 +2008,7 @@
        {:pattern given-pattern
         :canonicalized pattern
         :exit-map exit-value-function
-        :combine-labels rte-combine-labels
+        :combine-labels gns/combine-labels
         :states
         (into {}
               (map (fn [deriv index]
@@ -2029,9 +2026,9 @@
                            ;; where td-x is (or td-a td-b td-c ...) canonicalized
                            ;;   and td-y is (or td-d td-e ...) canonicalized
                            transitions (map (fn [[dst pairs]]
-                                                [(gns/canonicalize-type
-                                                  (gns/create-or (map first pairs)) :dnf) dst])
-                                              grouped-by-dst)
+                                              [(gns/canonicalize-type
+                                                (gns/create-or (map first pairs)) :dnf) dst])
+                                            grouped-by-dst)
                            ]
                        [index
                         (xym/map->State {:index index
@@ -2040,6 +2037,8 @@
                                          :pattern deriv
                                          :transitions transitions})]))
                    derivatives (range (count derivatives))))})))))
+
+
 
 (defn dispatch [obj _caller]
   (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa

@@ -2247,3 +2247,7 @@
 (def gns/Member
   (fn [& args]
     (assert-valid-type (template (member ~@args)))))
+
+(def gns/combine-labels
+  (fn [label-1 label-2]
+    (gns/canonicalize-type (gns/create-or [label-1 label-2]))))

@@ -27,7 +27,6 @@
                      derivative derivative-1
                      with-compile-env rte-trace
                      rte-inhabited? rte-vacuous? rte-to-dfa
-                     rte-combine-labels
                      with-rte]]
             [clojure.pprint :refer [cl-format]]
             [rte-extract :refer [dfa-to-rte rte-equivalent?]]
@@ -505,23 +504,23 @@
 
       )))
 
-(deftest t-rte-combine-labels
-  (testing "rte-combine-labels"
+(deftest t-gns-combine-labels
+  (testing "gns/combine-labels"
     (with-compile-env ()
       (is (= '(or Long String)
-             (rte-combine-labels 'Long
+             (gns/combine-labels 'Long
                                  'String)))
       (is (= '(or Double Long String)
-             (rte-combine-labels '(or Long String)
+             (gns/combine-labels '(or Long String)
                                  'Double)))
       (is (= '(or Double Long String)
-             (rte-combine-labels 'Double
+             (gns/combine-labels 'Double
                                  '(or Long String))))
       (is (= '(or Double Long String)
-             (rte-combine-labels '(or Double String)
+             (gns/combine-labels '(or Double String)
                                  '(or Long String)))))))
 
-(deftest t-rte-combine-labels-b
+(deftest t-combine-labels-b
   (testing "and/not conversion b"
     (with-compile-env ()
       (is (not= '(:not (= 0))

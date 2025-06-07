@@ -176,10 +176,12 @@
              (empty? items) false
              (nil? target) (some nil? items)
              (false? target) (some false? items)
+             (set? items) (contains? items target)
              :else (reduce (fn [_acc item]
                              (if (= item target)
                                (reduced true)
                                false)) false items))))
+
 
 (defn partition-by-pred 
   "Apply the predicate to every element of the sequence and return a vector of two

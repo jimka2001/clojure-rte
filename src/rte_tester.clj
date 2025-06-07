@@ -27,7 +27,8 @@
             [genus-tester :refer [*test-types*]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-construct :refer [with-compile-env rte-to-dfa  nullable?
-                                               canonicalize-pattern canonicalize-pattern-once canonicalize-pattern-once-impl]]
+                                   canonicalize-pattern canonicalize-pattern-once
+                                   canonicalize-pattern-once-impl]]
             ))
 
 (defn rte-components [pattern]
