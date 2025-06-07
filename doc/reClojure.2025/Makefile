@@ -33,8 +33,11 @@ GEN_PDF_FILES := $(patsubst %, $(IMAGE_DIR)/%, $(patsubst %.dot, %.pdf, $(notdir
 GEN_PNG_FILES := $(patsubst %, $(IMAGE_DIR)/%, $(patsubst %.gnu, %.png, $(notdir $(GNU_FILES))))
 GEN_GNU_PDF_FILES := $(patsubst %, $(GNU_IMAGE_DIR)/%, $(patsubst %.gnu, %.pdf, $(notdir $(GNU_FILES))))
 
-LATEXMK := latexmk --pdf -pvc
-%LATEXMK := latexmk --pdf
+# The variable LATEX_OPTS was suggested by chatgpt.
+# to include the -pvc option, run as follows
+# make LATEX_OPTS=-pvc
+LATEX_OPTS ?=
+LATEXMK := latexmk --pdf $(LATEX_OPTS)
 
 CLEAN_FILES += *.aux *.toc *.lof *.lot *.lox *.log	\
 	       *.cb *.cb2 *.fls *.fdb_latexmk		\
