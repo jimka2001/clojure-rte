@@ -197,22 +197,7 @@
   \end{tabular}
   \only<1>{\centerline{\includegraphics[height=0.8\textheight]{ldd-3.pdf}}}%
   \only<2>{\centerline{\includegraphics[height=0.8\textheight]{ldd-4.pdf}}}
-  
 \end{frame}
-
-\newsavebox\boxstop
-\begin{lrbox}{\boxstop}
-\begin{tikzpicture}
-\node[draw,text width=1.2cm] at (2,-2) {\code{:sigma}};
-\end{tikzpicture}
-\end{lrbox}
-
-\newsavebox\boxsempty
-\begin{lrbox}{\boxsempty}
-\begin{tikzpicture}
-\node[draw,text width=2.0cm] at (2,-2) {\code{:empty-set}};
-\end{tikzpicture}
-\end{lrbox}
 
 
 \begin{frame}{Rewrite: $1\to 2\to 3\to 4\to\colorbox{orange!30}{\Huge 5}\to 6\to 7\to 8\to 9$}
@@ -302,7 +287,6 @@
 
 
 %% --------------------
-
 
 
 \begin{frame}{Setup}{Declaration Clojure Code}
@@ -408,7 +392,7 @@
   \end{columns}
 \end{frame}
 
-
+\input{challenge-6}
 
 \begin{frame}{Habitation Check}
 
@@ -429,3 +413,4 @@
 
 
 
+\input{challenge-5}

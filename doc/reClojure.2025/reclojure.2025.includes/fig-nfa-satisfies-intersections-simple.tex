@@ -10,10 +10,10 @@
   \node[state,rounded rectangle] (2) [below right=27mm and 45mm of 1] {$2$};
   \node[state,rounded rectangle] (3) [above right=27mm and 45mm of 1] {$3$};
   \node[state,color=red,rounded rectangle] (4) [above right=5mm and 65mm of 1] {$4$};
-  \path[->] (0) edge node {$Int$} (1);
-  \path[->] (1) edge[color=indeterminate, line width=3pt, bend right=15]  node[pos=.7,swap] {$Int \cap Odd = Odd$} (2);
-  \path[->] (1) edge[color=indeterminate, line width=3pt, bend left=15]  node[pos=.8] {$Int~ \cap ~!Odd $} (3);
-  \path[->] (1) edge[color=indeterminate, dotted, line width=3pt, bend left=15]  node[pos=.4,swap] {$!Int \cap Odd = \emptyset$} (4);
-  \path[->] (1) edge[color=indeterminate, line width=3pt, bend right=15]  node[pos=.4] {$!Int~ \cap~ !Odd = !Int$} (5);
+  \path[->] (0) edge node {$Long$} (1);
+  \path[->] (1) edge[color=indeterminate, line width=3pt, bend right=15]  node[pos=.7,swap] {$Long \cap Odd = Odd$} (2);
+  \path[->] (1) edge[color=indeterminate, line width=3pt, bend left=15]  node[pos=.8] {$Long~ \cap ~!Odd $} (3);
+  \path[->] (1) edge[color=indeterminate, dotted, line width=3pt, bend left=15]  node[pos=.4,swap] {$!Long \cap Odd = \emptyset$} (4);
+  \path[->] (1) edge[color=indeterminate, line width=3pt, bend right=15]  node[pos=.4] {$!Long~ \cap~ !Odd = !Long$} (5);
 \end{tikzpicture}
 \end{document}

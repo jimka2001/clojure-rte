@@ -6,25 +6,24 @@
   Given an RTE, generate a finite automaton.
 
   \begin{itemize}
-  \item Well-known techniques exists to construct DFAs from classical REs
-    \begin{itemize}
-      \item Brzozowski Derivative
-  \end{itemize}
-  \item Adapt them to work with RTEs
-  \item Enforce determinism
+  \item Well-known classical technique: Brzozowski Derivative
+  \item Must be adapted to work with RTEs
   \end{itemize}
 \end{frame}
 }
 
 
 
-\begin{frame}<0>{Demo}{Sample Flow}
-   \includegraphics[height=0.8\textheight]{demo.png}
-\end{frame}
-
-\begin{frame}{RTE Construction: $(int \cdot str^{*} \cdot even)^{*}$}
+\begin{frame}
   \begin{columns}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.55\textwidth}
+      {\large \textcolor{blue}{RTE Construction: $(int \cdot str^{*} \cdot even)^{*}$}}\\
+
+      \only<2,3>{Q: How to compute a transition: $\textcolor{orange}{p_2 \xrightarrow{t_5} p_0}$?
+
+      }%
+  \only<3>{A: Construct $\textcolor{orange}{p_2 \xrightarrow{t_5} p_0}$ that $\textcolor{orange}{p_0 = \deriv{t_5}{p_2}}$}%
+  \only<4>{\Challenge{~4} Determine $t_1, t_2, \ldots t_{13}$.}%
       \begin{align*}
         p_0 &= (int \cdot str^{*} \cdot even)^{*}\\
         p_1 &= \emptyset\\
@@ -32,11 +31,11 @@
         p_3 &= \tystring^{*}\!\!\cdot\! \tyeven\!\cdot\! (\tyint\! \cdot\! \tystring^{*}\!\!\cdot\! \tyeven)^{*}\! \reor (\tyint\! \cdot\! \tystring^{*}\!\!\cdot\!\! \tyeven)^{*}
       \end{align*}
 
-
-
-      \includegraphics[width=0.9\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-2}
+      \only<1>{\includegraphics[width=0.85\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-2}}%
+      \only<2->{\includegraphics[width=0.85\textwidth,trim={1.4cm 1.2cm 1.4cm 0.8cm},clip=true]{reclojure-2025-sink-example-p2-t5-p0}}%
     \end{column}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.45\textwidth}
+      \only<1->{%
       \begin{align*}
         t_1 &= \Sigma\\
         t_2 &= int  \\
@@ -45,64 +44,36 @@
         t_5 &= \compl{str} \cap even\\
         t_6 &= str \cap \compl{even}\\
         t_7 &= (int \cap \compl{even}) \cup (str \cap \compl{even})\\
-        t_8   &=\compl{int} \cap \compl{str} \cap even\\
+        t_8 &=\compl{int} \cap \compl{str} \cap even\\
         t_9 &=(int \cap even) \cup (str \cap even)\\
         t_{10} &=\compl{str} \cap \compl{even}\\
         t_{11} &=\compl{int} \cap \compl{str} \cap \compl{even}
-      \end{align*}
+      \end{align*}}%
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{      State Construction by   Brzozowski Derivative}
-  \begin{columns}
-    \begin{column}{0.4\textwidth}
-      \begin{enumerate}
-      \item Compute RTEs:
-      \[\big\{\deriv{\typevar}{p_0} \mid \typevar \in \Pi(1sts(p_0))\big\}\]
+%% \begin{frame}{      State Construction by   Brzozowski Derivative}
+%%   \begin{columns}
+%%     \begin{column}{0.4\textwidth}
+%%       \begin{enumerate}
+%%       \item Compute RTEs:
+%%       \[\big\{\deriv{\typevar}{p_0} \mid \typevar \in \Pi(1sts(p_0))\big\}\]
 
-      \item 1:1 correspondence state to unique RTE
+%%       \item 1:1 correspondence state to unique RTE
 
-      \item Repeat for newly discovered states
+%%       \item Repeat for newly discovered states
 
-      \end{enumerate}
+%%       \end{enumerate}
 
-    \end{column}
-    \begin{column}{0.6\textwidth}
-      \scalebox{0.8}{\input{dfa-construction}}%
-    \end{column}
-  \end{columns}
-\end{frame}
-
-
-\newsavebox\boxa
-\begin{lrbox}{\boxa}
-  \begin{minipage}{0.4\textwidth}
-\begin{align*}
-  \deriv{\typevar}{(r^{*})}      &= (\deriv{\typevar}{r}) \cdot r^{*}\\
-  \deriv{\typevar}{(r \reor s)}   &= \deriv{\typevar}{r} ~ \reor~ \deriv{\typevar}{s}\\
-  \deriv{\typevar}{(r \reand s)} &= \deriv{\typevar}{r} ~ \reand~  \deriv{\typevar}{s}\\
-  \deriv{\typevar}{(r\!\cdot\! s)} & =\! \begin{cases}
-    \!(\deriv{\typevar}{r})\cdot s & \text{if $()\!\not\in\!\sem{r}$} \\
-    \!(\deriv{\typevar}{r})\cdot s \reor \deriv{\typevar}{s} & \text{if $()\!\in\!\sem{r}$}
-  \end{cases}\\
-  \deriv{\typevar}{\!\renot{r}}  &= \renot{\deriv{\typevar}{r}}
-\end{align*}
-  \end{minipage}
-\end{lrbox}
+%%     \end{column}
+%%     \begin{column}{0.6\textwidth}
+%%       \scalebox{0.8}{\input{dfa-construction}}%
+%%     \end{column}
+%%   \end{columns}
+%% \end{frame}
 
 
-
-\newsavebox\boxb
-\begin{lrbox}{\boxb}
-  \begin{minipage}{0.55\textwidth}
-\begin{align*}
-  \deriv{\typevar}{\singleton{\typevart}} &= \varepsilon \quad \text{ if } \sem{\typevar} \subseteq \sem{\typevart} \\
-  \deriv{\typevar}{\singleton{\typevart}} &= \emptyset \quad \text{ if } \sem{\typevar} \setand \sem{\typevart}=\emptyset         \\
-  \deriv{\typevar}{\singleton{\typevart}} &\quad   \text{ otherwise, no rule defined}   
-\end{align*}
-  \end{minipage}
-\end{lrbox}
 
 
 

@@ -10,10 +10,10 @@
   \node[state,rounded rectangle] (2) [fill=yellow, above right=7mm and 20mm of 1] {$2$};
   \node[state,accepting] (3) [right=40mm of 1] {$3$};
   \node[state,rounded rectangle] (4) [below right=7mm and 20mm of 1] {$4$};
-  \path[->] (0) edge node {$Int$} (1);
-  \path[->] (1) edge[color=orange, line width=3pt, bend left=15]  node[pos=.8] {$Int$} (2);
-  \path[->] (2) edge  node {$Float\cup String$} (3);
-  \path[->] (1) edge[bend right=15] node[swap] {$Number \cap \overline{Int}$} (4);
-  \path[->] (4) edge  node {$Float$} (3);
+  \path[->] (0) edge node {$Long$} (1);
+  \path[->] (1) edge[color=orange, line width=3pt, bend left=15]  node[pos=.8] {$Long$} (2);
+  \path[->] (2) edge  node {$Double\cup String$} (3);
+  \path[->] (1) edge[bend right=15] node[swap] {$Number \cap \overline{Long}$} (4);
+  \path[->] (4) edge  node {$Double$} (3);
 \end{tikzpicture}
 \end{document}

@@ -10,8 +10,8 @@ false))
 (typep 7.0 '(satisfies oddp)) ;; false
 (typep "seven" '(satisfies oddp)) ;; false
 
-(subtypep '(satisfies oddp) 'Number) ;; :dont-know
-(subtypep '(satisfies oddp) 'Integer)    ;; :dont-know
-(subtypep 'Int '(satisfies oddp))    ;; :dont-know
-(subtypep 'Int 'Number)              ;; true
+(subtype? '(satisfies oddp) 'Number) ;; :dont-know
+(subtype? '(satisfies oddp) 'Integer)    ;; :dont-know
+(subtype? 'Int '(satisfies oddp))    ;; :dont-know
+(subtype? 'Int 'Number)              ;; true
 \end{lstlisting}

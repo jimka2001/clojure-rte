@@ -1,12 +1,16 @@
 \subsection{Embedding: Complemented Type System Lattice}
 
-{  \setbeamercolor{background canvas}{bg=sectioncolor}
+
+
+{  % \setbeamercolor{background canvas}{bg=sectioncolor}
 \begin{frame}{\Challenge{2} Type Lattice}
 
-  How to support types like \textcolor{greeny}{$Int\cap\overline{Number}$} in Clojure, Scala, Python?
+\only<1,2,3>{
+  How to designate type \textcolor{greeny}{$Double\cup(odd\cap\overline{13})$} in Clojure ?
 
-  Similar to that build-in to  Common Lisp.
-
+  \medskip
+  
+}
   %% \begin{itemize}
   %% \item Support \Emph{complemented type lattice}
   %% \item SETS: Simple Embedded Type System
@@ -14,60 +18,43 @@
   %% \item Support application-specific predidate as type. \Eg \code{oddp}, \code{negativep}
   %% \item Answer type membership and subtype questions.
   %% \end{itemize}
+\only<2,3>{
+  \code{(or Double (and (satisfies odd?) (not (= 13))))}
 
+  \medskip
+  
+}
+\only<3>{
+{  \centering
+
+  \scalebox{0.95}{\input{td-ast}}}
+
+}
 \end{frame}
 }
 
-\begin{frame}{Simple Embedded Type System: SETS}
-
-  \begin{itemize}
-  \item Wrap/embed the PL-built-in type system
-  \item ... with a \Emph{simple} type system
-  \item ... which supports a complemented \Emph{type lattice}
-  \item ... with \Emph{membership Boolean} predicate
-  \item ... with \Emph{subtype semi-Boolean} predicate
-  \item ... which supports \Emph{reflection}
-  \end{itemize}
-
-\end{frame}
 
 
-\newsavebox\tdast
-\begin{lrbox}{\tdast}
-  \begin{minipage}{11cm}
-    \input{tdast}
-  \end{minipage}
-\end{lrbox}
+%% \begin{frame}{Simple Embedded Type System: SETS}
+
+%%   \begin{itemize}
+%%   \item Wrap/embed the PL-built-in type system
+%%   \item ... with a \Emph{simple} type system
+%%   \item ... which supports a complemented \Emph{type lattice}, \ie Boolean operations
+%%   %% \item ... with \Emph{membership Boolean} predicate
+%%   %% \item ... with \Emph{subtype semi-Boolean} predicate
+%%   %% \item ... which supports \Emph{reflection}
+%%   \end{itemize}
+
+%% \end{frame}
 
 
-\begin{frame}{Type Designator Expression Tree: AST}
-  \centering
-
-  \scalebox{0.95}{\input{td-ast}}
-
-\end{frame}
-
-
-
-\newsavebox\membershipbox
-\begin{lrbox}{\membershipbox}
-  \begin{minipage}{11cm}
-    \input{membershipbox}
-  \end{minipage}
-\end{lrbox}
 
 \begin{frame}{Type Membership Predicate}{$x \in \tysem{\typevar} \to \{true, false\}$}
   \Emph{Boolean} membership question is \Emph{always answerable}.
 
   \usebox\membershipbox
 \end{frame}
-
-\newsavebox\subtypebox
-\begin{lrbox}{\subtypebox}
-  \begin{minipage}{11cm}
-\input{subtypebox}
-  \end{minipage}
-\end{lrbox}
 
 
 

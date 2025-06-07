@@ -1739,16 +1739,18 @@
   which case the given default value is interpreted as a binary
   function which is called, and its value returned.  The default value
   of default is one of: true, false, :dont-know or :error."
-  [sub-designator super-designator default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (loop [[k & ks] (sort-method-keys -subtype?)]
-    (let [s ((k (methods -subtype?)) sub-designator super-designator)]
-      (case s
-        (true false) s
-        (if ks
-          (recur ks)
-          default)))))
+  ([sub-designator super-designator]
+   (subtype? sub-designator super-designator :dont-know))
+  ([sub-designator super-designator default]
+   {:pre [(member default '(true false :dont-know))]
+    :post [(member % '(true false :dont-know))]}
+   (loop [[k & ks] (sort-method-keys -subtype?)]
+     (let [s ((k (methods -subtype?)) sub-designator super-designator)]
+       (case s
+         (true false) s
+         (if ks
+           (recur ks)
+           default))))))
 
 (defmulti -subtype?
   "This function should never be called.
@@ -1764,7 +1766,7 @@
   If no method returns true or false, then the default is
   returned.
 
-  The methods of 'subtype? must specify a dispatch value.
+  The methods of -subtype? must specify a dispatch value.
   It is conventional that the method responsible for
   checking the subtypeness of (X ...) vs Y, or
   Y vs (X ...) specify a dispatch value of 'X.
@@ -1773,7 +1775,14 @@
   the subtypeness of (not (X ...)), and there is already a method
   whose dispatch value is 'not.  For this reason the implementor
   might wish to add two (or more) methods, one with dispatch value 'X
-  and others whith dispatch values such as :not-X, :X-case-2."
+  and others whith dispatch values such as :not-X, :X-case-2.
+
+  Method declarations of -subtype? look like the following:
+  (defmethod -subtype? some-key aux-name [sub-designator super-designator]
+     ... body ....)
+  aux-name is a name which will be printed in the stacktrace to help
+     identify which method it is.
+  some-key is a unique key, no other method of -subtype? may have this key."
   (fn [sub super]
     (throw (ex-info "-subtype? should not be called directly"
                     {:error-type :should-not-be-called-directly
@@ -1879,7 +1888,19 @@
         :else
         :dont-know))
 
-(defmethod -subtype? 'or subtype-or [t1 t2]
+(defmethod -subtype? 'or-t2 subtype-or-t2 [t1 t2]
+  (cond
+    (not (gns/or? t2))
+    :dont-know
+
+    (some (fn [td] (subtype? t1 td false))
+          (rest t2))
+    true
+
+    :else
+    :dont-know))
+
+(defmethod -subtype? 'or-t1 subtype-or-t1 [t1 t2]
   (cond
     (not (gns/or? t1))
     :dont-know
@@ -1896,7 +1917,22 @@
             :else
             :dont-know))))
 
-(defmethod -subtype? 'and subtype-and [t1 t2]
+(defmethod -subtype? 'and-t2 subtype-and-t2 [t1 t2]
+  (cond
+    (not (gns/and? t2))
+    :dont-know
+
+    ;; if w <x and w<y and w<z
+    ;; then w < (and x y z)
+    (every? (fn [td]
+              (subtype? t1 td false))
+            (rest t2))
+    true
+
+    :else
+    :dont-know))
+
+(defmethod -subtype? 'and-t1 subtype-and-t1 [t1 t2]
   (if (not (gns/and? t1))
     :dont-know
     (letfn [(cond-a []

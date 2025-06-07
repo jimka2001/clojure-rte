@@ -1,8 +1,8 @@
 %% dont re-indent this file
 \begin{lstlisting}[style=reclojureClojure]
 (let [pat-1 '(:* String (:* (? even)))
-      pat-2 '(:* (:cat String (and Integer (? even))))
-      pat-3 '(:* (:cat String (and Integer
+      pat-2 '(:* (:cat String (and Long (? even))))
+      pat-3 '(:* (:cat String (and Long
                                    (? even) 
                                    (? large))))
       diff-32 (template (and ~pat-3 (not ~pat-2)))]

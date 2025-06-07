@@ -1,6 +1,6 @@
 %% dont re-indent this file
 \begin{lstlisting}[style=reclojureClojure]
-(subtypep 'Integer 'Number) ;; returns true
-(subtypep 'String 'Integer) ;; returns false
-(subtypep '(satisfies odd?) 'Integer) ;; returns :dont-know
+(subtype? 'Long 'Number) ;; returns true
+(subtype? 'String 'Long) ;; returns false
+(subtype? '(satisfies odd?) 'Number) ;; returns :dont-know
 \end{lstlisting}

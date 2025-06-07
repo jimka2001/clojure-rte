@@ -171,3 +171,13 @@
     (is (not= false (gns/subtype? '(not (member a b))
                                   '(or (= []) (not (member a b)))
                                   :dont-know)) "found in random test")))
+
+(deftest t-double-ratio
+  (testing "doubles and ratio"
+    (is (= true (gns/subtype? 'Double 'Number :dont-know)))
+    (is (= true (gns/subtype? 'Double '(not Ratio) :dont-know)))
+    (is (= true (gns/subtype? 'Double '(and (not Ratio) Number) :dont-know)))
+
+    (is (= true (gns/subtype? 'Double '(or (not Ratio) Number) :dont-know)))
+    (is (= true (gns/subtype? 'Double '(or (not Ratio) String) :dont-know)))
+    ))

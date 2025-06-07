@@ -11,10 +11,10 @@
   \node[state,rounded rectangle] (3) [above right=7mm and 30mm of 1] {$3$};
   \node[state,rounded rectangle] (4) [below right=7mm and 30mm of 1] {$4$};
   \node[state,rounded rectangle] (5) [below right=28mm and 30mm of 1] {$5$};
-  \path[->] (0) edge node {$Int$} (1);
-  \path[->] (1) edge[color=satisfiable, line width=3pt, bend left=15]  node[pos=.8] {$Int\cap Number = Int$} (2);
-  \path[->] (1) edge[color=unsatisfiable, dotted, line width=3pt, bend right=15] node[swap] {$Int~\cap~ !Number = \emptyset$} (3);
-  \path[->] (1) edge[color=satisfiable, line width=3pt, bend left=15]  node[pos=.8] {$!Int \cap Number$} (4);
-  \path[->] (1) edge[color=satisfiable, line width=3pt, bend right=15] node[swap] {$!Int~ \cap~ !Number = ~ !Number$} (5);
+  \path[->] (0) edge node {$Long$} (1);
+  \path[->] (1) edge[color=satisfiable, line width=3pt, bend left=15]  node[pos=.8] {$Long\cap Number = Long$} (2);
+  \path[->] (1) edge[color=unsatisfiable, dotted, line width=3pt, bend right=15] node[swap] {$Long~\cap~ !Number = \emptyset$} (3);
+  \path[->] (1) edge[color=satisfiable, line width=3pt, bend left=15]  node[pos=.8] {$!Long \cap Number$} (4);
+  \path[->] (1) edge[color=satisfiable, line width=3pt, bend right=15] node[swap] {$!Long~ \cap~ !Number = ~ !Number$} (5);
 \end{tikzpicture}
 \end{document}
