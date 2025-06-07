@@ -1,0 +1,35 @@
+digraph G {
+// rte and-not
+  rankdir=LR;
+  fontname=courier;
+  graph [labeljust=l,nojustify=true];
+  node [fontname=Arial, fontsize=25];
+  edge [fontname=Helvetica, fontsize=20];
+   H0 [label="", style=invis, width=0]
+   H0 -> q0;
+   q0 -> q8 [label="t0"];
+   q0 -> q7 [label="t1"];
+   q0 -> q4 [label="t2"];
+   q7 -> q2 [label="t3",style=dashed];
+   q7 -> q3 [label="t4",style=dashed];
+   q7 -> q7 [label="t5",style=dashed];
+   q1 -> q5 [label="t0"];
+   q1 -> q2 [label="t1"];
+   q1 -> q1 [label="t2"];
+   q4 -> q5 [label="t6",style=dashed];
+   q4 -> q8 [label="t4",style=dashed];
+   q4 -> q2 [label="t7",style=dashed];
+   q4 -> q1 [label="t8",style=dashed];
+   q4 -> q7 [label="t9",style=dashed];
+   q4 -> q4 [label="t10",style=dashed];
+   q3 [shape=doublecircle] ;
+   q3 -> q2 [label="t3",style=dashed];
+   q3 -> q3 [label="t11",style=dashed];
+   q2 -> q2 [label="t12"];
+   q5 -> q5 [label="t13"];
+   q5 -> q2 [label="t1"];
+   q8 -> q5 [label="t14",style=dashed];
+   q8 -> q8 [label="t15",style=dashed];
+   q8 -> q2 [label="t7",style=dashed];
+   q8 -> q3 [label="t9",style=dashed];
+}

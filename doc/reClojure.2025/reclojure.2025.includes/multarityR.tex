@@ -1,0 +1,16 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(def rte-1 '(:and (:cat (:* Number) Double (:* Number))
+                  (:cat (:* Number) Ratio (:* Number))))
+
+(dot/dfa-to-dot rte-1 :title "Dfa rte-1"
+                :view true
+                :state-legend false)
+
+(def rte-2 '(:or (:cat (:* Number) Double (:* Number) Ratio (:* Number))
+                 (:cat (:* Number) Ratio (:* Number) Double (:* Number))))
+
+(dot/dfa-to-dot rte-2 :title "Dfa rte-2" 
+                :view true
+                :state-legend false)
+\end{lstlisting}

@@ -43,7 +43,7 @@ designated via so-called *type designators*.
 A *type designator* is defined by the following recursive definition.
   If `A` and `B` are type designators, then
   
-  - Any symbol designates a type, provided it can be resolved with the function `resolve`, and the resulting value is `true` according to the `class?` predicate.  I.e., if the predicate `(fn [x] (and (symbol? x) (resolve x) (class? (resolve x))))` is returns `true`.
+  - Any symbol designates a type, provided it can be resolved with the function `genus/resolve-class`. Examples are `Ratio`, `Number`, `my.ns.myrecord-name`.
 
   - `(and A B)` is a type designator, designating the set of values which are simultaneously of type `A` and `B`. `(and ...)` may have arbitrarily many operands. `(and A)` means `A`, and `(and)` means the empty set of all possible.
 

@@ -114,7 +114,7 @@ followed (in the same sequence) by one or more objects of type `String`.
 
 Which kinds of type designators can be used?  You may use 
 
-- Any type name which is a symbol, `T`, for which `(class? (resolve T))` evaluates to Boolean true.
+- Any type name which is a symbol, `T`, for which `(class? (resolve T))` evaluates to Boolean true or any symbol of the form `clojure.lang.XYZ` which `resolve` recognizes as a class, e.g. `Ratio` because `clojure.lang.Ratio` is a class.
 - Otherwise the type is assumed to be a type supported by [Genus](doc/genus.md)
 
 The dynamic variable `*rte-known*` is intended for applications to

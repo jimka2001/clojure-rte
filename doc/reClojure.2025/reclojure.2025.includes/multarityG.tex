@@ -1,0 +1,11 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [c d]] 14))
+
+(f [0 1] 2 3)  ;; --> 12
+(f 0 [1 2] 3)  ;; --> 13
+(f 0 1 [2 3])  ;; --> 14
+\end{lstlisting}

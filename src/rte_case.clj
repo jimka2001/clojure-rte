@@ -1,4 +1,4 @@
-;; Copyright (c) 2020,21 EPITA Research and Development Laboratory
+;; Copyright (c) 2020,21,25 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -21,6 +21,7 @@
 
 (ns rte-case
   (:require [xymbolyco :as xym]
+            [dot]
             [genus :as gns]
             [util :refer [defn-memoized member non-empty?]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
@@ -30,15 +31,24 @@
             )
   )
 
-(defn-memoized [rte-case-clauses-to-dfa
-                rte-case-clauses-to-dfa-impl]
-  "helper function for macro-expanding rte-case.
-  returns a complete dfa which is the union of the input clauses."
+(def ^:dynamic *warn-on-unreachable-code* true)
+
+
+(defn-memoized [clauses-to-dfa
+                clauses-to-dfa-impl]
+  "Returns a complete dfa which is the union of the input clauses.
+  E.g.,
+  (clauses-to-dfa [[0 rte-0] [1 rte-1] [3 rte-3] [2 rte-2] ...])
+  returns a dfa for which (rte/match dfa some-seq) will return 0 if
+  rte-0 is matched, 1 if rte-1 is matched etc...
+  If none of the rtes match, then false is returned.
+  "
   [pairs]
   (reduce xym/synchronized-union
-          (map (fn [[index rte]]
+          (map (fn reduce-synchronized-union [[index rte]]
                  (rte-to-dfa rte index))
                pairs)))
+
 
 (defn ensure-fns-index
   "Internal function used in macro expansion of rte-case, to assure the index is in range
@@ -69,22 +79,25 @@
   is called and its value is returned.
   The sequence is traversed a maximum of once, but may not traverse
   entirely if it is determined early that no rte matches."
-  [pairs]
-  (let [dfa (xym/synchronized-union
-             (reduce xym/synchronized-union 
-                     (for [[rte thunk] pairs]
-                       (do (assert (rte/valid-rte? rte)
-                                   (format "%s is not a valid rte" rte))
-                           (assert (fn? thunk))
-                           (rte-to-dfa rte thunk))))
-             ;; add a final dfa at the end matching sigma-* which will
-             ;;  serve as a default value.  thus (rte/match dfa s)
-             ;;  will always return a 0-ary function even if the sequence
-             ;;  s does not match.
-             (rte-to-dfa sigma-* (fn [] nil)))]
-    (fn [s]
-      ((rte/match dfa s)))))
-  
+  [pairs code-exprs]
+  (let [dfa (reduce xym/synchronized-union 
+                    (for [[rte thunk] pairs]
+                      (do (assert (rte/valid-rte? rte)
+                                  (format "%s is not a valid rte" rte))
+                          (assert (fn? thunk))
+                          (rte-to-dfa rte thunk))))
+        traces (xym/find-spanning-map dfa)
+        ]
+    (when *warn-on-unreachable-code*
+      (doall (map (fn [[rte thunk] code-expr]
+                    (when (not (traces thunk))
+                      (binding [*out* *err*]
+                        (printf "Unreachable code: %s\n" code-expr))))
+                  pairs code-exprs)))
+    ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
+    (fn f-101 [s]
+      (rte/match dfa s))))
+
 (defmacro rte-case
   "Takes an expression, and a set of clauses.
   The expression should evaluate to an object which is `sequential?`.
@@ -101,136 +114,249 @@
   is more efficient than a sequence of consecutive calls to
   rte/match."
   [sequence & clauses]
-  (assert (even? (count clauses)))
 
-  (let [pairs (into [] (for [[rte expr] (partition 2 2 clauses)]
-                         `['~rte (fn [] ~expr)]))]
-    `((rte-case-fn ~pairs) ~sequence)))
+  ;; if odd number of clauses, then don't complain if the final
+  ;;   clause is unreachable
+  (let [odd-clauses (odd? (count clauses))
+        clauses (if odd-clauses
+                  `(~@(butlast clauses)
+                    ~sigma-* ~(last clauses))
+                  clauses)]
+
+    ;; This macro expansion may seem a bit more complicated that it
+    ;; needs to be.  I think there's a way to avoid the complication
+    ;; but I have thus far not been able to do so.
+    ;; We need the Dfa to be constructed only once.  This one-time construction
+    ;; is accomplished by the (let ...) in the macro expansion making
+    ;; a call to rte-case-fn, which is a memoized function.
+    ;; In order for the memoization to work the arguments passed to
+    ;; must be all static, i.e., containing no function objects.
+    ;; Therefore we cannot put (fn [...] ....) into the call rte-case-fn.
+    ;; Instead, we replace the clojures with indexes into an array
+    ;; of closures which also sits in the (let [...] ...)
+    ;; rte-case-fn returns a function which can be called with a sequence,
+    ;; and will return an index into the array.  The index is used to
+    ;; grab a 0-ary function from the array and call it.
+    (let [parts (partition 2 2 clauses)
+          n-parts (count parts)
+          n-parts-to-check (if odd-clauses
+                             (dec n-parts)
+                             n-parts)
+          pairs (into [] (for [k (range n-parts)
+                               :let [[rte expr] (nth parts k)
+                                     name (symbol (format "rte-case-fn-%s" k))]]
+                           ;; we have to use ~'rte-fn because we don't
+                           ;; want backquote to slap a namespace on
+                           ;; the symbol
+                           `['~rte (fn ~name [] ~expr)]))
+          code-exprs (for [[_ expr] parts]
+                       expr)
+          ]
+      `(let [f# (rte-case-fn ~pairs '~code-exprs)
+             seq# ~sequence
+             thunk# (f# seq#)
+             ]
+         (if (fn? thunk#)
+           ;; f# has returned false if the sequence didn't match
+           ;; any of the rtes.  Otherwise it returned a 0-ary function,
+           ;; so we can call this 0-ary function.
+           (thunk#)
+           (throw (ex-info "No pattern matching given sequence"
+                           {:sequence seq#})))))))
+
+(defn remove-extra-syntax 
+  "lambda-list is a vector which is almost compatible with the
+   lambda-list of fn.   However there might be a :allow-other-keys
+   in the map immediately of the &
+   E.g.,  [1 2 3 & {:keys [a b c] :allow-other-keys true}]
+   If such an element is found, return a copy of the vector
+      except with :allow-other-keys removed from the map
+    otherwise just return the vector as is."
+  [lambda-list]
+  (if (not (member '& lambda-list))
+    lambda-list
+    (let [[before after] (split-with (fn [x] (not= x '&)) lambda-list)]
+      (cond
+        (<= (count after) 1)
+        lambda-list
+        (not (map? (nth after 1)))
+        lambda-list
+        :else
+        (into [] (concat before
+                         ['&]
+                         [(dissoc (nth after 1) :allow-other-keys)]
+                         (drop 2 after)))))))
 
 (defn lambda-list-to-rte
-  "Helper function for destructuring-case macro.
-  Returns an rte either of one of the following forms:
+  "Returns an rte either of one of the following forms:
     (:cat ... (:* ...)) -- if the given lambda-list contains &
-    (:cat ...) -- if the given lambda list only has required parametes."
+    (:cat ...) -- if the given lambda list only has required parametes.
+  The lambda-list itself might contain type hints such as [^Boolean a b ^Long c],
+  and the types-map might contain type hints for the same or perhaps different variables
+  such as {b String c (satisfies odd?)}
+  If there are multiple type hints for the same variable, they both apply, e.g.,
+  in this example the type designator for c would be (and Long (satisfies odd?)).
+  If a type hint is given for an [& other] variable, then the type hint
+  implicitly means sequence of that type.  
+  e.g., [& other] {other Boolean}, means that other has type sequence of Boolean.
+  This corresponds to the equivalent of an rte such as (:* Boolean)
+
+  The type-map may have keys corresponding to variables in the lambda list,
+  or keys of vectors of variables such as {a Boolean [b c] Number}.
+  In such a case the type designator corresponds equally to both variables.
+  In the case that a variable is mentioned stand-alone and also in a vector,
+  both type designators apply (intersection type).
+  "
   [lambda-list types-map]
   (assert (map? types-map))
-  
-  (loop [required lambda-list
-         others ()
-         prefix-rte []
-         suffix-rte []
-         parsed []]
-    (cond (and (empty? required)
-               (empty? others))
-          ;; finished parsing
-          (if (empty? suffix-rte)
-            `(:cat ~@prefix-rte)
-            `(:cat ~@prefix-rte ~@suffix-rte))
+  (letfn [(expand-multi-restrictions [types-map]
+            (assert (map? types-map))
+            (merge types-map
+                   (into {} (for [key (keys types-map)
+                                  :when (sequential? key)
+                                  :let [type-1 (get types-map key)]
+                                  var key
+                                  :let [type-2 (get types-map var)]]
+                              (if type-2
+                                [var (list 'and type-1 type-2)]
+                                [var type-1])))))]
+    (let [types-map (expand-multi-restrictions types-map)]
+      (loop [required lambda-list
+             others ()
+             prefix-rte []
+             suffix-rte []
+             parsed []]
+        (cond (and (empty? required)
+                   (empty? others))
+              ;; finished parsing
+              (if (empty? suffix-rte)
+                `(:cat ~@prefix-rte)
+                `(:cat ~@prefix-rte ~@suffix-rte))
 
-          (and (not-empty required)
-               (= '& (first required)))
-          ;; found & in the correct place
-          (recur nil ; required
-                 (rest required) ; rest
-                 prefix-rte ; prefix-rte
-                 suffix-rte ; suffix-rte
-                 (conj parsed '&))
+              (and (not-empty required)
+                   (= '& (first required)))
+              ;; found & in the correct place
+              (recur nil ; required
+                     (rest required) ; rest
+                     prefix-rte ; prefix-rte
+                     suffix-rte ; suffix-rte
+                     (conj parsed '&))
 
-          (and (not-empty others)
-               (map? (first others)))
-          (letfn [(make-keyword-matcher-rte [var]
-                    (let [k (keyword var)
-                          default-given (contains? (get (first others) :or {}) var)
-                          term-1 (template (:* (:cat (:not (= ~k)) :sigma)))
-                          td (gns/create-and [(get (meta var) :tag :sigma)
-                                              (get types-map var :sigma)])
-                          term-2 (template (:cat (:* (:cat :sigma :sigma))
-                                                 (:cat (= ~k) ~td)
-                                                 (:* (:cat (:not (= ~k)) :sigma))))]
-                      (list (if default-given
-                              (template (:or ~term-1
-                                             ~term-2
-                                             ))
-                              term-2))))]
-            
-            (assert (vector? (get (first others) :keys))
-                    (cl-format false "parsing ~A expecting a vector specified for :keys, not ~A"
-                               lambda-list
-                               (get (first others) :keys)))
-            
-            (let [given-keys (get (first others) :keys)
-                  allow-other-keys  (get (first others) :allow-other-keys false)
-                  valid-key (if allow-other-keys
-                              (template (satisfies keyword?))
-                              (template (member ~@(map keyword given-keys))))]
+              (and (not-empty others)
+                   (map? (first others)))
+              (letfn [(make-keyword-matcher-rte [var]
+                        (let [k (keyword var)
+                              default-given (contains? (get (first others) :or {}) var)
+                              term-1 (template (:* (:cat (:not (= ~k)) :sigma)))
+                              td (gns/create-and [(get (meta var) :tag :sigma)
+                                                  (get types-map var :sigma)])
+                              term-2 (template (:cat (:* (:cat :sigma :sigma))
+                                                     (:cat (= ~k) ~td)
+                                                     (:* (:cat (:not (= ~k)) :sigma))))]
+                          (list (if default-given
+                                  (template (:or ~term-1
+                                                 ~term-2
+                                                 ))
+                                  term-2))))]
+                
+                (assert (vector? (get (first others) :keys))
+                        (cl-format false "parsing ~A expecting a vector specified for :keys, not ~A"
+                                   lambda-list
+                                   (get (first others) :keys)))
+                
+                (let [given-keys (get (first others) :keys)
+                      allow-other-keys  (get (first others) :allow-other-keys false)
+                      valid-key (if allow-other-keys
+                                  (template (satisfies keyword?))
+                                  (template (member ~@(map keyword given-keys))))]
 
-              (recur required
-                     (rest others)
-                     prefix-rte
-                     (conj suffix-rte
-                           ;; enforce keyword :sigma pairs
-                           ;; and simultaneously a constraint for each key specified
-                           (template (:and (:* (:cat ~valid-key :sigma))
-                                           ~@(mapcat make-keyword-matcher-rte (:keys (first others))))))
-                     (conj parsed (first others)))))
-          
-          (not-empty required)
-          (let [var (first required)]
-            (recur (rest required)
-                   others
-                   (conj prefix-rte
-                         (cond (symbol? var)
-                               ;; parsing required section, found a var
-                               (gns/create-and [(get (meta var) :tag :sigma)
-                                                (get types-map var :sigma)])
-                               (vector? var)
-                               ;; parsing required section, found a vector
-                               (list 'rte
-                                     (lambda-list-to-rte (first required) types-map))
+                  (recur required
+                         (rest others)
+                         prefix-rte
+                         (conj suffix-rte
+                               ;; enforce keyword :sigma pairs
+                               ;; and simultaneously a constraint for each key specified
+                               (template (:and (:* (:cat ~valid-key :sigma))
+                                               ~@(mapcat make-keyword-matcher-rte (:keys (first others))))))
+                         (conj parsed (first others)))))
+              
+              (not-empty required)
+              (let [var (first required)]
+                (recur (rest required)
+                       others
+                       (conj prefix-rte
+                             (cond (symbol? var)
+                                   ;; parsing required section, found a var
+                                   (gns/create-and [(get (meta var) :tag :sigma)
+                                                    (get types-map var :sigma)])
+                                   (vector? var)
+                                   ;; parsing required section, found a vector
+                                   (list 'rte
+                                         (lambda-list-to-rte (first required) types-map))
 
-                               :else ;; found non-symbol non-vector
-                               (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
-                                                          lambda-list required)
-                                               {:error-type "cannot parse prefix"
-                                                :lambda-list lambda-list
-                                                :parsed parsed
-                                                :unparsed required}))))
-                   suffix-rte
-                   (conj parsed var)))
+                                   :else ;; found non-symbol non-vector
+                                   (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
+                                                              lambda-list required)
+                                                   {:error-type "cannot parse prefix"
+                                                    :lambda-list lambda-list
+                                                    :parsed parsed
+                                                    :unparsed required}))))
+                       suffix-rte
+                       (conj parsed var)))
 
-          (and (not-empty others)
-               (not-empty suffix-rte))
-          (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
-                                     lambda-list others)
-                          {:error-type "cannot parse suffix"
-                           :lambda-list lambda-list
-                           :parsed parsed
-                           :unparsed others}))
+              (and (not-empty others)
+                   (not-empty suffix-rte))
+              (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
+                                         lambda-list others)
+                              {:error-type "cannot parse suffix"
+                               :lambda-list lambda-list
+                               :parsed parsed
+                               :unparsed others}))
 
-          (and (not-empty others)
-               (symbol? (first others)))
-          (let [var (first others)]
-            (recur required
-                   (rest others)
-                   prefix-rte
-                   (conj suffix-rte
-                         (template (:* ~(gns/create-and [(get (meta var) :tag :sigma)
-                                                         (get types-map var :sigma)]))))
-                   (conj parsed var)))
+              (and (not-empty others)
+                   (symbol? (first others)))
+              (let [var (first others)]
+                (recur required
+                       (rest others)
+                       prefix-rte
+                       (conj suffix-rte
+                             (template (:* ~(gns/create-and [(get (meta var) :tag :sigma)
+                                                             (get types-map var :sigma)]))))
+                       (conj parsed var)))
 
-          (not-empty others)
-          (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
-                                     lambda-list others)
-                          {:error-type "cannot parse suffix"
-                           :lambda-list lambda-list
-                           :parsed parsed
-                           :unparsed others})))))
+              (not-empty others)
+              (throw (ex-info (cl-format false "invalid lambda-list ~A, at ~A"
+                                         lambda-list others)
+                              {:error-type "cannot parse suffix"
+                               :lambda-list lambda-list
+                               :parsed parsed
+                               :unparsed others})))))))
+
+
+(defn conv-1-case-clause [[lambda-list types-map] consequences k]
+  (assert (map? types-map)
+          (cl-format false "expecting a map, not ~A" types-map))
+  (assert (vector? lambda-list)
+          (cl-format false "expecting a vector, not ~A" lambda-list))
+  (let [name (symbol (format "conv-1-%d" k))]
+    [(lambda-list-to-rte lambda-list types-map)
+     `(fn ~name ~(remove-extra-syntax lambda-list)
+        ~@consequences)]))
+
 
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return
-  value
-  conforms to any of the given lambda lists and type restrictions.  If so,
-  bind the variables as if by let, and evaluate the corresponding form."
+  value conforms to any of the given lambda lists and type restrictions.
+  If so,  bind the variables as if by let, and evaluate the corresponding
+  form.
+  E.g.,
+  (destructuring-case '(true [\"hello\" 3] true)
+     [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
+     1
+
+     [[_a _b]          {_a Boolean _b (or String Boolean)}]
+     2)
+"
   [expr & operands]
   (cond
     (not= 0 (mod (count operands) 2))
@@ -242,51 +368,13 @@
                      :operands operands}))
 
     :else
-    (let [var (gensym "v")]
-      (letfn [(expand-multi-restrictions [types-map]
-                (assert (map? types-map))
-                (merge types-map
-                       (into {} (for [key (keys types-map)
-                                      :when (sequential? key)
-                                      :let [type-1 (get types-map key)]
-                                      var key
-                                      :let [type-2 (get types-map var)]]
-                                  (if type-2
-                                    [var (list 'and type-1 type-2)]
-                                    [var type-1])))))
-              (remove-extra-syntax [lambda-list]
-                ;; lambda-list is a vector which is almost compatible with the
-                ;;   lambda-list of fn.   However there might be a :allow-other-keys
-                ;;   in the map immediately of the &
-                ;;   E.g.,  [1 2 3 & {:keys [a b c] :allow-other-keys true}]
-                ;;   If such an element is found, return a copy of the vector
-                ;;      except with :allow-other-keys removed from the map
-                ;;   otherwise just return the vector as is.
-                (if (not (member '& lambda-list))
-                  lambda-list
-                  (let [[before after] (split-with (fn [x] (not= x '&)) lambda-list)]
-                    (cond
-                      (<= (count after) 1)
-                      lambda-list
-                      (not (map? (nth after 1)))
-                      lambda-list
-                      :else
-                      (into [] (concat before
-                                       ['&]
-                                       [(dissoc (nth after 1) :allow-other-keys)]
-                                       (drop 2 after)))))))
-              (conv-1-case-clause [[[lambda-list types-map] consequence]]
-                (assert (map? types-map)
-                        (cl-format false "destructuring-case expecting a map, not ~A" types-map))
-                [(lambda-list-to-rte lambda-list (expand-multi-restrictions types-map))
-                 `(let [~(remove-extra-syntax lambda-list) ~var]
-                    ~consequence)])]
-        (let [pairs (partition 2 operands)
-              cases (mapcat conv-1-case-clause pairs)]
-          `(let [~var ~expr]
-             (rte-case ~var ~@cases ~sigma-* 
-                       (throw (ex-info "No pattern matching given list"
-                                       {:args ~var})))))))))
+    (let [pairs (partition 2 operands)
+          ;; e.g. pairs =   (([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
+          ;;                  1)
+          ;;                 ([[_a _b]          {_a Boolean _b (or String Boolean)}]
+          ;;                  2))
+          ]
+      `(apply (-destructuring-fn-many nil ~@pairs) ~expr))))
 
 (defmacro dscase
   "Semantically similar to destructuring-case but arguably simpler syntax.
@@ -330,7 +418,13 @@
 
 
 (defmacro -destructuring-fn-many
-  "Internal macro used in the expansion of destructuring-fn"
+  "Internal macro used in the expansion of destructuring-fn
+   E.g.
+  (-destructuring-fn-many
+    nil
+    ([[[a b] c d] {}] (list :first a b c d))
+    ([[a [b c] d] {}] (list :second a b c d)))
+  "
   [& args]
   (cond (empty? args)
         nil
@@ -340,17 +434,49 @@
         `(-destructuring-fn-many nil ~@args)
 
         :else
-        (let [var (gensym "fn-var-")
-              [name & given-clauses] args
-              clauses (mapcat (fn [[structured-lambda-list & exprs]]
-                                `(~structured-lambda-list (do ~@exprs))) given-clauses)
+        ;; e.g. given-clauses =     (([[[a b] c d] {}] (list :first a b c d))
+        ;;                           ([[a [b c] d] {}] (list :second a b c d)))
+        (let [[name & given-clauses] args
+              parsed (map conv-1-case-clause
+                          (map first given-clauses)
+                          (map rest given-clauses)
+                          (range (count given-clauses)))
+              fns (into [] (map second parsed))
+              code-exprs (into [] (map rest given-clauses))
+              pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
+                                   [idx (lambda-list-to-rte lambda-list types-map)])
+                                 given-clauses)
               ]
-          `(fn
-             ~@(if name (list name) nil) ;; either name or nothing
-             [& ~var]
-             (destructuring-case ~var
-                                 ~@clauses)))))
+          `(let [dfa# (clauses-to-dfa '~pairs)]
+             ;; (dot/dfa-to-dot dfa# :title (gensym "rte") :view true :draw-sink false :dot-file-cb println :png-file-cb println)
+             (when *warn-on-unreachable-code*
+               (warn-unreachable dfa# '~code-exprs))
+             (fn
+               ~@(if name (list name) nil) ;; either name or nothing
+               [& seq#]
+               ;;(println [:seq seq#])
+               
+               ;; we must declare fns inside the (fn ...) because
+               ;;    the user code might make a recrusive call to `name`
+               ;;    see test case `t-dsfn-recursive` in rte_case_test.clj
+               (let [fns# ~fns
+                     ind# (rte/match dfa# seq# :promise-disjoint true)]
 
+                 ;;(println [:index ind#])
+                 
+                 (if ind#
+                   ;; get function out of vector fns# and call it
+                   (apply (fns# ind#) seq#)
+                   (throw (ex-info "No pattern matching given sequence"
+                                   {:sequence seq#}))
+                   )))))))
+
+(defn warn-unreachable [dfa code-exprs]
+  (let [traces (xym/find-spanning-map dfa)]
+    (doseq [ev (range (count code-exprs))
+            :when (not (traces ev))]
+      (binding [*out* *err*]
+        (printf "Unreachable code: %s\n" (nth code-exprs ev))))))
 
 (defmacro destructuring-fn
   "params => positional-params* , or positional-params* & next-param
@@ -433,7 +559,25 @@
       `(destructuring-fn
         ~@(map process forms)))))
 
-(defmacro dsdefn [name & forms]
+(defmacro dsdefn 
+  "E.g.,
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  ([a b [^Integer c d]] 14)
+  ([a b [^Double c d]] 16))
+
+  or
+
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  (^{c (satisfies integer?)} [a b [c d]] 14)
+  ([a b [^Double c d]] 16))
+"
+  [name & forms]
   `(def ~name (dsfn ~@forms)))
 
 

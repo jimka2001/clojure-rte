@@ -418,11 +418,11 @@
     (is (get (methods gns/-disjoint?) 'rte) "test 585")
     (with-compile-env ()
 
-      (is (rte-inhabited? (rte-to-dfa '(:and (:* Long) (:* Double)))))
-      (is (rte-vacuous? (rte-to-dfa '(:and (:+ Long) (:+ Double)))))
+      (is (rte-inhabited? (rte-to-dfa '(:and (:* Long) (:* Double))) false))
+      (is (rte-vacuous? (rte-to-dfa '(:and (:+ Long) (:+ Double))) false))
 
-      (is (rte-inhabited? '(:and (:* Long) (:* Double))))
-      (is (rte-vacuous? '(:and (:+ Long) (:+ Double)))))))
+      (is (rte-inhabited? '(:and (:* Long) (:* Double)) false))
+      (is (rte-vacuous? '(:and (:+ Long) (:+ Double)) false)))))
 
 (deftest t-rte-with-rte
   (testing "recursive rte"
@@ -450,6 +450,7 @@
     ;;   gns/-disjoint? :rte
     (is (get (methods gns/-disjoint?) 'rte) "test 615")
     (is (:not-rte (methods gns/-disjoint?)) "test 616")
+    (is (:not-rte (methods gns/-inhabited?)) "test 617")
 
     ;;   gns/-subtype? :rte
     (is (get (methods gns/-subtype?) 'rte) "test 619")
@@ -460,7 +461,9 @@
     ;;   gns/typep 'rte
     (is (get (methods gns/typep) 'rte) "test 625")
     
-    (is (= true (boolean (rte-inhabited? '(:cat String :sigma)))) "test 630")
+    (is (= true (gns/inhabited? '(rte (:cat String :sigma)) :dont-know)))
+    (is (= true (gns/inhabited? '(not (rte (:cat String :sigma))) :dont-know)))
+    (is (= true (rte-inhabited? '(:cat String :sigma) :dont-know)) "test 630")
     (is (= true (gns/inhabited? '(rte (:cat String :sigma)) :dont-know)) "test 631")
     (is (= true (gns/disjoint? '(rte (:cat String :sigma)) '(rte (:cat Character)) :dont-know)) "test 632")
     (is (= true (gns/disjoint? '(rte (:cat String :sigma)) 'String :dont-know)) "test 633")
@@ -721,6 +724,8 @@
                                (:? String))))
 
 ))
+
+
 
 (defn -main []
   ;; To run one test (clojure.test/test-vars [#'rte-test/the-test])

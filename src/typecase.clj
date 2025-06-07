@@ -122,7 +122,6 @@
         all-freq (frequencies all-leaves)
         first-leaves (collect-leaf-types (list (first (first canonicalized-pairs))))
         ]
-
     ;; find the leaf in first-leaves with the maximum occurances counting disjoints, supers, and subs 
     (reduce (fn [[most-freq' influence' disjoints' supers' subs'] leaf]
                (let [[most-freq influence disjoints supers subs] (calc-influence all-freq all-leaves leaf)]
@@ -163,11 +162,9 @@
         `(not (optimized-typep ~v ~ty)))
 
         (and (symbol? t)
-             (resolve t) ;; not gns/safe-resolve because Ratio
-             ;; (and the like) will not resolve with resolve.
-             ;; we don't want to output (instance? Ratio ...)
-             ;; because that will be an undefined variable.
-             (class? (resolve t)))
+             (gns/safe-resolve t) ;; only flatten class names which safely resolve
+             ;;  i.e., Number but not Ratio
+             (gns/resolve-class t))
         `(instance? ~t ~v)
 
         :otherwise

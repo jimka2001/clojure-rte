@@ -1,0 +1,10 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(defn f
+  ([a]   12)
+  ([^Boolean a b]   13)
+  ([a b [c d]]   14))
+
+(f true 2) ;; --> 13
+(f 1 2)    ;; --> 13
+\end{lstlisting}

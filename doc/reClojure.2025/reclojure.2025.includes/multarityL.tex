@@ -1,0 +1,15 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=reclojureClojure,frame=single]
+(dsdefn f 
+  ([[a b] c d] 12)
+  ([a [b c] d] 13)
+  ([a b [^Ratio c d]] 14)
+  (^{c (satisfies int?)} [a b [c d]] 15)
+  ([a b [^Double c d]] 16))
+
+(f 1 2 [10/3 20]) ;; --> 14
+(f 1 2 [10 20]) ;; --> 15
+(f 1 2 [10.0 20]) ;; --> 16
+(f 1 2 [false 20]) ;; ERROR:    No pattern matching given sequence
+                               {:sequence (1 2 [false 20])}
+\end{lstlisting}
