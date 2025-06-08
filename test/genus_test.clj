@@ -24,7 +24,7 @@
             [rte-construct :refer [with-compile-env]]
             [genus :as gns]
             [genus-tester :refer [gen-type *test-values*]]
-            [util :refer [ member ]]
+            [util :refer [member human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
 
@@ -38,10 +38,10 @@
   `(gns/call-with-genus-env
     (fn []
       (when test-verbose
-        (println [:testing ~string :starting (java.util.Date.)]))
+        (println [:testing ~string :starting (human-readable-current-time)]))
       (clojure.test/testing ~string ~@body)
       (when test-verbose
-        (println [:finished  (java.util.Date.)])))))
+        (println [:finished  (human-readable-current-time)])))))
 
 (deftest t-typep
   (testing "typep"

@@ -21,6 +21,7 @@
 
 (ns genus-conversion-test
   (:require [rte-core]
+            [util :refer [human-readable-current-time]]
             [genus :as gns]
             [backtick :refer [template]]
             [clojure.test :refer [deftest is]]))
@@ -33,9 +34,9 @@
   (let [verbose false]
     `(gns/call-with-genus-env
       (fn []
-        (when ~verbose (println [:testing ~string :starting (java.util.Date.)]))
+        (when ~verbose (println [:testing ~string :starting (human-readable-current-time)]))
         (clojure.test/testing ~string ~@body)
-        (when ~verbose (println [:finished  (java.util.Date.)]))))))
+        (when ~verbose (println [:finished  (human-readable-current-time)]))))))
 
 (deftest t-combo-conversion-C1
   (testing "combo conversion-C1"

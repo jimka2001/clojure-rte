@@ -22,7 +22,7 @@
 (ns cl-compat-test
   (:require [rte-core]
             [cl-compat :as cl]
-            [util :refer [call-with-collector]]
+            [util :refer [call-with-collector human-readable-current-time]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
@@ -33,10 +33,10 @@
 (defmacro testing
   [string & body]
   `(do (when test-verbose
-         (println [:testing ~string :starting (java.util.Date.)]))
+         (println [:testing ~string :starting (human-readable-current-time)]))
        (clojure.test/testing ~string ~@body)
        (when test-verbose
-         (println [:finished  (java.util.Date.)]))))
+         (println [:finished  (human-readable-current-time)]))))
 
 
 (deftest t-cl-prog1

@@ -22,6 +22,7 @@
 (ns thompson-test
   (:require [thompson :as tom]
             [genus :as gns]
+            [util :refer [human-readable-current-time]]
             [rte-core]
             [rte-construct :as rte]
             [xymbolyco :as xym]
@@ -39,10 +40,10 @@
   `(gns/call-with-genus-env
     (fn []
       (when testing-verbose
-        (println [:testing ~string :starting (java.util.Date.)]))
+        (println [:testing ~string :starting (human-readable-current-time)]))
       (clojure.test/testing ~string ~@body)
       (when testing-verbose
-        (println [:finished  (java.util.Date.)])))))
+        (println [:finished  (human-readable-current-time)])))))
 
 ;; default value of num_random_tests is 1000, but you can temporarily edit this file
 ;;   and set it to a smaller number for a quicker run of the tests.

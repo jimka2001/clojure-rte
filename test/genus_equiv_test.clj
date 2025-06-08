@@ -22,6 +22,7 @@
 (ns genus-equiv-test
   (:require [rte-core]
             [genus :as gns]
+            [util :refer [human-readable-current-time]]
             [genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
@@ -37,10 +38,10 @@
   `(gns/call-with-genus-env
     (fn []
       (when test-verbose
-        (println [:testing ~string :starting (java.util.Date.)]))
+        (println [:testing ~string :starting (human-readable-current-time)]))
       (clojure.test/testing ~string ~@body)
       (when test-verbose
-        (println [:finished  (java.util.Date.)])))))
+        (println [:finished  (human-readable-current-time)])))))
 
 (deftest t-type-equivalent-random
   (testing "type-equivalent? random"

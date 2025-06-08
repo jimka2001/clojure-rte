@@ -21,6 +21,7 @@
 
 (ns genus-statistics-test
   (:require [rte-core]
+            [util :refer [human-readable-current-time]]
             [genus :as gns]
             [genus-tester :refer [gen-type gen-inhabited-type]]
             [clojure.test :refer [deftest is]]))
@@ -36,9 +37,9 @@
     `(gns/call-with-genus-env
       (let [~verbose false]
         (fn []
-          (when ~verbose (println [:testing ~string :starting (java.util.Date.)]))
+          (when ~verbose (println [:testing ~string :starting (human-readable-current-time)]))
           (clojure.test/testing ~string ~@body)
-          (when ~verbose (println [:finished  (java.util.Date.)])))))))
+          (when ~verbose (println [:finished  (human-readable-current-time)])))))))
 
 (defn statistics
   "Generate a table of statics indicating the accuracy of the subtype? function."

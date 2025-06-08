@@ -25,7 +25,7 @@
              :refer [canonicalize-pattern with-compile-env ]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [util :refer [count-if-not]]
+            [util :refer [count-if-not human-readable-current-time]]
             [genus :as gns]))
 
 (def test-verbose false)
@@ -34,10 +34,10 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'rte-canonicalize ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-canonicalize ~string :starting (human-readable-current-time)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished 'rte-canonicalize ~string (java.util.Date.)]))))
+       (println [:finished 'rte-canonicalize ~string (human-readable-current-time)]))))
 
 (deftest t-canonicalize-pattern-14
   (when (and (resolve 'java.lang.Comparable)

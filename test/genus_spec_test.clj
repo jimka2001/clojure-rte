@@ -23,7 +23,7 @@
   (:require [rte-core]
             [rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
-            [util :refer [forall]]
+            [util :refer [forall human-readable-current-time]]
             [genus :as gns]
             [clojure.spec.alpha :as s]
             [genus-spec :as gs]
@@ -38,10 +38,10 @@
   (let [verbose false]
     `(rte/with-compile-env []
        (when ~verbose
-         (println [:testing ~string :starting (java.util.Date.)]))
+         (println [:testing ~string :starting (human-readable-current-time)]))
        (clojure.test/testing ~string ~@body)
        (when ~verbose
-         (println [:finished  (java.util.Date.)]))
+         (println [:finished  (human-readable-current-time)]))
      )))
 
 (t/deftest t-spec-to-rte

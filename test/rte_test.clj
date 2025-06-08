@@ -31,7 +31,7 @@
             [clojure.pprint :refer [cl-format]]
             [rte-extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [util :refer [member]]
+            [util :refer [member human-readable-current-time]]
             [genus :as gns]
             [genus-tester :refer [*test-types*]]
             [rte-tester :refer [gen-rte]]
@@ -45,10 +45,10 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'rte-test ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-test ~string :starting (human-readable-current-time)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished ' rte-test ~string (java.util.Date.)]))))
+       (println [:finished ' rte-test ~string (human-readable-current-time)]))))
 
 (deftest t-nullable
   (testing "nullable"

@@ -21,6 +21,7 @@
 
 (ns rte-test-memoize
   (:require [rte-core]
+            [util :refer [human-readable-current-time]]
             [rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
@@ -31,10 +32,10 @@
   [string & body]
   `(rte/with-compile-env []
      (when test-verbose
-       (println [:testing 'rte-test ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-test ~string :starting (human-readable-current-time)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished ' rte-test ~string (java.util.Date.)]))))
+       (println [:finished ' rte-test ~string (human-readable-current-time)]))))
 
 (deftest t-with-rte-5
   (testing "with-rte 5"

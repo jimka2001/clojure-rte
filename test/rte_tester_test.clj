@@ -20,7 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-tester-test
-  (:require [rte-core ]
+  (:require [rte-core]
+            [util :refer [human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [rte-construct :as rte :refer [canonicalize-pattern]]
             [xymbolyco :as xym]
@@ -45,10 +46,10 @@
   (let [verbose test-verbose]
   `(rte/with-compile-env []
      (when ~verbose
-       (println [:testing ~string :starting (java.util.Date.)]))
+       (println [:testing ~string :starting (human-readable-current-time)]))
      (clojure.test/testing ~string ~@body)
      (when ~verbose
-       (println [:finished  ~string (java.util.Date.)])))))
+       (println [:finished  ~string (human-readable-current-time)])))))
 
 (deftest t-test-canonicalize-pattern
   (testing "test-canonicalize-pattern"

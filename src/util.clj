@@ -707,3 +707,11 @@
   (into {} (for [[k vs] (group-by f seq)]
              [k (set (map g vs))])))
 
+
+(defn human-readable-current-time
+  "Generate (and return) a string corresponding to the current time in a human-readable form."
+  []
+  (let [now (java.time.LocalDateTime/now)
+        formatter (java.time.format.DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm:ss.SSS")]
+    (.format now formatter)))
+  

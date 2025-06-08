@@ -22,6 +22,7 @@
 (ns rte-case-test
   (:require [rte-core]
             [genus :as gns]
+            [util :refer [human-readable-current-time]]
             [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [rte-case :refer [rte-case destructuring-case
@@ -40,10 +41,10 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'rte-case-test ~string :starting (java.util.Date.)]))
+       (println [:testing 'rte-case-test ~string :starting (human-readable-current-time)]))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished 'rte-case-test ~string :finished (java.util.Date.)]))))
+       (println [:finished 'rte-case-test ~string :finished (human-readable-current-time)]))))
 
 (deftest t-rte-case
   (testing "rte-case"
