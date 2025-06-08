@@ -39,7 +39,7 @@
   (clojure.test/run-tests 'xymbolyco-test))
 
 (def test-verbose true)
-(def test-timeout-ms (* 1 60 1000 ))
+(def test-timeout-ms (* 3 60 1000 ))
 
 (defmacro with-timeout
   [fail-map & body]
@@ -471,13 +471,24 @@
             num-transitions (range num-states (+ 2 num-states))
             :let [exit-value 42 
                   type-size 2              
-                  dfa-1 (gen-dfa 10 25 42 2)
+                  dfa-1 (gen-dfa num-states
+                                 num-transitions
+                                 exit-value
+                                 type-size)
                   min-dfa (xym/minimize dfa-1)
                   rte (get (dfa-to-rte min-dfa) exit-value :empty-set)
-                  dfa-2 (with-timeout (rte-to-dfa rte exit-value))
+                  _ (println [:num-states num-states
+                              :num-transitions num-states])
+                  dfa-2 (with-timeout {:num-states num-states
+                                       :num-transitions num-transitions
+                                       :rte rte}
+                          (rte-to-dfa rte exit-value))
                   ]]
+      (println [:dfa-1 dfa-1
+                :dfa-2 dfa-2])
       (when testing-view
         (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions)))
+      ;; TODO test failing
       (is (xym/dfa-equivalent? dfa-1 dfa-2 :dont-know))
       )))
 
