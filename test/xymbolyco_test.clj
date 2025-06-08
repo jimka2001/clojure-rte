@@ -23,9 +23,11 @@
   (:refer-clojure :exclude [complement])
   (:require [rte-core ]
             [rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
+            [rte-extract :refer [dfa-to-rte]]
             [xymbolyco :as xym]
+            [xym-tester :refer [gen-dfa build-state-map]]
             [bdd :as bdd]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format pprint]]
             [genus :as gns]
             [util :refer [member human-readable-current-time]]
             [dot :refer [dfa-to-dot]]
@@ -36,7 +38,17 @@
 (defn -main []
   (clojure.test/run-tests 'xymbolyco-test))
 
-(def test-verbose false)
+(def test-verbose true)
+(def test-timeout-ms (* 1 60 1000 ))
+
+(defmacro with-timeout
+  [& body]
+  `(let [fut# (future ~@body)
+         res# (deref fut# test-timeout-ms :timeout)]
+     (if (= :timeout res#)
+       (throw (ex-info (format "Timed out at %s" (human-readable-current-time))
+                       {:timeout-ms test-timeout-ms}))
+       res#)))
 
 (defmacro testing
   [string & body]
@@ -437,3 +449,41 @@
       (is rte)
       (dfa-to-dot pat-1 :draw-sink true :title "reClojure 1" :view testing-view)
       (dfa-to-dot pat-2 :draw-sink true :title "reClojure 2" :view testing-view))))
+
+
+
+(deftest t-gen-dfa
+  (testing "testing gen-dfa"
+    (doseq [num-states (range 3 5)
+            num-transitions (range num-states (+ 2 num-states))
+            :let [exit-value 42 
+                  type-size 2
+                  dfa (gen-dfa 10 25 42 2)
+                  min-dfa (xym/minimize dfa)
+                  rte (get (dfa-to-rte min-dfa) exit-value :empty-set)]]
+      (is rte)
+      (if testing-view
+        (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions))))))
+
+(deftest t-gen-dfa-loop
+  (testing "testing gen-dfa"
+    (doseq [num-states (range 3 5)
+            num-transitions (range num-states (+ 2 num-states))
+            :let [exit-value 42 
+                  type-size 2              
+                  dfa-1 (gen-dfa 10 25 42 2)
+                  min-dfa (xym/minimize dfa-1)
+                  rte (get (dfa-to-rte min-dfa) exit-value :empty-set)
+                  dfa-2 (with-timeout (rte-to-dfa rte exit-value))
+                  ]]
+      (when testing-view
+        (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions)))
+      (is (xym/dfa-equivalent? dfa-1 dfa-2 :dont-know))
+      )))
+
+
+
+
+;;  (dot/dfa-view dfa "random")
+;;  (dot/dfa-view (minimize dfa) "random-min"))
+

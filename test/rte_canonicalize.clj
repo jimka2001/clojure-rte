@@ -531,6 +531,21 @@
     (is (= (rte/conversion-combo-16 '(:and (member 1 2 3) (member 3 4 5) (member 1 2 3 4 5 6)))
            '(:and (member 1 2 3) (member 3 4 5))))))
     
+(deftest t-conversion-combo-22
+  (testing "conversion combo 11"
+    ;; (:or A (rte X) B (rte Y) C)
+    ;; --> (:or (rte (:or X Y)) A B C)
+    ;; (:and A (rte X) B (rte Y) C)
+    ;; --> (:and (rte (:and X Y)) A B C)
+    (is (= (conversion-combo-22 '(:or A (rte X) B (rte Y) C))
+           '(:or (rte (:or X Y)) A B C)))
+    (is (= (conversion-combo-22 '(:and A (rte X) B (rte Y) C))
+           '(:and (rte (:and X Y)) A B C)))))
+
+
+
+
+
 
 (deftest t-conversion-combo-17
   (testing "conversion combo 17"

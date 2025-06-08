@@ -23,16 +23,17 @@
   (:refer-clojure :exclude [compile])
   (:require [genus :as gns]
             [util :refer [member exists setof forall
-                                      call-with-collector defn-memoized defmulti-memoized defmethod-memoized
-                                      visit-permutations fixed-point
-                                      sort-operands
-                                      seq-matcher
-                                      rte-identity rte-constantly
-                                      gc-friendly-memoize call-with-found find-first
-                                      search-replace remove-element uniquify
-                                      count-if-not find-simplifier]]
+                          call-with-collector defn-memoized defmulti-memoized defmethod-memoized
+                          visit-permutations fixed-point
+                          sort-operands
+                          human-readable-current-time
+                          seq-matcher
+                          rte-identity rte-constantly
+                          gc-friendly-memoize call-with-found find-first
+                          search-replace remove-element uniquify
+                          count-if-not find-simplifier]]
             [xymbolyco :as xym]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format pprint]]
             [clojure.set :refer [union]]
             [cl-compat :as cl]
             [backtick :refer [template]]
@@ -1308,6 +1309,20 @@
         filtered (mapcat g (operands self))]
     (create self filtered)))
 
+(defn conversion-combo-22
+  [self]
+  ;; (:or A (rte X) B (rte Y) C)
+  ;; --> (:or (rte (:or X Y)) A B C )
+  ;; (:and A (rte X) B (rte Y) C)
+  ;; --> (:and (rte (:and X Y)) A B C )
+  (assert (member (first self) [:and :or]))
+  (let [rtes (filter rte/rte? (operands self))
+        others (filter (complement rte/rte?) (operands self))]
+    (if (<= (count rtes) 1)
+      self
+      (create self (cons (template (rte ~(create self (mapcat rest rtes))))
+                           others)))))
+
 (defn conversion-combo-17
   [self]
   ;; And({1,2,3},Singleton(X),Not(Singleton(Y)))
@@ -1788,6 +1803,7 @@
                                                     conversion-and-17c
                                                     conversion-and-19
                                                     conversion-combo-17
+                                                    conversion-combo-22
                                                     conversion-combo-99
                                                     conversion-combo-5
                                                     ]))
@@ -1811,6 +1827,7 @@
                                                    conversion-combo-21
                                                    conversion-combo-15
                                                    conversion-combo-17
+                                                   conversion-combo-22
                                                    conversion-combo-99
                                                    conversion-combo-5])))))
 
@@ -1945,12 +1962,15 @@
       which might or might not include rte-1
   "
   [pattern]
+
   (loop [to-do-patterns (list pattern)
          done #{}
          triples [] 
          ]
+    (assert (not (.isInterrupted (Thread/currentThread)))
+            "Thread interrupted in test suite")
     (if (empty? to-do-patterns)
-      [ triples (seq done)] ;; The return value of find-all-derivatives
+      [triples (seq done)] ;; The return value of find-all-derivatives
       (let [[pattern & to-do-patterns] to-do-patterns]
         (if (done pattern)
           (recur to-do-patterns done triples)
@@ -2001,42 +2021,46 @@
                         [(index-map primative) wrt (index-map deriv)]
                         ) triples)
          grouped-by-src (group-by first triples)
-         exit-value-function (constantly exit-value)]
+         exit-value-function (constantly exit-value)
+         mapper (fn [deriv index]
+                  (let [from-src (map rest (grouped-by-src index))
+                        grouped-by-dst (group-by second from-src)
+                        ;; grouped-by-dst is of the form
+                        ;;  { dst-id-1 [(td-a dst-id-1)
+                        ;;              (td-b dst-id-1)
+                        ;;              (td-c dst-id-2)...],
+                        ;;    dst-id-2 [(td-d dst-id-2)
+                        ;;              (td-e dst-id-2) ...] ...
+                        ;;  }
+                        ;; derive transitions of the form
+                        ;; [[td-x dst-id-1] [td-y dst-id-2] ...]
+                        ;; where td-x is (or td-a td-b td-c ...) canonicalized
+                        ;;   and td-y is (or td-d td-e ...) canonicalized
+                        transitions (map (fn [[dst pairs]]
+                                           [(gns/canonicalize-type
+                                             (gns/create-or (map first pairs)) :dnf) dst])
+                                         grouped-by-dst)
+                        ]
+                    [index
+                     (xym/map->State {:index index
+                                      :initial (= 0 index)
+                                      :accepting (nullable? deriv)
+                                      :pattern deriv
+                                      :transitions transitions})]))
+
+         states (map mapper
+                     derivatives
+                     (range (count derivatives)))
+         dfa (xym/map->Dfa
+              {:pattern given-pattern
+               :canonicalized pattern
+               :exit-map exit-value-function
+               :combine-labels gns/combine-labels
+               :states (into {} states)})
+         ]
 
      (xym/extend-with-sink-state
-      (xym/map->Dfa
-       {:pattern given-pattern
-        :canonicalized pattern
-        :exit-map exit-value-function
-        :combine-labels gns/combine-labels
-        :states
-        (into {}
-              (map (fn [deriv index]
-                     (let [from-src (map rest (grouped-by-src index))
-                           grouped-by-dst (group-by second from-src)
-                           ;; grouped-by-dst is of the form
-                           ;;  { dst-id-1 [(td-a dst-id-1)
-                           ;;              (td-b dst-id-1)
-                           ;;              (td-c dst-id-2)...],
-                           ;;    dst-id-2 [(td-d dst-id-2)
-                           ;;              (td-e dst-id-2) ...] ...
-                           ;;  }
-                           ;; derive transitions of the form
-                           ;; [[td-x dst-id-1] [td-y dst-id-2] ...]
-                           ;; where td-x is (or td-a td-b td-c ...) canonicalized
-                           ;;   and td-y is (or td-d td-e ...) canonicalized
-                           transitions (map (fn [[dst pairs]]
-                                              [(gns/canonicalize-type
-                                                (gns/create-or (map first pairs)) :dnf) dst])
-                                            grouped-by-dst)
-                           ]
-                       [index
-                        (xym/map->State {:index index
-                                         :initial (= 0 index)
-                                         :accepting (nullable? deriv)
-                                         :pattern deriv
-                                         :transitions transitions})]))
-                   derivatives (range (count derivatives))))})))))
+      dfa))))
 
 
 

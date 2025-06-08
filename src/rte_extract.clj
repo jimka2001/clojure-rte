@@ -138,7 +138,7 @@
 (defn dfa-to-rte
   "Accepts an object of type Dfa, and returns a map which associates
   exit values of the dfa with canonicalized rte patterns of the accepting
-  langauge.  If there are no accepting states in the Dfa, an empty map {}
+  langauge.  If there are no accepting states in the Dfa, a map {true :empty-set}
   is returned."
   [dfa]
   (assert (instance? (xym/record-name) dfa)
@@ -149,7 +149,7 @@
       ret-val-rte)))
 
 (defn rte-equivalent?
-  "Compare two rte patterns build comparing their constructed Dfa's."
+  "Compare two rte patterns by comparing their constructed Dfa's."
   [rte-1 rte-2]
   (xym/dfa-equivalent? (rte/rte-to-dfa rte-1)
                        (rte/rte-to-dfa rte-2)))
