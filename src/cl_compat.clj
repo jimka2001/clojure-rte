@@ -109,3 +109,12 @@
 
 (defmacro with-output-to-string [var & body]
   `(write-to-string (fn [~var] ~@body)))
+
+(defmacro check-type [place type-spec]
+  `(let [value# ~place
+         ts# ~type-spec]
+     (assert (instance?  ts# value#) (format "%s evaluating to %s, expecting type %s, got %s"
+                                            ~place value#
+                                            ts#
+                                            (type value#)))
+     value#))
