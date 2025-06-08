@@ -1967,8 +1967,10 @@
          done #{}
          triples [] 
          ]
-    (assert (not (.isInterrupted (Thread/currentThread)))
-            "Thread interrupted in test suite")
+    (if (.isInterrupted (Thread/currentThread))
+      (throw (ex-info "Thread interrupted while attempting to compute derivative"
+                      {:pattern pattern
+                       })))
     (if (empty? to-do-patterns)
       [triples (seq done)] ;; The return value of find-all-derivatives
       (let [[pattern & to-do-patterns] to-do-patterns]

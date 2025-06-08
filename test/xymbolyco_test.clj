@@ -42,12 +42,12 @@
 (def test-timeout-ms (* 1 60 1000 ))
 
 (defmacro with-timeout
-  [& body]
+  [fail-map & body]
   `(let [fut# (future ~@body)
          res# (deref fut# test-timeout-ms :timeout)]
      (if (= :timeout res#)
        (throw (ex-info (format "Timed out at %s" (human-readable-current-time))
-                       {:timeout-ms test-timeout-ms}))
+                       (assoc ~fail-map :timeout-ms test-timeout-ms)))
        res#)))
 
 (defmacro testing
