@@ -41,7 +41,7 @@
 (defn -main []
   (clojure.test/run-tests 'xymbolyco-test))
 
-(def test-verbose true)
+(def test-verbose false)
 (def test-timeout-ms (* 3 60 1000 ))
 
 (defmacro with-timeout
@@ -480,8 +480,8 @@
 
 (deftest t-gen-dfa-loop
   (testing "testing gen-dfa"
-    (doseq [num-states (range 2 5)
-            num-transitions (range num-states (+ 2 num-states))
+    (doseq [num-states (range 2 10)
+            num-transitions (range num-states (* 2 num-states))
             :let [exit-value 42 
                   type-size 2
                   dfa-1 (gen-dfa num-states

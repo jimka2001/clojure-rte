@@ -1,6 +1,6 @@
 (ns xym-tester
   (:require [genus :as gns]
-            [genus-tester :refer [gen-type]]
+            [genus-tester :refer [gen-inhabited-type]]
             [xymbolyco :as xym]
             [util :refer [member]]
 
@@ -46,12 +46,12 @@
   (let [tr1 (- num-transitions num-states)
         transitions (concat (for [k (range tr1)
                                   :let [origin (rand-int (dec num-states))
-                                        td (gen-type type-size)
+                                        td (gen-inhabited-type type-size)
                                         target (rand-int (dec num-states))
                                         ]]
                               [origin td target])
                             (for [id (range (dec num-states))]
-                              [id (gen-type type-size) (inc id)]))]
+                              [id (gen-inhabited-type type-size) (inc id)]))]
     (xym/map->Dfa 
      {:exit-map {:default exit-value}
       :combine-labels gns/combine-labels
