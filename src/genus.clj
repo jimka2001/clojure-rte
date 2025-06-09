@@ -854,6 +854,12 @@
   (subtype? b a :dont-know))
 
 
+;; MAYBE THIS IS ALREADY DONE ???
+;; TODO add conversion for (and (member a b c) (satisfies f))
+;;    to keep only those a b c which satisfy f.
+;; similar for (or (member a b c) (satisfies f))
+;;     to remove everything satisfying f from the operands [a b c]
+
 (defn conversion-C1
   "(and) -> STop, unit = STop, zero = SEmpty
   (and x) -> x
