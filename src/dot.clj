@@ -83,7 +83,9 @@
     (when (= "Mac OS X" (System/getProperty "os.name"))
       (swap! tmp-files conj png-file-name)
       ;; -g => don't bring Preview to forground, and thus don't steal focus
-      (let [stat (sh "open" "-g" "-a" "Preview" png-file-name)]
+      (let [stat (sh "open"
+                     ;; "-g"
+                     "-a" "Preview" png-file-name)]
         (when (not= 0 (:exit stat))
           (println dot-string))
         stat))))
