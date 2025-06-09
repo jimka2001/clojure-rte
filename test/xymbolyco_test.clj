@@ -45,10 +45,15 @@
 (def test-timeout-ms (* 3 60 1000 ))
 
 (defmacro with-timeout
+  "Evaluate the given `body` in a future, and return its value if
+  it finishes within the timeout `test-timeout-ms`.  Otherwise throw
+  an exception assoc-ing in `:timeout-ms test-timeout-ms` into the given
+  `fail-map`"
   [fail-map & body]
   `(let [fut# (future ~@body)
-         res# (deref fut# test-timeout-ms :timeout)]
-     (if (= :timeout res#)
+         escape [:timeout]
+         res# (deref fut# test-timeout-ms escape)]
+     (if (identical? escape res#)
        (throw (ex-info (format "Timed out at %s" (human-readable-current-time))
                        (assoc ~fail-map :timeout-ms test-timeout-ms)))
        res#)))
