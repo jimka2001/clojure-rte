@@ -33,7 +33,10 @@
             [dot :refer [dfa-to-dot]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
-(def testing-view false)
+(def testing-view
+  "This value specifies whether dfa-view is called during testing.  It default to false
+  so that dfa-view does not get called in batch testing."
+  false)
 
 (defn -main []
   (clojure.test/run-tests 'xymbolyco-test))
@@ -256,7 +259,7 @@
                                          (fn [a b]
                                            (and a b))
                                          (fn [q1 _q2]
-                                           ((:exit-map dfa-1) (:index q1))))
+                                           (xym/exit-value dfa-1 q1)))
           dfa-sxp-trim (xym/trim dfa-sxp)
           dfa-sxp-min (xym/minimize dfa-sxp)
           _dfa-sxp-trim-min (xym/minimize dfa-sxp-trim)

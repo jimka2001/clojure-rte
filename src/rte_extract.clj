@@ -53,7 +53,7 @@
         new-final-transitions (for [q (xym/states-as-seq dfa)
                                     :when (:accepting q)]
                                 ;; we designate new final states each as [:F some-exit-value]
-                                [(:index q) :epsilon [:F ((:exit-map dfa) (:index q))]])]
+                                [(:index q) :epsilon [:F (xym/exit-value dfa q)]])]
     (letfn [          ;; local function
             (combine-parallel-labels [operands]
               (rte/canonicalize-pattern

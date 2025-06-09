@@ -2225,7 +2225,7 @@
             ;;  was possible.
             (cond
               (= false final-state) false
-              (:accepting (state-vec final-state)) ((:exit-map dfa) final-state)
+              (:accepting (state-vec final-state)) (xym/exit-value dfa final-state)
               :else false)))))))
 
 (defmulti valid-rte? type-dispatch)

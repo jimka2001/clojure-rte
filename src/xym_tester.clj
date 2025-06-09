@@ -56,7 +56,7 @@
                             (for [id (range (dec num-states))]
                               [id (gen-type type-size) (inc id)]))]
     (xym/map->Dfa 
-     {:exit-map {(dec num-states) exit-value}
+     {:exit-map {:default exit-value}
       :combine-labels gns/combine-labels
       ;; create map index -> State
       ;; divide transitions into two parts one transition for each state to some later state

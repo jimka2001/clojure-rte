@@ -117,10 +117,7 @@
                png-file-cb (fn [_file_name] nil)}}]
   (cond
     view (let [dot-string (dfa-to-dot dfa (assoc all-optionals :view false))]
-           (dot-view dot-string all-optionals)
-           ;;(apply dot-view dot-string (mapcat identity all-optionals))
-           )
-
+           (dot-view dot-string all-optionals))
     
     (seq? dfa)
     (dfa-to-dot (rte-to-dfa dfa) all-optionals)
@@ -139,15 +136,14 @@
                                         label))          
           abbrevs (zipmap transition-labels (range (count transition-labels)))
           labels (clojure.set/map-invert abbrevs)
-          exit-map (:exit-map dfa)
           accepting-states (filter :accepting (xym/states-as-seq dfa))
-          all-final-function (every? (fn [q] (fn? (exit-map (:index q))))
+          all-final-function (every? (fn [q] (fn? (xym/exit-value dfa q)))
                                      accepting-states)
           function-table (if all-final-function
                            (into {}
                                  (for [q accepting-states]
-                                   [(exit-map (:index q)) (format "fn-%d" (:index q))])))
-          all-final-true (every? (fn [q] (= true (exit-map (:index q))))
+                                   [(xym/exit-value dfa q) (format "fn-%d" (:index q))])))
+          all-final-true (every? (fn [q] (= true (xym/exit-value dfa q)))
                                  accepting-states)]
       (with-out-str
         (cl-format *out* "digraph G {~%")
@@ -191,12 +187,12 @@
                     all-final-function
                     (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
                         (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%"
-                                   (:index q) (function-table (get exit-map (:index q)))))
+                                   (:index q) (function-table (xym/exit-value dfa q))))
 
                     :otherwise
                     (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
                     (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
-                               (:index q) (get exit-map (:index q))))))
+                               (:index q) (xym/exit-value dfa q)))))
             (when (:initial q)
               (cl-format *out* "   H~D [label=\"\", style=invis, width=0]~%" (:index q))
               (cl-format *out* "   H~D -> q~D;~%" (:index q) (:index q)))

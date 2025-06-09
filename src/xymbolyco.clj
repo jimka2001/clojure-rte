@@ -63,11 +63,18 @@
 
 (defn exit-value
   "Given a Dfa and either a State or state-id (integer), compute the exit value of
-  the state by calling the function :exit-map in the dfa."
+  the state by calling the function :exit-map in the dfa.
+  The exit map might be a map whose keys are the state indices (integers)
+  in which case we look up the associated value.
+  However, the index might be missing, in which case we look for the
+  key :default, else we return nil"
   [dfa state]
   (if (instance? State state)
     (exit-value dfa (:index state))
-    ((:exit-map dfa) state)))
+    ((:exit-map dfa) state
+     ;; if there is no such index in the exit-map, then we look for
+     ;;   the key :default
+     ((:exit-map dfa) :default nil))))
 
 (defn state-by-index
   "Return the State object of the Dfa whose :index is the given index."
@@ -557,9 +564,10 @@
                                :accepting (member id new-fids)
                                :transitions new-transitions})])
             ]
-        (make-dfa dfa { :exit-map (into {} (map (fn [id]
-                                                  [id (exit-value dfa id)])
-                                                new-fids))
+        (make-dfa dfa {:exit-map (into {:default (exit-value dfa :default)}
+                                       (map (fn [id]
+                                              [id (exit-value dfa id)])
+                                            new-fids))
                        :states
                        (into {} new-states)})))))
 
@@ -613,9 +621,10 @@
         ;; any transition going to a state which has being removed, gets
         ;; diverted to the sink state.
         (make-dfa dfa
-                  {:exit-map (into {} (map (fn [id]
-                                             [id (exit-value dfa id)])
-                                           new-fids)) ;; map each of new-fids to the old value returned from the exit-map
+                  {:exit-map (into {:default (exit-value dfa :default)}
+                                   (map (fn [id]
+                                          [id (exit-value dfa id)])
+                                        new-fids)) ;; map each of new-fids to the old value returned from the exit-map
                    :states
                    (into {} (map (fn [id]
                                    (let [state (state-by-index dfa id)]
@@ -737,7 +746,9 @@
                                          :transitions new-transitions})]))))))
           ]
 
-    (let [sxp-pairs (sort (fn [[a b] [x y]]
+    (let [default-exit-value (or (exit-value dfa-1 :default)
+                                 (exit-value dfa-2 :default))
+          sxp-pairs (sort (fn [[a b] [x y]]
                             ;; sort first by sum, so that [1 0] preceeds [0 2]
                             (cond
                               (not (= (+ a b) (+ x y)))
@@ -786,7 +797,7 @@
 
       (bdd/with-hash []
         (make-dfa dfa-1
-                  {:exit-map (into {} new-exit-map)
+                  {:exit-map (into {:default default-exit-value} new-exit-map)
                    :states (into {} new-id-state-pairs)})))))
 
 (defn synchronized-union
@@ -800,8 +811,7 @@
                         (fn [a b]
                           (or a b))
                         (fn [q1 _q2]
-                          ((:exit-map dfa-1)
-                           (:index q1)))))
+                          (exit-value dfa-1 q1))))
 
 (defn synchronized-intersection
   "Compute the intersection of two Dfas. I.e., compute the Dfa which
@@ -812,8 +822,7 @@
                         (fn [a b]
                           (and a b))
                         (fn [q1 _q2]
-                          ((:exit-map dfa-1)
-                           (:index q1)))))
+                          (exit-value dfa-1 q1))))
 
 (defn synchronized-xor
   "Compute the xor of two Dfas. I.e., compute the Dfa which
@@ -825,8 +834,7 @@
                           (or (and a (not b))
                               (and b (not a))))
                         (fn [q1 _q2]
-                          ((:exit-map dfa-1)
-                           (:index q1)))))
+                          (exit-value dfa-1 q1))))
 
 (defn gen-dijkstra-edges [dfa]
   (let [states (states-as-map dfa)
