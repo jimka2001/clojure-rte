@@ -19,24 +19,21 @@
                 (cond (empty? pairs)
                       acc
 
-                      (empty (rest pairs))
+                      :else
                       (recur (rest pairs)
                              (conj acc
-                                   (first pairs)))
-
-                      :else
-                  (recur (rest pairs)
-                         (conj acc
-                               [(apply gns/And-not (cons (first (first pairs)) (map first (rest pairs))))
-                                (second (first pairs))])))))]
+                                   [(apply gns/And-not (cons (first (first pairs)) (map first (rest pairs))))
+                                    (second (first pairs))])))))]
 
       (into {} (for [origin-index state-ids
-                     :let [triples (get grouped origin-index [])]]
+                     :let [triples (get grouped origin-index [])
+                           mut-ex (mutually-exclusive (map rest triples))
+                           ]]
                  [origin-index
                   (xym/map->State {:index origin-index
-                               :initial (= origin-index initial)
-                               :accepting (member origin-index accepting)
-                               :transitions (mutually-exclusive (map rest triples))})])))))
+                                   :initial (= origin-index initial)
+                                   :accepting (member origin-index accepting)
+                                   :transitions mut-ex})])))))
 
 ;;(let [dfa (gen-dfa 10 25 42 2)]
 ;;  (dot/dfa-view dfa "random")
