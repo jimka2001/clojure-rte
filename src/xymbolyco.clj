@@ -61,6 +61,12 @@
   []
   Dfa)
 
+(defn initial-state
+  "Return the initial state (state, not index of state)
+  or nil, if there is no initial state."
+  [dfa]
+  (find-first :initial (states-as-seq dfa) nil))
+
 (defn exit-value
   "Given a Dfa and either a State or state-id (integer), compute the exit value of
   the state by calling the function :exit-map in the dfa.
