@@ -41,6 +41,12 @@
   ;;    8.    n^2 iteration to-this-state x from-this-state
   ;;    9.    append new transitions in next iteration of loop 5.
   ;;    10. this reduces to one transition per exit value, returns the map of exit-value to label
+  ;; assert that state 0 is the initial state
+  ;; and that no other state is an initial state
+  (doseq [[id state] (:states dfa')]
+    (if (= id 0)
+      (assert (:initial state) (format "%s should be an initial state" state))
+      (assert (not (:initial state)) (format "%s should NOT be an initial state" state))))
   (let [;; #1
         dfa (xym/trim (xym/minimize dfa')) ; we must minimize otherwise the size of the returned expression can be HUGE
         ;; #2
@@ -53,8 +59,14 @@
         new-final-transitions (for [q (xym/states-as-seq dfa)
                                     :when (:accepting q)]
                                 ;; we designate new final states each as [:F some-exit-value]
-                                [(:index q) :epsilon [:F (xym/exit-value dfa q)]])]
-    (letfn [          ;; local function
+                                [(:index q) :epsilon [:F (xym/exit-value dfa q)]])
+        ]
+    (doseq [[id state] (:states dfa)]
+      (if (= id 0)
+        (assert (:initial state) (format "%s should be an initial state" state))
+        (assert (not (:initial state)) (format "%s should NOT be an initial state" state))))
+
+    (letfn [;; local function
             (combine-parallel-labels [operands]
               (rte/canonicalize-pattern
                (rte/create-or operands)))
@@ -114,6 +126,7 @@
                                                          (list :* self-loop-label)
                                                          post-label))
                                    dst])]
+
                 (concat others new-triples)))]
 
       ;; #5 / #9
