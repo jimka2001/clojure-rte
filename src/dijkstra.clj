@@ -58,8 +58,9 @@
 (defn dijkstra-to-final
   "Like `dijkstra` function above, except that the search aborts
   when a path is found to one of the given final states.
-  Returns [s d] if the shortest path to a final state is to s, and
-  where d is the shortest distance."
+  Returns [f d path] if the shortest path to a final state is to f, and
+  where d is the shortest distance.
+  path is ??? TODO document path"
   [start f finals]
   (letfn [(f-no-self-loop [v] (dissoc (f v) v))]
     (loop [q (priority-map start 0)
@@ -74,7 +75,9 @@
           [v d (find-path start v p)]
 
           :otherwise
-          (let [dist (-> (f-no-self-loop v) (remove-keys r) (update-vals #(+ d %)))
+          (let [dist (-> (f-no-self-loop v)
+                         (remove-keys r)
+                         (update-vals #(+ d %)))
                 [q p] (reduce-kv (fn [[q p] n d]
                                    (let [curr-d (q n)]
                                      (if (or (nil? curr-d) (< d curr-d))
