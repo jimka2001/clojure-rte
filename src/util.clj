@@ -715,3 +715,15 @@
         formatter (java.time.format.DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm:ss.SSS")]
     (.format now formatter)))
   
+(defn time-fn
+  "Compute and return a pair [x y] where
+   x is the value the 0-ary function `f` returns when called
+   and y is the amount of time in milli-seconds used to call `f`."
+  [f]
+  (let [now (java.time.LocalDateTime/now)
+        res (f)
+        t2 (java.time.LocalDateTime/now)]
+    [res (.toMillis (java.time.Duration/between now t2))]))
+    
+(defmacro time-expr [& body]
+  `(time-fn (fn [] ~@body)))
