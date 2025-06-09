@@ -537,9 +537,9 @@
     ;; --> (:or (rte (:or X Y)) A B C)
     ;; (:and A (rte X) B (rte Y) C)
     ;; --> (:and (rte (:and X Y)) A B C)
-    (is (= (conversion-combo-22 '(:or A (rte X) B (rte Y) C))
+    (is (= (rte/conversion-combo-22 '(:or A (rte X) B (rte Y) C))
            '(:or (rte (:or X Y)) A B C)))
-    (is (= (conversion-combo-22 '(:and A (rte X) B (rte Y) C))
+    (is (= (rte/conversion-combo-22 '(:and A (rte X) B (rte Y) C))
            '(:and (rte (:and X Y)) A B C)))))
 
 
