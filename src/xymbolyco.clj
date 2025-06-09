@@ -858,7 +858,9 @@
      indeterminate-weight]))
 
 (defn find-spanning-map
-  "Return a map from exit-value to [satisfiability path]"
+  "Return a map from exit-value to [satisfiability path],
+  where `satisfiability` is one of ...
+  and `path` is is a list from initial state to final state"
   [dfa]
   (let [states (states-as-seq dfa)
         [f indeterminate-weight] (gen-dijkstra-edges dfa)
@@ -915,7 +917,12 @@
             {}
             (find-spanning-map dfa))))
 
-(defn dfa-find-accepting-path [dfa]
+(defn dfa-find-accepting-path
+  "Return pair of the form [key path]
+  where key is one of :unsatisfiable, :satisfiable, :indeterminate
+  and path is a list of of integers, each an index of a state,
+  the path leads from initial state to final state."
+  [dfa]
   (let [states (states-as-map dfa)
         finals (map :index (filter :accepting (states-as-seq dfa)))
         [f indeterminate-weight] (gen-dijkstra-edges dfa)]
