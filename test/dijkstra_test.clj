@@ -9,13 +9,13 @@
 (deftest t-dijkstra-self-loop
   (testing "dijkstra"
     (let [[d p] (sut/dijkstra 0 (fn [v]
-                               (case v
-                                 (0) {1 1
-                                      2 1}
-                                 (1) {1 1}
-                                 (2) {})))]
+                                  (case v
+                                    (0) {1 1
+                                         2 1}
+                                    (1) {1 1}
+                                    (2) {})))]
       (is (= d {0 0,
-             1 1,
+                1 1,
                 2 1}))
       (is (= @(get p 1) '(0 1)))
       (is (= @(get p 2) '(0 2))))))
@@ -31,5 +31,6 @@
              1 1,
              2 2}))
       (is (= @(get p 1) '(0 1)))
-      (is (= @(get p 2)  '(0 1 2))))))
+      (is (= @(get p 2) '(0 1 2))))))
 
+;; TODO test dijkstra-to-final
