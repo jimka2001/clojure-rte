@@ -23,8 +23,25 @@
   (:require [genus :as gns]
             [backtick :refer [template]]))
 
+(defn safe-odd? 
+  "Save version of odd?.  The build-in odd? throws
+  an exception if its argument is not an integer.
+  safe-odd? simply returns false in this case."
+  [n]
+  (and (integer? n)
+       (odd? n)))
+
+(defn safe-positive? [n]
+  "Save version of positive?.  The build-in positive? throws
+  an exception if its argument is not an number.
+  safe-positive? simply returns false in this case."
+  (and (number? n)
+       (> n 0)))
+
 (def ^:dynamic *test-types*
   "Some type designators used for testing"
+  (concat (template ((satisfies ~safe-odd?)
+                     (satisfies ~safe-positive?)))
   '((satisfies integer?)
     (satisfies int?)
     (satisfies rational?)
@@ -60,7 +77,7 @@
     (member 1 "a")
     :sigma
     :empty-set
-    ))
+    )))
 
 (def ^:dynamic *test-values*
   "Some values used for random tests"
@@ -85,8 +102,8 @@
   ([size types limit-to-inhabited]
    (if (< 0 size)
      (case (rand-nth '(or and not :else))
-       (or) (template (or ~(gen-type (dec size) types)
-                          ~(gen-type (dec size) types)))
+       (or) (template (or ~(gen-type (dec size) types limit-to-inhabited)
+                          ~(gen-type (dec size) types limit-to-inhabited)))
        (and) (let [t1 (if limit-to-inhabited
                         (gen-inhabited-type (dec size) types)
                         (gen-type (dec size) types limit-to-inhabited))
@@ -105,7 +122,7 @@
 (defn gen-inhabited-type 
   "gen-type may generate a type designator which reduces to :empty-set.
   gen-inhabited-type generates a type designator which is guaranteed
-  NOT to reduce to :empty-set."
+  be inhabited, i.e. gns/inhabited? returns true"
   ([size]
    (gen-inhabited-type size  *test-types*))
   ([size types]
@@ -114,3 +131,18 @@
        (if (gns/inhabited? td false)
          td
          (recur))))))
+
+(defn gen-quasi-inhabited-type 
+  "gen-type may generate a type designator which reduces to :empty-set.
+  gen-inhabited-type generates a type designator which not provably empty.
+  I.e., gns/inhabited? returns true or :dont-know"
+  ([size]
+   (gen-quasi-inhabited-type size *test-types*))
+  ([size types]
+   (loop []
+     (let [td (gen-type size types) ]
+       (if (gns/inhabited? td :dont-know)
+         td
+         (recur))))))
+
+
