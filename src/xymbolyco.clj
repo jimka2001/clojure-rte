@@ -61,12 +61,6 @@
   []
   Dfa)
 
-(defn initial-state
-  "Return the initial state (state, not index of state)
-  or nil, if there is no initial state."
-  [dfa]
-  (find-first :initial (states-as-seq dfa) nil))
-
 (defn exit-value
   "Given a Dfa and either a State or state-id (integer), compute the exit value of
   the state by calling the function :exit-map in the dfa.
@@ -107,6 +101,12 @@
   [dfa]
   (assert (instance? Dfa dfa))
   (map :index (states-as-seq dfa)))
+
+(defn initial-state
+  "Return the initial state (state, not index of state)
+  or nil, if there is no initial state."
+  [dfa]
+  (find-first :initial (states-as-seq dfa) nil))
 
 (defn check-dfa
   "assert that no transition references an invalid state"
@@ -864,7 +864,8 @@
   [dfa]
   (let [states (states-as-seq dfa)
         [f indeterminate-weight] (gen-dijkstra-edges dfa)
-        [d p] (dijkstra 0 f)
+        q0 (initial-state dfa)
+        [d p] (dijkstra (:index q0) f)
         ]
     ;; dijkstra has computed the shortest paths from state 0
     ;;   to every other state in the dfa.
@@ -925,8 +926,9 @@
   [dfa]
   (let [states (states-as-map dfa)
         finals (map :index (filter :accepting (states-as-seq dfa)))
+        q0 (initial-state dfa)
         [f indeterminate-weight] (gen-dijkstra-edges dfa)]
-    (let [[_final distance path] (dijkstra-to-final 0 f finals)]
+    (let [[_final distance path] (dijkstra-to-final (:index q0) f finals)]
       (cond
         (empty? path)
         [:unsatisfiable path]
