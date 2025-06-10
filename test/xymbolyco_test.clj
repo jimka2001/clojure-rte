@@ -42,7 +42,11 @@
   (clojure.test/run-tests 'xymbolyco-test))
 
 (def test-verbose false)
-(def test-timeout-ms (* 3 60 1000 ))
+
+(def test-timeout-ms
+  "This variable indicates the number of miliseconds `with-timeout` allows for
+  its body to evaluate before throwing an exception."
+  (* 3 60 1000 ))
 
 (defmacro with-timeout
   "Evaluate the given `body` in a future, and return its value if
@@ -51,11 +55,12 @@
   `fail-map`"
   [fail-map & body]
   `(let [fut# (future ~@body)
-         escape [:timeout]
-         res# (deref fut# test-timeout-ms escape)]
-     (if (identical? escape res#)
-       (throw (ex-info (format "Timed out at %s" (human-readable-current-time))
-                       (assoc ~fail-map :timeout-ms test-timeout-ms)))
+         escape# [:timeout]
+         res# (deref fut# test-timeout-ms escape#)]
+     (if (identical? escape# res#)
+       (do (future-cancel fut#)
+           (throw (ex-info (format "Timed out at %s" (human-readable-current-time))
+                           (assoc ~fail-map :timeout-ms test-timeout-ms))))
        res#)))
 
 (defmacro testing
@@ -66,7 +71,6 @@
      (clojure.test/testing ~string ~@body)
      (when test-verbose
        (println [:finished  (human-readable-current-time)]))))
-
 
 (deftest t-split-eqv-class
   (testing "split-eqv-class"
@@ -504,6 +508,9 @@
       (is (xym/dfa-equivalent? min-dfa dfa-2 :dont-know)
           (format "two dfas not equivalent for type-size=%s num-states=%s num-transitions=%s rte=%s"
                   type-size num-states num-transitions rte)))))
+
+
+
 
 ;;  (dot/dfa-view dfa "random")
 ;;  (dot/dfa-view (minimize dfa) "random-min"))
