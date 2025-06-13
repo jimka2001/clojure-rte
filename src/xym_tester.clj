@@ -4,7 +4,8 @@
             [clojure.pprint :refer [pprint]]
             [rte-construct :refer [rte-to-dfa]]
             [rte-extract :refer [dfa-to-rte]]
-            [genus-tester :refer [gen-inhabited-type gen-quasi-inhabited-type]]
+            [genus-tester :refer [gen-inhabited-type
+                                  gen-indeterminate-type]]
             [xymbolyco :as xym]
             [util :refer [member time-expr find-first]]
 
@@ -71,26 +72,76 @@
   satisfied in the case that unsatisfiable transitions are produced during
   the determinization loop (see `build-state-map`).
   "
-  [num-states num-transitions exit-value type-size]
-  (let [tr1 (- num-transitions num-states)
-        transitions (concat (for [k (range tr1)
-                                  :let [origin (rand-int (dec num-states))
-                                        td (gen-quasi-inhabited-type type-size)
-                                        target (rand-int (dec num-states))
-                                        ]]
-                              [origin td target])
-                            ;; generate path from 0 to (num-states - 1)
-                            (for [id (range (dec num-states))]
-                              [id (gen-quasi-inhabited-type type-size) (inc id)]))]
-    (xym/map->Dfa 
-     {:exit-map {:default exit-value}
-      :combine-labels gns/combine-labels
-      ;; create map index -> State
-      ;; divide transitions into two parts one transition for each state to some later state
-      ;; after that transitions between randomly selected states
-      :states (build-state-map transitions
-                               0
-                               [(dec num-states)])})))
+  [& {:keys [num-states num-transitions exit-value type-size probability-indeterminate]
+      :or {num-states 10
+           num-transitions 20
+           exit-value true
+           type-size 2
+           probability-indeterminate 0.15}}]
+  (letfn [(choose-type []
+            (if (< (rand) probability-indeterminate)
+              (gen-indeterminate-type (* 2 type-size))
+              (gen-inhabited-type type-size)
+              ))]
+    (let [tr1 (- num-transitions num-states)
+          transitions (concat (for [k (range tr1)
+                                    :let [origin (rand-int (dec num-states))
+                                          ;; transition satisfiability is either true or :dont-know
+                                          ;;  not false.
+                                          td (choose-type)
+                                          target (rand-int (dec num-states))
+                                          ]]
+                                [origin td target])
+                              ;; generate path from 0 to (num-states - 1)
+                              (for [id (range (dec num-states))]
+                                [id
+                                 (choose-type)
+                                 (inc id)]))]
+      (xym/map->Dfa 
+       {:exit-map {:default exit-value}
+        :combine-labels gns/combine-labels
+        ;; create map index -> State
+        ;; divide transitions into two parts one transition for each state to some later state
+        ;; after that transitions between randomly selected states
+        :states (build-state-map transitions
+                                 0
+                                 [(dec num-states)])}))))
+
+(defn gen-dfa-statistics [& {:keys [num-samples num-states num-transitions exit-value type-size probability-indeterminate]
+                             :as options
+                             :or {num-samples 100
+                                  num-states 10
+                                  num-transitions 30
+                                  exit-value true
+                                  type-size 2
+                                  probability-indeterminate 0.15}}]
+  (letfn [(hier-size [seq]
+            (if (seq? seq)
+              (apply + (map hier-size seq))
+              1))]
+    (dotimes [n num-samples]
+      (println [:n n])
+      (let [dfa (gen-dfa :num-states num-states
+                         :num-transitions num-transitions
+                         :exit-value exit-value
+                         :type-size type-size
+                         :probability-indeterminate probability-indeterminate)
+            min-dfa (xym/minimize dfa)
+            rte (dfa-to-rte min-dfa)
+            [satisfiability path] (get (xym/find-trace-map min-dfa) true)
+            size (hier-size rte)]
+        (dot/dfa-view min-dfa (format "min-%d-%d" num-states num-transitions))
+        (dot/dfa-view dfa (format "dfa-%d-%d" num-states num-transitions))
+        (printf "%d;%d;%d;%s\n"
+                num-states
+                (count (:states min-dfa))
+                (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                 (xym/states-as-seq min-dfa)))
+                satisfiability)))))
+
+(gen-dfa-statistics :num-samples 1
+                    :num-states 7 :num-transitions 18 
+                    :probability-indeterminate 0.3 :num-transitions 30)
 
 ;; time-expr
 ;; time-fn

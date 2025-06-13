@@ -145,4 +145,15 @@
          td
          (recur))))))
 
+(defn gen-indeterminate-type
+  ([size]
+   (gen-indeterminate-type size *test-types*))
+  ([size types]
+   (loop []
+     (let [td (gen-type size types)]
+       (if (= :dont-know (gns/inhabited? td :dont-know))
+         td
+         (recur))))))
+
+(gen-indeterminate-type 5)
 
