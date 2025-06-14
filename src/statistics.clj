@@ -1,0 +1,192 @@
+(ns statistics
+  (:require
+   [genus :as gns]
+   [clojure.java.io :as io]
+   [rte-extract :refer [dfa-to-rte]]
+   [rte-construct :refer [rte-to-dfa]]
+   [clojure.pprint :refer [pprint cl-format]]
+   [xymbolyco :as xym]
+   [xym-tester :refer [gen-dfa]]
+   [util :refer [member time-expr]]
+))
+
+(defn write-stats-csv [& {:keys [csv-file-name num-samples num-states num-transitions
+                                 exit-value type-size probability-indeterminate]
+                          :or {csv-file-name "/tmp/file.csv"
+                               num-samples 100
+                               num-states 10
+                               num-transitions 30
+                               exit-value true
+                               type-size 2
+                               probability-indeterminate 0.15
+                               }}]
+  (doseq [r (range num-samples)]
+    (let [dfa (gen-dfa :num-states num-states
+                       :num-transitions num-transitions
+                       :exit-value exit-value
+                       :type-size type-size
+                       :probability-indeterminate probability-indeterminate)
+          min-dfa (xym/minimize dfa)
+          [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)]
+      
+      (with-open [out-file (java.io.FileWriter. csv-file-name true)]
+        ;; num-states ; num-transitions ; type-size ; probability-indeterminate ;
+        (cl-format out-file "~d;~d;~d;~f" num-states num-transitions type-size probability-indeterminate)
+
+        ;; min-dfa-state-count ;
+        (cl-format out-file ";~d" (count (:states min-dfa)))
+
+        ;; min-dfa-transitions-count ;
+        (cl-format out-file ";~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                                   (xym/states-as-seq min-dfa))))
+
+        ;; count indeterminate transitions
+        (cl-format out-file ";~d" (count (for [q (xym/states-as-seq min-dfa)
+                                                   [td _] (:transitions q)
+                                              :when (= :dont-know (gns/inhabited? td :dont-know))]
+                                          1)))
+
+        ;; inhabited dfa language
+        (cl-format out-file ";~a" satisfiability)
+
+        (cl-format out-file "~%"))
+      
+      (write-stats-csv))))
+
+
+
+
+(defn gen-dfa-statistics [& {:keys [num-samples num-states num-transitions
+                                    exit-value type-size probability-indeterminate]
+                             :as options
+                             :or {num-samples 100
+                                  num-states 10
+                                  num-transitions 30
+                                  exit-value true
+                                  type-size 2
+                                  probability-indeterminate 0.15}}]
+  (letfn [(hier-size [seq]
+            (if (seq? seq)
+              (apply + (map hier-size seq))
+              1))]
+    (for [n (range num-samples)]
+      (let [dfa (gen-dfa :num-states num-states
+                         :num-transitions num-transitions
+                         :exit-value exit-value
+                         :type-size type-size
+                         :probability-indeterminate probability-indeterminate)
+            min-dfa (xym/minimize dfa)
+            rte (dfa-to-rte min-dfa)
+            [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)
+            size (hier-size rte)]
+        (dot/dfa-view min-dfa (format "min-%d-%d" num-states num-transitions))
+        (dot/dfa-view dfa (format "dfa-%d-%d" num-states num-transitions))
+        (printf "%d;%d;%d;%s\n"
+                num-states
+                (count (:states min-dfa))
+                (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                 (xym/states-as-seq min-dfa)))
+                satisfiability)
+        [(count (:states min-dfa))
+         (reduce + 0 (map (fn [st] (count (:transitions st)))
+                          (xym/states-as-seq min-dfa)))
+         satisfiability
+         (xym/serialize-dfa min-dfa)
+         ]
+))))
+
+
+
+(defn time-build-traces [max-num-states]
+  (println "=========================================")
+  (doseq [num-states (range 2 max-num-states)
+          num-transitions (range num-states (* 2 num-states))
+          :let [exit-value 42 
+                type-size 2
+                [dfa-1 t-1] (time-expr (gen-dfa num-states
+                                                num-transitions
+                                                exit-value
+                                                type-size))
+                [min-dfa t-2] (time-expr (xym/minimize dfa-1))
+                [sm t-3] (time-expr (xym/find-trace-map min-dfa))]]
+    (println "------------------------------------")
+    (pprint [;;:num-states num-states
+             ;;:num-transitions num-transitions 
+             :num-minimized-states (count (xym/states-as-seq min-dfa))
+             :sm (for [[ev [satisfiability path]] sm]
+                   [ev satisfiability])
+             :time (+ t-1 t-2 t-3)])
+    (if (> (+ t-1 t-2 t-3) 400)
+      (dot/dfa-view min-dfa (format "dfa-%d-%d" num-states num-transitions)))
+
+))
+
+(defn time-build-dfas
+  ([max-num-states]
+   (time-build-dfas 2 max-num-states))
+  ([min-num-states max-num-states]
+   (println "=========================================")
+   (doseq [num-states (range min-num-states (inc max-num-states))
+           num-transitions (range num-states (/ (* num-states num-states) 2) 5)
+           :let [exit-value 42 
+                 type-size 2
+                 [dfa-1 t-1] (time-expr (xym/minimize (gen-dfa num-states
+                                                               num-transitions
+                                                               exit-value
+                                                               type-size)))
+
+                 [sm-1 t-2] (time-expr (xym/find-trace-map dfa-1))
+
+                 [rte t-3] (time-expr (get (dfa-to-rte dfa-1) exit-value :empty-set))
+
+                 [dfa-2 t-4] (time-expr (rte-to-dfa rte))
+
+                 [dfa-xor t-5] (time-expr (xym/synchronized-xor dfa-1 dfa-2))
+
+                 [sm-2 t-6] (time-expr (xym/find-trace-map dfa-xor))
+
+                 total-time (+ t-1 t-2 t-3 t-4 t-5 t-6)
+                 ]]
+     (let [suffix (format "-%d-%d" num-states num-transitions)]
+       (dot/dfa-view dfa-1 (str "dfa-1" suffix))
+       (dot/dfa-view dfa-2 (str "dfa-2" suffix))
+       (dot/dfa-view dfa-xor (str "dfa-xor" suffix)))
+     (println "------------------------------------")
+     (println [[ num-states num-transitions ]
+               :num-minimized-states (count (xym/states-as-seq dfa-1))
+               :sm-1 (for [[ev [satisfiability path]] sm-1]
+                       [ev satisfiability])
+               :sm-2 (for [[ev [satisfiability path]] sm-2]
+                       [ev satisfiability])
+               :time total-time])
+     )))
+        
+
+                  
+
+;; (time-build-traces 30)
+
+
+
+
+;; (time-build-dfas 6 6)
+
+(defn -main [& argv]
+  (doseq [num-samples (range 10 20)
+          num-states (range 5 10)
+          num-transitions (range (* 2 num-states)
+                                 (* 3 num-states))
+          ]
+    (write-stats-csv :num-samples num-samples
+                     :num-states num-states
+                     :num-transitions num-transitions
+                     :type-size 2
+                     :probability-indeterminate 0.25))
+
+  ;; (pprint (gen-dfa-statistics :num-samples 1
+  ;;                             :num-states 7 :num-transitions 18 
+  ;;                             :probability-indeterminate 0.3 :num-transitions 30))
+)
+
+
+(-main)
