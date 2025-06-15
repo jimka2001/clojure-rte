@@ -10,48 +10,50 @@
    [util :refer [member time-expr]]
 ))
 
-(defn write-stats-csv [& {:keys [csv-file-name num-samples num-states num-transitions
+(defn write-stats-csv [& {:keys [csv-file-name num-states num-transitions
                                  exit-value type-size probability-indeterminate]
                           :or {csv-file-name "/tmp/file.csv"
-                               num-samples 100
                                num-states 10
                                num-transitions 30
                                exit-value true
                                type-size 2
                                probability-indeterminate 0.15
                                }}]
-  (doseq [r (range num-samples)]
-    (let [dfa (gen-dfa :num-states num-states
-                       :num-transitions num-transitions
-                       :exit-value exit-value
-                       :type-size type-size
-                       :probability-indeterminate probability-indeterminate)
-          min-dfa (xym/minimize dfa)
-          [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)]
-      
-      (with-open [out-file (java.io.FileWriter. csv-file-name true)]
-        ;; num-states ; num-transitions ; type-size ; probability-indeterminate ;
-        (cl-format out-file "~d;~d;~d;~f" num-states num-transitions type-size probability-indeterminate)
+  (println [:num-states num-states
+            :num-transitions num-states
+            :type-size type-size
+            :probability-indeterminate probability-indeterminate])
+  (let [dfa (gen-dfa :num-states num-states
+                     :num-transitions num-transitions
+                     :exit-value exit-value
+                     :type-size type-size
+                     :probability-indeterminate probability-indeterminate)
+        min-dfa (xym/minimize dfa)
+        [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)]
+    
+    ;; open the csv file in append mode, i.e., write to the end
+    (with-open [out-file (java.io.FileWriter. csv-file-name true)]
+      ;; num-states , num-transitions , type-size , probability-indeterminate ,
+      (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
-        ;; min-dfa-state-count ;
-        (cl-format out-file ";~d" (count (:states min-dfa)))
+      ;; min-dfa-state-count ,
+      (cl-format out-file ",~d" (count (:states min-dfa)))
 
-        ;; min-dfa-transitions-count ;
-        (cl-format out-file ";~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
-                                                   (xym/states-as-seq min-dfa))))
+      ;; min-dfa-transitions-count ,
+      (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                                 (xym/states-as-seq min-dfa))))
 
-        ;; count indeterminate transitions
-        (cl-format out-file ";~d" (count (for [q (xym/states-as-seq min-dfa)
-                                                   [td _] (:transitions q)
-                                              :when (= :dont-know (gns/inhabited? td :dont-know))]
-                                          1)))
+      ;; count indeterminate transitions
+      (cl-format out-file ",~d" (count (for [q (xym/states-as-seq min-dfa)
+                                             [td _] (:transitions q)
+                                             :when (= :dont-know (gns/inhabited? td :dont-know))]
+                                         1)))
 
-        ;; inhabited dfa language
-        (cl-format out-file ";~a" satisfiability)
+      ;; inhabited dfa language?
+      (cl-format out-file ",~a" satisfiability)
 
-        (cl-format out-file "~%"))
-      
-      (write-stats-csv))))
+      (cl-format out-file "~%"))
+    ))
 
 
 
@@ -81,7 +83,7 @@
             size (hier-size rte)]
         (dot/dfa-view min-dfa (format "min-%d-%d" num-states num-transitions))
         (dot/dfa-view dfa (format "dfa-%d-%d" num-states num-transitions))
-        (printf "%d;%d;%d;%s\n"
+        (printf "%d,%d,%d,%s\n"
                 num-states
                 (count (:states min-dfa))
                 (reduce + 0 (map (fn [st] (count (:transitions st)))
@@ -93,7 +95,7 @@
          satisfiability
          (xym/serialize-dfa min-dfa)
          ]
-))))
+        ))))
 
 
 
@@ -119,7 +121,7 @@
     (if (> (+ t-1 t-2 t-3) 400)
       (dot/dfa-view min-dfa (format "dfa-%d-%d" num-states num-transitions)))
 
-))
+    ))
 
 (defn time-build-dfas
   ([max-num-states]
@@ -172,16 +174,17 @@
 ;; (time-build-dfas 6 6)
 
 (defn -main [& argv]
-  (doseq [num-samples (range 10 20)
-          num-states (range 5 10)
-          num-transitions (range (* 2 num-states)
-                                 (* 3 num-states))
-          ]
-    (write-stats-csv :num-samples num-samples
-                     :num-states num-states
+  (doseq [num-samples (range 100)
+          :let [num-states (+ 5 (rand-int 5) (rand-int 5))
+                num-transitions (+ (rand-int (* 2 num-states))
+                                   (rand-int (* 3 num-states)))
+                type-size (+ 2 (rand-int 3))
+                probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
+                ]]
+    (write-stats-csv :num-states num-states
                      :num-transitions num-transitions
-                     :type-size 2
-                     :probability-indeterminate 0.25))
+                     :type-size type-size
+                     :probability-indeterminate probability-indeterminate))
 
   ;; (pprint (gen-dfa-statistics :num-samples 1
   ;;                             :num-states 7 :num-transitions 18 
