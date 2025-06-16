@@ -10,9 +10,9 @@
    [util :refer [member time-expr]]
 ))
 
-(defn write-stats-csv [& {:keys [csv-file-name num-states num-transitions
+(defn write-stats-1-csv [& {:keys [csv-file-name num-states num-transitions
                                  exit-value type-size probability-indeterminate]
-                          :or {csv-file-name "/tmp/file.csv"
+                          :or {csv-file-name "/tmp/file-1.csv"
                                num-states 10
                                num-transitions 30
                                exit-value true
@@ -51,6 +51,48 @@
 
       ;; inhabited dfa language?
       (cl-format out-file ",~a" satisfiability)
+
+      (cl-format out-file "~%"))
+    ))
+
+(defn write-stats-2-csv [& {:keys [csv-file-name num-states num-transitions
+                                 exit-value type-size probability-indeterminate]
+                          :or {csv-file-name "/tmp/file-2.csv"
+                               num-states 10
+                               num-transitions 30
+                               exit-value true
+                               type-size 2
+                               probability-indeterminate 0.15
+                               }}]
+  (println [:num-states num-states
+            :num-transitions num-states
+            :type-size type-size
+            :probability-indeterminate probability-indeterminate])
+  (let [dfa-1 (xym/minimize (gen-dfa :num-states num-states
+                                     :num-transitions num-transitions
+                                     :exit-value exit-value
+                                     :type-size type-size
+                                     :probability-indeterminate probability-indeterminate))
+        dfa-2 (xym/minimize (gen-dfa :num-states num-states
+                                     :num-transitions num-transitions
+                                     :exit-value exit-value
+                                     :type-size type-size
+                                     :probability-indeterminate probability-indeterminate))
+        
+        subset (xym/dfa-inhabited? (get (xym/synchronized-and-not dfa-1 dfa-2)))
+        overlap (xym/dfa-inhabited? (get (xym/synchronized-xort dfa-1 dfa-2)))]
+    
+    
+    ;; open the csv file in append mode, i.e., write to the end
+    (with-open [out-file (java.io.FileWriter. csv-file-name true)]
+      ;; num-states , num-transitions , type-size , probability-indeterminate ,
+      (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+
+      ;; subset ,
+      (cl-format out-file ",~a" subset)
+
+      ;; overlap ,
+      (cl-format out-file ",~a" overlap)
 
       (cl-format out-file "~%"))
     ))
@@ -181,10 +223,17 @@
                 type-size (+ 2 (rand-int 3))
                 probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
                 ]]
-    (write-stats-csv :num-states num-states
+    (write-stats-1-csv :num-states num-states
                      :num-transitions num-transitions
                      :type-size type-size
-                     :probability-indeterminate probability-indeterminate))
+                     :probability-indeterminate probability-indeterminate)
+
+    (write-stats-2-csv :num-states num-states
+                     :num-transitions num-transitions
+                     :type-size type-size
+                     :probability-indeterminate probability-indeterminate)
+
+)
 
   ;; (pprint (gen-dfa-statistics :num-samples 1
   ;;                             :num-states 7 :num-transitions 18 
@@ -192,4 +241,4 @@
 )
 
 
-(-main)
+;; (-main)

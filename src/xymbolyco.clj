@@ -830,6 +830,14 @@
                         (fn [q1 _q2]
                           (exit-value dfa-1 q1))))
 
+(defn synchronized-and-not
+  [dfa-1 dfa-2]
+  (synchronized-product dfa-1 dfa-2
+                        (fn [a b]
+                          (and a (not b)))
+                        (fn [q1 _q2]
+                          (exit-value dfa-1 q1))))
+
 (defn synchronized-xor
   "Compute the xor of two Dfas. I.e., compute the Dfa which
   will recognized any sequence which is recognized by dfa-1 or
