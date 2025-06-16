@@ -79,8 +79,8 @@
                                      :type-size type-size
                                      :probability-indeterminate probability-indeterminate))
         
-        subset (xym/dfa-inhabited? (get (xym/synchronized-and-not dfa-1 dfa-2)))
-        overlap (xym/dfa-inhabited? (get (xym/synchronized-xort dfa-1 dfa-2)))]
+        subset (xym/dfa-inhabited? (xym/synchronized-and-not dfa-1 dfa-2))
+        overlap (xym/dfa-inhabited? (xym/synchronized-xor dfa-1 dfa-2))]
     
     
     ;; open the csv file in append mode, i.e., write to the end
