@@ -19,10 +19,6 @@
                                type-size 2
                                probability-indeterminate 0.15
                                }}]
-  (println [:num-states num-states
-            :num-transitions num-states
-            :type-size type-size
-            :probability-indeterminate probability-indeterminate])
   (let [dfa (gen-dfa :num-states num-states
                      :num-transitions num-transitions
                      :exit-value exit-value
@@ -30,7 +26,7 @@
                      :probability-indeterminate probability-indeterminate)
         min-dfa (xym/minimize dfa)
         [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)]
-    
+    (fn []
     ;; open the csv file in append mode, i.e., write to the end
     (with-open [out-file (java.io.FileWriter. csv-file-name true)]
       ;; num-states , num-transitions , type-size , probability-indeterminate ,
@@ -52,8 +48,9 @@
       ;; inhabited dfa language?
       (cl-format out-file ",~a" satisfiability)
 
-      (cl-format out-file "~%"))
+      (cl-format out-file "~%")))
     ))
+
 
 (defn write-stats-2-csv [& {:keys [csv-file-name num-states num-transitions
                                  exit-value type-size probability-indeterminate]
@@ -64,25 +61,24 @@
                                type-size 2
                                probability-indeterminate 0.15
                                }}]
-  (println [:num-states num-states
-            :num-transitions num-states
-            :type-size type-size
-            :probability-indeterminate probability-indeterminate])
-  (let [dfa-1 (xym/minimize (gen-dfa :num-states num-states
+  (let [dfa-1 (future (xym/minimize (gen-dfa :num-states num-states
                                      :num-transitions num-transitions
                                      :exit-value exit-value
                                      :type-size type-size
-                                     :probability-indeterminate probability-indeterminate))
-        dfa-2 (xym/minimize (gen-dfa :num-states num-states
+                                     :probability-indeterminate probability-indeterminate)))
+        dfa-2 (future (xym/minimize (gen-dfa :num-states num-states
                                      :num-transitions num-transitions
                                      :exit-value exit-value
                                      :type-size type-size
-                                     :probability-indeterminate probability-indeterminate))
-        
-        subset (xym/dfa-inhabited? (xym/synchronized-and-not dfa-1 dfa-2))
-        overlap (xym/dfa-inhabited? (xym/synchronized-xor dfa-1 dfa-2))]
+                                     :probability-indeterminate probability-indeterminate)))
+        dfa-xor (xym/synchronized-xor @dfa-1 @dfa-2)
+        dfa-empty-word (rte-to-dfa :epsilon exit-value)
+        dfa-xor-non-trivial (xym/synchronized-and-not dfa-xor dfa-empty-word)
+        subset (xym/dfa-inhabited? (xym/synchronized-and-not @dfa-1 @dfa-2))
+        overlap (xym/dfa-inhabited? dfa-xor)
+        non-trivial-overlap (xym/dfa-inhabited? dfa-xor-non-trivial)]
     
-    
+    (fn [] 
     ;; open the csv file in append mode, i.e., write to the end
     (with-open [out-file (java.io.FileWriter. csv-file-name true)]
       ;; num-states , num-transitions , type-size , probability-indeterminate ,
@@ -94,11 +90,11 @@
       ;; overlap ,
       (cl-format out-file ",~a" overlap)
 
-      (cl-format out-file "~%"))
+      ;; non-trivial-overlap ,
+      (cl-format out-file ",~a" non-trivial-overlap)
+
+      (cl-format out-file "~%")))
     ))
-
-
-
 
 (defn gen-dfa-statistics [& {:keys [num-samples num-states num-transitions
                                     exit-value type-size probability-indeterminate]
@@ -204,41 +200,47 @@
                        [ev satisfiability])
                :time total-time])
      )))
-        
-
-                  
 
 ;; (time-build-traces 30)
-
-
-
-
 ;; (time-build-dfas 6 6)
 
 (defn -main [& argv]
   (doseq [num-samples (range 100)
-          :let [num-states (+ 5 (rand-int 5) (rand-int 5))
-                num-transitions (+ (rand-int (* 2 num-states))
-                                   (rand-int (* 3 num-states)))
+          :let [num-states (+ 5 (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
+                delta (+ (rand-int num-states)
+                         (rand-int num-states))
+                num-transitions (+ num-states
+                                   delta)
                 type-size (+ 2 (rand-int 3))
                 probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
                 ]]
-    (write-stats-1-csv :num-states num-states
-                     :num-transitions num-transitions
-                     :type-size type-size
-                     :probability-indeterminate probability-indeterminate)
+    
+    (cl-format true "num-samples=~D~%" num-samples)
+    (println "++++++++++++++++++++++++++++++++++++++++")
+    (println [:num-states num-states
+            :num-transitions num-transitions
+            :type-size type-size
+            :probability-indeterminate probability-indeterminate])
 
-    (write-stats-2-csv :num-states num-states
-                     :num-transitions num-transitions
-                     :type-size type-size
-                     :probability-indeterminate probability-indeterminate)
-
+    (let [csv-1 (future   (write-stats-1-csv :num-states num-states
+                                             :num-transitions num-transitions
+                                             :type-size type-size
+                                             :probability-indeterminate probability-indeterminate))
+          csv-2 (future (write-stats-2-csv :num-states num-states
+                                           :num-transitions num-transitions
+                                           :type-size type-size
+                                           :probability-indeterminate probability-indeterminate))
+          f1 @csv-1
+          f2 @csv-2]
+      (f1)
+      (f2)
+      
+      )
+    
+    ;; (pprint (gen-dfa-statistics :num-samples 1
+    ;;                             :num-states 7 :num-transitions 18 
+    ;;                             :probability-indeterminate 0.3 :num-transitions 30))
+    )
 )
-
-  ;; (pprint (gen-dfa-statistics :num-samples 1
-  ;;                             :num-states 7 :num-transitions 18 
-  ;;                             :probability-indeterminate 0.3 :num-transitions 30))
-)
-
 
 ;; (-main)
