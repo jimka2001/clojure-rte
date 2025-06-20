@@ -2,12 +2,15 @@
   (:require
    [genus :as gns]
    [clojure.java.io :as io]
+   [clojure.data.csv :as csv]
+   [clojure.edn :as edn]
    [rte-extract :refer [dfa-to-rte]]
    [rte-construct :refer [rte-to-dfa]]
    [clojure.pprint :refer [pprint cl-format]]
    [xymbolyco :as xym]
    [xym-tester :refer [gen-dfa]]
-   [util :refer [member time-expr]]
+   [util :refer [member time-expr mean std-deviation]]
+
 ))
 
 (defn write-stats-1-csv [& {:keys [csv-file-name num-states num-transitions
@@ -29,6 +32,7 @@
     (fn []
     ;; open the csv file in append mode, i.e., write to the end
     (with-open [out-file (java.io.FileWriter. csv-file-name true)]
+      ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
       ;; num-states , num-transitions , type-size , probability-indeterminate ,
       (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
@@ -50,6 +54,50 @@
 
       (cl-format out-file "~%")))
     ))
+
+(defn summarize-file-1 [csv-file-name]
+  ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
+  (let [lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+                (doall (for [line (csv/read-csv csv-file)
+                             :when (not (= \# (get (get line 0) 0)))]
+                         (zipmap
+                          [:num-states
+                           :num-transitions
+                           :type-size
+                           :probability-indeterminate
+                           :min-dfa-state-count
+                           :min-dfa-transitions-count
+                           :count-indeterminate-transitions
+                           :inhabited-dfa-language]
+                          (map edn/read-string line)))))]
+    (letfn [(numeric [key]
+              (let [population (map key lines)]
+              {:min (reduce min population)
+               :max (reduce max population)
+               :mean (mean population)
+               :sigma (std-deviation population)}
+              ))
+            (symbolic [key]
+              (let [population (map key lines)
+                    n (count population)
+                    ]
+                {:distinct (distinct population)
+                 :count (for [x (distinct population)]
+                          [x (/ (count (filter #(= % x) population)) n)])
+                 }))
+            ]
+    {:num-states (numeric :num-states)
+                               
+     :num-transitions (numeric :num-transitions)
+     :type-size (numeric :type-size)
+     :probability-indeterminate  (numeric :probability-indeterminate )
+     :min-dfa-state-count (numeric :min-dfa-state-count)
+     :min-dfa-transitions-count (numeric :min-dfa-transitions-count)
+     :count-indeterminate-transitions (numeric :count-indeterminate-transitions )
+     :inhabited-dfa-language  (symbolic :inhabited-dfa-language)}
+  )))
+
+
 
 
 (defn write-stats-2-csv [& {:keys [csv-file-name num-states num-transitions
@@ -81,7 +129,9 @@
     (fn [] 
     ;; open the csv file in append mode, i.e., write to the end
     (with-open [out-file (java.io.FileWriter. csv-file-name true)]
-      ;; num-states , num-transitions , type-size , probability-indeterminate ,
+      ;; num-states , num-transitions , type-size , probability-indeterminate
+      ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap~%")
+
       (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
       ;; subset ,
@@ -215,7 +265,7 @@
                 probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
                 ]]
     
-    (cl-format true "num-samples=~D~%" num-samples)
+    (cl-format true "num-samples=~D " num-samples)
     (println "++++++++++++++++++++++++++++++++++++++++")
     (println [:num-states num-states
             :num-transitions num-transitions

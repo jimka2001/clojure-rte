@@ -21,6 +21,7 @@
 
 (ns util
   (:require [clojure.pprint :refer [cl-format]]
+            [clojure.math]
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
 
@@ -727,3 +728,15 @@
     
 (defmacro time-expr [& body]
   `(time-fn (fn [] ~@body)))
+
+(defn mean [population]
+  (/ (reduce + population)
+     (count population)))
+
+(defn std-deviation [population]
+  (let [m (mean population)
+        variance (mean (map (fn [p] 
+                              (let [d (- p m)]
+                                (* d d))) population))]
+    (clojure.math/sqrt variance)))
+
