@@ -1,10 +1,10 @@
-{:aliases
- {:clj-kondo
-  {:replace-deps
-   {clj-kondo/clj-kondo
-    {:git/url "https://github.com/clj-kondo/clj-kondo"
-     
-     :sha  "d5e0ec443fecbc01f8fc5aae4de69cce2e1e72be"
-     }}
-   :main-opts ["-m" "clj-kondo.main"]}}
-}
+{:paths ["src" "resources"],
+ :deps
+ {org.clojure/clojure {:mvn/version "1.12.0"},
+  org.clojure/data.csv {:mvn/version "1.1.0"},
+  lein-cloverage/lein-cloverage {:mvn/version "1.1.2"},
+  org.clojure/data.json {:mvn/version "1.0.0"},
+  com.clojure-goes-fast/clj-async-profiler {:mvn/version "0.5.1"},
+  backtick/backtick {:mvn/version "0.3.4"},
+  org.clojure/core.memoize {:mvn/version "1.0.236"},
+  org.clojure/math.combinatorics {:mvn/version "0.1.6"}}}

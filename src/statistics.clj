@@ -19,16 +19,27 @@
 (def inhabited-csv (.getPath (io/resource "statistics/dfa-inhabited.csv")))
 
 
-(defn merge-file [csv-file-name write-record]
+(defn merge-file 
+  "`csv-file-name` is a csv file in the resourse/statistics directory
+  `write-record` is a unary function, callable with a file writer (from java.io.FileWriter)
+  This function `merge-file`, calls `write-record` which is expected to write a line into
+  the write of its argument.  Thereafter, that resulting file is merged (via sort -m) into
+  the csv-file in the resource directory.
+  It is safe to call this function simultaneously from two different threads or
+  two different processes because the manipulation of the resource file is managed
+  by `util/call-in-block`"
+  [csv-file-name write-record]
   (let [tmp-1 (str "/tmp/" (random-uuid))
         tmp-2 (str "/tmp/" (random-uuid))]
-    ;; open the csv file in append mode, i.e., write to the end
-    (with-open [out-file (java.io.FileWriter. csv-file-name true)]
+    (with-open [out-file (java.io.FileWriter. tmp-1 true)]
       (write-record out-file))
-    (sh "mv" csv-file-name tmp-2)
-    (sh "sort" "-o" csv-file-name "-m" tmp-1 tmp-2)
-    (sh "trash" tmp-1)
-    (sh "trash" tmp-2)))
+    (printf "wrote to %s\n" tmp-1)
+    (call-in-block lock-file
+                   (fn []
+                     ;; open the csv file in append mode, i.e., write to the end
+                     (sh "sort" "-m" tmp-1 csv-file-name "-o" tmp-2)
+                     (sh "mv" tmp-2 csv-file-name)))
+    (sh "trash" tmp-1)))
 
 (defn write-stats-1-csv [& {:keys [csv-file-name num-states num-transitions
                                    exit-value type-size probability-indeterminate]
@@ -47,39 +58,34 @@
         min-dfa (xym/minimize dfa)
         [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)]
 
-    (call-in-block lock-file 
-                   (fn []
+    (merge-file csv-file-name
+                (fn [out-file]
+                  ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
+                  ;; num-states , num-transitions , type-size , probability-indeterminate ,
+                  (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
-                     ;; open the csv file in append mode, i.e., write to the end
-                     (with-open [out-file (java.io.FileWriter. csv-file-name true)]
-                       (merge-file csv-file-name
-                                   (fn [out-file]
-                                     ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
-                                     ;; num-states , num-transitions , type-size , probability-indeterminate ,
-                                     (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+                  ;; min-dfa-state-count ,
+                  (cl-format out-file ",~d" (count (:states min-dfa)))
 
-                                     ;; min-dfa-state-count ,
-                                     (cl-format out-file ",~d" (count (:states min-dfa)))
+                  ;; min-dfa-transitions-count ,
+                  (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                                             (xym/states-as-seq min-dfa))))
 
-                                     ;; min-dfa-transitions-count ,
-                                     (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
-                                                                                (xym/states-as-seq min-dfa))))
+                  ;; count indeterminate transitions
+                  (cl-format out-file ",~d" (count (for [q (xym/states-as-seq min-dfa)
+                                                         [td _] (:transitions q)
+                                                         :when (= :dont-know (gns/inhabited? td :dont-know))]
+                                                     1)))
 
-                                     ;; count indeterminate transitions
-                                     (cl-format out-file ",~d" (count (for [q (xym/states-as-seq min-dfa)
-                                                                            [td _] (:transitions q)
-                                                                            :when (= :dont-know (gns/inhabited? td :dont-know))]
-                                                                        1)))
+                  ;; inhabited dfa language?
+                  (cl-format out-file ",~a" satisfiability)
 
-                                     ;; inhabited dfa language?
-                                     (cl-format out-file ",~a" satisfiability)
+                  (cl-format out-file "~%")))))
 
-                                     (cl-format out-file "~%")))
-                       )))))
-
-(defn summarize-file-1 [csv-file-name]
+(defn summarize-subset-data []
   ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
-  (let [lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+  (let [csv-file-name inhabited-csv
+        lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
                 (doall (for [line (csv/read-csv csv-file)
                              :when (not (= \# (get (get line 0) 0)))]
                          (zipmap
@@ -148,32 +154,30 @@
         overlap (xym/dfa-inhabited? dfa-xor)
         non-trivial-overlap (xym/dfa-inhabited? dfa-xor-non-trivial)]
     
-    (call-in-block lock-file
-
-                   (fn [] 
-                     (merge-file csv-file-name
-                                 (fn [out-file]
-                                   ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap~%")
-                                   
-                                   ;; num-states , num-transitions , type-size , probability-indeterminate
-                                   (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
-                                   
-                                   ;; subset ,
-                                   (cl-format out-file ",~a" subset)
-                                   
-                                   ;; overlap ,
-                                   (cl-format out-file ",~a" overlap)
-                                   
-                                   ;; non-trivial-overlap ,
-                                   (cl-format out-file ",~a" non-trivial-overlap)
-                                   
-                                   (cl-format out-file "~%")
-                                   ))))))
+    (merge-file csv-file-name
+                (fn [out-file]
+                  ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap~%")
+                  
+                  ;; num-states , num-transitions , type-size , probability-indeterminate
+                  (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+                  
+                  ;; subset ,
+                  (cl-format out-file ",~a" subset)
+                  
+                  ;; overlap ,
+                  (cl-format out-file ",~a" overlap)
+                  
+                  ;; non-trivial-overlap ,
+                  (cl-format out-file ",~a" non-trivial-overlap)
+                  
+                  (cl-format out-file "~%")
+                  ))))
 
 
-(defn summarize-file-2 [csv-file-name]
+(defn summarize-file-2 []
   ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
-  (let [lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+  (let [csv-file-name subset-csv
+        lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
                 (doall (for [line (csv/read-csv csv-file)
                              :when (not (= \# (get (get line 0) 0)))]
                          (zipmap
