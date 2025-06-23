@@ -1,4 +1,4 @@
-# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
+#num-states,num-transitions,type-size,probability-indeterminate,min-dfa-state-count,min-dfa-transitions-count,count-indeterminate-transitions,inhabited-dfa-language
 10,10,3,0.33934508955104753,10,9,2,:indeterminate
 10,13,4,0.09194240764545365,10,12,1,:satisfiable
 10,14,4,0.4222330404686356,10,12,10,:indeterminate

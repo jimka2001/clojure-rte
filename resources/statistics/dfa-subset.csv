@@ -1,4 +1,4 @@
-# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
+#num-states,num-transitions,type-size,probability-indeterminate,subset,overlap,non-trivial-overlap
 10,10,3,0.33934508955104753,false,false,false
 10,13,4,0.09194240764545365,:dont-know,:dont-know,:dont-know
 10,14,4,0.4222330404686356,:dont-know,:dont-know,:dont-know
