@@ -103,6 +103,7 @@
 13,17,2,0.39230179074782784,false,false,false
 13,18,4,0.4296279548963598,false,:dont-know,:dont-know
 13,19,2,0.2197256685253236,:dont-know,:dont-know,:dont-know
+13,20,2,0.5452347290376384,false,:dont-know,:dont-know
 13,20,3,0.2635081384892129,:dont-know,:dont-know,:dont-know
 13,21,3,0.47730439215759946,true,true,true
 13,22,2,0.21816097086576025,true,true,true
@@ -452,6 +453,7 @@
 17,41,2,0.4232994212835394,:dont-know,true,true
 17,41,2,0.4736955089544778,:dont-know,true,true
 17,41,2,0.5586297814642882,:dont-know,:dont-know,:dont-know
+17,43,3,0.10297470015330108,false,false,false
 17,43,3,0.10815627415435584,true,true,true
 17,43,4,0.5202118318661049,:dont-know,:dont-know,:dont-know
 17,44,3,0.3684903260871122,true,true,true
