@@ -493,10 +493,10 @@
             num-transitions (range num-states (* 2 num-states))
             :let [exit-value 42 
                   type-size 2
-                  dfa-1 (gen-dfa num-states
-                                 num-transitions
-                                 exit-value
-                                 type-size)
+                  dfa-1 (gen-dfa :num-states num-states
+                                 :num-transitions num-transitions
+                                 :exit-value exit-value
+                                 :type-size type-size)
                   min-dfa (xym/minimize dfa-1)
                   rte (get (dfa-to-rte min-dfa) exit-value :empty-set)
                   dfa-2 (with-timeout {:num-states num-states
