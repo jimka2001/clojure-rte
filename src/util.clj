@@ -21,6 +21,9 @@
 
 (ns util
   (:require [clojure.pprint :refer [cl-format]]
+            [clojure.math]
+            [clojure.java.shell :refer [sh]]
+            [clojure.string :refer [trim]]
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
 
@@ -727,3 +730,31 @@
     
 (defmacro time-expr [& body]
   `(time-fn (fn [] ~@body)))
+
+(defn mean [population]
+  (/ (reduce + population)
+     (count population)))
+
+(defn std-deviation [population]
+  (let [m (mean population)
+        variance (mean (map (fn [p] 
+                              (let [d (- p m)]
+                                (* d d))) population))]
+    (clojure.math/sqrt variance)))
+
+(defn call-in-block [lock-file-name f]
+  (let [lock-key (str (random-uuid))
+        ms 500]
+    (sh "ln" "-s" lock-key lock-file-name)
+    (loop [content (:out (sh "readlink" lock-file-name))]
+      (if (and content
+               (= (trim content) lock-key))
+        (try (f)
+             (finally (sh "rm" "-f" lock-file-name)))
+        (do (printf "retry %s, got [%s], expecting [%s]\n" lock-file-name (trim content) lock-key)
+            (Thread/sleep 500)
+            (sh "ln" "-s" lock-key lock-file-name)
+            (recur (:out (sh "readlink" lock-file-name)))
+          )))))
+
+

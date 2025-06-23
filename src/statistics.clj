@@ -2,23 +2,54 @@
   (:require
    [genus :as gns]
    [clojure.java.io :as io]
+   [clojure.java.shell :refer [sh]]
+   [clojure.data.csv :as csv]
+   [clojure.edn :as edn]
    [rte-extract :refer [dfa-to-rte]]
    [rte-construct :refer [rte-to-dfa]]
    [clojure.pprint :refer [pprint cl-format]]
    [xymbolyco :as xym]
    [xym-tester :refer [gen-dfa]]
-   [util :refer [member time-expr]]
+   [util :refer [member time-expr mean std-deviation call-in-block]]
 ))
 
+
+(def lock-file (str (.getPath (io/resource "statistics")) "/statistics.lockfile"))
+(def subset-csv (.getPath (io/resource "statistics/dfa-subset.csv")))
+(def inhabited-csv (.getPath (io/resource "statistics/dfa-inhabited.csv")))
+
+
+(defn merge-file 
+  "`csv-file-name` is a csv file in the resourse/statistics directory
+  `write-record` is a unary function, callable with a file writer (from java.io.FileWriter)
+  This function `merge-file`, calls `write-record` which is expected to write a line into
+  the write of its argument.  Thereafter, that resulting file is merged (via sort -m) into
+  the csv-file in the resource directory.
+  It is safe to call this function simultaneously from two different threads or
+  two different processes because the manipulation of the resource file is managed
+  by `util/call-in-block`"
+  [csv-file-name write-record]
+  (let [tmp-1 (str "/tmp/" (random-uuid))
+        tmp-2 (str "/tmp/" (random-uuid))]
+    (with-open [out-file (java.io.FileWriter. tmp-1 true)]
+      (write-record out-file))
+    (printf "wrote to %s\n" tmp-1)
+    (call-in-block lock-file
+                   (fn []
+                     ;; open the csv file in append mode, i.e., write to the end
+                     (sh "sort" "-m" tmp-1 csv-file-name "-o" tmp-2)
+                     (sh "mv" tmp-2 csv-file-name)))
+    (sh "trash" tmp-1)))
+
 (defn write-stats-1-csv [& {:keys [csv-file-name num-states num-transitions
-                                 exit-value type-size probability-indeterminate]
-                          :or {csv-file-name "/tmp/file-1.csv"
-                               num-states 10
-                               num-transitions 30
-                               exit-value true
-                               type-size 2
-                               probability-indeterminate 0.15
-                               }}]
+                                   exit-value type-size probability-indeterminate]
+                            :or {csv-file-name inhabited-csv
+                                 num-states 10
+                                 num-transitions 30
+                                 exit-value true
+                                 type-size 2
+                                 probability-indeterminate 0.15
+                                 }}]
   (let [dfa (gen-dfa :num-states num-states
                      :num-transitions num-transitions
                      :exit-value exit-value
@@ -26,51 +57,96 @@
                      :probability-indeterminate probability-indeterminate)
         min-dfa (xym/minimize dfa)
         [satisfiability path] (get (xym/find-trace-map min-dfa) exit-value)]
-    (fn []
-    ;; open the csv file in append mode, i.e., write to the end
-    (with-open [out-file (java.io.FileWriter. csv-file-name true)]
-      ;; num-states , num-transitions , type-size , probability-indeterminate ,
-      (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
-      ;; min-dfa-state-count ,
-      (cl-format out-file ",~d" (count (:states min-dfa)))
+    (merge-file csv-file-name
+                (fn [out-file]
+                  ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
+                  ;; num-states , num-transitions , type-size , probability-indeterminate ,
+                  (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
-      ;; min-dfa-transitions-count ,
-      (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
-                                                 (xym/states-as-seq min-dfa))))
+                  ;; min-dfa-state-count ,
+                  (cl-format out-file ",~d" (count (:states min-dfa)))
 
-      ;; count indeterminate transitions
-      (cl-format out-file ",~d" (count (for [q (xym/states-as-seq min-dfa)
-                                             [td _] (:transitions q)
-                                             :when (= :dont-know (gns/inhabited? td :dont-know))]
-                                         1)))
+                  ;; min-dfa-transitions-count ,
+                  (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                                             (xym/states-as-seq min-dfa))))
 
-      ;; inhabited dfa language?
-      (cl-format out-file ",~a" satisfiability)
+                  ;; count indeterminate transitions
+                  (cl-format out-file ",~d" (count (for [q (xym/states-as-seq min-dfa)
+                                                         [td _] (:transitions q)
+                                                         :when (= :dont-know (gns/inhabited? td :dont-know))]
+                                                     1)))
 
-      (cl-format out-file "~%")))
-    ))
+                  ;; inhabited dfa language?
+                  (cl-format out-file ",~a" satisfiability)
+
+                  (cl-format out-file "~%")))))
+
+(defn summarize-subset-data []
+  ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
+  (let [csv-file-name inhabited-csv
+        lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+                (doall (for [line (csv/read-csv csv-file)
+                             :when (not (= \# (get (get line 0) 0)))]
+                         (zipmap
+                          [:num-states
+                           :num-transitions
+                           :type-size
+                           :probability-indeterminate
+                           :min-dfa-state-count
+                           :min-dfa-transitions-count
+                           :count-indeterminate-transitions
+                           :inhabited-dfa-language]
+                          (map edn/read-string line)))))]
+    (letfn [(numeric [key]
+              (let [population (map key lines)]
+              {:min (reduce min population)
+               :max (reduce max population)
+               :mean (mean population)
+               :sigma (std-deviation population)}
+              ))
+            (symbolic [key]
+              (let [population (map key lines)
+                    n (count population)
+                    ]
+                {:distinct (distinct population)
+                 :frequencies (frequencies population)
+                 :count (for [x (distinct population)]
+                          [x (/ (count (filter #(= % x) population)) n)])
+                 }))
+            ]
+    {:num-states (numeric :num-states)
+                               
+     :num-transitions (numeric :num-transitions)
+     :type-size (numeric :type-size)
+     :probability-indeterminate  (numeric :probability-indeterminate )
+     :min-dfa-state-count (numeric :min-dfa-state-count)
+     :min-dfa-transitions-count (numeric :min-dfa-transitions-count)
+     :count-indeterminate-transitions (numeric :count-indeterminate-transitions )
+     :inhabited-dfa-language  (symbolic :inhabited-dfa-language)}
+  )))
+
 
 
 (defn write-stats-2-csv [& {:keys [csv-file-name num-states num-transitions
-                                 exit-value type-size probability-indeterminate]
-                          :or {csv-file-name "/tmp/file-2.csv"
-                               num-states 10
-                               num-transitions 30
-                               exit-value true
-                               type-size 2
-                               probability-indeterminate 0.15
-                               }}]
+                                   exit-value type-size probability-indeterminate]
+                            :or {csv-file-name subset-csv
+                                 num-states 10
+                                 num-transitions 30
+                                 exit-value true
+                                 type-size 2
+                                 probability-indeterminate 0.15
+                                 }}]
   (let [dfa-1 (future (xym/minimize (gen-dfa :num-states num-states
-                                     :num-transitions num-transitions
-                                     :exit-value exit-value
-                                     :type-size type-size
-                                     :probability-indeterminate probability-indeterminate)))
+                                             :num-transitions num-transitions
+                                             :exit-value exit-value
+                                             :type-size type-size
+                                             :probability-indeterminate probability-indeterminate)))
         dfa-2 (future (xym/minimize (gen-dfa :num-states num-states
-                                     :num-transitions num-transitions
-                                     :exit-value exit-value
-                                     :type-size type-size
-                                     :probability-indeterminate probability-indeterminate)))
+                                             :num-transitions num-transitions
+                                             :exit-value exit-value
+                                             :type-size type-size
+                                             :probability-indeterminate probability-indeterminate)))
         dfa-xor (xym/synchronized-xor @dfa-1 @dfa-2)
         dfa-empty-word (rte-to-dfa :epsilon exit-value)
         dfa-xor-non-trivial (xym/synchronized-and-not dfa-xor dfa-empty-word)
@@ -78,23 +154,68 @@
         overlap (xym/dfa-inhabited? dfa-xor)
         non-trivial-overlap (xym/dfa-inhabited? dfa-xor-non-trivial)]
     
-    (fn [] 
-    ;; open the csv file in append mode, i.e., write to the end
-    (with-open [out-file (java.io.FileWriter. csv-file-name true)]
-      ;; num-states , num-transitions , type-size , probability-indeterminate ,
-      (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+    (merge-file csv-file-name
+                (fn [out-file]
+                  ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap~%")
+                  
+                  ;; num-states , num-transitions , type-size , probability-indeterminate
+                  (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+                  
+                  ;; subset ,
+                  (cl-format out-file ",~a" subset)
+                  
+                  ;; overlap ,
+                  (cl-format out-file ",~a" overlap)
+                  
+                  ;; non-trivial-overlap ,
+                  (cl-format out-file ",~a" non-trivial-overlap)
+                  
+                  (cl-format out-file "~%")
+                  ))))
 
-      ;; subset ,
-      (cl-format out-file ",~a" subset)
 
-      ;; overlap ,
-      (cl-format out-file ",~a" overlap)
-
-      ;; non-trivial-overlap ,
-      (cl-format out-file ",~a" non-trivial-overlap)
-
-      (cl-format out-file "~%")))
-    ))
+(defn summarize-file-2 []
+  ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
+  (let [csv-file-name subset-csv
+        lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+                (doall (for [line (csv/read-csv csv-file)
+                             :when (not (= \# (get (get line 0) 0)))]
+                         (zipmap
+                          [:num-states
+                           :num-transitions
+                           :type-size
+                           :probability-indeterminate
+                           :subset
+                           :overlap
+                           :non-trivial-overlap
+                           ]
+                          (map edn/read-string line)))))]
+    (letfn [(numeric [key]
+              (let [population (map key lines)]
+              {:min (reduce min population)
+               :max (reduce max population)
+               :mean (mean population)
+               :sigma (std-deviation population)}
+              ))
+            (symbolic [key]
+              (let [population (map key lines)
+                    n (count population)
+                    ]
+                {:distinct (distinct population)
+                 :frequencies (frequencies population)
+                 :count (for [x (distinct population)]
+                          [x (/ (count (filter #(= % x) population)) n)])
+                 }))
+            ]
+    {:num-states (numeric :num-states)
+     :num-transitions (numeric :num-transitions)
+     :type-size (numeric :type-size)
+     :probability-indeterminate  (numeric :probability-indeterminate )
+     :subset (symbolic :subset)
+     :overlap (symbolic :overlap)
+     :non-trivial-overlap (symbolic :non-trivila-overlap)
+  }
+  )))
 
 (defn gen-dfa-statistics [& {:keys [num-samples num-states num-transitions
                                     exit-value type-size probability-indeterminate]
@@ -215,7 +336,7 @@
                 probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
                 ]]
     
-    (cl-format true "num-samples=~D~%" num-samples)
+    (cl-format true "num-samples=~D " num-samples)
     (println "++++++++++++++++++++++++++++++++++++++++")
     (println [:num-states num-states
             :num-transitions num-transitions
@@ -229,12 +350,9 @@
           csv-2 (future (write-stats-2-csv :num-states num-states
                                            :num-transitions num-transitions
                                            :type-size type-size
-                                           :probability-indeterminate probability-indeterminate))
-          f1 @csv-1
-          f2 @csv-2]
-      (f1)
-      (f2)
-      
+                                           :probability-indeterminate probability-indeterminate))]
+      @csv-1
+      @csv-2
       )
     
     ;; (pprint (gen-dfa-statistics :num-samples 1
