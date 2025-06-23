@@ -22,7 +22,9 @@
 (ns util
   (:require [clojure.pprint :refer [cl-format]]
             [clojure.math]
+            [clojure.data.csv :as csv]
             [clojure.java.shell :refer [sh]]
+            [clojure.set :refer [rename-keys]]
             [clojure.string :refer [trim]]
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
@@ -758,3 +760,73 @@
           )))))
 
 
+
+(defn rename-columns 
+  "`headers` is a sequence of strings
+  `lines` is a sequence of maps
+  `rename` is a map of old-name to new-name
+  Returns a pair which is a new sequence of headers and
+  a sequence of maps, having the keys renamed according to the `rename` map"
+  [headers lines rename]
+  [(for [header headers]
+     ;; CHALLENGE: student must complete the implementation.
+     (get rename header header)
+     )
+   (for [line-map lines]
+     ;; CHALLENGE: student must complete the implementation.
+     (rename-keys line-map rename)
+     )])
+
+(defn read-csv-data
+  "Given a string representing the content of a csv file,
+  return a pair [list-of-headers list-of-maps], where list-of-headers is the
+  list of header strings, in order, and list-of-maps is one per line in the csv.
+  whose keys are the headers on the first line, and whose values are the corresponding
+  values in the column of the rest of the lines.
+  `parsers` is a map of header to parser function.   the function should accept a string
+  and return the interpreted value, the tbl will be populated by returns values
+  from this function if given.   E.g., if the table contains a column named \"xyz\" with a value such
+  as 1 in the column, then it is normally
+  read as the string \"10\"; however if you would like this converted to an integer,
+  you'll specify the function parse-long: {\"xyz\" parse-long}.
+  If `headers` is `nil` then interpret the first (non-comment) line as the headers list.
+  If `headers` is not nil, then interpret the first (non-comment) as csv data.
+  "
+  [csv & {:keys [parsers headers comment? separator]
+          :as options
+          :or {comment?  (fn [[start]] (= \# (get start 0)))
+               separator \,
+               parsers {}
+               headers nil}
+          }]
+  (cond (string? csv)
+        (let [tbl (filter (complement comment?) (csv/read-csv csv
+                                                              :separator separator))
+              headers (or headers (first tbl))
+              body (if (:headers options)
+                     tbl ;; if headers was given as :headers, the don't skip first line
+                     (rest tbl))]
+          [headers
+           (for [line body]
+             (into {} (map (fn [header cell]
+                             ;; header is a header string which indicates the name
+                             ;; of one of the csv columns.
+                             ;; (get parsers header) returns nil or a function which will parse
+                             ;;  the string in the csv column.  If (get parsers header) returns
+                             ;;  nil, then the string value should not be *parsed*, otherwise
+                             ;;  the parsing function should be called on the string in the cell
+                             ;;  to obtain the desired value.
+                             ;; CHALLENGE: student must complete the implementation.
+                             {header
+                              ((get parsers header (get parsers :default identity)) cell)}
+                             )
+                           headers line)))])
+        (= (type csv)
+           java.io.BufferedReader)
+        (read-csv-data (slurp csv) options)
+
+        :else
+        (throw (ex-info "read-csv cannot handle first argument"
+                        {:csv csv
+                         :type (type csv)}))
+))

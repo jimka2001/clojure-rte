@@ -1,16 +1,16 @@
 (ns statistics
   (:require
-   [genus :as gns]
-   [clojure.java.io :as io]
-   [clojure.java.shell :refer [sh]]
    [clojure.data.csv :as csv]
    [clojure.edn :as edn]
-   [rte-extract :refer [dfa-to-rte]]
-   [rte-construct :refer [rte-to-dfa]]
+   [clojure.java.io :as io]
+   [clojure.java.shell :refer [sh]]
    [clojure.pprint :refer [pprint cl-format]]
-   [xymbolyco :as xym]
+   [genus :as gns]
+   [rte-construct :refer [rte-to-dfa]]
+   [rte-extract :refer [dfa-to-rte]]
+   [util :refer [member time-expr mean std-deviation call-in-block read-csv-data rename-columns]]
    [xym-tester :refer [gen-dfa]]
-   [util :refer [member time-expr mean std-deviation call-in-block]]
+   [xymbolyco :as xym]
 ))
 
 
@@ -116,7 +116,6 @@
                  }))
             ]
     {:num-states (numeric :num-states)
-                               
      :num-transitions (numeric :num-transitions)
      :type-size (numeric :type-size)
      :probability-indeterminate  (numeric :probability-indeterminate )
@@ -172,6 +171,15 @@
                   
                   (cl-format out-file "~%")
                   ))))
+
+
+(defn read-resource-csv [csv-file]
+  (with-open [csv-file (clojure.java.io/reader csv-file)]
+    (let [[headers lines] (read-csv-data csv-file
+                                         :comment? (constantly false)
+                                         :parsers {:default edn/read-string}
+                                         )]
+      (rename-columns headers lines {"#num-states" "num-states"}))))
 
 
 (defn summarize-file-2 []
@@ -325,8 +333,8 @@
 ;; (time-build-traces 30)
 ;; (time-build-dfas 6 6)
 
-(defn -main [& argv]
-  (doseq [num-samples (range 100)
+(defn update-resource-csv [num-samples]
+  (doseq [num-samples (range num-samples)
           :let [num-states (+ 5 (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
@@ -339,9 +347,9 @@
     (cl-format true "num-samples=~D " num-samples)
     (println "++++++++++++++++++++++++++++++++++++++++")
     (println [:num-states num-states
-            :num-transitions num-transitions
-            :type-size type-size
-            :probability-indeterminate probability-indeterminate])
+              :num-transitions num-transitions
+              :type-size type-size
+              :probability-indeterminate probability-indeterminate])
 
     (let [csv-1 (future   (write-stats-1-csv :num-states num-states
                                              :num-transitions num-transitions
@@ -358,7 +366,10 @@
     ;; (pprint (gen-dfa-statistics :num-samples 1
     ;;                             :num-states 7 :num-transitions 18 
     ;;                             :probability-indeterminate 0.3 :num-transitions 30))
-    )
+    ))
+
+(defn -main [& argv]
+  (update-resource-csv 100)
 )
 
 ;; (-main)
