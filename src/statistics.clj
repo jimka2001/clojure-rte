@@ -112,7 +112,7 @@
                 {:distinct (distinct population)
                  :frequencies (frequencies population)
                  :count (for [x (distinct population)]
-                          [x (/ (count (filter #(= % x) population)) n)])
+                          [x (float (/ (count (filter #(= % x) population)) n))])
                  }))
             ]
     {:num-states (numeric :num-states)
@@ -221,7 +221,7 @@
                 {:distinct (distinct population)
                  :frequencies (frequencies population)
                  :count (for [x (distinct population)]
-                          [x (/ (count (filter #(= % x) population)) n)])
+                          [x (float (/ (count (filter #(= % x) population)) n))])
                  }))
             ]
     {:num-states (numeric :num-states)
