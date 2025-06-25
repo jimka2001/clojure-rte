@@ -1,4 +1,4 @@
-(ns common.vega-plot
+(ns vega-plot
   (:require [oz.core :as oz]))
 
 (defn series-format-plot-data 
