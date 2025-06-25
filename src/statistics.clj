@@ -11,6 +11,7 @@
    [util :refer [member time-expr mean std-deviation call-in-block read-csv-data rename-columns]]
    [xym-tester :refer [gen-dfa]]
    [xymbolyco :as xym]
+   [vega-plot :as vega]
 ))
 
 
