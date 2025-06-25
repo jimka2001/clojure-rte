@@ -62,6 +62,7 @@
 12,18,2,0.31054143058659883,false,true,true
 12,18,3,0.25156520332723054,true,true,true
 12,18,4,0.3229315348322381,false,false,false
+12,19,3,0.2471284399354593,:dont-know,:dont-know,:dont-know
 12,19,3,0.3038398148482076,false,false,false
 12,20,2,0.36162811893299995,:dont-know,:dont-know,:dont-know
 12,20,2,0.49268009669245255,:dont-know,:dont-know,:dont-know
@@ -83,6 +84,7 @@
 12,25,3,0.39618200931075487,:dont-know,:dont-know,:dont-know
 12,26,4,0.3470017087300354,:dont-know,:dont-know,:dont-know
 12,27,3,0.2199251377972162,:dont-know,:dont-know,:dont-know
+12,28,3,0.2406232767022962,:dont-know,:dont-know,:dont-know
 12,28,3,0.36094689992889295,:dont-know,:dont-know,:dont-know
 12,28,3,0.3699184285039978,:dont-know,:dont-know,:dont-know
 12,28,3,0.4144049530356049,true,true,true
@@ -206,6 +208,7 @@
 14,32,3,0.11811309102576917,:dont-know,:dont-know,:dont-know
 14,32,3,0.3395200062590022,false,false,false
 14,32,3,0.44512336581967454,:dont-know,:dont-know,:dont-know
+14,32,4,0.17959065161125767,true,true,true
 14,32,4,0.2464946236733504,:dont-know,true,true
 14,33,2,0.27342931912018303,:dont-know,:dont-know,:dont-know
 14,33,3,0.1589177858003256,:dont-know,true,true
@@ -617,6 +620,7 @@
 20,32,3,0.2717363616031689,:dont-know,:dont-know,:dont-know
 20,33,2,0.37781532401983126,true,true,true
 20,33,3,0.46655538838531946,:dont-know,:dont-know,:dont-know
+20,34,2,0.1726858575281025,:dont-know,:dont-know,:dont-know
 20,35,2,0.41609866828672676,:dont-know,:dont-know,:dont-know
 20,35,4,0.47311937799443377,:dont-know,:dont-know,:dont-know
 20,36,2,0.31881179568212353,:dont-know,:dont-know,:dont-know
