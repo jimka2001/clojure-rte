@@ -176,6 +176,7 @@
                        verbose
                        )))
 
+
 (defn test-rte-not-1
   "Assert that the same result occurs from complementing a dfa
   or building a Dfa from a complemented rte."
