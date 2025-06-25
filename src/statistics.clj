@@ -82,7 +82,7 @@
 
                   (cl-format out-file "~%")))))
 
-(defn summarize-subset-data []
+(defn summarize-inhabited-data []
   ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
   (let [csv-file-name inhabited-csv
         lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
@@ -181,8 +181,17 @@
                                          )]
       (rename-columns headers lines {"#num-states" "num-states"}))))
 
+(defn plot-resource-csv [csv-file x-axis y-axis]
+  (let [[headers lines] (read-resource-csv csv-file)]
+    (vega/series-scatter-plot "some data"
+                              x-axis
+                              y-axis
+                              [[(format "%s vs %s" x-axis y-axis)
+                                (for [line lines]
+                                  [(get line x-axis)
+                                   (get line y-axis)])]])))
 
-(defn summarize-file-2 []
+(defn summarize-subset-data []
   ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
   (let [csv-file-name subset-csv
         lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
