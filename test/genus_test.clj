@@ -98,6 +98,12 @@
     (is (= false (gns/disjoint? 'Number 'clojure.lang.IPersistentList :dont-know)))
     (is (= true (gns/inhabited? '(and Number clojure.lang.IPersistentList) :dont-know)))))
 
+(deftest t-disjoint-String
+  (testing "disjoint string"
+    (is (= true (gns/disjoint? 'String
+                               'Number
+                               :dont-know)))))
+
 (deftest t-expand-satisfies
   (testing "expand-satisfies"
     (is (= (gns/expand-satisfies nil)
