@@ -389,7 +389,7 @@
     ;;                             :probability-indeterminate 0.3 :num-transitions 30))
     ))
 
-(defn plot-satisfiable-percent []
+(defn plot-summary []
   (let [inhabited-xys (for [[num-states lines] (group-by :num-states (slurp-inhabited-data))
               :let [m (frequencies (map :inhabited-dfa-language lines))
                     indeterminate (get m :indeterminate 0)
@@ -444,9 +444,9 @@
                                         "probability"
                                         [["inhabited=true" (sort inhabited-xys)]
                                          ["subset=true" (sort subset-true-xys)]
-                                         ["subset=indeterminate" (sort subset-dont-know-xys)]
+                                         ["subset=dont-know" (sort subset-dont-know-xys)]
                                          ["overlap=true" (sort overlap-true-xys)]
-                                         ["overlap=indeterminate" (sort overlap-dont-know-xys)]
+                                         ["overlap=dont-know" (sort overlap-dont-know-xys)]
                                          ])]
 
     (sh "cp" image plot-path)
@@ -455,11 +455,12 @@
     image))
 
 
-(plot-satisfiable-percent)
+(plot-summary)
 
 
 (defn -main [& argv]
   (update-resource-csv 100)
+  (plot-satisfiable-percent)
 )
 
 ;; (-main)
