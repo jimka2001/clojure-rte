@@ -356,7 +356,7 @@
 
 (defn update-resource-csv [num-samples]
   (doseq [num-samples (range num-samples)
-          :let [num-states (+ 20 5 (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
+          :let [num-states (+ 10 5 (rand-int 5) (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
                 num-transitions (+ num-states
