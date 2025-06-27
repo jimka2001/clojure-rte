@@ -356,7 +356,7 @@
 
 (defn update-resource-csv [num-samples]
   (doseq [num-samples (range num-samples)
-          :let [num-states (+ 5 (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
+          :let [num-states (+ 20 5 (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
                 num-transitions (+ num-states
@@ -398,7 +398,8 @@
                     ]]
           
                         [num-states satisfiable-percent])
-        grouped-subset (group-by :num-states (slurp-subset-data))
+        sample-lines (slurp-subset-data)
+        grouped-subset (group-by :num-states sample-lines)
         subset-true-xys (for [[num-states lines] grouped-subset
                               :let [m (frequencies (map :subset lines))
                                     count-true (get m true 0)
@@ -439,10 +440,18 @@
                                     ]]
           
                           [num-states true-percent])
+        population (count sample-lines)
+        histogram-xyz (for [[num-states lines] grouped-subset
+                            :let [count-local (count lines)
+                                  true-percent (* 100 (float (/ count-local population)))
+                                  ]]
+          
+                          [num-states true-percent])
         image (vega/series-scatter-plot "Statistics"
                                         "state count"
                                         "probability"
-                                        [["inhabited=true" (sort inhabited-xys)]
+                                        [["state-count-histogram" (sort histogram-xyz)]
+                                         ["inhabited=true" (sort inhabited-xys)]
                                          ["subset=true" (sort subset-true-xys)]
                                          ["subset=dont-know" (sort subset-dont-know-xys)]
                                          ["overlap=true" (sort overlap-true-xys)]
@@ -455,12 +464,10 @@
     image))
 
 
-(plot-summary)
-
-
 (defn -main [& argv]
   (update-resource-csv 100)
-  (plot-satisfiable-percent)
+  (plot-summary)
 )
 
+;; to run this from the shell 
 ;; (-main)
