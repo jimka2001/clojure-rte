@@ -42,5 +42,3 @@
 
     (oz/export! formatted-data tmp)
     tmp))
-
-

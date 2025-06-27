@@ -12,12 +12,14 @@
    [xym-tester :refer [gen-dfa]]
    [xymbolyco :as xym]
    [vega-plot :as vega]
+   [view]
 ))
 
 
 (def lock-file (str (.getPath (io/resource "statistics")) "/statistics.lockfile"))
 (def subset-csv (.getPath (io/resource "statistics/dfa-subset.csv")))
 (def inhabited-csv (.getPath (io/resource "statistics/dfa-inhabited.csv")))
+(def plot-path (.getPath (io/resource "statistics/statistics-plot.svg")))
 
 
 (defn merge-file 
@@ -83,22 +85,27 @@
 
                   (cl-format out-file "~%")))))
 
+(defn slurp-inhabited-data []
+  (let [csv-file-name inhabited-csv]
+    ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
+    (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+      (doall (for [line (csv/read-csv csv-file)
+                   :when (not (= \# (get (get line 0) 0)))]
+               (zipmap
+                [:num-states
+                 :num-transitions
+                 :type-size
+                 :probability-indeterminate
+                 :min-dfa-state-count
+                 :min-dfa-transitions-count
+                 :count-indeterminate-transitions
+                 :inhabited-dfa-language]
+                (map edn/read-string line)))))))
+  
+
 (defn summarize-inhabited-data []
   ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
-  (let [csv-file-name inhabited-csv
-        lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
-                (doall (for [line (csv/read-csv csv-file)
-                             :when (not (= \# (get (get line 0) 0)))]
-                         (zipmap
-                          [:num-states
-                           :num-transitions
-                           :type-size
-                           :probability-indeterminate
-                           :min-dfa-state-count
-                           :min-dfa-transitions-count
-                           :count-indeterminate-transitions
-                           :inhabited-dfa-language]
-                          (map edn/read-string line)))))]
+  (let [lines (slurp-inhabited-data)]
     (letfn [(numeric [key]
               (let [population (map key lines)]
               {:min (reduce min population)
@@ -192,22 +199,26 @@
                                   [(get line x-axis)
                                    (get line y-axis)])]])))
 
+(defn slurp-subset-data []
+  (let [csv-file-name subset-csv]
+    ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
+    (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+      (doall (for [line (csv/read-csv csv-file)
+                   :when (not (= \# (get (get line 0) 0)))]
+               (zipmap
+                [:num-states
+                 :num-transitions
+                 :type-size
+                 :probability-indeterminate
+                 :subset
+                 :overlap
+                 :non-trivial-overlap
+                 ]
+                (map edn/read-string line)))))))
+  
 (defn summarize-subset-data []
   ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
-  (let [csv-file-name subset-csv
-        lines (with-open [csv-file (clojure.java.io/reader csv-file-name)]
-                (doall (for [line (csv/read-csv csv-file)
-                             :when (not (= \# (get (get line 0) 0)))]
-                         (zipmap
-                          [:num-states
-                           :num-transitions
-                           :type-size
-                           :probability-indeterminate
-                           :subset
-                           :overlap
-                           :non-trivial-overlap
-                           ]
-                          (map edn/read-string line)))))]
+  (let [lines (slurp-subset-data)]
     (letfn [(numeric [key]
               (let [population (map key lines)]
               {:min (reduce min population)
@@ -377,6 +388,75 @@
     ;;                             :num-states 7 :num-transitions 18 
     ;;                             :probability-indeterminate 0.3 :num-transitions 30))
     ))
+
+(defn plot-satisfiable-percent []
+  (let [inhabited-xys (for [[num-states lines] (group-by :num-states (slurp-inhabited-data))
+              :let [m (frequencies (map :inhabited-dfa-language lines))
+                    indeterminate (get m :indeterminate 0)
+                    satisfiable (get m :satisfiable 0)
+                    satisfiable-percent (* 100 (float (/ satisfiable (+ satisfiable indeterminate))))
+                    ]]
+          
+                        [num-states satisfiable-percent])
+        grouped-subset (group-by :num-states (slurp-subset-data))
+        subset-true-xys (for [[num-states lines] grouped-subset
+                              :let [m (frequencies (map :subset lines))
+                                    count-true (get m true 0)
+                                    count-false (get m false 0)
+                                    count-dont-know (get m :dont-know 0)
+                                    count (+ count-true count-false count-dont-know)
+                                    true-percent (* 100 (float (/ count-true count)))
+                                    ]]
+          
+                          [num-states true-percent])
+        subset-dont-know-xys (for [[num-states lines] grouped-subset
+                              :let [m (frequencies (map :subset lines))
+                                    count-true (get m true 0)
+                                    count-false (get m false 0)
+                                    count-dont-know (get m :dont-know 0)
+                                    count (+ count-true count-false count-dont-know)
+                                    dont-know-percent (* 100 (float (/ count-dont-know count)))
+                                    ]]
+          
+                               [num-states dont-know-percent])
+        overlap-dont-know-xys (for [[num-states lines] grouped-subset
+                                    :let [m (frequencies (map :overlap lines))
+                                    count-true (get m true 0)
+                                    count-false (get m false 0)
+                                    count-dont-know (get m :dont-know 0)
+                                    count (+ count-true count-false count-dont-know)
+                                    dont-know-percent (* 100 (float (/ count-dont-know count)))
+                                    ]]
+          
+                                [num-states dont-know-percent])
+        overlap-true-xys (for [[num-states lines] grouped-subset
+                              :let [m (frequencies (map :overlap lines))
+                                    count-true (get m true 0)
+                                    count-false (get m false 0)
+                                    count-dont-know (get m :dont-know 0)
+                                    count (+ count-true count-false count-dont-know)
+                                    true-percent (* 100 (float (/ count-true count)))
+                                    ]]
+          
+                          [num-states true-percent])
+        image (vega/series-scatter-plot "Statistics"
+                                        "state count"
+                                        "probability"
+                                        [["inhabited=true" (sort inhabited-xys)]
+                                         ["subset=true" (sort subset-true-xys)]
+                                         ["subset=indeterminate" (sort subset-dont-know-xys)]
+                                         ["overlap=true" (sort overlap-true-xys)]
+                                         ["overlap=indeterminate" (sort overlap-dont-know-xys)]
+                                         ])]
+
+    (sh "cp" image plot-path)
+    (view/view-image image)
+
+    image))
+
+
+(plot-satisfiable-percent)
+
 
 (defn -main [& argv]
   (update-resource-csv 100)
