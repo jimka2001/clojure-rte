@@ -482,40 +482,42 @@
     (pprint [:ssd ssd])
     (pprint [:sid sid])
     (printf "---------------\n")
-    (with-open [out-file (java.io.FileWriter. statistics-tex-path)]
-      (doseq [[sym value]
-              [['xyznumsamples (:num-samples ssd)]
-               ['xyzminsize (get-in ssd [:num-states :min])]
-               ['xyzmaxsize (get-in ssd [:num-states :max])]
-               ['xyzsizemu  (round-2 (get-in ssd [:num-states :mean]))]
-               ['xyzsizesigma (round-2 (get-in ssd [:num-states :sigma]))]
+    (call-in-block lock-file
+                   (fn []
+                     (with-open [out-file (java.io.FileWriter. statistics-tex-path)]
+                       (doseq [[sym value]
+                               [['xyznumsamples (:num-samples ssd)]
+                                ['xyzminsize (get-in ssd [:num-states :min])]
+                                ['xyzmaxsize (get-in ssd [:num-states :max])]
+                                ['xyzsizemu  (round-2 (get-in ssd [:num-states :mean]))]
+                                ['xyzsizesigma (round-2 (get-in ssd [:num-states :sigma]))]
 
-               ['xyzmintransitions (get-in ssd [:num-transitions :min])]
-               ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
-               ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean]))]
-               ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma]))]
+                                ['xyzmintransitions (get-in ssd [:num-transitions :min])]
+                                ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
+                                ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean]))]
+                                ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma]))]
 
-               ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
-               ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
-               ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean]))]
-               ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
+                                ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
+                                ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
+                                ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean]))]
+                                ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
 
-               ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
-               ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable])))]
-               ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
-               ['xyzpercentindeterminate
-                (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate])))]
-               ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true])))]
-               ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false])))]
-               ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know])))]
-               ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false])))]
-               ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true])))]
-               ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know])))]
-               ]]
-        (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))))
+                                ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
+                                ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable])))]
+                                ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
+                                ['xyzpercentindeterminate
+                                 (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate])))]
+                                ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true])))]
+                                ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false])))]
+                                ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know])))]
+                                ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false])))]
+                                ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true])))]
+                                ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know])))]
+                                ]]
+                         (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))))))
 
 (defn -main [& argv]
-  (update-resource-csv 3)
+  (update-resource-csv 75)
   (plot-summary)
   (summarize-data)
 )
