@@ -36,7 +36,6 @@
         tmp-2 (str "/tmp/" (random-uuid))]
     (with-open [out-file (java.io.FileWriter. tmp-1 true)]
       (write-record out-file))
-    (printf "wrote to %s\n" tmp-1)
     (call-in-block lock-file
                    (fn []
                      ;; open the csv file in append mode, i.e., write to the end
@@ -108,30 +107,31 @@
   (let [lines (slurp-inhabited-data)]
     (letfn [(numeric [key]
               (let [population (map key lines)]
-              {:min (reduce min population)
-               :max (reduce max population)
-               :mean (mean population)
-               :sigma (std-deviation population)}
-              ))
+                {:min (reduce min population)
+                 :max (reduce max population)
+                 :mean (mean population)
+                 :sigma (std-deviation population)}
+                ))
             (symbolic [key]
               (let [population (map key lines)
                     n (count population)
                     ]
                 {:distinct (distinct population)
                  :frequencies (frequencies population)
-                 :count (for [x (distinct population)]
-                          [x (float (/ (count (filter #(= % x) population)) n))])
+                 :count (into {} (for [x (distinct population)]
+                          [x (float (/ (count (filter #(= % x) population)) n))]))
                  }))
             ]
-    {:num-states (numeric :num-states)
-     :num-transitions (numeric :num-transitions)
-     :type-size (numeric :type-size)
-     :probability-indeterminate  (numeric :probability-indeterminate )
-     :min-dfa-state-count (numeric :min-dfa-state-count)
-     :min-dfa-transitions-count (numeric :min-dfa-transitions-count)
-     :count-indeterminate-transitions (numeric :count-indeterminate-transitions )
-     :inhabited-dfa-language  (symbolic :inhabited-dfa-language)}
-  )))
+      {:num-samples (count lines)
+       :num-states (numeric :num-states)
+       :num-transitions (numeric :num-transitions)
+       :type-size (numeric :type-size)
+       :probability-indeterminate  (numeric :probability-indeterminate )
+       :min-dfa-state-count (numeric :min-dfa-state-count)
+       :min-dfa-transitions-count (numeric :min-dfa-transitions-count)
+       :count-indeterminate-transitions (numeric :count-indeterminate-transitions )
+       :inhabited-dfa-language  (symbolic :inhabited-dfa-language)}
+      )))
 
 
 
@@ -232,11 +232,12 @@
                     ]
                 {:distinct (distinct population)
                  :frequencies (frequencies population)
-                 :count (for [x (distinct population)]
-                          [x (float (/ (count (filter #(= % x) population)) n))])
+                 :count (into {} (for [x (distinct population)]
+                          [x (float (/ (count (filter #(= % x) population)) n))]))
                  }))
             ]
-    {:num-states (numeric :num-states)
+    {:num-samples (count lines)
+     :num-states (numeric :num-states)
      :num-transitions (numeric :num-transitions)
      :type-size (numeric :type-size)
      :probability-indeterminate  (numeric :probability-indeterminate )
@@ -356,7 +357,7 @@
 
 (defn update-resource-csv [num-samples]
   (doseq [num-samples (range num-samples)
-          :let [num-states (+ 10 5 (rand-int 5) (rand-int 5) (rand-int 5) (rand-int 10) (rand-int 10))
+          :let [num-states (+ 4 (rand-int 5) (rand-int 5))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
                 num-transitions (+ num-states
@@ -383,10 +384,6 @@
       @csv-1
       @csv-2
       )
-    
-    ;; (pprint (gen-dfa-statistics :num-samples 1
-    ;;                             :num-states 7 :num-transitions 18 
-    ;;                             :probability-indeterminate 0.3 :num-transitions 30))
     ))
 
 (defn plot-summary []
@@ -419,46 +416,46 @@
                                     count (+ count-true count-false count-dont-know)
                                     true-percent (* 100 (float (/ count-true count)))
                                     ]]
-          
+                          
                           [num-states true-percent])
         subset-dont-know-xys (for [[num-states lines] grouped-subset
-                              :let [m (frequencies (map :subset lines))
-                                    count-true (get m true 0)
-                                    count-false (get m false 0)
-                                    count-dont-know (get m :dont-know 0)
-                                    count (+ count-true count-false count-dont-know)
-                                    dont-know-percent (* 100 (float (/ count-dont-know count)))
-                                    ]]
-          
+                                   :let [m (frequencies (map :subset lines))
+                                         count-true (get m true 0)
+                                         count-false (get m false 0)
+                                         count-dont-know (get m :dont-know 0)
+                                         count (+ count-true count-false count-dont-know)
+                                         dont-know-percent (* 100 (float (/ count-dont-know count)))
+                                         ]]
+                               
                                [num-states dont-know-percent])
         overlap-dont-know-xys (for [[num-states lines] grouped-subset
                                     :let [m (frequencies (map :overlap lines))
-                                    count-true (get m true 0)
-                                    count-false (get m false 0)
-                                    count-dont-know (get m :dont-know 0)
-                                    count (+ count-true count-false count-dont-know)
-                                    dont-know-percent (* 100 (float (/ count-dont-know count)))
-                                    ]]
-          
+                                          count-true (get m true 0)
+                                          count-false (get m false 0)
+                                          count-dont-know (get m :dont-know 0)
+                                          count (+ count-true count-false count-dont-know)
+                                          dont-know-percent (* 100 (float (/ count-dont-know count)))
+                                          ]]
+                                
                                 [num-states dont-know-percent])
         overlap-true-xys (for [[num-states lines] grouped-subset
-                              :let [m (frequencies (map :overlap lines))
-                                    count-true (get m true 0)
-                                    count-false (get m false 0)
-                                    count-dont-know (get m :dont-know 0)
-                                    count (+ count-true count-false count-dont-know)
-                                    true-percent (* 100 (float (/ count-true count)))
-                                    ]]
-          
-                          [num-states true-percent])
+                               :let [m (frequencies (map :overlap lines))
+                                     count-true (get m true 0)
+                                     count-false (get m false 0)
+                                     count-dont-know (get m :dont-know 0)
+                                     count (+ count-true count-false count-dont-know)
+                                     true-percent (* 100 (float (/ count-true count)))
+                                     ]]
+                           
+                           [num-states true-percent])
         population (count sample-lines)
         histogram-xyz (for [[num-states lines] grouped-subset
                             :let [count-local (count lines)
                                   true-percent (* 100 (float (/ count-local population)))
                                   ]]
-          
-                          [num-states true-percent])
-        image (vega/series-scatter-plot "Statistics"
+                        
+                        [num-states true-percent])
+        image (vega/series-scatter-plot (format "Statistics for %d samples" (count sample-lines))
                                         "state count"
                                         "probability"
                                         [["state-count-histogram" (sort histogram-xyz)]
@@ -475,11 +472,48 @@
 
     image))
 
+(defn round-2 [val]
+  (format "%3.2f" (float val)))
+
+(defn summarize-data []
+  (let [ssd (summarize-subset-data)
+        sid (summarize-inhabited-data)]
+    (pprint [:ssd ssd])
+    (pprint [:sid sid])
+    (printf "---------------\n")
+    (doseq [[sym value]
+            [['xyznumsamples (:num-samples ssd)]
+             ['xyzminsize (get-in ssd [:num-states :min])]
+             ['xyzmaxsize (get-in ssd [:num-states :max])]
+             ['xyzsizemu  (round-2 (get-in ssd [:num-states :mean]))]
+             ['xyzsizesigma (round-2 (get-in ssd [:num-states :sigma]))]
+
+             ['xyzmintransitions (get-in ssd [:num-transitions :min])]
+             ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
+             ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean]))]
+             ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma]))]
+
+             ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
+             ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
+             ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean]))]
+             ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
+
+             ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
+             ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable])))]
+             ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
+             ['xyzpercentindeterminate
+              (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate])))]
+             ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true])))]
+             ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false])))]
+             ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know])))]
+             ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false])))]
+             ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true])))]
+             ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know])))]
+            ]]
+      (printf "\\newcommand\\%s{%s}\n" sym value))))
 
 (defn -main [& argv]
-  (update-resource-csv 100)
+  (update-resource-csv 30)
   (plot-summary)
+  (summarize-data)
 )
-
-;; to run this from the shell 
-;; (-main)
