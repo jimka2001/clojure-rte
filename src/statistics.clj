@@ -390,14 +390,25 @@
     ))
 
 (defn plot-summary []
-  (let [inhabited-xys (for [[num-states lines] (group-by :num-states (slurp-inhabited-data))
-              :let [m (frequencies (map :inhabited-dfa-language lines))
-                    indeterminate (get m :indeterminate 0)
-                    satisfiable (get m :satisfiable 0)
-                    satisfiable-percent (* 100 (float (/ satisfiable (+ satisfiable indeterminate))))
-                    ]]
-          
+  (let [inhabited-grouped (group-by :num-states (slurp-inhabited-data))
+        inhabited-xys (for [[num-states lines] inhabited-grouped
+                            :let [m (frequencies (map :inhabited-dfa-language lines))
+                                  indeterminate (get m :indeterminate 0)
+                                  satisfiable (get m :satisfiable 0)
+                                  satisfiable-percent (* 100 (float (/ satisfiable (+ satisfiable indeterminate))))
+                                  ]]
+                        
                         [num-states satisfiable-percent])
+
+        inhabited-dont-know-xys (for [[num-states lines] inhabited-grouped
+                                      :let [m (frequencies (map :inhabited-dfa-language lines))
+                                            indeterminate (get m :indeterminate 0)
+                                            satisfiable (get m :satisfiable 0)
+                                            satisfiable-percent (* 100 (float (/ indeterminate (+ satisfiable indeterminate))))
+                                            ]]
+                                  
+                                  [num-states satisfiable-percent])
+
         sample-lines (slurp-subset-data)
         grouped-subset (group-by :num-states sample-lines)
         subset-true-xys (for [[num-states lines] grouped-subset
@@ -452,6 +463,7 @@
                                         "probability"
                                         [["state-count-histogram" (sort histogram-xyz)]
                                          ["inhabited=true" (sort inhabited-xys)]
+                                         ["inhabited=dont-know" (sort inhabited-dont-know-xys)]
                                          ["subset=true" (sort subset-true-xys)]
                                          ["subset=dont-know" (sort subset-dont-know-xys)]
                                          ["overlap=true" (sort overlap-true-xys)]
