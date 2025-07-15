@@ -172,6 +172,7 @@
 12,19,2,0.5243225014386429,false,false,false
 12,19,3,0.2471284399354593,:dont-know,:dont-know,:dont-know
 12,19,3,0.3038398148482076,false,false,false
+12,19,3,0.3675964587905876,:dont-know,:dont-know,:dont-know
 12,19,4,0.6393326267977806,false,false,false
 12,20,2,0.05298378790507193,true,true,true
 12,20,2,0.23385429446206574,false,false,false
@@ -2019,6 +2020,7 @@
 4,8,4,0.24462556831207724,true,true,true
 4,8,4,0.28745414613784714,:dont-know,:dont-know,:dont-know
 4,9,3,0.0805786253253195,:dont-know,:dont-know,:dont-know
+4,9,3,0.17946788793828536,:dont-know,:dont-know,:dont-know
 4,9,3,0.2958659342133821,:dont-know,true,true
 4,9,4,0.4031109135422044,:dont-know,:dont-know,:dont-know
 4,9,4,0.40398410586495714,false,false,false
@@ -2319,6 +2321,7 @@
 5,10,2,0.3267239910331715,:dont-know,:dont-know,:dont-know
 5,10,2,0.36373666929191845,:dont-know,:dont-know,:dont-know
 5,10,2,0.3745838430149743,:dont-know,:dont-know,:dont-know
+5,10,3,0.13708527350267033,:dont-know,:dont-know,:dont-know
 5,10,3,0.32807110673908474,true,true,true
 5,10,3,0.3310890107934925,false,true,true
 5,10,3,0.4216893600150165,:dont-know,:dont-know,:dont-know
@@ -2358,6 +2361,7 @@
 5,7,4,0.411802980999778,:dont-know,:dont-know,:dont-know
 5,7,4,0.4747571237792225,false,false,false
 5,8,2,0.10526575601314436,true,true,true
+5,8,2,0.333411068369053,:dont-know,:dont-know,:dont-know
 5,8,2,0.34939715500564,false,:dont-know,:dont-know
 5,8,2,0.5633184990333989,false,false,false
 5,8,3,0.09721994792572912,true,true,true
@@ -2469,6 +2473,7 @@
 7,12,2,0.580909941434924,:dont-know,:dont-know,:dont-know
 7,13,2,0.1683994906160511,:dont-know,:dont-know,:dont-know
 7,13,2,0.19167867280616493,true,true,true
+7,13,2,0.19269163601731779,:dont-know,:dont-know,:dont-know
 7,13,2,0.1978697159635959,false,false,false
 7,13,2,0.3023079995147139,:dont-know,:dont-know,:dont-know
 7,13,2,0.3801069195261823,:dont-know,true,true
@@ -2664,6 +2669,7 @@
 9,18,3,0.30644932348857806,true,true,true
 9,18,4,0.08958425851273503,true,true,true
 9,18,4,0.15959477327410673,true,true,true
+9,18,4,0.2955507325579005,true,true,true
 9,18,4,0.41659640723378316,:dont-know,:dont-know,:dont-know
 9,19,2,0.3921562009964221,:dont-know,:dont-know,:dont-know
 9,19,3,0.4899622784395372,:dont-know,:dont-know,:dont-know
