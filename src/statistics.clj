@@ -356,9 +356,9 @@
 ;; (time-build-traces 30)
 ;; (time-build-dfas 6 6)
 
-(defn update-resource-csv [num-samples]
+(defn update-resource-csv [num-samples center radius]
   (doseq [num-samples (range num-samples)
-          :let [num-states (+ 4 (rand-int 5) (rand-int 5))
+          :let [num-states (+ center (- radius) (rand-int (* 2 radius)))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
                 num-transitions (+ num-states
