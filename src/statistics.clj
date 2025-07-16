@@ -517,7 +517,7 @@
                          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))))))
 
 (defn -main [& argv]
-  (update-resource-csv 75)
+  (update-resource-csv 5 12 3)
   (plot-summary)
   (summarize-data)
   (System/exit 0)
