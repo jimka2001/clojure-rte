@@ -29,15 +29,15 @@
                 :shape {:field "series"
                         :type "nominal"
                         :legend {:orient "bottom"
-                                 :title "Curves"
+                                 :title "Curve shape"
                                  :direction "vertical"}
                         }
                 :color {:field "series"
                         :legend {:orient "bottom"
-                                 :title "Curves"
+                                 :title "Curve color"
                                  :direction "vertical"}
                         :type "nominal"}}
-     :mark "line"}))
+     :mark {:type "line" :point {:filled true :size 80}}}))
 
 (defn series-scatter-plot
   "Pop up image in browser showing a graph with multiple curves.
