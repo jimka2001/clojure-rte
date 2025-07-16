@@ -517,8 +517,12 @@
                          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))))))
 
 (defn -main [& argv]
-  (update-resource-csv 5 12 3)
-  (plot-summary)
-  (summarize-data)
-  (System/exit 0)
-)
+  (let [num-samples (Integer/parseInt (nth argv 0))
+        center (Integer/parseInt (nth argv 1))
+        radius (Integer/parseInt (nth argv 2))]
+
+    (update-resource-csv num-samples center radius)
+    (plot-summary)
+    (summarize-data)
+    (System/exit 0)
+    ))
