@@ -26,7 +26,16 @@
                     :type "quantitative"}
                 :y {:field y-label
                     :type "quantitative"}
+                :shape {:field "series"
+                        :type "nominal"
+                        :legend {:orient "bottom"
+                                 :title "Curves"
+                                 :direction "vertical"}
+                        }
                 :color {:field "series"
+                        :legend {:orient "bottom"
+                                 :title "Curves"
+                                 :direction "vertical"}
                         :type "nominal"}}
      :mark "line"}))
 
@@ -37,7 +46,7 @@
   ;; data is of form [[string [(x y) (x y) (x y) ...]]
   ;;                  [string [(x y) (x y) (x y) ...]]
   ;;                  ...]
-  (let [tmp  (.getAbsolutePath (java.io.File/createTempFile chart-title ".svg"))
+  (let [tmp (.getAbsolutePath (java.io.File/createTempFile chart-title ".svg"))
         formatted-data (series-format-plot-data chart-title x-label y-label data)]
 
     (oz/export! formatted-data tmp)
