@@ -520,4 +520,5 @@
   (update-resource-csv 75)
   (plot-summary)
   (summarize-data)
+  (System/exit 0)
 )
