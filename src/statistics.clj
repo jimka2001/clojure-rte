@@ -459,7 +459,7 @@
         image (vega/series-scatter-plot (format "Statistics for %d samples" (count sample-lines))
                                         "state count"
                                         "probability"
-                                        [["state-count-histogram" (sort histogram-xyz)]
+                                        [["State-count-histogram" (sort histogram-xyz)]
                                          ["inhabited=true" (sort inhabited-xys)]
                                          ["inhabited=dont-know" (sort inhabited-dont-know-xys)]
                                          ["subset=true" (sort subset-true-xys)]

@@ -30,12 +30,14 @@
                         :type "nominal"
                         :legend {:orient "bottom"
                                  :title "Curve shape"
-                                 :direction "vertical"}
+                                 :direction "vertical"
+                                 :labelLimit 1000}
                         }
                 :color {:field "series"
                         :legend {:orient "bottom"
                                  :title "Curve color"
-                                 :direction "vertical"}
+                                 :direction "vertical"
+                                 :labelLimit 1000}
                         :type "nominal"}}
      :mark {:type "line" :point {:filled true :size 80}}}))
 
