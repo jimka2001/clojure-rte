@@ -155,7 +155,6 @@
                                              :exit-value exit-value
                                              :type-size type-size
                                              :probability-indeterminate probability-indeterminate)))
-        dfa-xor (xym/synchronized-xor @dfa-1 @dfa-2)
         dfa-and (xym/synchronized-intersection @dfa-1 @dfa-2)
         dfa-empty-word (rte-to-dfa :epsilon exit-value)
         dfa-and-non-trivial (xym/synchronized-and-not dfa-and dfa-empty-word)
