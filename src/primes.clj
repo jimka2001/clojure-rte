@@ -106,6 +106,7 @@
   ([items a<b]
    (topological-sort items a<b []))
   ([items a<b sorted-so-far]
+
    (let [unconstrained (filter (fn [i] (not-any? (fn [[a b]] (= i b)) a<b)) items)
          hit-count (bounded-count 2 unconstrained)]
      (cond (empty? items)
@@ -114,7 +115,7 @@
            (= 0 hit-count)
            [sorted-so-far :over-constrained] ;; no order exists
 
-           (> 1 hit-count)
+           (< 1 hit-count)
            [sorted-so-far :under-constrained] ;; multiple orders exist
 
            :otherwise
@@ -124,10 +125,19 @@
 
              (recur items a<b (conj sorted-so-far found)))))))
 
-
 ;; (topological-sort [1 2 3] [[1 2] [2 3] [3 4]])
 
+(let [n 10]
+  (map encode-as-factorization (range 2 n)))
 
-(let [n 100]
-  (topological-sort (shuffle (map encode-as-factorization (range 2 n)))
-                    (generate-constraints n)))
+(let [n 10
+      population (map encode-as-factorization (range 2 n))
+      constraints (generate-constraints n)
+      ]
+  ;; ((1) (0 1) (2) (0 0 1) (1 1) (0 0 0 1) (3) (0 2))
+  
+  [:population population
+   :constraints constraints
+   :sorted (topological-sort (shuffle population)
+                             constraints)])
+
