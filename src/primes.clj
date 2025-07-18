@@ -97,7 +97,7 @@
                               :3))
         ]
     (concat constraints-1
-            constraints-2
+            ;;constraints-2
             constraints-3)))
                             
 ;; (pprint (generate-constraints 12))
