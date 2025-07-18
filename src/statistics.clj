@@ -110,7 +110,7 @@
               (let [population (map key lines)]
                 {:min (reduce min population)
                  :max (reduce max population)
-                 :mean (mean population)
+                 :mean (float (mean population))
                  :sigma (std-deviation population)}
                 ))
             (symbolic [key]
@@ -156,11 +156,12 @@
                                              :type-size type-size
                                              :probability-indeterminate probability-indeterminate)))
         dfa-xor (xym/synchronized-xor @dfa-1 @dfa-2)
+        dfa-and (xym/synchronized-intersection @dfa-1 @dfa-2)
         dfa-empty-word (rte-to-dfa :epsilon exit-value)
-        dfa-xor-non-trivial (xym/synchronized-and-not dfa-xor dfa-empty-word)
+        dfa-and-non-trivial (xym/synchronized-and-not dfa-and dfa-empty-word)
         subset (xym/dfa-inhabited? (xym/synchronized-and-not @dfa-1 @dfa-2))
-        overlap (xym/dfa-inhabited? dfa-xor)
-        non-trivial-overlap (xym/dfa-inhabited? dfa-xor-non-trivial)]
+        overlap (xym/dfa-inhabited? dfa-and)
+        non-trivial-overlap (xym/dfa-inhabited? dfa-and-non-trivial)]
     
     (merge-file csv-file-name
                 (fn [out-file]
@@ -224,7 +225,7 @@
               (let [population (map key lines)]
               {:min (reduce min population)
                :max (reduce max population)
-               :mean (mean population)
+               :mean (float (mean population))
                :sigma (std-deviation population)}
               ))
             (symbolic [key]
