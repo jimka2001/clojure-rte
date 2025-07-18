@@ -358,7 +358,7 @@
 
 (defn update-resource-csv [num-samples center radius]
   (doseq [num-samples (range num-samples)
-          :let [num-states (+ center (- radius) (rand-int (* 2 radius)))
+          :let [num-states (max 2 (+ center (- radius) (rand-int (* 2 radius))))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
                 num-transitions (+ num-states
@@ -559,11 +559,11 @@
                                 ]]
                          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))))))
 
+
 (defn -main [& argv]
   (let [num-samples (Integer/parseInt (nth argv 0))
         center (Integer/parseInt (nth argv 1))
         radius (Integer/parseInt (nth argv 2))]
-
     (update-resource-csv num-samples center radius)
     (plot-summary)
     (summarize-data)
