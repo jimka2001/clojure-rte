@@ -393,7 +393,9 @@
         inhabited-xys (for [[num-states lines] inhabited-grouped
                             :let [m (frequencies (map :inhabited-dfa-language lines))
                                   indeterminate (get m :indeterminate 0)
-                                  satisfiable (get m :satisfiable 0)
+                                  satisfiable (get m :satisfiable 0)]
+                            :when (> (+ satisfiable indeterminate) 0)
+                            :let [
                                   satisfiable-percent (* 100 (float (/ satisfiable (+ satisfiable indeterminate))))
                                   ]]
                         
@@ -402,7 +404,9 @@
         inhabited-dont-know-xys (for [[num-states lines] inhabited-grouped
                                       :let [m (frequencies (map :inhabited-dfa-language lines))
                                             indeterminate (get m :indeterminate 0)
-                                            satisfiable (get m :satisfiable 0)
+                                            satisfiable (get m :satisfiable 0)]
+                                      :when (> (+ satisfiable indeterminate) 0)
+                                      :let [
                                             satisfiable-percent (* 100 (float (/ indeterminate (+ satisfiable indeterminate))))
                                             ]]
                                   
@@ -415,7 +419,9 @@
                                     count-true (get m true 0)
                                     count-false (get m false 0)
                                     count-dont-know (get m :dont-know 0)
-                                    count (+ count-true count-false count-dont-know)
+                                    count (+ count-true count-false count-dont-know)]
+                              :when (> count 0)
+                              :let [
                                     true-percent (* 100 (float (/ count-true count)))
                                     ]]
                           
@@ -425,7 +431,9 @@
                                          count-true (get m true 0)
                                          count-false (get m false 0)
                                          count-dont-know (get m :dont-know 0)
-                                         count (+ count-true count-false count-dont-know)
+                                         count (+ count-true count-false count-dont-know)]
+                                   :when (> count 0)
+                                   :let [
                                          dont-know-percent (* 100 (float (/ count-dont-know count)))
                                          ]]
                                
@@ -435,7 +443,9 @@
                                           count-true (get m true 0)
                                           count-false (get m false 0)
                                           count-dont-know (get m :dont-know 0)
-                                          count (+ count-true count-false count-dont-know)
+                                          count (+ count-true count-false count-dont-know)]
+                                    :when (> count 0)
+                                    :let [
                                           dont-know-percent (* 100 (float (/ count-dont-know count)))
                                           ]]
                                 
@@ -445,14 +455,45 @@
                                      count-true (get m true 0)
                                      count-false (get m false 0)
                                      count-dont-know (get m :dont-know 0)
-                                     count (+ count-true count-false count-dont-know)
+                                     count (+ count-true count-false count-dont-know)]
+                               :when (> count 0)
+                               :let [
                                      true-percent (* 100 (float (/ count-true count)))
                                      ]]
                            
                            [num-states true-percent])
+
+        non-trivial-overlap-true-xys (for [[num-states lines] grouped-subset
+                                           :let [m (frequencies (map :non-trivial-overlap lines))
+                                                 count-true (get m true 0)
+                                                 count-false (get m false 0)
+                                                 count-dont-know (get m :dont-know 0)
+                                                 count (+ count-true count-false count-dont-know)]
+                                           :when (> count 0)
+                                           :let [
+                                                 true-percent (* 100 (float (/ count-true count)))
+                                                 ]]
+                                       
+                                       [num-states true-percent])
+
+        non-trivial-overlap-dont-know-xys (for [[num-states lines] grouped-subset
+                                                :let [m (frequencies (map :non-trivial-overlap lines))
+                                                      count-true (get m true 0)
+                                                      count-false (get m false 0)
+                                                      count-dont-know (get m :dont-know 0)
+                                                      count (+ count-true count-false count-dont-know)]
+                                                :when (> count 0)
+                                                :let [
+                                                      true-percent (* 100 (float (/ count-dont-know count)))
+                                                      ]]
+                                            
+                                            [num-states true-percent])
+
         population (count sample-lines)
         histogram-xyz (for [[num-states lines] grouped-subset
-                            :let [count-local (count lines)
+                            :let [count-local (count lines)]
+                            :when (> population 0)
+                            :let [
                                   true-percent (* 100 (float (/ count-local population)))
                                   ]]
                         
@@ -467,6 +508,8 @@
                                          ["subset=dont-know" (sort subset-dont-know-xys)]
                                          ["overlap=true" (sort overlap-true-xys)]
                                          ["overlap=dont-know" (sort overlap-dont-know-xys)]
+                                         ;;["non-trivila-overlap=true" (sort non-trivial-overlap-true-xys)]
+                                         ;;["non-trivial-overlap=dont-know" (sort non-trivial-overlap-dont-know-xys)]
                                          ])]
 
     (sh "cp" image plot-path)
@@ -495,25 +538,25 @@
 
                                 ['xyzmintransitions (get-in ssd [:num-transitions :min])]
                                 ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
-                                ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean]))]
-                                ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma]))]
+                                ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean] 0))]
+                                ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma] 0))]
 
                                 ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
                                 ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
-                                ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean]))]
+                                ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean] 0))]
                                 ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
 
                                 ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
-                                ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable])))]
+                                ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable] 0)))]
                                 ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
                                 ['xyzpercentindeterminate
-                                 (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate])))]
-                                ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true])))]
-                                ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false])))]
-                                ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know])))]
-                                ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false])))]
-                                ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true])))]
-                                ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know])))]
+                                 (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate] 0)))]
+                                ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true] 0)))]
+                                ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false] 0)))]
+                                ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know] 0)))]
+                                ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false] 0)))]
+                                ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true] 0)))]
+                                ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know] 0)))]
                                 ]]
                          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))))))
 
