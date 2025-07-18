@@ -357,7 +357,7 @@
 ;; (time-build-dfas 6 6)
 
 (defn update-resource-csv [num-samples center radius]
-  (doseq [num-samples (range num-samples)
+  (doseq [nsample (range num-samples)
           :let [num-states (max 2 (+ center (- radius) (rand-int (* 2 radius))))
                 delta (+ (rand-int num-states)
                          (rand-int num-states))
@@ -367,7 +367,7 @@
                 probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
                 ]]
     
-    (cl-format true "num-samples=~D " num-samples)
+    (cl-format true "sample=~D/~D " nsample num-samples)
     (println "++++++++++++++++++++++++++++++++++++++++")
     (println [:num-states num-states
               :num-transitions num-transitions
