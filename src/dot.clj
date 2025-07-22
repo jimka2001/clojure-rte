@@ -222,7 +222,10 @@
         (cl-format *out* "}~%")))))
 
 (defn dfa-view [dfa title]
-  (dfa-to-dot dfa :view true :title title :state-legend false))
+  (dfa-to-dot dfa :view true :title title :state-legend false
+              :dot-file-cb println
+              :png-file-cb println
+))
 
 (defn bdd-to-dot 
   "Create (and possibly display) a graphical image rendering the given Bdd

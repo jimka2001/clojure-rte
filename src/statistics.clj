@@ -295,10 +295,10 @@
           num-transitions (range num-states (* 2 num-states))
           :let [exit-value 42 
                 type-size 2
-                [dfa-1 t-1] (time-expr (gen-dfa num-states
-                                                num-transitions
-                                                exit-value
-                                                type-size))
+                [dfa-1 t-1] (time-expr (gen-dfa :num-states num-states
+                                                :num-transitions num-transitions
+                                                :exit-value exit-value
+                                                :type-size type-size))
                 [min-dfa t-2] (time-expr (xym/minimize dfa-1))
                 [sm t-3] (time-expr (xym/find-trace-map min-dfa))]]
     (println "------------------------------------")
@@ -320,12 +320,13 @@
    (println "=========================================")
    (doseq [num-states (range min-num-states (inc max-num-states))
            num-transitions (range num-states (/ (* num-states num-states) 2) 5)
-           :let [exit-value 42 
+           :let [exit-value 42
                  type-size 2
-                 [dfa-1 t-1] (time-expr (xym/minimize (gen-dfa num-states
-                                                               num-transitions
-                                                               exit-value
-                                                               type-size)))
+                 [dfa-1 t-1] (time-expr (gen-dfa :num-states num-states
+                                                 :num-transitions num-transitions
+                                                 :exit-value exit-value
+                                                 :probability-indeterminate 0.4
+                                                 :type-size type-size))
 
                  [sm-1 t-2] (time-expr (xym/find-trace-map dfa-1))
 
@@ -340,8 +341,8 @@
                  total-time (+ t-1 t-2 t-3 t-4 t-5 t-6)
                  ]]
      (let [suffix (format "-%d-%d" num-states num-transitions)]
-       (dot/dfa-view dfa-1 (str "dfa-1" suffix))
-       (dot/dfa-view dfa-2 (str "dfa-2" suffix))
+       (dot/dfa-view dfa-1 (str "dfa-rand" suffix))
+       (dot/dfa-view dfa-2 (str "dfa-rte" suffix))
        (dot/dfa-view dfa-xor (str "dfa-xor" suffix)))
      (println "------------------------------------")
      (println [[ num-states num-transitions ]
@@ -444,9 +445,8 @@
                                           count-dont-know (get m :dont-know 0)
                                           count (+ count-true count-false count-dont-know)]
                                     :when (> count 0)
-                                    :let [
-                                          dont-know-percent (* 100 (float (/ count-dont-know count)))
-                                          ]]
+                                    :let [dont-know-percent (* 100 (float (/ count-dont-know count)))]
+                                    ]
                                 
                                 [num-states dont-know-percent])
         overlap-true-xys (for [[num-states lines] grouped-subset
@@ -456,9 +456,8 @@
                                      count-dont-know (get m :dont-know 0)
                                      count (+ count-true count-false count-dont-know)]
                                :when (> count 0)
-                               :let [
-                                     true-percent (* 100 (float (/ count-true count)))
-                                     ]]
+                               :let [true-percent (* 100 (float (/ count-true count)))]
+                               ]
                            
                            [num-states true-percent])
 
@@ -500,13 +499,20 @@
         image (vega/series-scatter-plot (format "Statistics for %d samples" (count sample-lines))
                                         "state count"
                                         "probability"
-                                        [["State-count-histogram" (sort histogram-xyz)]
-                                         ["inhabited=true" (sort inhabited-xys)]
-                                         ["inhabited=dont-know" (sort inhabited-dont-know-xys)]
-                                         ["subset=true" (sort subset-true-xys)]
-                                         ["subset=dont-know" (sort subset-dont-know-xys)]
-                                         ["overlap=true" (sort overlap-true-xys)]
-                                         ["overlap=dont-know" (sort overlap-dont-know-xys)]
+                                        [
+
+                                         ["1: inhabited=true" (sort inhabited-xys)]
+                                         ["2: inhabited=dont-know" (sort inhabited-dont-know-xys)]
+
+                                         ["3: subset=true" (sort subset-true-xys)]
+                                         ;; ["4: subset*2=true" (sort (map (fn [[x y]] [x (* 2 y)]) subset-true-xys))]
+                                         ["4: subset=dont-know" (sort subset-dont-know-xys)]
+
+                                         ["5: overlap=true" (sort overlap-true-xys)]
+                                         ["6: overlap=dont-know" (sort overlap-dont-know-xys)]
+                                         
+                                         ["7: state-count-histogram" (sort histogram-xyz)]
+
                                          ;;["non-trivila-overlap=true" (sort non-trivial-overlap-true-xys)]
                                          ;;["non-trivial-overlap=dont-know" (sort non-trivial-overlap-dont-know-xys)]
                                          ])]

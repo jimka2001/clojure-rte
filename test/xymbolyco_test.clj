@@ -470,7 +470,10 @@
             num-transitions (range num-states (+ 2 num-states))
             :let [exit-value 42 
                   type-size 2
-                  dfa (gen-dfa 10 25 42 2)
+                  dfa (gen-dfa :num-states 10
+                               :num-transitions 25
+                               :exit-value 42
+                               :type-size 2)
                   min-dfa (xym/minimize dfa)
                   rte (get (dfa-to-rte min-dfa) exit-value :empty-set)]]
       (is rte)
