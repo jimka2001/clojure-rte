@@ -355,12 +355,13 @@
                :time total-time])
      )))
 
-(defn build-dfas-balanced 
+(defn build-rtes-balanced 
   ;; NOT YET FINISHED, gather data on gen-balanced-rte
-  [depth repetitions]
+  [depth repetitions & {:keys [gen] ;; unary function which takes depth argument and generates a random rte of that approximate depth
+                        :or {gen gen-balanced-rte}}]
   (loop [repetitions repetitions
          rtes nil]
-    (let [rte-1 (gen-balanced-rte depth)
+    (let [rte-1 (gen depth)
           dfa-1 (rte-to-dfa rte-1)
           rte-2 (get (dfa-to-rte dfa-1) true :empty-set)
           dfa-2 (rte-to-dfa rte-2)
