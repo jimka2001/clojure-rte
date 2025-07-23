@@ -8,6 +8,7 @@
    [genus :as gns]
    [rte-construct :refer [rte-to-dfa]]
    [rte-extract :refer [dfa-to-rte]]
+   [rte-tester :refer [gen-balanced-rte rte-depth rte-count-leaves]]
    [util :refer [member time-expr mean std-deviation call-in-block read-csv-data rename-columns]]
    [xym-tester :refer [gen-dfa]]
    [xymbolyco :as xym]
@@ -353,6 +354,34 @@
                        [ev satisfiability])
                :time total-time])
      )))
+
+(defn build-dfas-balanced 
+  ;; NOT YET FINISHED, gather data on gen-balanced-rte
+  [depth repetitions]
+  (loop [repetitions repetitions
+         rtes nil]
+    (let [rte-1 (gen-balanced-rte depth)
+          dfa-1 (rte-to-dfa rte-1)
+          rte-2 (get (dfa-to-rte dfa-1) true :empty-set)
+          dfa-2 (rte-to-dfa rte-2)
+          dfa-xor (xym/synchronized-xor dfa-1 dfa-2)]
+
+      (println [:state-count [:dfa-1 (count (xym/states-as-seq dfa-1))
+                              :dfa-2 (count (xym/states-as-seq dfa-2))]
+                :rte [:rte-1 [:depth (rte-depth rte-1)
+                              :leaves (rte-count-leaves rte-1)
+
+                              ]
+                      :rte-2 [:depth (rte-depth rte-2)
+                              :leaves (rte-count-leaves rte-2)
+                              ;;:rte rte-2
+                              ]]
+                      
+                :equivalent (xym/dfa-equivalent? dfa-1 dfa-2)])
+
+      (if (pos? repetitions)
+        (recur (dec repetitions) (cons rte-2 rtes))
+        (frequencies rtes)))))
 
 ;; (time-build-traces 30)
 ;; (time-build-dfas 6 6)
