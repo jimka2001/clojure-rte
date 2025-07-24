@@ -733,16 +733,26 @@
 (defmacro time-expr [& body]
   `(time-fn (fn [] ~@body)))
 
-(defn mean [population]
-  (/ (reduce + population)
-     (count population)))
+(defn mean 
+  ([population default]
+   (if (empty? population)
+     default
+     (mean population)))
+  ([population]
+   (/ (reduce + population)
+      (count population))))
 
-(defn std-deviation [population]
-  (let [m (mean population)
-        variance (mean (map (fn [p] 
-                              (let [d (- p m)]
-                                (* d d))) population))]
-    (clojure.math/sqrt variance)))
+(defn std-deviation 
+  ([population default]
+   (if (empty? population)
+     default
+     (std-deviation population)))
+  ([population]
+   (let [m (mean population)
+         variance (mean (map (fn [p] 
+                               (let [d (- p m)]
+                                 (* d d))) population))]
+     (clojure.math/sqrt variance))))
 
 (defn call-in-block [lock-file-name f]
   (let [lock-key (str (random-uuid))
