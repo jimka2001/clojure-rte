@@ -3,7 +3,11 @@
 
 (defn series-format-plot-data 
   "encode plotting data into an hashmap ready to pass to oz/view!"
-  [chart-title x-label y-label data]
+  [chart-title x-label y-label data
+   & {:keys [x-scale y-scale]
+      :or {x-scale "linear" ;; or "log", "symlog", "sqrt" etc.
+           y-scale "linear"}}
+   ]
   ;; data is of form [[string [(x y) (x y) (x y) ...]]
   ;;                  [string [(x y) (x y) (x y) ...]]
   ;;                  ...]
@@ -23,8 +27,10 @@
             {:orient "left"
              :title y-label}]
      :encoding {:x {:field x-label
+                    :scale {:type x-scale}
                     :type "quantitative"}
                 :y {:field y-label
+                    :scale {:type y-scale}
                     :type "quantitative"}
                 :shape {:field "series"
                         :type "nominal"
@@ -44,12 +50,17 @@
 (defn series-scatter-plot
   "Pop up image in browser showing a graph with multiple curves.
   Each curve corresponds to a series specified in the given `data`."
-  [chart-title x-label y-label data]
+  [chart-title x-label y-label data
+   & {:keys [x-scale y-scale]
+      :or {x-scale "linear" ;; or "log", "symlog", "sqrt" etc.
+           y-scale "linear"}}]
   ;; data is of form [[string [(x y) (x y) (x y) ...]]
   ;;                  [string [(x y) (x y) (x y) ...]]
   ;;                  ...]
   (let [tmp (.getAbsolutePath (java.io.File/createTempFile chart-title ".svg"))
-        formatted-data (series-format-plot-data chart-title x-label y-label data)]
+        formatted-data (series-format-plot-data chart-title x-label y-label data
+                                                :x-scale x-scale
+                                                :y-scale y-scale)]
 
     (oz/export! formatted-data tmp)
     tmp))
