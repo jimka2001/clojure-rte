@@ -840,3 +840,31 @@
                         {:csv csv
                          :type (type csv)}))
 ))
+
+(defn is-secret-data []
+  {:secret true})
+
+(defn call-with-timeout [timeout-ms f on-time-out]
+  ;; {:pre  [(do
+  ;;           (printf "pre ms:%s\n" timeout-ms)
+  ;;           true)]
+  ;;  :post [(do
+  ;;           (printf "post: ms:%s  %%=%s\n" timeout-ms %)
+  ;;           true)]}
+  (let [timeout-val ::test-timeout
+        fut         (future (f))
+        val         (deref fut timeout-ms timeout-val)]
+    (if (= val timeout-val)
+      (do
+        (printf "kill %s\n" fut)
+        (future-cancel fut)
+        (on-time-out))
+      val)))
+
+(defmacro with-timeout [time-out-seconds on-time-out & body]
+  (assert (not-empty body))
+  `(call-with-timeout (* 1000 ~time-out-seconds)
+                      (fn []
+                        ~@body)
+                      (fn []
+                        ~@on-time-out)))
