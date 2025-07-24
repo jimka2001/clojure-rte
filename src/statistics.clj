@@ -8,7 +8,7 @@
    [genus :as gns]
    [rte-construct :refer [rte-to-dfa]]
    [rte-extract :refer [dfa-to-rte]]
-   [rte-tester :refer [gen-balanced-rte rte-depth rte-count-leaves]]
+   [rte-tester :refer [gen-rte gen-balanced-rte rte-depth rte-count-leaves]]
    [util :refer [member time-expr mean std-deviation call-in-block read-csv-data rename-columns]]
    [xym-tester :refer [gen-dfa]]
    [xymbolyco :as xym]
@@ -17,12 +17,16 @@
 ))
 
 
-(def lock-file (str (.getPath (io/resource "statistics")) "/statistics.lockfile"))
-(def subset-csv (.getPath (io/resource "statistics/dfa-subset.csv")))
-(def inhabited-csv (.getPath (io/resource "statistics/dfa-inhabited.csv")))
-(def plot-path (.getPath (io/resource "statistics/statistics-plot.svg")))
-(def statistics-tex-path (.getPath (io/resource "statistics/statistics-constants.tex")))
-
+(def statistics-resource (str (.getPath (io/resource "statistics")) "/"))
+(def lock-file (str statistics-resource "statistics.lockfile"))
+(def subset-csv (str statistics-resource "dfa-subset.csv"))
+(def inhabited-csv (str statistics-resource "dfa-inhabited.csv"))
+(def plot-path (str statistics-resource "statistics-plot.svg"))
+(def statistics-tex-path (str statistics-resource "statistics-constants.tex"))
+(def gen-rte-balanced-csv (str statistics-resource "gen-rte-balanced.csv"))
+(def gen-rte-classic-csv (str statistics-resource "gen-rte-classic.csv"))
+(def gen-rte-balanced-svg (str statistics-resource "gen-rte-balanced.svg"))
+(def gen-rte-classic-svg (str statistics-resource "gen-rte-classic.svg"))
 
 (defn merge-file 
   "`csv-file-name` is a csv file in the resourse/statistics directory
@@ -89,19 +93,21 @@
 (defn slurp-inhabited-data []
   (let [csv-file-name inhabited-csv]
     ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
-    (with-open [csv-file (clojure.java.io/reader csv-file-name)]
-      (doall (for [line (csv/read-csv csv-file)
-                   :when (not (= \# (get (get line 0) 0)))]
-               (zipmap
-                [:num-states
-                 :num-transitions
-                 :type-size
-                 :probability-indeterminate
-                 :min-dfa-state-count
-                 :min-dfa-transitions-count
-                 :count-indeterminate-transitions
-                 :inhabited-dfa-language]
-                (map edn/read-string line)))))))
+    (call-in-block lock-file
+                   (fn []
+                     (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+                       (doall (for [line (csv/read-csv csv-file)
+                                    :when (not (= \# (get (get line 0) 0)))]
+                                (zipmap
+                                 [:num-states
+                                  :num-transitions
+                                  :type-size
+                                  :probability-indeterminate
+                                  :min-dfa-state-count
+                                  :min-dfa-transitions-count
+                                  :count-indeterminate-transitions
+                                  :inhabited-dfa-language]
+                                 (map edn/read-string line)))))))))
   
 
 (defn summarize-inhabited-data []
@@ -204,19 +210,21 @@
 (defn slurp-subset-data []
   (let [csv-file-name subset-csv]
     ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
-    (with-open [csv-file (clojure.java.io/reader csv-file-name)]
-      (doall (for [line (csv/read-csv csv-file)
-                   :when (not (= \# (get (get line 0) 0)))]
-               (zipmap
-                [:num-states
-                 :num-transitions
-                 :type-size
-                 :probability-indeterminate
-                 :subset
-                 :overlap
-                 :non-trivial-overlap
-                 ]
-                (map edn/read-string line)))))))
+    (call-in-block lock-file
+                   (fn []
+                     (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+                       (doall (for [line (csv/read-csv csv-file)
+                                    :when (not (= \# (get (get line 0) 0)))]
+                                (zipmap
+                                 [:num-states
+                                  :num-transitions
+                                  :type-size
+                                  :probability-indeterminate
+                                  :subset
+                                  :overlap
+                                  :non-trivial-overlap
+                                  ]
+                                 (map edn/read-string line)))))))))
   
 (defn summarize-subset-data []
   ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
@@ -355,34 +363,97 @@
                :time total-time])
      )))
 
-(defn build-rtes-balanced 
+(defn compute-balance-factors [r]
+  ;; {:post [(or (println [:r r :returns %]) true)]}
+  (cond (not (sequential? r))
+        [0 []]
+
+        (keyword? (first r))
+        (let [[operator & operands] r
+              pairs (map compute-balance-factors operands)
+              heights (map first pairs)]
+          (if (empty? heights)
+            [0 []]
+            (let [max-height (reduce max heights)
+                  min-height (reduce min heights)
+                  balance (- max-height min-height) ]
+              [(inc max-height)
+               (conj (mapcat second pairs) balance)])))
+
+        :else
+        [0 []]))
+
+;; (compute-balance-factors '(:* (:or (:and a (:not (:or a b)) (:or a (:or a b))))))
+
+
+(defn build-rtes
   ;; NOT YET FINISHED, gather data on gen-balanced-rte
-  [depth repetitions & {:keys [gen] ;; unary function which takes depth argument and generates a random rte of that approximate depth
-                        :or {gen gen-balanced-rte}}]
-  (loop [repetitions repetitions
-         rtes nil]
-    (let [rte-1 (gen depth)
-          dfa-1 (rte-to-dfa rte-1)
-          rte-2 (get (dfa-to-rte dfa-1) true :empty-set)
-          dfa-2 (rte-to-dfa rte-2)
-          dfa-xor (xym/synchronized-xor dfa-1 dfa-2)]
+  [depth repetitions & {:keys [gen csv-file] ;; unary function which takes depth argument and generates a random rte of that approximate depth
+                        :or {gen gen-balanced-rte
+                             csv-file gen-rte-balanced-csv
+                             }}]
+  (let [freqs (loop [repetitions repetitions
+                     rtes nil]
+                (let [rte-1 (gen depth)
+                      [_ balance-factors] (compute-balance-factors rte-1)
+                      mean-balance (float (mean balance-factors 0))
+                      max-balance (reduce max (conj balance-factors 0))
+                      sigma-balance (std-deviation balance-factors 0)
+                      dfa-1 (xym/minimize (rte-to-dfa rte-1))
+                      rte-2 (get (dfa-to-rte dfa-1) true :empty-set)
+                      dfa-2 (rte-to-dfa rte-2)
+                      dfa-xor (xym/synchronized-xor dfa-1 dfa-2)]
 
-      (println [:state-count [:dfa-1 (count (xym/states-as-seq dfa-1))
-                              :dfa-2 (count (xym/states-as-seq dfa-2))]
-                :rte [:rte-1 [:depth (rte-depth rte-1)
-                              :leaves (rte-count-leaves rte-1)
+                  (println [:rep repetitions
+                            :depth depth
+                            :csv-file (if (= csv-file gen-rte-balanced-csv)
+                                        "balanced"
+                                        "classic")
+                            :state-count [:dfa-1 (count (xym/states-as-seq dfa-1))
+                                          :dfa-2 (count (xym/states-as-seq dfa-2))]
+                            :rte [:rte-1 [:depth (rte-depth rte-1)
+                                          :leaves (rte-count-leaves rte-1)
+                                          :max-balance max-balance
+                                          :mean-balance mean-balance
+                                          :sigma-balance sigma-balance
+                                          ]
+                                  :rte-2 [:depth (rte-depth rte-2)
+                                          :leaves (rte-count-leaves rte-2)
+                                          ;;:rte rte-2
+                                          ]]
+                            
+                            :equivalent (xym/dfa-equivalent? dfa-1 dfa-2)])
 
-                              ]
-                      :rte-2 [:depth (rte-depth rte-2)
-                              :leaves (rte-count-leaves rte-2)
-                              ;;:rte rte-2
-                              ]]
-                      
-                :equivalent (xym/dfa-equivalent? dfa-1 dfa-2)])
+                  (merge-file csv-file
+                              (fn [out-file]
+                                ;;(cl-format out-file "# requested-depth, actual-depth, max-balance, mean-balance, sigma-balance, actual-leaf-count, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte~%")
+                                (cl-format out-file "~D, ~D, ~D" depth (rte-depth rte-1) (rte-count-leaves rte-1))
+                                (cl-format out-file ", ~A, ~A, ~A" max-balance mean-balance sigma-balance)
+                                (cl-format out-file ", ~D, ~D" (rte-depth rte-2) (rte-count-leaves rte-2))
+                                (cl-format out-file ", ~D, ~D" (count (xym/states-as-seq dfa-1)) (count (xym/states-as-seq dfa-2)))
+                                (cl-format out-file ", ~A" (if (member rte-2 '(:sigma (:* :sigma) (:cat :sigma (:* :sigma)) (:cat (:* :sigma) :sigma) :epsilon :empty-set))
+                                                             rte-2
+                                                             :other))
+                                (cl-format out-file "~%")))
+                  
+                  (if (pos? repetitions)
+                    (recur (dec repetitions) (cons rte-2 rtes))
+                    (frequencies rtes))))]
+    (into {} (for [[k v] freqs
+                   :when (> v 1)]
+               [k v]))))
 
-      (if (pos? repetitions)
-        (recur (dec repetitions) (cons rte-2 rtes))
-        (frequencies rtes)))))
+
+(defn build-rtes-classic [depth repetitions]
+  (build-rtes depth repetitions
+              :gen gen-rte
+              :csv-file gen-rte-classic-csv))
+
+(defn build-rtes-balanced [depth repetitions]
+  (build-rtes depth repetitions
+              :gen gen-balanced-rte
+              :csv-file gen-rte-balanced-csv))
+
 
 ;; (time-build-traces 30)
 ;; (time-build-dfas 6 6)
@@ -551,6 +622,61 @@
     (view/view-image image)
 
     image))
+
+(defn slurp-rte-data [csv-file-name]
+  ;; # requested-depth, actual-depth, actual-leaf-count, max-balance, mean-balance, sigma-balance, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte
+  (call-in-block lock-file
+                 (fn []
+                   (with-open [csv-file (clojure.java.io/reader csv-file-name)]
+                     (doall (for [line (csv/read-csv csv-file)
+                                  :when (not (= \# (get (get line 0) 0)))]
+                              (zipmap
+                               [:requested-depth
+                                :actual-depth
+                                :actual-leaf-count
+                                :max-balance
+                                :mean-balance
+                                :sigma-balance
+                                :minimized-depth
+                                :minimized-leaf-count
+                                :actual-state-count
+                                :minimized-state-count
+                                :minimized-rte]
+                               (map edn/read-string line))))))))
+
+(defn plot-rte-summary []
+  (doseq [[cvs title plot-path] [[gen-rte-balanced-csv "Statistics for balanced generation" gen-rte-balanced-svg]
+                                 [gen-rte-classic-csv  "Statistics for classic generation" gen-rte-classic-svg]]
+          
+          :let [grouped (group-by :actual-leaf-count (slurp-rte-data cvs))
+                average-minimized-leaf-count (for [[actual-leaf-count lines] grouped]
+                                               [actual-leaf-count (float (mean (map :minimized-leaf-count lines)))])
+                average-minimized-state-count (for [[actual-leaf-count lines] grouped]
+                                                [actual-leaf-count (float (mean (map :minimized-state-count lines)))])
+                max-minimized-leaf-count (for [[actual-leaf-count lines] grouped]
+                                           [actual-leaf-count (float (reduce max 0 (map :minimized-leaf-count lines)))])
+                max-minimized-state-count (for [[actual-leaf-count lines] grouped]
+                                            [actual-leaf-count (float (reduce max 0 (map :minimized-state-count lines)))])
+                image (vega/series-scatter-plot title
+                                                "Starting leaf count"
+                                                "not sure name of y axix"
+                                                [;; ["curve name" [[x y] [x y] [x y] ...]]
+                                                 ["minimized (avg) leaf count" (sort average-minimized-leaf-count)]
+                                                 ["minimized (max) leaf count" (sort max-minimized-leaf-count)]
+                                                 ["minimized (avg) state count" (sort average-minimized-state-count)]
+                                                 ["minimized (max) state count" (sort max-minimized-state-count)]
+
+                                                 ]
+                                                :y-scale "symlog"
+                                                )]]
+    (sh "cp" image plot-path)
+    (view/view-image image)))
+
+
+
+;; (plot-rte-summary)
+
+          
 
 (defn round-2 [val]
   (format "%3.2f" (float val)))
