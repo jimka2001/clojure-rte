@@ -973,6 +973,19 @@
        default
        (not inh)))))
 
+(defn dfa-subset?
+  "Attemps to determine whether dfa-1 is a subset of dfa-2.
+  Returns true, false, or the default which is :dont-know if
+  no default is given.
+  dfa-1 is a subset of dfa-2 (meaning language of dfa-1 is a
+  subset of the language of dfa-2) if
+  dfa-1 AND-NOT dfa-2 is empty (dfa-vacuous?)"
+  ([dfa-1 dfa-2]
+   (dfa-subset? dfa-1 dfa-2 :dont-know))
+  ([dfa-1 dfa-2 default]
+   (dfa-vacuous? (synchronized-and-not dfa-1 dfa-2)
+                 default)))
+
 (defn dfa-equivalent?
   "Returns a Boolean (or None) indicating whether the two given Dfas
   recognize the same language.

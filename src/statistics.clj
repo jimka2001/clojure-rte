@@ -232,7 +232,7 @@
         dfa-and (xym/synchronized-intersection @dfa-1 @dfa-2)
         dfa-empty-word (rte-to-dfa :epsilon exit-value)
         dfa-and-non-trivial (xym/synchronized-and-not dfa-and dfa-empty-word)
-        subset (xym/dfa-inhabited? (xym/synchronized-and-not @dfa-1 @dfa-2))
+        subset (xym/dfa-subset? @dfa-1 @dfa-2)
         overlap (xym/dfa-inhabited? dfa-and)
         non-trivial-overlap (xym/dfa-inhabited? dfa-and-non-trivial)
         [satisfiability path] (get (xym/find-trace-map @dfa-1) exit-value)
