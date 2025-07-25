@@ -4,8 +4,9 @@
 (defn series-format-plot-data 
   "encode plotting data into an hashmap ready to pass to oz/view!"
   [chart-title x-label y-label data
-   & {:keys [x-scale y-scale]
-      :or {x-scale "linear" ;; or "log", "symlog", "sqrt" etc.
+   & {:keys [sort x-scale y-scale]
+      :or {sort nil ;; or a vector of the exact order ["plot1" "plot2" "plot3"]
+           x-scale "linear" ;; or "log", "symlog", "sqrt" etc.
            y-scale "linear"}}
    ]
   ;; data is of form [[string [(x y) (x y) (x y) ...]]
@@ -33,6 +34,7 @@
                     :scale {:type y-scale}
                     :type "quantitative"}
                 :shape {:field "series"
+                        :sort sort
                         :type "nominal"
                         :legend {:orient "bottom"
                                  :title "Curve shape"
@@ -40,6 +42,7 @@
                                  :labelLimit 1000}
                         }
                 :color {:field "series"
+                        :sort sort
                         :legend {:orient "bottom"
                                  :title "Curve color"
                                  :direction "vertical"
@@ -51,14 +54,17 @@
   "Pop up image in browser showing a graph with multiple curves.
   Each curve corresponds to a series specified in the given `data`."
   [chart-title x-label y-label data
-   & {:keys [x-scale y-scale]
+   & {:keys [x-scale y-scale sort]
       :or {x-scale "linear" ;; or "log", "symlog", "sqrt" etc.
-           y-scale "linear"}}]
+           y-scale "linear"
+           sort nil
+           }}]
   ;; data is of form [[string [(x y) (x y) (x y) ...]]
   ;;                  [string [(x y) (x y) (x y) ...]]
   ;;                  ...]
   (let [tmp (.getAbsolutePath (java.io.File/createTempFile chart-title ".svg"))
         formatted-data (series-format-plot-data chart-title x-label y-label data
+                                                :sort sort
                                                 :x-scale x-scale
                                                 :y-scale y-scale)]
 

@@ -305,10 +305,10 @@
               :type-size type-size
               :probability-indeterminate probability-indeterminate])
 
-    (write-stats-csv :num-states num-states
-                     :num-transitions num-transitions
-                     :type-size type-size
-                     :probability-indeterminate probability-indeterminate)
+    (write-inhabited-subset-stats-csv :num-states num-states
+                                      :num-transitions num-transitions
+                                      :type-size type-size
+                                      :probability-indeterminate probability-indeterminate)
     ))
 
 
@@ -421,26 +421,29 @@
                                   ]]
                         
                         [num-states true-percent])
-        image (vega/series-scatter-plot (format "Statistics for %d samples" (count sample-lines))
-                                        "state count"
-                                        "probability"
-                                        [
+        plot-data [
 
-                                         ["1: inhabited=true" (sort inhabited-xys)]
-                                         ["2: inhabited=dont-know" (sort inhabited-dont-know-xys)]
+                                         ["inhabited=true" (sort inhabited-xys)]
+                                         ["inhabited=dont-know" (sort inhabited-dont-know-xys)]
 
-                                         ["3: subset=true" (sort subset-true-xys)]
+                                         ["subset=true" (sort subset-true-xys)]
                                          ;; ["4: subset*2=true" (sort (map (fn [[x y]] [x (* 2 y)]) subset-true-xys))]
-                                         ["4: subset=dont-know" (sort subset-dont-know-xys)]
+                                         ["subset=dont-know" (sort subset-dont-know-xys)]
 
-                                         ["5: overlap=true" (sort overlap-true-xys)]
-                                         ["6: overlap=dont-know" (sort overlap-dont-know-xys)]
+                                         ["overlap=true" (sort overlap-true-xys)]
+                                         ["overlap=dont-know" (sort overlap-dont-know-xys)]
                                          
-                                         ["7: state-count-histogram" (sort histogram-xyz)]
+                                         ["state-count-histogram" (sort histogram-xyz)]
 
                                          ;;["non-trivila-overlap=true" (sort non-trivial-overlap-true-xys)]
                                          ;;["non-trivial-overlap=dont-know" (sort non-trivial-overlap-dont-know-xys)]
-                                         ])]
+                                         ]
+        image (vega/series-scatter-plot (format "Statistics for %d samples" (count sample-lines))
+                                        "state count"
+                                        "probability"
+                                        plot-data
+                                        :sort (map first plot-data)
+)]
 
     (sh "cp" image plot-path)
     (view/view-image image)
