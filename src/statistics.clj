@@ -10,7 +10,7 @@
    [rte-extract :refer [dfa-to-rte]]
    [rte-tester :refer [gen-rte gen-balanced-rte rte-depth rte-count-leaves]]
    [util :refer [member time-expr mean std-deviation read-csv-data rename-columns
-                 with-timeout human-readable-current-time]]
+                 call-in-block with-timeout human-readable-current-time]]
    [xym-tester :refer [gen-dfa]]
    [xymbolyco :as xym]
    [vega-plot :as vega]
@@ -74,6 +74,39 @@
                        (map edn/read-string line)))))))
 
 
+(defn read-resource-csv 
+  "Read a csv file into a list of maps.  They keys depend on the column titles
+  given on the first line of the csv file."
+  [csv-file]
+  (with-open [csv-file (clojure.java.io/reader csv-file)]
+    (let [[headers lines] (read-csv-data csv-file
+                                         :comment? (constantly false)
+                                         :parsers {:default edn/read-string}
+                                         )]
+      (rename-columns headers lines {"#num-states" "num-states"}))))
+
+
+(defn plot-resource-csv 
+  "Read data from a csv file `csv-file` using the `read-resource-csv` function.
+  Generate a plot of one column vs another column. `x-axis` and `y-axis` are string
+  specifying the column name of the data to plot."
+  [csv-file x-axis y-axis]
+  (let [[headers lines] (read-resource-csv csv-file)]
+    (vega/series-scatter-plot "some data"
+                              x-axis
+                              y-axis
+                              [[(format "%s vs %s" x-axis y-axis)
+                                (for [line lines]
+                                  [(get line x-axis)
+                                   (get line y-axis)])]])))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Generation of inhabited data for randomly generated DFAs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
 (defn slurp-inhabited-data []
   ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
   (slurp-csv-data inhabited-csv [:num-states
@@ -85,38 +118,6 @@
                              :count-indeterminate-transitions
                              :inhabited-dfa-language]))  
 
-(defn slurp-rte-data [csv-file-name]
-  ;; # requested-depth, actual-depth, actual-leaf-count, max-balance, mean-balance, sigma-balance, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte
-  (slurp-csv-data csv-file-name
-                  [:requested-depth
-                   :actual-depth
-                   :actual-leaf-count
-                   :max-balance
-                   :mean-balance
-                   :sigma-balance
-                   :minimized-depth
-                   :minimized-leaf-count
-                   :actual-state-count
-                   :minimized-state-count
-                   :minimized-rte]))
-
-(defn slurp-balanced-rte-data []
-  (slurp-rte-data gen-rte-balanced-csv))
-
-(defn slurp-classic-rte-data []
-  (slurp-rte-data gen-rte-classic-csv))
-
-(defn slurp-subset-data []
-  ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
-  (slurp-csv-data subset-csv
-                  [:num-states
-                   :num-transitions
-                   :type-size
-                   :probability-indeterminate
-                   :subset
-                   :overlap
-                   :non-trivial-overlap
-                   ]))
 
 (defn summarize-inhabited-data []
   ;; # num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language
@@ -149,7 +150,55 @@
        :inhabited-dfa-language  (symbolic :inhabited-dfa-language)}
       )))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Generation of subset data for randomly generated DFAs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+(defn slurp-subset-data []
+  ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
+  (slurp-csv-data subset-csv
+                  [:num-states
+                   :num-transitions
+                   :type-size
+                   :probability-indeterminate
+                   :subset
+                   :overlap
+                   :non-trivial-overlap
+                   ]))
+
+
+  
+(defn summarize-subset-data []
+  ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
+  (let [lines (slurp-subset-data)]
+    (letfn [(numeric [key]
+              (let [population (map key lines)]
+              {:min (reduce min population)
+               :max (reduce max population)
+               :mean (float (mean population))
+               :sigma (std-deviation population)}
+              ))
+            (symbolic [key]
+              (let [population (map key lines)
+                    n (count population)
+                    ]
+                {:distinct (distinct population)
+                 :frequencies (frequencies population)
+                 :count (into {} (for [x (distinct population)]
+                          [x (float (/ (count (filter #(= % x) population)) n))]))
+                 }))
+            ]
+    {:num-samples (count lines)
+     :num-states (numeric :num-states)
+     :num-transitions (numeric :num-transitions)
+     :type-size (numeric :type-size)
+     :probability-indeterminate  (numeric :probability-indeterminate )
+     :subset (symbolic :subset)
+     :overlap (symbolic :overlap)
+     :non-trivial-overlap (symbolic :non-trivila-overlap)
+  }
+  )))
 
 (defn write-stats-csv 
   "Append statistics to the file `subset-csv`  resources/statistics/dfa-subset.csv
@@ -231,170 +280,9 @@
                   ))))
 
 
-(defn read-resource-csv [csv-file]
-  (with-open [csv-file (clojure.java.io/reader csv-file)]
-    (let [[headers lines] (read-csv-data csv-file
-                                         :comment? (constantly false)
-                                         :parsers {:default edn/read-string}
-                                         )]
-      (rename-columns headers lines {"#num-states" "num-states"}))))
-
-(defn plot-resource-csv [csv-file x-axis y-axis]
-  (let [[headers lines] (read-resource-csv csv-file)]
-    (vega/series-scatter-plot "some data"
-                              x-axis
-                              y-axis
-                              [[(format "%s vs %s" x-axis y-axis)
-                                (for [line lines]
-                                  [(get line x-axis)
-                                   (get line y-axis)])]])))
-
-  
-(defn summarize-subset-data []
-  ;; num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap
-  (let [lines (slurp-subset-data)]
-    (letfn [(numeric [key]
-              (let [population (map key lines)]
-              {:min (reduce min population)
-               :max (reduce max population)
-               :mean (float (mean population))
-               :sigma (std-deviation population)}
-              ))
-            (symbolic [key]
-              (let [population (map key lines)
-                    n (count population)
-                    ]
-                {:distinct (distinct population)
-                 :frequencies (frequencies population)
-                 :count (into {} (for [x (distinct population)]
-                          [x (float (/ (count (filter #(= % x) population)) n))]))
-                 }))
-            ]
-    {:num-samples (count lines)
-     :num-states (numeric :num-states)
-     :num-transitions (numeric :num-transitions)
-     :type-size (numeric :type-size)
-     :probability-indeterminate  (numeric :probability-indeterminate )
-     :subset (symbolic :subset)
-     :overlap (symbolic :overlap)
-     :non-trivial-overlap (symbolic :non-trivila-overlap)
-  }
-  )))
 
 
-(defn compute-balance-factors [r]
-  ;; {:post [(or (println [:r r :returns %]) true)]}
-  (cond (not (sequential? r))
-        [0 []]
-
-        (keyword? (first r))
-        (let [[operator & operands] r
-              pairs (map compute-balance-factors operands)
-              heights (map first pairs)]
-          (if (empty? heights)
-            [0 []]
-            (let [max-height (reduce max heights)
-                  min-height (reduce min heights)
-                  balance (- max-height min-height) ]
-              [(inc max-height)
-               (conj (mapcat second pairs) balance)])))
-
-        :else
-        [0 []]))
-
-(defn build-rtes
-  "Using a given genrator function `gen`, create `repetitions` many
-  rte objects.  Update the specified `csv-file` with data extracted
-  from the objects, one line per rte."
-  [depth repetitions & {:keys [gen csv-file] ;; unary function which takes depth argument and generates a random rte of that approximate depth
-                        :or {gen gen-balanced-rte
-                             csv-file gen-rte-balanced-csv
-                             }}]
-  (let [time-out-secs 30
-        max-rte-leaf-count 35536
-        trivials '(:sigma (:* :sigma) (:cat :sigma (:* :sigma)) (:cat (:* :sigma) :sigma) :epsilon :empty-set)
-        freqs (loop [repetitions repetitions
-                     rtes nil]
-                (if (not (pos? repetitions))
-                  (frequencies rtes)
-                  (let [rte-1 (gen depth)
-                        count-rte-1-leaves (rte-count-leaves rte-1)
-                        _ (println [:rte-1-count count-rte-1-leaves])
-                        [_ balance-factors] (compute-balance-factors rte-1)
-                        mean-balance (float (mean balance-factors 0))
-                        max-balance (reduce max (conj balance-factors 0))
-                        sigma-balance (std-deviation balance-factors 0)
-                        _ (println [
-                                    :mean-balance mean-balance
-                                    :max-balance max-balance
-                                    :sigma-balance sigma-balance])
-                        dfa-1 (when (> max-rte-leaf-count count-rte-1-leaves)
-                                (with-timeout time-out-secs
-                                    (do (printf "timed out computing rte-to-dfa %s\n" rte-1)
-                                        nil)
-                                  (do (println "starting (rte-to-dfa rte-1)\n")
-                                      (rte-to-dfa rte-1))))
-                        _ (println [:dfa-1 dfa-1])
-                        dfa-min (when dfa-1
-                                  (with-timeout time-out-secs
-                                      (do (printf "timed out computing minimize %s\n" dfa-1)
-                                          nil)
-                                    (xym/minimize dfa-1)))
-                        _ (println [:dfa-min dfa-min])
-                        rte-map (when dfa-min
-                                  (with-timeout time-out-secs
-                                      (do (printf "timed out computing dfa-to-rte %s\n" dfa-min)
-                                          nil)
-                                    (dfa-to-rte dfa-min)))
-                        _ (println [:rte-map (keys rte-map)])
-                        rte-2 (when rte-map (get rte-map true :empty-set))
-                        _ (if rte-2
-                            (println [:rte-2-count (rte-count-leaves rte-2)])
-                            (printf "skipped computation of rte-2\n"))
-
-                        dfa-2 (when (and rte-2 
-                                         (> max-rte-leaf-count (rte-count-leaves rte-2)))
-                                (with-timeout time-out-secs
-                                              (do (printf "timed out computing rte-to-dfa %s\n" rte-2)
-                                                  nil)
-                                            (rte-to-dfa rte-2)))]
-
-                    (println [:rep repetitions
-                              :depth depth
-                              :csv-file (if (= csv-file gen-rte-balanced-csv)
-                                          "balanced"
-                                          "classic")
-                              :date  (human-readable-current-time)])
-                    (if dfa-2
-                      (do (merge-file csv-file
-                                      (fn [out-file]
-                                        ;;(cl-format out-file "# requested-depth, actual-depth, max-balance, mean-balance, sigma-balance, actual-leaf-count, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte~%")
-                                        (cl-format out-file "~D, ~D, ~D" depth (rte-depth rte-1) (rte-count-leaves rte-1))
-                                        (cl-format out-file ", ~A, ~A, ~A" max-balance mean-balance sigma-balance)
-                                        (cl-format out-file ", ~D, ~D" (rte-depth rte-2) (rte-count-leaves rte-2))
-                                        (cl-format out-file ", ~D, ~D" (count (xym/states-as-seq dfa-1)) (count (xym/states-as-seq dfa-2)))
-                                        (cl-format out-file ", ~A" (if (member rte-2 trivials)
-                                                                     rte-2
-                                                                     :other))
-                                        (cl-format out-file "~%")))
-                          (recur (dec repetitions) (cons rte-2 rtes)))
-                      (recur (dec repetitions) rtes)))))]
-    (into {} (for [[k v] freqs
-                   :when (> v 1)]
-               [k v]))))
-
-
-(defn build-rtes-classic [depth repetitions]
-  (build-rtes depth repetitions
-              :gen gen-rte
-              :csv-file gen-rte-classic-csv))
-
-(defn build-rtes-balanced [depth repetitions]
-  (build-rtes depth repetitions
-              :gen gen-balanced-rte
-              :csv-file gen-rte-balanced-csv))
-
-(defn update-resource-csv
+(defn update-inhabited-subset-csv
   "Run a suite of simulations, appending to resources/statistics/dfa-subset.csv
   and dfa-inhabited.csv."
   [num-samples center radius]
@@ -421,7 +309,9 @@
                      :probability-indeterminate probability-indeterminate)
     ))
 
-(defn plot-summary []
+
+
+(defn plot-inhabited-subset-summary []
   (let [inhabited-grouped (group-by :num-states (slurp-inhabited-data))
         inhabited-xys (for [[num-states lines] inhabited-grouped
                             :let [m (frequencies (map :inhabited-dfa-language lines))
@@ -556,6 +446,200 @@
     image))
 
 
+          
+
+(defn summarize-inhabited-subset-data []
+  (let [ssd (summarize-subset-data)
+        sid (summarize-inhabited-data)
+        round-2 (fn [val] (format "%3.2f" (float val)))
+        ]
+    (pprint [:ssd ssd])
+    (pprint [:sid sid])
+    (printf "---------------\n")
+    (with-lock
+      (with-open [out-file (java.io.FileWriter. statistics-tex-path)]
+        (doseq [[sym value]
+                [['xyznumsamples (:num-samples ssd)]
+                 ['xyzminsize (get-in ssd [:num-states :min])]
+                 ['xyzmaxsize (get-in ssd [:num-states :max])]
+                 ['xyzsizemu  (round-2 (get-in ssd [:num-states :mean]))]
+                 ['xyzsizesigma (round-2 (get-in ssd [:num-states :sigma]))]
+
+                 ['xyzmintransitions (get-in ssd [:num-transitions :min])]
+                 ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
+                 ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean] 0))]
+                 ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma] 0))]
+
+                 ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
+                 ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
+                 ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean] 0))]
+                 ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
+
+                 ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
+                 ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable] 0)))]
+                 ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
+                 ['xyzpercentindeterminate
+                  (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate] 0)))]
+                 ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true] 0)))]
+                 ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false] 0)))]
+                 ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know] 0)))]
+                 ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false] 0)))]
+                 ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true] 0)))]
+                 ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know] 0)))]
+                 ]]
+          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Generation of RTE-based data for randomly generated RTEs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+(defn compute-balance-factors [r]
+  ;; {:post [(or (println [:r r :returns %]) true)]}
+  (cond (not (sequential? r))
+        [0 []]
+
+        (keyword? (first r))
+        (let [[operator & operands] r
+              pairs (map compute-balance-factors operands)
+              heights (map first pairs)]
+          (if (empty? heights)
+            [0 []]
+            (let [max-height (reduce max heights)
+                  min-height (reduce min heights)
+                  balance (- max-height min-height) ]
+              [(inc max-height)
+               (conj (mapcat second pairs) balance)])))
+
+        :else
+        [0 []]))
+
+
+(defn build-rtes
+  "Using a given genrator function `gen`, create `repetitions` many
+  rte objects.  Update the specified `csv-file` with data extracted
+  from the objects, one line per rte."
+  [depth repetitions & {:keys [gen csv-file] ;; unary function which takes depth argument and generates a random rte of that approximate depth
+                        :or {gen gen-balanced-rte
+                             csv-file gen-rte-balanced-csv
+                             }}]
+  (let [time-out-secs 30
+        max-rte-leaf-count 35536
+        trivials '(:sigma (:* :sigma) (:cat :sigma (:* :sigma)) (:cat (:* :sigma) :sigma) :epsilon :empty-set)
+        freqs (loop [repetitions repetitions
+                     rtes nil]
+                (if (not (pos? repetitions))
+                  (frequencies rtes)
+                  (let [rte-1 (gen depth)
+                        count-rte-1-leaves (rte-count-leaves rte-1)
+                        _ (println [:rte-1-count count-rte-1-leaves])
+                        [_ balance-factors] (compute-balance-factors rte-1)
+                        mean-balance (float (mean balance-factors 0))
+                        max-balance (reduce max (conj balance-factors 0))
+                        sigma-balance (std-deviation balance-factors 0)
+                        _ (println [
+                                    :mean-balance mean-balance
+                                    :max-balance max-balance
+                                    :sigma-balance sigma-balance])
+                        dfa-1 (when (> max-rte-leaf-count count-rte-1-leaves)
+                                (with-timeout time-out-secs
+                                    (do (printf "timed out computing rte-to-dfa %s\n" rte-1)
+                                        nil)
+                                  (do (println "starting (rte-to-dfa rte-1)\n")
+                                      (rte-to-dfa rte-1))))
+                        _ (println [:dfa-1 dfa-1])
+                        dfa-min (when dfa-1
+                                  (with-timeout time-out-secs
+                                      (do (printf "timed out computing minimize %s\n" dfa-1)
+                                          nil)
+                                    (xym/minimize dfa-1)))
+                        _ (println [:dfa-min dfa-min])
+                        rte-map (when dfa-min
+                                  (with-timeout time-out-secs
+                                      (do (printf "timed out computing dfa-to-rte %s\n" dfa-min)
+                                          nil)
+                                    (dfa-to-rte dfa-min)))
+                        _ (println [:rte-map (keys rte-map)])
+                        rte-2 (when rte-map (get rte-map true :empty-set))
+                        _ (if rte-2
+                            (println [:rte-2-count (rte-count-leaves rte-2)])
+                            (printf "skipped computation of rte-2\n"))
+
+                        dfa-2 (when (and rte-2 
+                                         (> max-rte-leaf-count (rte-count-leaves rte-2)))
+                                (with-timeout time-out-secs
+                                              (do (printf "timed out computing rte-to-dfa %s\n" rte-2)
+                                                  nil)
+                                            (rte-to-dfa rte-2)))]
+
+                    (println [:rep repetitions
+                              :depth depth
+                              :csv-file (if (= csv-file gen-rte-balanced-csv)
+                                          "balanced"
+                                          "classic")
+                              :date  (human-readable-current-time)])
+                    (if dfa-2
+                      (do (merge-file csv-file
+                                      (fn [out-file]
+                                        ;;(cl-format out-file "# requested-depth, actual-depth, max-balance, mean-balance, sigma-balance, actual-leaf-count, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte~%")
+                                        (cl-format out-file "~D, ~D, ~D" depth (rte-depth rte-1) (rte-count-leaves rte-1))
+                                        (cl-format out-file ", ~A, ~A, ~A" max-balance mean-balance sigma-balance)
+                                        (cl-format out-file ", ~D, ~D" (rte-depth rte-2) (rte-count-leaves rte-2))
+                                        (cl-format out-file ", ~D, ~D" (count (xym/states-as-seq dfa-1)) (count (xym/states-as-seq dfa-2)))
+                                        (cl-format out-file ", ~A" (if (member rte-2 trivials)
+                                                                     rte-2
+                                                                     :other))
+                                        (cl-format out-file "~%")))
+                          (recur (dec repetitions) (cons rte-2 rtes)))
+                      (recur (dec repetitions) rtes)))))]
+    (into {} (for [[k v] freqs
+                   :when (> v 1)]
+               [k v]))))
+
+
+(defn build-rtes-classic
+  "Interface to build-rtes using classical RTE generation."
+  [depth repetitions]
+  (build-rtes depth repetitions
+              :gen gen-rte
+              :csv-file gen-rte-classic-csv))
+
+(defn build-rtes-balanced 
+  "Interface to build-rtes using balanced RTE generation."
+[depth repetitions]
+  (build-rtes depth repetitions
+              :gen gen-balanced-rte
+              :csv-file gen-rte-balanced-csv))
+
+
+(defn slurp-rte-data [csv-file-name]
+  ;; # requested-depth, actual-depth, actual-leaf-count, max-balance, mean-balance, sigma-balance, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte
+  (slurp-csv-data csv-file-name
+                  [:requested-depth
+                   :actual-depth
+                   :actual-leaf-count
+                   :max-balance
+                   :mean-balance
+                   :sigma-balance
+                   :minimized-depth
+                   :minimized-leaf-count
+                   :actual-state-count
+                   :minimized-state-count
+                   :minimized-rte]))
+
+(defn slurp-balanced-rte-data []
+  (slurp-rte-data gen-rte-balanced-csv))
+
+(defn slurp-classic-rte-data []
+  (slurp-rte-data gen-rte-classic-csv))
+
+
+
+
 
 (defn plot-rte-summary []
   (let [balanced-rte-data (slurp-balanced-rte-data)
@@ -640,60 +724,19 @@
       
     ))
 
-
-
 ;; (plot-rte-summary)
 
-          
 
-(defn summarize-data []
-  (let [ssd (summarize-subset-data)
-        sid (summarize-inhabited-data)
-        round-2 (fn [val] (format "%3.2f" (float val)))
-        ]
-    (pprint [:ssd ssd])
-    (pprint [:sid sid])
-    (printf "---------------\n")
-    (with-lock
-      (with-open [out-file (java.io.FileWriter. statistics-tex-path)]
-        (doseq [[sym value]
-                [['xyznumsamples (:num-samples ssd)]
-                 ['xyzminsize (get-in ssd [:num-states :min])]
-                 ['xyzmaxsize (get-in ssd [:num-states :max])]
-                 ['xyzsizemu  (round-2 (get-in ssd [:num-states :mean]))]
-                 ['xyzsizesigma (round-2 (get-in ssd [:num-states :sigma]))]
 
-                 ['xyzmintransitions (get-in ssd [:num-transitions :min])]
-                 ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
-                 ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean] 0))]
-                 ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma] 0))]
 
-                 ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
-                 ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
-                 ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean] 0))]
-                 ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
-
-                 ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
-                 ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable] 0)))]
-                 ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
-                 ['xyzpercentindeterminate
-                  (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate] 0)))]
-                 ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true] 0)))]
-                 ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false] 0)))]
-                 ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know] 0)))]
-                 ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false] 0)))]
-                 ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true] 0)))]
-                 ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know] 0)))]
-                 ]]
-          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value))))))
-
+;;;;;;; unsorted
 
 (defn -main [& argv]
   (let [num-samples (Integer/parseInt (nth argv 0))
         center (Integer/parseInt (nth argv 1))
         radius (Integer/parseInt (nth argv 2))]
-    (update-resource-csv num-samples center radius)
-    (plot-summary)
-    (summarize-data)
+    (update-inhabited-subset-csv num-samples center radius)
+    (plot-inhabited-subset-summary)
+    (summarize-inhabited-subset-data)
     (System/exit 0)
     ))

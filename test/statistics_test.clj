@@ -43,5 +43,5 @@
     (is (sut/read-resource-csv sut/inhabited-csv))))
 
 (deftest t-update-resource-csv
-  (testing "update csv resource"
-    (sut/update-resource-csv 2)))
+  (testing "update inhabited subset csv resource"
+    (sut/update-inhabited-subset-csv 2)))
