@@ -202,7 +202,7 @@
   }
   )))
 
-(defn write-stats-csv 
+(defn write-inhabited-subset-stats-csv 
   "Append statistics to the file `subset-csv`  resources/statistics/dfa-subset.csv
   and to `inhabited-csv` resources/statistics/dfa-inhabited.csv.
   The statistics registered in `subset-csv` specify information about subset-ness and disjoint-ness
