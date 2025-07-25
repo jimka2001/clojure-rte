@@ -33,7 +33,9 @@
 (def reduction-svg (str statistics-resource "reduction.svg"))
 
 (defmacro with-lock
-  "macro version of call-in-block"
+  "macro version of call-in-block.
+  Evaluate the given code body in a way which blocks access to
+  the resource files in statistics/resources/"
   [& body]
   `(call-in-block lock-file
                   (fn [] ~@body)))
