@@ -50,7 +50,7 @@
     ;;     clojure.lang.Keyword, then go to state 1.  The type is some type designator
     ;;     as specified in the genus library.  the state index is some index of the state
     ;;     array representing the finite atomaton.
-    [index initial accepting pattern transitions])
+    [index description initial accepting pattern transitions])
 
 (defmethod print-method State [v w]
   (.write w (format "#<State %s>" (:index v))))
@@ -159,6 +159,7 @@
   "Serialize a State for debugging"
   [state]
   [:index (:index state)
+   :description (:description state)
    :accepting (:accepting state)
    :pattern (:pattern state)
    :transitions (:transitions state)])
@@ -692,7 +693,7 @@
     perform an (and a1 a2).
   f-arbitrate-exit-value - binary function called with [q1,q2].  q1 is an accepting state
     of dfa-1.  q2 is an accepting state in dfa-2.
-    f-arbitrate-exit-value is called when q1 and q2 are both accepting state or
+    f-arbitrate-exit-value is called when q1 and q2 are both accepting states or
       when neither is an accepting state.   In the case that only q1 or only q2
       is an accepting state, this accepting state's exit value is used in the SXP.
       f-arbitrate-exit-value should return the exit value for the state in the SXP."
@@ -700,14 +701,14 @@
   (letfn [(compute-state-transitions [state-1 state-2 state-ident-map]
             (for [[label-1 dst-1] (:transitions state-1)
                   [label-2 dst-2] (:transitions state-2)
-                  :when (not (bdd/type-disjoint? label-1 label-2))
+                  :when (not (gns/disjoint? label-1 label-2 false))
                   :let [label-sxp (intersect-labels label-1 label-2)]
                   :when (gns/inhabited? label-sxp true)
                   ]
               [label-sxp (state-ident-map [dst-1 dst-2])]))
           (accumulate-states [initial-id-pair state-ident-map ident-state-map]
             ;; Returns a sequence of pairs [id state], one for each
-            ;;   state in the SXP Dfa being create.
+            ;;   state in the SXP Dfa being created.
             ;;
             ;; This local function allocates the states in the SXP Dfa.
             ;; It uses a breadth-first-search starting at the initial state [0 0].
@@ -718,7 +719,7 @@
             ;; Caveat some states may appear accessible but really aren't because
             ;; they might have null-transitions leading to them.   E.g.,
             ;; There might be a type-designator which is the intersection of two
-            ;; type-designators which bdd/type-disjoint? is not able to determine
+            ;; type-designators which gns/disjoint? is not able to determine
             ;; are really disjoint.   We error on the side of redundancy, leaving
             ;; transitions which will never be taken at runtime.
             (loop [work-id-pairs (list initial-id-pair)
@@ -745,6 +746,7 @@
                          (conj acc-id-state-pairs
                                [id-sxp (map->State
                                         {:index id-sxp
+                                         :description [id-1 id-2]
                                          :initial (= 0 id-sxp)
                                          :accepting (f-arbitrate-accepting
                                                      (:accepting state-1)

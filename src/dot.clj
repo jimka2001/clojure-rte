@@ -162,81 +162,97 @@
                            (into {}
                                  (for [q accepting-states]
                                    [(xym/exit-value dfa q) (format "fn-%d" (:index q))])))
+          state-text (fn [q] 
+                       (with-out-str
+                         (printf "[")
+                         (when (:accepting q)
+                           (printf "shape=doublecircle,"))
+                         (printf "label=\"q%d" (:index q))
+                         (when (:description q)
+                           (printf "%s" (:description q)))
+                         (printf "\"")
+                         (printf "]")))
           all-final-true (every? (fn [q] (= true (xym/exit-value dfa q)))
                                  accepting-states)]
-      (with-out-str
-        (cl-format *out* "digraph G {~%")
-        (when title
-          (cl-format *out* "// ~a~%" title))
-        (cl-format *out* "  rankdir=LR;~%")
-        (cl-format *out* "  fontname=courier;~%")
-        (when abbrev
-          (cl-format *out* "  label=\"~a\\l\"~%"
-                     (str/replace
-                      (str/join
-                       "" (concat (map (fn [index]
-                                         (cl-format false "\\lt~a= ~a"
-                                                    index (line-wrap (labels index) right-margin)))
-                                       (range (count (keys labels))))
-                                  ["\\l"]
-                                  (if state-legend
-                                    (for [q visible-states
-                                          :when (boolean (:pattern q))]
-                                      (cl-format false "\\lq~a= ~a"
-                                                 (:index q) (line-wrap (:pattern q) right-margin)))
-                                    [""])))
-                      "\"" "\\\"")))
-        (cl-format *out* "  graph [labeljust=l,nojustify=true];~%")
-        (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
-        (cl-format *out* "  edge [fontname=Helvetica, fontsize=20];~%")
 
-        
-        (doseq [q (xym/states-as-seq dfa)]
-          (cl/cl-cond
-           ((and (member q sink-states)
-                 (not draw-sink)))
-           (:else
-            (when (:accepting q)
-              (cl-format *out* "   q~D [shape=doublecircle] ;~%" (:index q))
-              ;; if all exit values are explicitly true, the don't draw
-              ;; any exit arrows.
-              (cond all-final-true
-                    nil
+      [(with-out-str
+         (cl-format *out* "digraph G {~%")
+         (when title
+           (cl-format *out* "// ~a~%" title))
+         (cl-format *out* "  rankdir=LR;~%")
+         (cl-format *out* "  fontname=courier;~%")
+         (when abbrev
+           (cl-format *out* "  label=\"~a\\l\"~%"
+                      (str/replace
+                       (str/join
+                        "" (concat (mapcat (fn [index]
+                                             ;; only if the label actually exists in dfa
+                                             (if (member (labels index) transition-labels)
+                                               [(cl-format false "\\lt~a= ~a"
+                                                           index (line-wrap (labels index) right-margin))]
+                                               []))
+                                           (range (count (keys labels))))
+                                   ["\\l"]
+                                   (if state-legend
+                                     (for [q visible-states
+                                           :when (boolean (:pattern q))]
+                                       (cl-format false "\\lq~a= ~a"
+                                                  (:index q) (line-wrap (:pattern q) right-margin)))
+                                     [""])))
+                       "\"" "\\\"")))
+         (cl-format *out* "  graph [labeljust=l,nojustify=true];~%")
+         (cl-format *out* "  node [fontname=Arial, fontsize=25];~%")
+         (cl-format *out* "  edge [fontname=Helvetica, fontsize=20];~%")
 
-                    all-final-function
-                    (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
-                        (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%"
-                                   (:index q) (function-table (xym/exit-value dfa q))))
+         
+         (doseq [q (xym/states-as-seq dfa)]
+           (cl/cl-cond
+            ((and (member q sink-states)
+                  (not draw-sink)))
+            (:else
+             (printf "   q%d %s ;\n" (:index q) (state-text q))
 
-                    :otherwise
-                    (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
-                    (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
-                               (:index q) (xym/exit-value dfa q)))))
-            (when (:initial q)
-              (cl-format *out* "   H~D [label=\"\", style=invis, width=0]~%" (:index q))
-              (cl-format *out* "   H~D -> q~D;~%" (:index q) (:index q)))
-            (doseq [[next-state transitions] (group-by second (:transitions q))
-                    ;; if there are parallel transitions, print them seperated by comma
-                    :let [type-desigs (map first transitions)
-                          labels (if abbrev
-                                   (for [td type-desigs]
-                                     (cl-format false "t~a" (abbrevs td)))
-                                   type-desigs)
-                          label (str/join "," labels)
-                          ;; draw indeterminate transitions as dashed lines
-                          inh-text (if (some (fn [td] (gns/inhabited? td false)) type-desigs)
-                                     ""
-                                     ",style=dashed")
-                          ]]
-              (cl/cl-cond
-               ((and (member (xym/state-by-index dfa next-state) sink-states)
-                     (not draw-sink)))
-               (:else
+             (when (:accepting q)
+               ;; if all exit values are explicitly true, the don't draw
+               ;; any exit arrows.
+               (cond all-final-true
+                     nil
 
-                (cl-format *out* "   q~D -> q~D [label=\"~a\"~a];~%"
-                           (:index q) next-state label inh-text)))))))
-        
-        (cl-format *out* "}~%")))))
+                     all-final-function
+                     (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
+                         (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%"
+                                    (:index q) (function-table (xym/exit-value dfa q))))
+
+                     :otherwise
+                     (do (cl-format *out* "   q~D -> X~D ;~%" (:index q) (:index q))
+                         (cl-format *out* "   X~D [label=\"~A\", shape=rarrow]~%" ;; or plaintext ?
+                                    (:index q) (xym/exit-value dfa q)))))
+             (when (:initial q)
+               (cl-format *out* "   H~D [label=\"\", style=invis, width=0]~%" (:index q))
+               (cl-format *out* "   H~D -> q~D;~%" (:index q) (:index q)))
+             (doseq [[next-state transitions] (group-by second (:transitions q))
+                     ;; if there are parallel transitions, print them seperated by comma
+                     :let [type-desigs (map first transitions)
+                           labels (if abbrev
+                                    (for [td type-desigs]
+                                      (cl-format false "t~a" (abbrevs td)))
+                                    type-desigs)
+                           label (str/join "," labels)
+                           ;; draw indeterminate transitions as dashed lines
+                           inh-text (if (some (fn [td] (gns/inhabited? td false)) type-desigs)
+                                      ""
+                                      ",style=dashed")
+                           ]]
+               (cl/cl-cond
+                ((and (member (xym/state-by-index dfa next-state) sink-states)
+                      (not draw-sink)))
+                (:else
+
+                 (cl-format *out* "   q~D -> q~D [label=\"~a\"~a];~%"
+                            (:index q) next-state label inh-text)))))))
+         
+         (cl-format *out* "}~%"))
+       abbrevs])))
 
 (defn dfa-view 
   "Draw a dfa graphically using `dfa-to-dot` returning a map which

@@ -40,7 +40,7 @@
   `(call-in-block lock-file
                   (fn [] ~@body)))
 
-(defn merge-file 
+(defn merge-file
   "`csv-file-name` is a csv file in the resource/statistics directory
   `write-record` is a unary function, callable with a file writer (from java.io.FileWriter)
   This function `merge-file`, calls `write-record` which is expected to write a line into
@@ -230,6 +230,7 @@
                                              :type-size type-size
                                              :probability-indeterminate probability-indeterminate)))
         dfa-and (xym/synchronized-intersection @dfa-1 @dfa-2)
+        dfa-and-not (xym/synchronized-and-not @dfa-1 @dfa-2)
         dfa-empty-word (rte-to-dfa :epsilon exit-value)
         dfa-and-non-trivial (xym/synchronized-and-not dfa-and dfa-empty-word)
         subset (xym/dfa-subset? @dfa-1 @dfa-2)
@@ -237,7 +238,7 @@
         non-trivial-overlap (xym/dfa-inhabited? dfa-and-non-trivial)
         [satisfiability path] (get (xym/find-trace-map @dfa-1) exit-value)
         ]
-    
+
     (merge-file inhabited-csv
                 (fn [out-file]
                   ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
@@ -281,9 +282,6 @@
                   (cl-format out-file "~%")
                   ))))
 
-
-
-
 (defn update-inhabited-subset-csv
   "Run a suite of simulations, appending to resources/statistics/dfa-subset.csv
   and dfa-inhabited.csv."
@@ -310,8 +308,6 @@
                                       :type-size type-size
                                       :probability-indeterminate probability-indeterminate)
     ))
-
-
 
 (defn plot-inhabited-subset-summary []
   (let [inhabited-grouped (group-by :num-states (slurp-inhabited-data))
@@ -413,7 +409,7 @@
                                             [num-states true-percent])
 
         population (count sample-lines)
-        histogram-xyz (for [[num-states lines] grouped-subset
+        histogram-vmcai (for [[num-states lines] grouped-subset
                             :let [count-local (count lines)]
                             :when (> population 0)
                             :let [
@@ -433,7 +429,7 @@
                                          ["overlap=true" (sort overlap-true-xys)]
                                          ["overlap=dont-know" (sort overlap-dont-know-xys)]
                                          
-                                         ["state-count-histogram" (sort histogram-xyz)]
+                                         ["state-count-histogram" (sort histogram-vmcai)]
 
                                          ;;["non-trivila-overlap=true" (sort non-trivial-overlap-true-xys)]
                                          ;;["non-trivial-overlap=dont-know" (sort non-trivial-overlap-dont-know-xys)]
@@ -464,33 +460,33 @@
     (with-lock
       (with-open [out-file (java.io.FileWriter. statistics-tex-path)]
         (doseq [[sym value]
-                [['xyznumsamples (:num-samples ssd)]
-                 ['xyzminsize (get-in ssd [:num-states :min])]
-                 ['xyzmaxsize (get-in ssd [:num-states :max])]
-                 ['xyzsizemu  (round-2 (get-in ssd [:num-states :mean]))]
-                 ['xyzsizesigma (round-2 (get-in ssd [:num-states :sigma]))]
+                [['vmcainumsamples (:num-samples ssd)]
+                 ['vmcaiminsize (get-in ssd [:num-states :min])]
+                 ['vmcaimaxsize (get-in ssd [:num-states :max])]
+                 ['vmcaisizemu  (round-2 (get-in ssd [:num-states :mean]))]
+                 ['vmcaisizesigma (round-2 (get-in ssd [:num-states :sigma]))]
 
-                 ['xyzmintransitions (get-in ssd [:num-transitions :min])]
-                 ['xyzmaxtransitions (get-in ssd [:num-transitions :max])]
-                 ['xyztransitionsmu  (round-2 (get-in ssd [:num-transitions :mean] 0))]
-                 ['xyztransitionssigma (round-2 (get-in ssd [:num-transitions :sigma] 0))]
+                 ['vmcaimintransitions (get-in ssd [:num-transitions :min])]
+                 ['vmcaimaxtransitions (get-in ssd [:num-transitions :max])]
+                 ['vmcaitransitionsmu  (round-2 (get-in ssd [:num-transitions :mean] 0))]
+                 ['vmcaitransitionssigma (round-2 (get-in ssd [:num-transitions :sigma] 0))]
 
-                 ['xyzminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
-                 ['xyzmaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
-                 ['xyzmuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean] 0))]
-                 ['xyzsigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
+                 ['vmcaiminindeterminatetransitions (get-in sid [:count-indeterminate-transitions :min])]
+                 ['vmcaimaxindeterminatetransitions (get-in sid [:count-indeterminate-transitions :max])]
+                 ['vmcaimuindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :mean] 0))]
+                 ['vmcaisigmaindeterminatetransitions (round-2 (get-in sid [:count-indeterminate-transitions :sigma]))]
 
-                 ['xyznuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
-                 ['xyzpercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable] 0)))]
-                 ['xyznumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
-                 ['xyzpercentindeterminate
+                 ['vmcainuminhabited (get-in sid [:inhabited-dfa-language :frequencies :satisfiable])]
+                 ['vmcaipercentinhabited (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :satisfiable] 0)))]
+                 ['vmcainumindeterminate (get-in sid [:inhabited-dfa-language :frequencies :indeterminate])]
+                 ['vmcaipercentindeterminate
                   (round-2 (* 100 (get-in sid [:inhabited-dfa-language :count :indeterminate] 0)))]
-                 ['xyzpercentsubset (round-2 (* 100 (get-in ssd [:subset :count true] 0)))]
-                 ['xyzpercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false] 0)))]
-                 ['xyzpercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know] 0)))]
-                 ['xyzpercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false] 0)))]
-                 ['xyzpercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true] 0)))]
-                 ['xyzpercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know] 0)))]
+                 ['vmcaipercentsubset (round-2 (* 100 (get-in ssd [:subset :count true] 0)))]
+                 ['vmcaipercentnotsubset (round-2 (* 100 (get-in ssd [:subset :count false] 0)))]
+                 ['vmcaipercentdontknowsubset (round-2 (* 100 (get-in ssd [:subset :count :dont-know] 0)))]
+                 ['vmcaipercentdisjoint (round-2 (* 100 (get-in ssd [:overlap :count false] 0)))]
+                 ['vmcaipercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true] 0)))]
+                 ['vmcaipercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know] 0)))]
                  ]]
           (cl-format out-file "\\newcommand\\~a{~a}~%" sym value))))))
 
