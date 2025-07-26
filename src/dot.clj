@@ -106,25 +106,31 @@
   For Mac OS, the :view option may be used to display the image
   interactively.
   dfa-to-dot also accepts an rte (as dfa) in which case it will be converted
-  to a Dfa using rte-to-dfa."
-  [dfa & {:keys [title view abbrev draw-sink right-margin state-legend dot-file-cb png-file-cb]
+  to a Dfa using rte-to-dfa.
+  Returns the new abbrevs map which is necessarily an extension of
+  the given `abbrevs` map.  This map can be used by the caller to
+  re-call dba-to-dot with a different dfa.  If any transitions of the second
+  dfa have the same type label as the first dfa, then the same abbreviation will
+  be used.  This makes it much easier for the human to understand the
+  dfa drawings being viewed."
+  [dfa & {:keys [title view abbrev draw-sink right-margin state-legend dot-file-cb png-file-cb abbrevs]
           :as all-optionals
           :or {title "no-title"
                draw-sink false
                abbrev true
+               abbrevs {}
                view false
                right-margin 120
                state-legend true
                dot-file-cb (fn [_file_name] nil)
                png-file-cb (fn [_file_name] nil)}}]
   (cond
-    view (let [dot-string (dfa-to-dot dfa (assoc all-optionals :view false))]
-           (dot-view dot-string all-optionals))
+    view (let [[dot-string new-abbrevs] (dfa-to-dot dfa (assoc all-optionals :view false))]
+           (dot-view dot-string all-optionals)
+           new-abbrevs)
     
     (seq? dfa)
     (dfa-to-dot (rte-to-dfa dfa) all-optionals)
-    ;; (apply dfa-to-dot (rte-to-dfa dfa)
-    ;;        (mapcat identity all-optionals))
 
     :otherwise ;; if dfa is of type Dfa then return a string content of the impending .dot file
     (let [sink-states (xym/find-sink-states dfa)
@@ -136,7 +142,18 @@
                                             [label dst-id] (:transitions q)
                                             :when (member dst-id visible-state-ids)]
                                         label))          
-          abbrevs (zipmap transition-labels (range (count transition-labels)))
+          ;; find smallest non-negative integer not in the used list
+          new-index (fn [used] (loop [guess 0]
+                                 (if (member guess used)
+                                   (recur (inc guess))
+                                   guess)))
+
+          ;; we already have some abbrevs, we need to merge some new ones in
+          abbrevs (merge abbrevs (reduce (fn [acc-map td]
+                                           (if (get acc-map td)
+                                             acc-map
+                                             (assoc acc-map td (new-index (vals acc-map)))))
+                                         abbrevs transition-labels))
           labels (clojure.set/map-invert abbrevs)
           accepting-states (filter :accepting (xym/states-as-seq dfa))
           all-final-function (every? (fn [q] (fn? (xym/exit-value dfa q)))
@@ -221,10 +238,21 @@
         
         (cl-format *out* "}~%")))))
 
-(defn dfa-view [dfa title]
-  (dfa-to-dot dfa :view true :title title :state-legend false
+(defn dfa-view 
+  "Draw a dfa graphically using `dfa-to-dot` returning a map which
+  maps types to abbreviation.  This map is an extension of the given abbrevs map."
+
+  [dfa title & {:keys [abbrevs draw-sink]
+                :or {abbrevs {}
+                     draw-sink false}}]
+  (dfa-to-dot dfa
+              :view true
+              :title title
+              :draw-sink draw-sink
+              :state-legend false
               :dot-file-cb println
               :png-file-cb println
+              :abbrevs abbrevs
 ))
 
 (defn bdd-to-dot 
