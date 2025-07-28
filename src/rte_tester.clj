@@ -94,19 +94,23 @@
   "Take a tree as created by `build-binary-tree`, insert a type at each
   leave node, and insert a randomly selected operator at each internal node.
   If the operator is unary, then the right child is simply discarded."
-  [tree types]
-  (cond (not-empty tree)
-        (let [key (rand-nth '[:? :* :not
-                              :and :or :cat])
-              [value left right] tree]
-          (case key
-            (:? :* :not) (list key (tree-to-rte left types))
-            (:and :or :cat) (list key
-                                  (tree-to-rte left types)
-                                  (tree-to-rte right types))))
+  ([tree]
+   (tree-to-rte tree *test-types*))
+  ([tree types]
+   (cond (not-empty tree)
+         (let [key (rand-nth '[:? :* :not
+                               :and :or :cat])
+               [value left right] tree]
+           (case key
+             (:? :* :not) (if (= 0 (rand-int 2)) ;; 50% choice
+                            (list key (tree-to-rte left types))
+                            (list key (tree-to-rte tree types)))
+             (:and :or :cat) (list key
+                                   (tree-to-rte left types)
+                                   (tree-to-rte right types))))
 
-        :else 
-        (rand-nth types)))
+         :else 
+         (rand-nth types))))
 
 (defn rte-depth
   "compute the depth of an RTE expression"
@@ -142,10 +146,12 @@
   [depth]
   (let [num-leaves (+ (round (pow 2 depth))
                       (rand-int (round (pow 2 depth))))
-        population (into () (shuffle (range num-leaves)))]
-    (build-binary-tree population)))
-
-
+        population (into () (shuffle (range num-leaves)))
+        tree (build-binary-tree population)
+        ]
+    ;; (printf "target num-leaves=%d %s\n" num-leaves tree)
+    tree
+    ))
 
 (defn gen-balanced-rte
   "Generate an RTE which corresponds (on average) in shape closely to a balanced
@@ -155,12 +161,15 @@
    (gen-balanced-rte depth 
                      (cons :epsilon *test-types*)))
   ([depth types]
+   (printf "generating tree of depth %d:  %s <= count < %s\n" depth (pow 2 depth) (pow 2 (inc depth)))
    ;; a binary tree of depth=n has 2^n <= m < 2^(n+1) leaves
    ;; so generate a random number 2^n <= rand < 2^(n+1)
    ;; i.e 2^n + (rand-int 2^(n+1) - 2^n)
    ;;    2^n + (rand-int 2^n)
-   (let [tree (rand-tree depth)]
-     (tree-to-rte tree types))))
+   (let [tree (rand-tree depth)
+         rte (tree-to-rte tree types)]
+
+     rte)))
 
 (defn gen-rte
   ([depth]
