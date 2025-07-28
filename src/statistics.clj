@@ -611,7 +611,7 @@
 
 (defn build-rtes-balanced 
   "Interface to build-rtes using balanced RTE generation."
-[depth repetitions]
+  [depth repetitions]
   (build-rtes depth repetitions
               :gen gen-balanced-rte
               :csv-file gen-rte-balanced-csv))
