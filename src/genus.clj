@@ -159,8 +159,8 @@
         :otherwise
         (resolve-class class-name)))
 
-(resolve-class 'Number)
-(resolve-class 'Ratio)
+;;(resolve-class 'Number)
+;;(resolve-class 'Ratio)
 
 (defn-memoized [type-equivalent? type-equivalent?-impl]
   "Test whether two type designators represent the same type."
@@ -212,7 +212,8 @@
   for the purse of valid-type?"
   ())
 
-(defn-memoized [sort-method-keys sort-method-keys-impl]
+
+(defn sort-method-keys 
   "Given a multimethod object, return a list of method keys.
   The :primary method comes first in the return list and the :default
   method has been filtered away."
@@ -1380,11 +1381,12 @@
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
+  ;; (println [:t1 t1 :t2 t2 :inh-1 (inhabited? t1 :dont-know) :inh-2 (inhabited? t2 :dont-know)])
   (cond
-    (not (inhabited? t1 true)) ;; if t1 is empty, t1 and t2 are disjoint
+    (= false (inhabited? t1 :dont-know)) ;; if t1 is empty, t1 and t2 are disjoint
     true
 
-    (not (inhabited? t2 true)) ;; if t2 is empty, t1 and t2 are disjoint
+    (= false (inhabited? t2 :dont-know)) ;; if t2 is empty, t1 and t2 are disjoint
     true
 
     :else
@@ -1984,6 +1986,7 @@
    :post [(member % '(true false :dont-know))]}
   (letfn [(calc-inhabited [type-designator default]
               (loop [[k & ks] (sort-method-keys -inhabited?)]
+                ;; (println [:calc type-designator :k k :inhabited? ((k (methods -inhabited?)) type-designator)])
                 (case ((k (methods -inhabited?)) type-designator)
                   (true) true
                   (false) false
