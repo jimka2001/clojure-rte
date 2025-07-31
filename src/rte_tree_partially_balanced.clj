@@ -90,7 +90,7 @@
    (gen-partially-balanced-rte depth 
                      (cons :epsilon *test-types*)))
   ([depth types]
-   (printf "generating tree of depth %d:  %s <= count < %s\n" depth (pow 2 depth) (pow 2 (inc depth)))
+   ;;(printf "generating tree of depth %d:  %s <= count < %s\n" depth (pow 2 depth) (pow 2 (inc depth)))
    ;; a binary tree of depth=n has 2^n <= m < 2^(n+1) leaves
    ;; so generate a random number 2^n <= rand < 2^(n+1)
    ;; i.e 2^n + (rand-int 2^(n+1) - 2^n)
