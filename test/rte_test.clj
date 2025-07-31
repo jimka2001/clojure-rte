@@ -33,8 +33,8 @@
             [clojure.test :refer [deftest is] :exclude [testing]]
             [util :refer [member human-readable-current-time]]
             [genus :as gns]
-            [genus-tester :refer [*test-types*]]
-            [rte-tester :refer [gen-rte]]
+            [genus-tester :refer [*test-types* gen-type]]
+            [rte-randomize-syntax :refer [gen-rte]]
             [dot :as dot]
             [backtick :refer [template]]
             [xymbolyco :as xym]))
@@ -423,20 +423,58 @@
       (is (rte-inhabited? '(:and (:* Long) (:* Double)) false))
       (is (rte-vacuous? '(:and (:+ Long) (:+ Double)) false)))))
 
+(deftest r-rte-with-rte-3
+  (testing "recursive rte 427"
+    (with-compile-env ()
+      (doseq [r (range 100)
+              :let [td (gen-type 4)
+                    i1 (gns/inhabited? td :dont-know)
+                    i3 (gns/inhabited? (template (rte (:* ~td))) :dont-know)]]
+        (is (= i3 true)
+            ;; (:* x) is supposed to be inhabited because it contains the empty-sequence
+            (format "td=%s inhabited=%s but (rte (:* %s)) inh=%s"
+                    td i1 td i3))))))
+
+(deftest r-rte-with-rte-2
+  (testing "recursive rte 427"
+    (with-compile-env ()
+      (doseq [r (range 100)
+              :let [td (gen-type 4)
+                    i1 (gns/inhabited? td :dont-know)]
+              :when (not= (= :dont-know i1))
+              :let [i2 (gns/inhabited? (template (rte ~td)) :dont-know)]]
+        (is (= i1 i2
+               (format "td=%s inhabited=%s but (rte %s) inh=%s"
+                       td i1 td i2)))))))
+
 (deftest t-rte-with-rte
-  (testing "recursive rte"
+  (testing "recursive rte 428"
     (is (get (methods gns/-disjoint?) 'rte) "test 596")
     (with-compile-env ()
+      (is (= true (gns/inhabited? 'Number :dont-know)))
+      (is (= true (gns/inhabited? 'String :dont-know)))
+      (is (= true (gns/inhabited? Number :dont-know)))
+      (is (= true (gns/inhabited? String :dont-know)))
+      (is (= true (gns/inhabited? '(rte Number) :dont-know)))
+      (is (= true (gns/inhabited? '(rte String) :dont-know)))
+      (is (= true (gns/inhabited? (list 'rte Number) :dont-know)))
+      (is (= true (gns/inhabited? (list 'rte String) :dont-know)))
 
-      (is (not (gns/disjoint? '(rte (:* Number))
-                          '(rte (:* Double))
-                          true)))
-      (is (not (gns/disjoint? '(rte (:* Number))
-                          '(rte (:* String))
-                          true)))
-      (is (gns/disjoint? '(rte (:+ Number)) 
-                     '(rte (:+ String))
-                     false))
+      (is (= true (gns/disjoint? 'Number
+                                 'String ;; String with quote
+                                 :dont-know)))
+      (is (= true (gns/disjoint? 'Number
+                                 String ;; String without quote
+                                 :dont-know)))
+      (is (= true (gns/disjoint? '(rte Number)
+                                 '(rte String)
+                                 :dont-know)))
+
+      ;; not disjoint because both contain empty sequence
+      (is (= false (gns/disjoint? '(rte (:* Number))
+                                  '(rte (:* Double))
+                                  :dont-know)))
+
       (is (rte-to-dfa '(:or (rte (:* Number)) 
                             (rte (:cat Double Number))
                             (rte (:* Double))))))))

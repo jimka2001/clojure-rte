@@ -570,21 +570,21 @@
 
 (defmacro dsdefn 
   "E.g.,
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
-  ([a b [^Integer c d]] 14)
-  ([a b [^Double c d]] 16))
+  (dsdefn f 
+    ([[a b] c d] 12)
+    ([a [b c] d] 13)
+    ([a b [^Ratio c d]] 14)
+    ([a b [^Integer c d]] 14)
+    ([a b [^Double c d]] 16))
 
   or
 
-(dsdefn f 
-  ([[a b] c d] 12)
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)
-  (^{c (satisfies integer?)} [a b [c d]] 14)
-  ([a b [^Double c d]] 16))
+  (dsdefn f 
+    ([[a b] c d] 12)
+    ([a [b c] d] 13)
+    ([a b [^Ratio c d]] 14)
+    (^{c (satisfies integer?)} [a b [c d]] 14)
+    ([a b [^Double c d]] 16))
 "
   [name & forms]
   `(def ~name (dsfn ~@forms)))

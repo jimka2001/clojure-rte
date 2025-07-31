@@ -18,7 +18,7 @@
          :else
          (recur n (inc lower) upper factors))))
 
-(prime-factorization (* 2 2 13 7 17 3 5 5 17))
+;; (prime-factorization (* 2 2 13 7 17 3 5 5 17))
 
 (defn primes
   ([n]
@@ -127,17 +127,17 @@
 
 ;; (topological-sort [1 2 3] [[1 2] [2 3] [3 4]])
 
-(let [n 10]
-  (map encode-as-factorization (range 2 n)))
+;; (let [n 10]
+;;   (map encode-as-factorization (range 2 n)))
 
-(let [n 10
-      population (map encode-as-factorization (range 2 n))
-      constraints (generate-constraints n)
-      ]
-  ;; ((1) (0 1) (2) (0 0 1) (1 1) (0 0 0 1) (3) (0 2))
+;; (let [n 10
+;;       population (map encode-as-factorization (range 2 n))
+;;       constraints (generate-constraints n)
+;;       ]
+;;   ;; ((1) (0 1) (2) (0 0 1) (1 1) (0 0 0 1) (3) (0 2))
   
-  [:population population
-   :constraints constraints
-   :sorted (topological-sort (shuffle population)
-                             constraints)])
+;;   [:population population
+;;    :constraints constraints
+;;    :sorted (topological-sort (shuffle population)
+;;                              constraints)])
 

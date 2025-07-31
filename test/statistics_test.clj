@@ -44,4 +44,4 @@
 
 (deftest t-update-resource-csv
   (testing "update inhabited subset csv resource"
-    (sut/update-inhabited-subset-csv 2)))
+    (sut/update-inhabited-subset-csv 2 4 3)))

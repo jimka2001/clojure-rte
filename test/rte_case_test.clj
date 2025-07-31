@@ -899,12 +899,12 @@
              :foo 12))
       "test 797"))
 
-(dscase '(true ["3" 3] true)
-  ^{[_a _d] Boolean _b String} [_a [_b _c] & _d]
-  1
+;; (dscase '(true ["3" 3] true)
+;;   ^{[_a _d] Boolean _b String} [_a [_b _c] & _d]
+;;   1
 
-  ^{_a Boolean _b (or String Boolean)} [_a _b]
-  2)
+;;   ^{_a Boolean _b (or String Boolean)} [_a _b]
+;;   2)
 
 (deftest t-dscase
   (testing "dscase"

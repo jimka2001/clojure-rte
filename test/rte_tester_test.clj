@@ -29,8 +29,9 @@
                                             test-canonicalize-pattern
                                             test-rte-canonicalize-nullable
                                             test-rte-not
-                                            rte-components gen-rte
-                                            *rte-keywords*]]
+                                            rte-components
+                                            ]]
+            [rte-randomize-syntax :refer [gen-rte *rte-keywords*]]
             [genus :as gns]
             [genus-tester :refer [*test-types* gen-inhabited-type]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
