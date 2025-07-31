@@ -28,7 +28,7 @@
 
 
 (defn build-binary-tree
-  "Build a binary try by iterating through the
+  "Build a binary tree by iterating through the
   population, and inserting them one by one in the given order. "
   [population]
   (loop [tree nil
