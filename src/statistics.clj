@@ -27,13 +27,13 @@
 (def inhabited-csv (str statistics-resource "dfa-inhabited.csv"))
 (def plot-path (str statistics-resource "statistics-plot.svg"))
 (def statistics-tex-path (str statistics-resource "statistics-constants.tex"))
-(def gen-rte-balanced-csv (str statistics-resource "gen-rte-balanced.csv"))
+(def gen-rte-partially-balanced-csv (str statistics-resource "gen-rte-partially-balanced.csv"))
 (def gen-rte-totally-balanced-csv (str statistics-resource "gen-rte-totally-balanced.csv"))
 (def gen-rte-classic-csv (str statistics-resource "gen-rte-classic.csv"))
-(def gen-rte-balanced-svg (str statistics-resource "gen-rte-balanced.svg"))
+(def gen-rte-partially-balanced-svg (str statistics-resource "gen-rte-partially-balanced.svg"))
 (def gen-rte-totally-balanced-svg (str statistics-resource "gen-rte-totally-balanced.svg"))
 (def gen-rte-classic-svg (str statistics-resource "gen-rte-classic.svg"))
-(def gen-dfa-balanced-svg (str statistics-resource "gen-dfa-balanced.svg"))
+(def gen-dfa-partially-balanced-svg (str statistics-resource "gen-dfa-partially-balanced.svg"))
 (def gen-dfa-totally-balanced-svg (str statistics-resource "gen-dfa-totally-balanced.svg"))
 (def gen-dfa-classic-svg (str statistics-resource "gen-dfa-classic.svg"))
 (def reduction-svg (str statistics-resource "reduction.svg"))
@@ -585,9 +585,12 @@
 
                     (println [:rep repetitions
                               :depth depth
-                              :csv-file (if (= csv-file gen-rte-balanced-csv)
-                                          "balanced"
-                                          "classic")
+                              :csv-file (cond (= csv-file gen-rte-partially-balanced-csv)
+                                              "partially-balanced"
+                                              (= csv-file gen-rte-totally-balanced-csv)
+                                              "totally-balanced"
+                                              (= csv-file gen-rte-classic-csv)
+                                              "classic")
                               :date  (human-readable-current-time)])
                     (if dfa-2
                       (do (merge-file csv-file
@@ -624,9 +627,9 @@
 
 (defn build-rtes-totally-balanced 
   "Interface to build-rtes using totally balanced RTE generation."
-  [depth repetitions]
+  [probability-binary depth repetitions]
   (build-rtes depth repetitions
-              :gen gen-totally-balanced-rte
+              :gen (fn [depth] (gen-totally-balanced-rte probability-binary depth))
               :csv-file gen-rte-totally-balanced-csv))
 
 
@@ -645,8 +648,8 @@
                    :minimized-state-count
                    :minimized-rte]))
 
-(defn slurp-balanced-rte-data []
-  (slurp-rte-data gen-rte-balanced-csv))
+(defn slurp-partially-balanced-rte-data []
+  (slurp-rte-data gen-rte-partially-balanced-csv))
 
 (defn slurp-totally-balanced-rte-data []
   (slurp-rte-data gen-rte-totally-balanced-csv))
@@ -657,14 +660,16 @@
 
 
 (defn plot-rte-summary []
-  (let [balanced-rte-data (slurp-balanced-rte-data)
+  (let [partially-balanced-rte-data (slurp-partially-balanced-rte-data)
+        totally-balanced-rte-data (slurp-totally-balanced-rte-data)
         classic-rte-data  (slurp-classic-rte-data)
         minimized-leaf-count (fn [data-map]
                                (min (:minimized-leaf-count data-map)
                                     (:actual-leaf-count data-map)))
         ]
     (doseq [[cvs-data title plot-path-1 plot-path-2]
-            [[balanced-rte-data "Statistics for balanced generation" gen-rte-balanced-svg gen-dfa-balanced-svg]
+            [[totally-balanced-rte-data "Statistics for totally balanced generation" gen-rte-totally-balanced-svg gen-dfa-totally-balanced-svg]
+             [partially-balanced-rte-data "Statistics for partially balanced generation" gen-rte-partially-balanced-svg gen-dfa-partially-balanced-svg]
              [classic-rte-data  "Statistics for classic generation" gen-rte-classic-svg gen-dfa-classic-svg]]
             
             :let [grouped (group-by :actual-leaf-count cvs-data)
@@ -707,7 +712,9 @@
 
     (let [average-rte-reduction
           (for [[max-balance lines] (group-by :max-balance
-                                              (concat balanced-rte-data classic-rte-data))
+                                              (concat totally-balanced-rte-data
+                                                      partially-balanced-rte-data
+                                                      classic-rte-data))
                 ;; if we went from 10 leaves to 2 leaves we have 80% reduction
                 :let [rte-reductions (for [line lines]
                                        (* 100.0 (if (= 0 (:actual-leaf-count line))
@@ -719,7 +726,9 @@
 
           average-dfa-reduction
           (for [[max-balance lines] (group-by :max-balance
-                                              (concat balanced-rte-data classic-rte-data))
+                                              (concat totally-balanced-rte-data
+                                                      partially-balanced-rte-data
+                                                      classic-rte-data))
                 ;; if we went from 10 states to 2 states we have 80% reduction
                 :let [dfa-reductions (for [line lines]
                                        (* 100.0 (if (= 0 (:actual-state-count line))

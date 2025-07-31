@@ -26,13 +26,13 @@
           (let [[parent left right] tree]
             (cond (< value parent)
                   [parent
-                   (insert-012-tree value left)
+                   (insert-012-tree probability-binary value left)
                    right]
 
                   (> value parent)
                   [parent
                    left
-                   (insert-012-tree value right)]
+                   (insert-012-tree probability-binary value right)]
 
                   ;; don't insert duplicate node
                   :else
@@ -58,10 +58,10 @@
   ([tree types]
    (case (count tree)
      (0) (rand-nth types)
-     (1) (let [[parent child] tree]
+     (2) (let [[parent child] tree]
            (list (rand-nth [:? :* :not])
                  (tree-012-to-rte child types)))
-     (2) (let [[parent left right] tree]
+     (3) (let [[parent left right] tree]
            (list (rand-nth [:and :or :cat])
                  (tree-012-to-rte left types)
                  (tree-012-to-rte right types))))))
