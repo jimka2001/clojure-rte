@@ -66,7 +66,7 @@
 
 (defn rand-tree 
   "Build a binary tree which has between 2^n and (2^(n+1) - 1) leaf nodes.
-  The tree is build by taking a random permutation of 
+  The tree is built by taking a random permutation of 
   and inserting each of (range 2^n) a tree in random order
   (starting with an empty tree)"
 
