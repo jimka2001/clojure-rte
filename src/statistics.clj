@@ -8,7 +8,9 @@
    [genus :as gns]
    [rte-construct :refer [rte-to-dfa]]
    [rte-extract :refer [dfa-to-rte]]
-   [rte-tester :refer [gen-rte gen-balanced-rte rte-depth rte-count-leaves]]
+   [rte-tester :refer [rte-depth rte-count-leaves]]
+   [rte-tree-partially-balanced :refer [gen-balanced-rte]]
+   [rte-randomize-syntax :refer [gen-rte]]
    [util :refer [member time-expr mean std-deviation read-csv-data rename-columns
                  call-in-block with-timeout human-readable-current-time]]
    [xym-tester :refer [gen-dfa]]

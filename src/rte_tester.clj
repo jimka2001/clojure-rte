@@ -26,6 +26,8 @@
             [clojure.math :refer [pow round]]
             [genus :as gns]
             [genus-tester :refer [*test-types*]]
+            [rte-tree-partially-balanced :refer [gen-balanced-rte]]
+            [rte-randomize-syntax :refer [gen-rte]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-construct :refer [with-compile-env rte-to-dfa  nullable?
                                    canonicalize-pattern canonicalize-pattern-once
@@ -49,68 +51,7 @@
     :else
     ()))
 
-(def ^:dynamic *rte-keywords*
-  [:type
-   :? :+ :* :not
-   :and :or 
-   :cat ;; :permute
-   :contains-any :contains-every :contains-none
-   :sigma :empty-set :epsilon])
 
-(defn insert-tree 
-  "nondestructively insert a value into a binary tree.  nodes are of the form [value left right],
-  leaves are all empty according to the empty? function"
-  [value tree]
-  (cond (empty? tree)
-        [value nil nil]
-
-        :else
-        (let [[top left right] tree]
-          (cond (< value top)
-                [top
-                 (insert-tree value left)
-                 right]
-
-                (> value top)
-                [top
-                 left
-                 (insert-tree value right)]
-
-                :else
-                tree))))
-
-(defn build-binary-tree
-  "Build a binary try by iterating through the
-  population, and inserting them one by one in the given order. "
-  [population]
-  (loop [tree nil
-         population population]
-    (if (not-empty population)
-      (recur (insert-tree (first population) tree)
-             (rest population))
-      tree)))
-
-(defn tree-to-rte 
-  "Take a tree as created by `build-binary-tree`, insert a type at each
-  leave node, and insert a randomly selected operator at each internal node.
-  If the operator is unary, then the right child is simply discarded."
-  ([tree]
-   (tree-to-rte tree *test-types*))
-  ([tree types]
-   (cond (not-empty tree)
-         (let [key (rand-nth '[:? :* :not
-                               :and :or :cat])
-               [value left right] tree]
-           (case key
-             (:? :* :not) (if (= 0 (rand-int 2)) ;; 50% choice
-                            (list key (tree-to-rte left types))
-                            (list key (tree-to-rte tree types)))
-             (:and :or :cat) (list key
-                                   (tree-to-rte left types)
-                                   (tree-to-rte right types))))
-
-         :else 
-         (rand-nth types))))
 
 (defn rte-depth
   "compute the depth of an RTE expression"
@@ -137,55 +78,8 @@
         :else
         1))
 
-(defn rand-tree 
-  "Build a binary tree which has between 2^n and (2^(n+1) - 1) leaf nodes.
-  The tree is build by taking a random permutation of 
-  and inserting each of (range 2^n) a tree in random order
-  (starting with an empty tree)"
 
-  [depth]
-  (let [num-leaves (+ (round (pow 2 depth))
-                      (rand-int (round (pow 2 depth))))
-        population (into () (shuffle (range num-leaves)))
-        tree (build-binary-tree population)
-        ]
-    ;; (printf "target num-leaves=%d %s\n" num-leaves tree)
-    tree
-    ))
 
-(defn gen-balanced-rte
-  "Generate an RTE which corresponds (on average) in shape closely to a balanced
-  binary tree.  The goal is to sample languages uniformly rather than sampling
-  syntactic structure of the RTE uniformly."
-  ([depth]
-   (gen-balanced-rte depth 
-                     (cons :epsilon *test-types*)))
-  ([depth types]
-   (printf "generating tree of depth %d:  %s <= count < %s\n" depth (pow 2 depth) (pow 2 (inc depth)))
-   ;; a binary tree of depth=n has 2^n <= m < 2^(n+1) leaves
-   ;; so generate a random number 2^n <= rand < 2^(n+1)
-   ;; i.e 2^n + (rand-int 2^(n+1) - 2^n)
-   ;;    2^n + (rand-int 2^n)
-   (let [tree (rand-tree depth)
-         rte (tree-to-rte tree types)]
-
-     rte)))
-
-(defn gen-rte
-  ([depth]
-   (gen-rte depth *test-types*))
-  ([depth types]
-   (let [key (rand-nth *rte-keywords*)] 
-     (gen-rte key depth types)))
-  ([key depth types]
-   (case key
-     (:type) (rand-nth types)
-     (:sigma :empty-set :epsilon) key
-     ;;(:permute) (gen-rte :cat depth types)
-     (:and :or :cat :contains-any
-           :contains-every :contains-none) (cons key (map (fn [_k] (gen-rte (dec depth) types))
-                                                          (range depth)))
-     (:? :+ :* :not) (list key (gen-rte (dec depth) types)))))
 
 (defn test-rte-to-dfa [num-tries size verbose is-fn]
   (tester/random-test num-tries (fn [rte]

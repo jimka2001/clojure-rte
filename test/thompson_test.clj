@@ -27,6 +27,7 @@
             [rte-construct :as rte]
             [xymbolyco :as xym]
             [rte-tester :as test]
+            [rte-randomize-syntax :refer [gen-rte]]
             [clojure.test :refer [deftest is]]))
 
 
@@ -175,7 +176,7 @@
   (testing "random create"
     (doseq [depth (range 4)
             _r (range num_random_tests)
-            :let [pattern (test/gen-rte depth)
+            :let [pattern (gen-rte depth)
                   dfa-thompson (tom/construct-thompson-dfa pattern  42)
                   dfa-brzozowski (rte/compile pattern 42)]]
       ;; equivalent might return :dont-know or true  but need to fail if returns false

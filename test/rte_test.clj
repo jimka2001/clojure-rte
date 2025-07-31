@@ -34,7 +34,7 @@
             [util :refer [member human-readable-current-time]]
             [genus :as gns]
             [genus-tester :refer [*test-types*]]
-            [rte-tester :refer [gen-rte]]
+            [rte-randomize-syntax :refer [gen-rte]]
             [dot :as dot]
             [backtick :refer [template]]
             [xymbolyco :as xym]))
