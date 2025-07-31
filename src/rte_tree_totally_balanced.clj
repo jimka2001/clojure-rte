@@ -19,20 +19,20 @@
           ;; unary node
           (= 1 (count tree))
           (let [[parent child] tree]
-            [parent (insert-tree probability-binary value child)])
+            [parent (insert-012-tree probability-binary value child)])
           
           ;; binary node
           :else
           (let [[parent left right] tree]
             (cond (< value parent)
                   [parent
-                   (insert-tree value left)
+                   (insert-012-tree value left)
                    right]
 
                   (> value parent)
                   [parent
                    left
-                   (insert-tree value right)]
+                   (insert-012-tree value right)]
 
                   ;; don't insert duplicate node
                   :else

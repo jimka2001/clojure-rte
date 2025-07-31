@@ -9,7 +9,8 @@
    [rte-construct :refer [rte-to-dfa]]
    [rte-extract :refer [dfa-to-rte]]
    [rte-tester :refer [rte-depth rte-count-leaves]]
-   [rte-tree-partially-balanced :refer [gen-balanced-rte]]
+   [rte-tree-partially-balanced :refer [gen-partially-balanced-rte]]
+   [rte-tree-totally-balanced :refer [gen-totally-balanced-rte]]
    [rte-randomize-syntax :refer [gen-rte]]
    [util :refer [member time-expr mean std-deviation read-csv-data rename-columns
                  call-in-block with-timeout human-readable-current-time]]
@@ -27,10 +28,13 @@
 (def plot-path (str statistics-resource "statistics-plot.svg"))
 (def statistics-tex-path (str statistics-resource "statistics-constants.tex"))
 (def gen-rte-balanced-csv (str statistics-resource "gen-rte-balanced.csv"))
+(def gen-rte-totally-balanced-csv (str statistics-resource "gen-rte-totally-balanced.csv"))
 (def gen-rte-classic-csv (str statistics-resource "gen-rte-classic.csv"))
 (def gen-rte-balanced-svg (str statistics-resource "gen-rte-balanced.svg"))
+(def gen-rte-totally-balanced-svg (str statistics-resource "gen-rte-totally-balanced.svg"))
 (def gen-rte-classic-svg (str statistics-resource "gen-rte-classic.svg"))
 (def gen-dfa-balanced-svg (str statistics-resource "gen-dfa-balanced.svg"))
+(def gen-dfa-totally-balanced-svg (str statistics-resource "gen-dfa-totally-balanced.svg"))
 (def gen-dfa-classic-svg (str statistics-resource "gen-dfa-classic.svg"))
 (def reduction-svg (str statistics-resource "reduction.svg"))
 
@@ -527,7 +531,7 @@
   rte objects.  Update the specified `csv-file` with data extracted
   from the objects, one line per rte."
   [depth repetitions & {:keys [gen csv-file] ;; unary function which takes depth argument and generates a random rte of that approximate depth
-                        :or {gen gen-balanced-rte
+                        :or {gen gen-partially-balanced-rte
                              csv-file gen-rte-balanced-csv
                              }}]
   (let [time-out-secs 30
@@ -615,8 +619,15 @@
   "Interface to build-rtes using balanced RTE generation."
   [depth repetitions]
   (build-rtes depth repetitions
-              :gen gen-balanced-rte
+              :gen gen-partially-balanced-rte
               :csv-file gen-rte-balanced-csv))
+
+(defn build-rtes-totally-balanced 
+  "Interface to build-rtes using totally balanced RTE generation."
+  [depth repetitions]
+  (build-rtes depth repetitions
+              :gen gen-totally-balanced-rte
+              :csv-file gen-rte-totally-balanced-csv))
 
 
 (defn slurp-rte-data [csv-file-name]
@@ -637,10 +648,11 @@
 (defn slurp-balanced-rte-data []
   (slurp-rte-data gen-rte-balanced-csv))
 
+(defn slurp-totally-balanced-rte-data []
+  (slurp-rte-data gen-rte-totally-balanced-csv))
+
 (defn slurp-classic-rte-data []
   (slurp-rte-data gen-rte-classic-csv))
-
-
 
 
 

@@ -82,12 +82,12 @@
 
 
 
-(defn gen-balanced-rte
+(defn gen-partially-balanced-rte
   "Generate an RTE which corresponds (on average) in shape closely to a balanced
   binary tree.  The goal is to sample languages uniformly rather than sampling
   syntactic structure of the RTE uniformly."
   ([depth]
-   (gen-balanced-rte depth 
+   (gen-partially-balanced-rte depth 
                      (cons :epsilon *test-types*)))
   ([depth types]
    (printf "generating tree of depth %d:  %s <= count < %s\n" depth (pow 2 depth) (pow 2 (inc depth)))
