@@ -31,7 +31,9 @@
                           rte-identity rte-constantly
                           gc-friendly-memoize call-with-found find-first
                           search-replace remove-element uniquify
-                          count-if-not find-simplifier]]
+                          count-if-not find-simplifier
+                          timeout-reached?
+                          ]]
             [xymbolyco :as xym]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.set :refer [union]]
@@ -1967,7 +1969,7 @@
          done #{}
          triples [] 
          ]
-    (if (.isInterrupted (Thread/currentThread))
+    (if (timeout-reached?);; (.isInterrupted (Thread/currentThread))
       (throw (ex-info "Thread interrupted while attempting to compute derivative"
                       {:pattern pattern
                        })))

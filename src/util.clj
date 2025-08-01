@@ -861,7 +861,33 @@
         (on-time-out))
       val)))
 
-(defmacro with-timeout [time-out-seconds on-time-out & body]
+(defn timeout-reached?
+  "Can be called within a body of code to detect whether `with-timeout`
+  or the underlying `call-with-timeout` has detected a time-out
+  situation and attempted to cancel the thread.
+  If it the caller of `timeout-reached?` detects a truthy return
+  value, it should abort the computation, for example by
+  raising an exception with a message indicating some useful debug
+  information:
+   (when (timeout-reached?)
+      (throw (ex-info \"Thread interrupted while attempting to compute derivative\"
+                      {:pattern pattern})))"
+  []
+  (.isInterrupted (Thread/currentThread)))
+
+(defmacro with-timeout
+  "Macro to evaluating a body of code within a time-out.
+  If `time-out-seconds` many seconds passes before the body finishes
+  evaluating, then `on-time-out` is evaluated and its value is returned.
+  Otherwise the value returned by the body is returned.
+  The body is evaluated in another thread.  That thread will continue
+  to run even after the timeout, even though the current thead will continue.
+  However, `call-with-timeout` sends a cancel signal to the thread.
+  Therefore, it is recommended that the code being run within the body
+  periodically check to see whether the thread has been interrupted,
+  which it can do by calling `timeout-reached?`"
+
+ [time-out-seconds on-time-out & body]
   (assert (not-empty body))
   `(call-with-timeout (* 1000 ~time-out-seconds)
                       (fn []

@@ -22,6 +22,7 @@
 (ns rte-extract
   (:require [clojure.pprint :refer [cl-format]]
             [rte-construct :as rte]
+            [util :refer [timeout-reached?]]
             [xymbolyco :as xym]))
 
 (defn extract-rte
@@ -92,6 +93,9 @@
 
             ;; local function
             (eliminate-state [transition-triples q-id]
+              (when (timeout-reached?)
+                (throw (ex-info (format "extract-rte interrupted while eliminating state %s" q-id)
+                                {:remaining-triples (count transition-triples)})))
               (let [[x-to-q q-to-q q-to-x others]
                     ;; #6
                     (reduce (fn [[x-to-q q-to-q q-to-x others]
