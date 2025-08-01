@@ -84,47 +84,45 @@
                      rtes nil]
                 (if (not (pos? repetitions))
                   (frequencies rtes)
-                  (let [rte-1 (gen depth)
-                        count-rte-1-leaves (rte-count-leaves rte-1)
-                        ;; _ (println [:rte-1-count count-rte-1-leaves])
-                        [_ balance-factors] (compute-balance-factors rte-1)
-                        mean-balance (float (mean balance-factors 0))
-                        max-balance (reduce max (conj balance-factors 0))
-                        sigma-balance (std-deviation balance-factors 0)
-                        ;; _ (println [
-                        ;;             :mean-balance mean-balance
-                        ;;             :max-balance max-balance
-                        ;;             :sigma-balance sigma-balance])
-                        dfa-1 (when (> max-rte-leaf-count count-rte-1-leaves)
-                                (with-timeout time-out-secs
-                                    (do (printf "timed out computing rte-to-dfa %s\n" rte-1)
-                                        nil)
-                                  (do ;;(println "starting (rte-to-dfa rte-1)\n")
-                                      (rte-to-dfa rte-1))))
-                        ;; _ (println [:dfa-1 dfa-1])
-                        dfa-min (when dfa-1
-                                  (with-timeout time-out-secs
-                                      (do (printf "timed out computing minimize %s\n" dfa-1)
-                                          nil)
-                                    (xym/minimize dfa-1)))
-                        ;; _ (println [:dfa-min dfa-min])
-                        rte-map (when dfa-min
-                                  (with-timeout time-out-secs
-                                      (do (printf "timed out computing dfa-to-rte %s\n" dfa-min)
-                                          nil)
-                                    (dfa-to-rte dfa-min)))
-                        ;; _ (println [:rte-map (keys rte-map)])
-                        rte-2 (when rte-map (get rte-map true :empty-set))
-                        ;; _ (if rte-2
-                        ;;     (println [:rte-2-count (rte-count-leaves rte-2)])
-                        ;;     (printf "skipped computation of rte-2\n"))
+                  (truthy-let [rte-1 (gen depth)
+                               count-rte-1-leaves (rte-count-leaves rte-1)
+                               [_ balance-factors] (compute-balance-factors rte-1)
+                               mean-balance (float (mean balance-factors 0))
+                               max-balance (reduce max (conj balance-factors 0))
+                               sigma-balance (std-deviation balance-factors 0)
+                               :do (when (println [:rep repetitions
+                                                   :time (human-readable-current-time)
+                                                   :rte-1-count count-rte-1-leaves
+                                                   :mean-balance mean-balance
+                                                   :max-balance max-balance
+                                                   ;; :sigma-balance sigma-balance
+                                                   ]))
+                               dfa-1 (when (> max-rte-leaf-count count-rte-1-leaves)
+                                       (with-timeout time-out-secs
+                                           (do (printf "timed out computing rte-to-dfa %s\n" rte-1)
+                                               nil)
+                                         (do ;;(println "starting (rte-to-dfa rte-1)\n")
+                                           (rte-to-dfa rte-1))))
+                               :do (when verbose (tab) (println [:dfa-1 dfa-1]))
+                               dfa-min (with-timeout time-out-secs
+                                           (do (printf "timed out computing minimize %s\n" dfa-1)
+                                               nil)
+                                         (xym/minimize dfa-1))
+                               :do (when verbose (tab) (println [:dfa-min dfa-min]))
+                               rte-map (with-timeout time-out-secs
+                                           (do (printf "timed out computing dfa-to-rte %s\n" dfa-min)
+                                               nil)
+                                         (dfa-to-rte dfa-min))
+                               rte-2 (when rte-map (get rte-map true :empty-set))
+                               :do (if verbose
+                                     (do (tab) (println [:rte-2-count (rte-count-leaves rte-2)]))
+                                     (printf "skipped computation of rte-2\n"))
 
-                        dfa-2 (when (and rte-2 
-                                         (> max-rte-leaf-count (rte-count-leaves rte-2)))
-                                (with-timeout time-out-secs
-                                              (do (printf "timed out computing rte-to-dfa %s\n" rte-2)
-                                                  nil)
-                                            (rte-to-dfa rte-2)))]
+                               dfa-2 (when (> max-rte-leaf-count (rte-count-leaves rte-2))
+                                       (with-timeout time-out-secs
+                                           (do (printf "timed out computing rte-to-dfa %s\n" rte-2)
+                                               nil)
+                                         (rte-to-dfa rte-2)))]
 
                     ;; (println [:rep repetitions
                     ;;           :depth depth

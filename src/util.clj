@@ -894,3 +894,26 @@
                         ~@body)
                       (fn []
                         ~@on-time-out)))
+
+(defmacro truthy-let [bindings & body]
+  (if (empty? bindings)
+    `(do ~@body)
+    (let [[var-1 val-1 & others] bindings]
+      (cond (= var-1 :do)
+            `(do ~val-1
+                 (truthy-let [~@others]
+                   ~@body))
+            (symbol? var-1)
+            `(let [~var-1 ~val-1]
+               (when ~var-1
+                 (truthy-let [~@others]
+                   ~@body)))
+
+            ;; e.g., (vector? var-1) 
+            ;; cannot construct a (when ....)  of the vector var-1
+            ;;   because it might have lots of stuff in it other than variable names
+            ;;   e.g., [a & as]
+            :else 
+            `(let [~var-1 ~val-1]
+               (truthy-let [~@others]
+                   ~@body))))))
