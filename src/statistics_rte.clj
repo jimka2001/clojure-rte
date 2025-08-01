@@ -216,29 +216,38 @@
                                (min (:minimized-leaf-count data-map)
                                     (:actual-leaf-count data-map)))
         ]
-    (doseq [[cvs-data title plot-path-1 plot-path-2]
+    (doseq [[cvs-data title plot-path-1 plot-path-2 max-x]
             [[totally-balanced-rte-data "Statistics for totally balanced generation"
-              gen-rte-totally-balanced-svg gen-dfa-totally-balanced-svg]
+              gen-rte-totally-balanced-svg gen-dfa-totally-balanced-svg 200]
              [partially-balanced-rte-data "Statistics for partially balanced generation"
-              gen-rte-partially-balanced-svg gen-dfa-partially-balanced-svg]
+              gen-rte-partially-balanced-svg gen-dfa-partially-balanced-svg 200]
              [classic-rte-data  "Statistics for classic generation"
-              gen-rte-classic-svg gen-dfa-classic-svg]]
+              gen-rte-classic-svg gen-dfa-classic-svg 200]]
             
             :let [grouped (group-by :actual-leaf-count cvs-data)
-                  average-minimized-leaf-count (for [[actual-leaf-count lines] grouped]
+                  count-lines (count cvs-data)
+                  histogram (for [[actual-leaf-count lines] grouped
+                                  :when (< actual-leaf-count max-x)]
+                              [actual-leaf-count (* 10 (/ (float (count lines)) count-lines))])
+                  average-minimized-leaf-count (for [[actual-leaf-count lines] grouped
+                                                     :when (< actual-leaf-count max-x)]
                                                  [actual-leaf-count (float (mean (map minimized-leaf-count lines)))])
-                  average-minimized-state-count (for [[actual-leaf-count lines] grouped]
+                  average-minimized-state-count (for [[actual-leaf-count lines] grouped
+                                                     :when (< actual-leaf-count max-x)]
                                                   [actual-leaf-count (float (mean (map :minimized-state-count lines)))])
-                  max-minimized-leaf-count (for [[actual-leaf-count lines] grouped]
+                  max-minimized-leaf-count (for [[actual-leaf-count lines] grouped
+                                                     :when (< actual-leaf-count max-x)]
                                              [actual-leaf-count (float (reduce max 0 (map minimized-leaf-count lines)))])
-                  max-minimized-state-count (for [[actual-leaf-count lines] grouped]
+                  max-minimized-state-count (for [[actual-leaf-count lines] grouped
+                                                  :when (< actual-leaf-count max-x)]
                                               [actual-leaf-count (float (reduce max 0 (map :minimized-state-count lines)))])
                   image-1 (vega/series-scatter-plot (str "rte: " title)
                                                     "Starting leaf count"
-                                                    "not sure name of y axix"
+                                                    "Final LEAF count"
                                                     [;; ["curve name" [[x y] [x y] [x y] ...]]
-                                                     ["minimized (avg) leaf count" (sort average-minimized-leaf-count)]
-                                                     ["minimized (max) leaf count" (sort max-minimized-leaf-count)]
+                                                     ["average" (sort average-minimized-leaf-count)]
+                                                     ["maximum" (sort max-minimized-leaf-count)]
+                                                     ["histogram" (sort histogram)]
                                                      ;;["minimized (avg) state count" (sort average-minimized-state-count)]
                                                      ;;["minimized (max) state count" (sort max-minimized-state-count)]
                                                      
@@ -248,13 +257,13 @@
                                                     )
                   image-2 (vega/series-scatter-plot (str "dfa: " title)
                                                     "Starting leaf count"
-                                                    "not sure name of y axix"
+                                                    "Final STATE count"
                                                     [;; ["curve name" [[x y] [x y] [x y] ...]]
                                                      ;; ["minimized (avg) leaf count" (sort average-minimized-leaf-count)]
                                                      ;; ["minimized (max) leaf count" (sort max-minimized-leaf-count)]
-                                                     ["minimized (avg) state count" (sort average-minimized-state-count)]
-                                                     ["minimized (max) state count" (sort max-minimized-state-count)]
-                                                     
+                                                     ["average" (sort average-minimized-state-count)]
+                                                     ["maximum" (sort max-minimized-state-count)]
+                                                     ["histogram" (sort histogram)]                                                     
                                                      ]
                                                     :y-scale "symlog"
                                                     :x-scale "symlog"
@@ -314,6 +323,8 @@
       (view/view-image image))
       
     ))
+
+;; (plot-rte-summary)
 
 ;;;;;;; unsorted
 
