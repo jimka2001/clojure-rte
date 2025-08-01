@@ -5,7 +5,9 @@
             [clojure.java.shell :refer [sh]]
             [clojure.pprint :refer [pprint cl-format]]
             [util :refer [member time-expr mean std-deviation read-csv-data rename-columns
-                          call-in-block with-timeout human-readable-current-time]]
+                          call-in-block with-timeout human-readable-current-time
+                          truthy-let
+                          ]]
             [view]
             [vega-plot :as vega]
             [genus :as gns]
@@ -69,13 +71,16 @@
         [0 []]))
 
 
+(defn tab [] (printf "\t"))
+
 (defn build-rtes
   "Using a given genrator function `gen`, create `repetitions` many
   rte objects.  Update the specified `csv-file` with data extracted
   from the objects, one line per rte."
-  [depth repetitions & {:keys [gen csv-file] ;; unary function which takes depth argument and generates a random rte of that approximate depth
+  [depth repetitions & {:keys [gen csv-file verbose] ;; unary function which takes depth argument and generates a random rte of that approximate depth
                         :or {gen gen-partially-balanced-rte
                              csv-file gen-rte-partially-balanced-csv
+                             verbose false
                              }}]
   (let [time-out-secs 30
         max-rte-leaf-count 35536
@@ -135,16 +140,16 @@
                     ;;           :date  (human-readable-current-time)])
                     (if dfa-2
                       (do (lock/merge-file csv-file
-                                      (fn [out-file]
-                                        ;;(cl-format out-file "# requested-depth, actual-depth, max-balance, mean-balance, sigma-balance, actual-leaf-count, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte~%")
-                                        (cl-format out-file "~D, ~D, ~D" depth (rte-depth rte-1) (rte-count-leaves rte-1))
-                                        (cl-format out-file ", ~A, ~A, ~A" max-balance mean-balance sigma-balance)
-                                        (cl-format out-file ", ~D, ~D" (rte-depth rte-2) (rte-count-leaves rte-2))
-                                        (cl-format out-file ", ~D, ~D" (count (xym/states-as-seq dfa-1)) (count (xym/states-as-seq dfa-2)))
-                                        (cl-format out-file ", ~A" (if (member rte-2 trivials)
-                                                                     rte-2
-                                                                     :other))
-                                        (cl-format out-file "~%")))
+                                           (fn [out-file]
+                                             ;;(cl-format out-file "# requested-depth, actual-depth, max-balance, mean-balance, sigma-balance, actual-leaf-count, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte~%")
+                                             (cl-format out-file "~D, ~D, ~D" depth (rte-depth rte-1) (rte-count-leaves rte-1))
+                                             (cl-format out-file ", ~A, ~A, ~A" max-balance mean-balance sigma-balance)
+                                             (cl-format out-file ", ~D, ~D" (rte-depth rte-2) (rte-count-leaves rte-2))
+                                             (cl-format out-file ", ~D, ~D" (count (xym/states-as-seq dfa-1)) (count (xym/states-as-seq dfa-2)))
+                                             (cl-format out-file ", ~A" (if (member rte-2 trivials)
+                                                                          rte-2
+                                                                          :other))
+                                             (cl-format out-file "~%")))
                           (recur (dec repetitions) (cons rte-2 rtes)))
                       (recur (dec repetitions) rtes)))))]
     (into {} (for [[k v] freqs
@@ -156,6 +161,7 @@
   "Interface to build-rtes using classical RTE generation."
   [depth repetitions]
   (build-rtes depth repetitions
+              :verbose true
               :gen gen-rte
               :csv-file gen-rte-classic-csv))
 
@@ -163,6 +169,7 @@
   "Interface to build-rtes using balanced RTE generation."
   [depth repetitions]
   (build-rtes depth repetitions
+              :verbose true
               :gen gen-partially-balanced-rte
               :csv-file gen-rte-partially-balanced-csv))
 
@@ -170,6 +177,7 @@
   "Interface to build-rtes using totally balanced RTE generation."
   [probability-binary depth repetitions]
   (build-rtes depth repetitions
+              :verbose true
               :gen (fn [depth] (gen-totally-balanced-rte probability-binary depth))
               :csv-file gen-rte-totally-balanced-csv))
 
@@ -209,9 +217,12 @@
                                     (:actual-leaf-count data-map)))
         ]
     (doseq [[cvs-data title plot-path-1 plot-path-2]
-            [[totally-balanced-rte-data "Statistics for totally balanced generation" gen-rte-totally-balanced-svg gen-dfa-totally-balanced-svg]
-             [partially-balanced-rte-data "Statistics for partially balanced generation" gen-rte-partially-balanced-svg gen-dfa-partially-balanced-svg]
-             [classic-rte-data  "Statistics for classic generation" gen-rte-classic-svg gen-dfa-classic-svg]]
+            [[totally-balanced-rte-data "Statistics for totally balanced generation"
+              gen-rte-totally-balanced-svg gen-dfa-totally-balanced-svg]
+             [partially-balanced-rte-data "Statistics for partially balanced generation"
+              gen-rte-partially-balanced-svg gen-dfa-partially-balanced-svg]
+             [classic-rte-data  "Statistics for classic generation"
+              gen-rte-classic-svg gen-dfa-classic-svg]]
             
             :let [grouped (group-by :actual-leaf-count cvs-data)
                   average-minimized-leaf-count (for [[actual-leaf-count lines] grouped]
@@ -222,7 +233,7 @@
                                              [actual-leaf-count (float (reduce max 0 (map minimized-leaf-count lines)))])
                   max-minimized-state-count (for [[actual-leaf-count lines] grouped]
                                               [actual-leaf-count (float (reduce max 0 (map :minimized-state-count lines)))])
-                  image-1 (vega/series-scatter-plot title
+                  image-1 (vega/series-scatter-plot (str "rte: " title)
                                                     "Starting leaf count"
                                                     "not sure name of y axix"
                                                     [;; ["curve name" [[x y] [x y] [x y] ...]]
@@ -233,8 +244,9 @@
                                                      
                                                      ]
                                                     :y-scale "symlog"
+                                                    :x-scale "symlog"
                                                     )
-                  image-2 (vega/series-scatter-plot title
+                  image-2 (vega/series-scatter-plot (str "dfa: " title)
                                                     "Starting leaf count"
                                                     "not sure name of y axix"
                                                     [;; ["curve name" [[x y] [x y] [x y] ...]]
@@ -245,6 +257,7 @@
                                                      
                                                      ]
                                                     :y-scale "symlog"
+                                                    :x-scale "symlog"
                                                     )]]
       (sh "cp" image-1 plot-path-1)
       (view/view-image image-1)
@@ -278,16 +291,45 @@
                                                      (:actual-state-count line)))))]]
             ;; compute average reduction percentage
             [max-balance (mean dfa-reductions)])
+
+          population-count (+ (count totally-balanced-rte-data)
+                              (count partially-balanced-rte-data)
+                              (count classic-rte-data))
+          dfa-reduction-histogram
+          (for [[max-balance lines] (group-by :max-balance
+                                              (concat totally-balanced-rte-data
+                                                      partially-balanced-rte-data
+                                                      classic-rte-data))]
+            ;; compute average reduction percentage
+            [max-balance (* 100 (/ (float (count lines)) population-count))])
+
           image (vega/series-scatter-plot "Reduction vs Imbalance"
                                           "Imbalance"
                                           "Percentage"
                                           [["rte reduction" (sort average-rte-reduction)]
                                            ["dfa reduction" (sort average-dfa-reduction)]
+                                           ["histogram" (sort dfa-reduction-histogram)]
                                            ])]
       (sh "cp" image reduction-svg)
       (view/view-image image))
       
     ))
 
-;; (plot-rte-summary)
+;;;;;;; unsorted
 
+(defn -main [& argv]
+  (let [kind (nth argv 0)
+        repetitions (Integer/parseInt (nth argv 1))]
+
+    (case kind
+      ("totally-balanced")
+      (build-rtes-totally-balanced 0.5 4 repetitions)
+
+      ("partially-balanced")
+      (build-rtes-partially-balanced 4 repetitions)
+
+      ("classic")
+      (build-rtes-classic 4 repetitions))
+
+    (System/exit 0)
+    ))
