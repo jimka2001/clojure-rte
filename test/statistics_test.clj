@@ -21,9 +21,11 @@
 
 (ns statistics-test
   (:require [clojure.pprint :refer [cl-format]]
-            [statistics :as sut]
-            [util :refer [human-readable-current-time]]
             [clojure.test :refer [deftest is] :exclude [testing]]
+            [util :refer [human-readable-current-time]]
+            [statistics :as sut]
+            [statistics-lock :as lock]
+            [statistics-inhabited :refer [subset-csv inhabited-csv update-inhabited-subset-csv]]
 ))
 
 (def test-verbose false)
@@ -39,9 +41,9 @@
 
 (deftest t-read-csv-resource
   (testing "reading csv resource"
-    (is (sut/read-resource-csv sut/subset-csv))
-    (is (sut/read-resource-csv sut/inhabited-csv))))
+    (is (lock/read-resource-csv subset-csv))
+    (is (lock/read-resource-csv inhabited-csv))))
 
 (deftest t-update-resource-csv
   (testing "update inhabited subset csv resource"
-    (sut/update-inhabited-subset-csv 2 4 3)))
+    (update-inhabited-subset-csv 2 4 3)))

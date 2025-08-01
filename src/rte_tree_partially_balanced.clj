@@ -1,7 +1,9 @@
 (ns rte-tree-partially-balanced
   (:require [clojure.math :refer [pow round]]
+            [statistics-lock :as lock]
             [genus-tester :refer [*test-types*]])
 )
+
 
 
 (defn insert-tree 
@@ -99,3 +101,4 @@
          rte (tree-to-rte tree types)]
 
      rte)))
+

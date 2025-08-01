@@ -1,9 +1,8 @@
 (ns rte-tree-totally-balanced
   (:require [clojure.math :refer [pow round]]
+            [statistics-lock :as lock]
             [genus-tester :refer [*test-types*]])
 )
-
-
 
 (defn insert-012-tree 
   "nondestructively insert a value into a binary tree.  nodes are of the form [value left right],
