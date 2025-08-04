@@ -21,7 +21,7 @@
 
 (ns util
   (:require [clojure.pprint :refer [cl-format]]
-            [clojure.math]
+            [clojure.math :refer [round pow]]
             [clojure.data.csv :as csv]
             [clojure.java.shell :refer [sh]]
             [clojure.set :refer [rename-keys]]
@@ -917,3 +917,68 @@
             `(let [~var-1 ~val-1]
                (truthy-let [~@others]
                    ~@body))))))
+
+(defn insert-012-tree 
+  "nondestructively insert a value into a binary tree.  nodes are of the form [value left right],
+  leaves are all empty according to the empty? function"
+  [probability-binary value tree]
+  (letfn [(make-node []
+            (if (< (rand 1) probability-binary)
+              [value nil nil]
+              [value nil]))]
+    (cond (empty? tree)
+          (make-node)
+
+          ;; unary node
+          (= 1 (count tree))
+          (let [[parent child] tree]
+            [parent (insert-012-tree probability-binary value child)])
+          
+          ;; binary node
+          :else
+          (let [[parent left right] tree]
+            (cond (< value parent)
+                  [parent
+                   (insert-012-tree probability-binary value left)
+                   right]
+
+                  (> value parent)
+                  [parent
+                   left
+                   (insert-012-tree probability-binary value right)]
+
+                  ;; don't insert duplicate node
+                  :else
+                  tree)))))
+
+(defn build-012-tree
+  "Build a 012 tree by iterating through the
+  population, and inserting them one by one in the given order. 
+  A 012 tree is a tree where every node either has 0 children (i.e. leaf)
+  or internal unary-1 or binary-2 node."
+  [probability-binary population]
+  (reduce (fn [acc-tree item]
+            (insert-012-tree probability-binary item acc-tree))
+          nil
+          population))
+
+(defn rand-tree-012
+  "Build a 012 tree which has between 2^n and (2^(n+1) - 1) leaf nodes.
+  The tree is built by taking a random permutation of 
+  and inserting each of (range 2^n) a tree in random order
+  (starting with an empty tree)"
+  [probability-binary depth]
+  {:pre [(float? probability-binary)
+         (< 0.0 probability-binary 1.0)
+         (int? depth)
+         (<= 0 depth)
+         ]}
+  (let [num-leaves (+ (round (pow 2 depth))
+                      (rand-int (round (pow 2 depth))))
+        _ (println [:depth depth :num-leaves num-leaves])
+        population (into () (shuffle (range num-leaves)))
+        tree (build-012-tree probability-binary population)
+        ]
+    ;; (printf "target num-leaves=%d %s\n" num-leaves tree)
+    tree
+    ))

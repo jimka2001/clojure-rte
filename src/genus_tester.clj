@@ -1,4 +1,4 @@
-;; Copyright (c) 2021 EPITA Research and Development Laboratory
+;; Copyright (c) 2021,25 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -21,6 +21,7 @@
 
 (ns genus-tester
   (:require [genus :as gns]
+            [util :refer [rand-tree-012]]
             [backtick :refer [template]]))
 
 (defn safe-odd? 
@@ -119,17 +120,39 @@
        (rand-nth types))
      (rand-nth types))))
 
+(defn tree-012-to-type [tree types]
+  (case (count tree)
+    (0) (rand-nth types)
+    (2) (let [[parent child] tree]
+          (gns/Not (tree-012-to-type child types)))
+    (3) (let [[parent left right] tree]
+          (list (rand-nth '(or and))
+                (tree-012-to-type left types)
+                (tree-012-to-type right types)))))
+
+(defn gen-balanced-type
+  "Generate a type designator for testing."
+  ([depth]
+   (gen-balanced-type depth *test-types*))
+  ([depth types]
+   (if (< 0 depth)
+     (tree-012-to-type (rand-tree-012 0.66666 depth) types)
+     (rand-nth types))))
+
 (defn gen-inhabited-type 
   "gen-type may generate a type designator which reduces to :empty-set.
   gen-inhabited-type generates a type designator which is guaranteed
   be inhabited, i.e. gns/inhabited? returns true"
   ([size]
-   (gen-inhabited-type size  *test-types*))
+   (gen-inhabited-type size *test-types*))
   ([size types]
    (loop []
-     (let [td (gen-type size types true) ]
-       (if (gns/inhabited? td false)
+     (let [td (gen-balanced-type size types)]
+       (case (gns/inhabited? td :dont-know)
+         (true)
          td
+
+         (false :dont-know)
          (recur))))))
 
 (defn gen-quasi-inhabited-type 
@@ -140,9 +163,12 @@
    (gen-quasi-inhabited-type size *test-types*))
   ([size types]
    (loop []
-     (let [td (gen-type size types) ]
-       (if (gns/inhabited? td :dont-know)
+     (let [td (gen-balanced-type size types) ]
+       (case (gns/inhabited? td :dont-know)
+         (true :dont-know)
          td
+
+         (false)
          (recur))))))
 
 (defn gen-indeterminate-type
@@ -150,10 +176,15 @@
    (gen-indeterminate-type size *test-types*))
   ([size types]
    (loop []
-     (let [td (gen-type size types)]
-       (if (= :dont-know (gns/inhabited? td :dont-know))
+     (let [td (gen-balanced-type size types)]
+       (case (gns/inhabited? td :dont-know)
+         (:dont-know)
          td
+
+         (true false)
          (recur))))))
 
 ;; (gen-indeterminate-type 5)
+;; (gen-indeterminate-type 5)
+;; (gen-quasi-inhabited-type 5)
 
