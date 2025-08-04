@@ -155,5 +155,5 @@
          td
          (recur))))))
 
-(gen-indeterminate-type 5)
+;; (gen-indeterminate-type 5)
 
