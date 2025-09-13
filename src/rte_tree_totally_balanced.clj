@@ -7,7 +7,7 @@
 
 
 (defn tree-012-to-rte 
-  "Take a tree as created by `build-binary-tree`, insert a type at each
+  "Take a tree as created by `rand-tree-012`, insert a type designator at each
   leaf node, and insert a randomly selected operator at each internal node.
   If the operator is unary, then the right child is simply discarded."
   ([tree]

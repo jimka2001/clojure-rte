@@ -26,7 +26,7 @@
   "`csv-file-name` is a csv file in the resource/statistics directory
   `write-record` is a unary function, callable with a file writer (from java.io.FileWriter)
   This function `merge-file`, calls `write-record` which is expected to write a line into
-  the write of its argument.  Thereafter, that resulting file is merged (via sort -m) into
+  the writer of its argument.  Thereafter, that resulting file is merged (via sort -m) into
   the csv-file in the resource directory. Recall, sort -m, expect the file(s) to already
   be in sorted order.
   It is safe to call this function simultaneously from two different threads or

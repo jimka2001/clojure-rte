@@ -44,8 +44,9 @@
 
 
 (defn tree-to-rte 
-  "Take a tree as created by `build-binary-tree`, insert a type at each
-  leave node, and insert a randomly selected operator at each internal node.
+  "Take a tree as created by `build-binary-tree`, insert a type designator
+  (from the given `types`)  at each leaf node, and insert a randomly selected
+  operator at each internal node.
   If the operator is unary, then the right child is simply discarded."
   ([tree]
    (tree-to-rte tree *test-types*))
