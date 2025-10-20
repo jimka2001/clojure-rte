@@ -1,7 +1,7 @@
-(ns clojureconj-2025
+(ns demos.conj-2025.gen
   (:require 
-   [clojureconj-csv :refer [statistics-resource write-csv-statistic]]
-   [clojureconj-random :refer [ tree-split-rte-linear
+   [demos.conj-2025.csv :refer [statistics-resource write-csv-statistic]]
+   [demos.conj-2025.random :refer [ tree-split-rte-linear
                                tree-split-rte-gaussian
                                tree-split-rte-inv-gaussian
                                flajolet-rte-by-size

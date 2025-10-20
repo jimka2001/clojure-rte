@@ -1,5 +1,5 @@
 (ns demos.conj-2025.cli
-  (:require [demos.conj-205.gen :refer [gen-csv-by-size]]))
+  (:require [demos.conj-2025.gen :refer [gen-csv-by-size]]))
 
 (defn -main [& argv]
   (let [algo (nth argv 0)
@@ -15,3 +15,5 @@
 
     (System/exit 0)
     ))
+
+;;(-main "comb-rte" "1")
