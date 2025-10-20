@@ -982,3 +982,32 @@
     ;; (printf "target num-leaves=%d %s\n" num-leaves tree)
     tree
     ))
+
+(defn weighted-case-impl
+  "functional implementation of the weighted-case macro"
+  [& body]
+  (let [r (rand-int 100)]
+    (loop [total 0
+           [[p thunk] & clauses] (partition 2 body)]
+      (if (< r (+ p total))
+        (thunk)
+        (recur (+ p total) clauses)))))
+    
+
+(defmacro weighted-case 
+  "E.g., (weighted-case 50 :a
+                        20 :b
+                        30 :c)
+    Randonmly one of the clauses and evaluate its body.
+    The random selection is biased so that each clause is selected
+    with the given probability.  In this example :a is selected 50%
+    of the time, :b 20% of the time, and :c 30% of the time.
+    "
+  [& args]
+  (assert (even? (count args)))
+  (let [args (mapcat (fn [[p body]]
+                       [p `(fn [] ~body)])
+                     (partition 2 args))]
+    `(weighted-case-impl ~@args)))
+
+
