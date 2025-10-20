@@ -1011,7 +1011,5 @@
                        [p `(fn [] ~body)])
                      pairs)]
     (assert (= 100 percent)
-            (format "does not sum to 100: %s" (doall (map first pairs))))    
+            (format "does not sum to 100: %s" (pr-str (map first pairs))))
     `(weighted-case-impl ~@args)))
-
-
