@@ -18,37 +18,46 @@
                               union-types))
 
 (defn tree-split-rte [leaves pivot]
+  (assert (< 0 leaves))
   (if (= 1 leaves)
     (rand-nth inhabited-leaves)
     (let [left-size (pivot leaves)
           left  (delay (tree-split-rte left-size pivot))
           right (delay (tree-split-rte (- leaves left-size) pivot))
           mid   (delay (tree-split-rte leaves pivot))]
+      (assert (< 0 left-size))
       (weighted-case 20 (rte/Cat @left @right)
                      30 (rte/And @left @right)
                      30 (rte/Or @left @right)
                      5  (rte/Star @mid)
                      15 (rte/Not @mid)))))
+
+
       
 (defn tree-split-rte-linear [leaves]
-  (tree-split-rte leaves rand-int))
+  (tree-split-rte leaves (fn [n] (max 1 (rand-int n)))))
 
 (defn tree-split-rte-gaussian [leaves]
   (tree-split-rte leaves (fn [n]
-                           (+ (rand-int (quot n 2))
-                              (rand-int (quot n 2))))))
+                           (case n
+                             (1 2 3)
+                             1
+                             (max 1 (+ (rand-int (quot n 2))
+                                       (rand-int (quot n 2))))))))
+
+;; (tree-split-rte-gaussian 10)
 
 
 (defn tree-split-rte-inv-gaussian [leaves]
   (tree-split-rte leaves (fn [n]
-                           (let [r (rand-int (quot n 2))]
+                           (let [r (max 1 (rand-int (quot n 2)))]
                              (if (= 0 (rand-int 2))
                                r
                                (- n r))))))
 
 (defn comb-rte [leaves]
   (tree-split-rte leaves (fn [n]
-                           (case (2 3)
+                           (case (1 2 3)
                              1
                              2))))
 
@@ -66,7 +75,7 @@
             (cond (> (random) flajolet-probability-binary)
                   (weighted-case 50 (rte/Not (to-rte tree))
                                  50 (rte/Star (to-rte tree)))
-
+                  
                   (empty? tree)
                   (rand-nth inhabited-leaves)
 

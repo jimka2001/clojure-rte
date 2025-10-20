@@ -33,8 +33,8 @@
   two different processes because the manipulation of the resource file is managed
   by `util/call-in-block`"
   [csv-file-name write-record]
-  (let [tmp-1 (str statistics-resource (random-uuid))
-        tmp-2 (str statistics-resource (random-uuid))]
+  (let [tmp-1 (str statistics-resource (random-uuid) "~")
+        tmp-2 (str statistics-resource (random-uuid) "~")]
     (with-open [out-file (java.io.FileWriter. tmp-1 true)]
       (write-record out-file))
     (with-lock

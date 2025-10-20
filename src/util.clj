@@ -988,10 +988,11 @@
   (let [r (rand-int 100)]
     (loop [total 0
            [[p thunk] & clauses] (partition 2 body)]
-      (if (< r (+ p total))
+      (assert (int? p))
+      (assert (fn? thunk))
+      (if (<= r (+ p total))
         (thunk)
         (recur (+ p total) clauses)))))
-    
 
 (defmacro weighted-case 
   "E.g., (weighted-case 50 :a
@@ -1004,9 +1005,13 @@
     "
   [& args]
   (assert (even? (count args)))
-  (let [args (mapcat (fn [[p body]]
+  (let [pairs (partition 2 args)
+        percent (reduce + 0 (map first pairs))
+        args (mapcat (fn [[p body]]
                        [p `(fn [] ~body)])
-                     (partition 2 args))]
+                     pairs)]
+    (assert (= 100 percent)
+            (format "does not sum to 100: %s" (doall (map first pairs))))    
     `(weighted-case-impl ~@args)))
 
 
