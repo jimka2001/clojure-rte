@@ -15,13 +15,17 @@ deps:
 		-M -m lein2deps.api --print --write-file deps.edn
 
 simple: deps
-	clj -M -m demos.conj-2025.cli tree-split-gaussian 1
+	clj -M -m demos.conj-2025.cli tree-split-rte-gaussian 1
+	clj -M -m demos.conj-2025.cli tree-split-rte-inv-gaussian 1
+	clj -M -m demos.conj-2025.cli tree-split-rte-linear 1
+	clj -M -m demos.conj-2025.cli comb-rte 1
+	clj -M -m demos.conj-2025.cli flajolet 1
 
 loop:
 	for i in $$(seq 1 10); do \
-		clj -M -m clojureconj-cli tree-split-gaussian 1 ; \
-		clj -M -m clojureconj-cli tree-split-inv-gaussian 1 ; \
-		clj -M -m clojureconj-cli tree-split-linear 1 ; \
+		clj -M -m clojureconj-cli tree-split-rte-gaussian 1 ; \
+		clj -M -m clojureconj-cli tree-split-rte-inv-gaussian 1 ; \
+		clj -M -m clojureconj-cli tree-split-rte-linear 1 ; \
 		clj -M -m clojureconj-cli comb-rte 1 ; \
 		clj -M -m clojureconj-cli flajolet 1 ; \
 	done

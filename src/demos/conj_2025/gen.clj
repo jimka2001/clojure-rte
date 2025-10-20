@@ -31,13 +31,19 @@
                       lot
                       min-leaf
                       max-leaf]
-  (let [futures (for [r (range num-repetitions)
-                      :let [size (+ min-leaf (rand-int (- max-leaf min-leaf)))
-                            f (future (write-csv-statistic (fn [] (gen-rte algo size))
-                                                           algo
-                                                           (csv algo prefix)))]
-                      ]
-                  f)]
+  (doseq [r (range num-repetitions)
+          :let [size (+ min-leaf (rand-int (- max-leaf min-leaf)))]
+          futures (for [_ (range lot)]
+                    (future (write-csv-statistic (fn [] ((gen-rte algo) size))
+                                                 algo
+                                                 (csv algo prefix))))
+          ]           
     (map deref futures)))
+
+
+;;(gen-csv-by-size 1 "tree-split-linear" "" 6 20 30)
+;;(write-csv-statistic (fn [] (flajolet-rte-by-size 30))
+;;                     "flajolet"
+;;                     "flajolet.csv")
 
 

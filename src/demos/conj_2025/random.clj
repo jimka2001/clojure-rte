@@ -13,7 +13,7 @@
                                 j (range i (count inhabited-types))
                                 :let [td-2 (nth inhabited-types j)]]
                             (gns/Or td-1 td-2))))
-(def inhabited-leaves (concat [:sigma :empty-seq]
+(def inhabited-leaves (concat [:sigma :epsilon]
                               inhabited-types
                               union-types))
 
@@ -30,7 +30,6 @@
                      5  (rte/Star @mid)
                      15 (rte/Not @mid)))))
       
-
 (defn tree-split-rte-linear [leaves]
   (tree-split-rte leaves rand-int))
 

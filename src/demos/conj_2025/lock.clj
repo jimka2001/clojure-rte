@@ -11,7 +11,7 @@
 
 
 (def statistics-resource (str (.getPath (io/resource "statistics")) "/"))
-(def lock-file (str statistics-resource "statistics.lockfile"))
+(def lock-file (str statistics-resource "../../" "statistics.lockfile"))
 
 
 (defmacro with-lock
@@ -41,7 +41,8 @@
       ;; open the csv file in append mode, i.e., write to the end
       (sh "sort" "-t," "-k1,3n" "-m" tmp-1 csv-file-name "-o" tmp-2)
       (sh "mv" tmp-2 csv-file-name))
-    (sh "trash" tmp-1)))
+    (sh "trash" tmp-1)
+    ))
 
 
 (defn slurp-csv-data

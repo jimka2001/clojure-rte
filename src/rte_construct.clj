@@ -502,7 +502,6 @@
   ([depth given-pattern functions]
    (assert (map? functions)
            (format "functions should be a map, not %s" functions))
-   (printf "verbose given-pattern=%s\n" given-pattern)
    (when (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
                 depth given-pattern))
