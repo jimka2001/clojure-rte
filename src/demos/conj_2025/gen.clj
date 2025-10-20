@@ -25,18 +25,20 @@
               "comb" comb-rte})
 
 (defn gen-csv-by-size [num-repetitions
-                      algo
-                      prefix
-                      lot
-                      min-leaf
+                       algo
+                       prefix
+                       lot
+                       min-leaf
                        max-leaf]
   (assert (gen-rte algo) (format "invalid algo=%s" algo))
   (doseq [r (range num-repetitions)
           :let [size (+ min-leaf (rand-int (- max-leaf min-leaf)))
-                futures (for [_ (range lot)]
-                          (future (write-csv-statistic (fn [] ((gen-rte algo) size))
+                futures (for [q (range lot)]
+                          (future (do
+                                    (println [algo size r q])
+                                    (write-csv-statistic (fn [] ((gen-rte algo) size))
                                                        algo
-                                                       (csv algo prefix))))]
+                                                       (csv algo prefix)))))]
           ]
     (doall (map deref futures))))
 
