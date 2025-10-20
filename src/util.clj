@@ -975,7 +975,6 @@
          ]}
   (let [num-leaves (+ (round (pow 2 depth))
                       (rand-int (round (pow 2 depth))))
-        _ (println [:depth depth :num-leaves num-leaves])
         population (into () (shuffle (range num-leaves)))
         tree (build-012-tree probability-binary population)
         ]
