@@ -502,6 +502,7 @@
   ([depth given-pattern functions]
    (assert (map? functions)
            (format "functions should be a map, not %s" functions))
+   (printf "verbose given-pattern=%s\n" given-pattern)
    (when (= depth traversal-depth-max)
      (cl-format false "warning traverse pattern depth reached: ~A ~A"
                 depth given-pattern))
@@ -540,7 +541,7 @@
              (let [[token operand] pattern]
                (case token
                  (:or :and :cat)
-                 (traverse-pattern (inc depth) operand functions)
+                 ((functions token) (list operand) functions)
                  
                  (:not :*)
                  ((functions token) operand functions)
@@ -603,6 +604,86 @@
                                   (some nullable? operands))
                             :not (fn [operand _functions]
                                    (not (nullable? operand)))))))
+
+(defn count-leaves [expr]
+  (letfn [(multi [operands _functions]
+            (reduce + 0 (map count-leaves operands)))
+          (single [operand _functions]
+            (+ 1 (count-leaves operand)))
+          (leaf [_operand _functions]
+            1)]
+    (traverse-pattern expr
+                      (assoc *traversal-functions*
+                             :epsilon leaf
+                             :empty-set leaf
+                             :sigma leaf
+                             :type  leaf
+                             :or multi
+                             :cat multi
+                             :and multi
+                             :not single
+                             :* single))))
+
+(defn count-internal-nodes [expr]
+  (letfn [(multi [operands _functions]
+            (+ 1
+               (reduce + 0 (map count-internal-nodes operands))))
+          (single [operand _functions]
+            (+ 1 (count-internal-nodes operand)))
+          (leaf [_operand _functions]
+            0)]
+    (traverse-pattern expr
+                      (assoc *traversal-functions*
+                             :epsilon leaf
+                             :empty-set leaf
+                             :sigma leaf
+                             :type  leaf
+                             :or multi
+                             :cat multi
+                             :and multi
+                             :not single
+                             :* single))))
+
+(defn measure-longest-branch [expr]
+  (letfn [(multi [operands _functions]
+            (+ 1
+               (reduce max (map measure-longest-branch operands))))
+          (single [operand _functions]
+            (+ 1 (measure-longest-branch operand)))
+          (leaf [_operand _functions]
+            0)]
+    (traverse-pattern expr
+                      (assoc *traversal-functions*
+                             :epsilon leaf
+                             :empty-set leaf
+                             :sigma leaf
+                             :type  leaf
+                             :or multi
+                             :cat multi
+                             :and multi
+                             :not single
+                             :* single))))
+
+(defn measure-shortest-branch [expr]
+  (letfn [(multi [operands _functions]
+            (+ 1
+               (reduce min (map measure-shortest-branch operands))))
+          (single [operand _functions]
+            (+ 1 (measure-shortest-branch operand)))
+          (leaf [_operand _functions]
+            0)]
+    (traverse-pattern expr
+                      (assoc *traversal-functions*
+                             :epsilon leaf
+                             :empty-set leaf
+                             :sigma leaf
+                             :type  leaf
+                             :or multi
+                             :cat multi
+                             :and multi
+                             :not single
+                             :* single))))
+
 
 (defn first-types 
   "Return a possibly empty set of types (i.e., object which can be

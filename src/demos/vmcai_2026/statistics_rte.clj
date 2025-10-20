@@ -216,7 +216,7 @@
                                (min (:minimized-leaf-count data-map)
                                     (:actual-leaf-count data-map)))
         ]
-    (doseq [[cvs-data title plot-path-1 plot-path-2 max-x]
+    (doseq [[csv-data title plot-path-1 plot-path-2 max-x]
             [[totally-balanced-rte-data "Statistics for totally balanced generation"
               gen-rte-totally-balanced-svg gen-dfa-totally-balanced-svg 200]
              [partially-balanced-rte-data "Statistics for partially balanced generation"
@@ -224,8 +224,8 @@
              [classic-rte-data  "Statistics for classic generation"
               gen-rte-classic-svg gen-dfa-classic-svg 200]]
             
-            :let [grouped (group-by :actual-leaf-count cvs-data)
-                  count-lines (count cvs-data)
+            :let [grouped (group-by :actual-leaf-count csv-data)
+                  count-lines (count csv-data)
                   histogram (for [[actual-leaf-count lines] grouped
                                   :when (< actual-leaf-count max-x)]
                               [actual-leaf-count (* 10 (/ (float (count lines)) count-lines))])
