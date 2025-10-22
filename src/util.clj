@@ -1013,3 +1013,20 @@
     (assert (= 100 percent)
             (format "does not sum to 100: %s" (pr-str (map first pairs))))
     `(weighted-case-impl ~@args)))
+
+(defn run-dot
+  "to-png is a function (String, String, String)=>A
+  run-dot returns the pair [`a` `png-file-name`]
+     where `a` is the return value of `to-png`
+     and `png-file-name` is the name of the .png file which has been created by dot.
+  "
+  [title prefix to-png]
+  (let [uuid (random-uuid)
+        png (str prefix "-" title "-" uuid ".png")
+        dot (str prefix "-" title "-" uuid ".png")
+        latex (str prefix "-" title "-" uuid ".tex")
+        alt (str prefix "-" title "-" uuid ".plain")
+        a (to-png dot latex title)]
+    (sh "dot" "-Tplain" dot "-o" alt)
+    (sh "dot" "-Tpng" dot "-o" png)
+    [a png]))

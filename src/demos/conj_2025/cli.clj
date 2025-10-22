@@ -4,7 +4,7 @@
 (defn test-main [algo repetitions]
   (gen-csv-by-size repetitions algo
                      "" ;; prefix
-                     6 ;; lot
+                     2 ;; lot
                      (bit-shift-left 1 5) ;; min-leaf
                      (bit-shift-left 1 6) ;; max-leaf
 

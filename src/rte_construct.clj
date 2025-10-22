@@ -604,6 +604,45 @@
                             :not (fn [operand _functions]
                                    (not (nullable? operand)))))))
 
+(defn linearize [expr]
+  (cons expr
+        (letfn [(multi [operands _functions]
+                  (mapcat linearize operands))
+                (single [operand _functions]
+                  (list (linearize operand)))
+                (leaf [_operand _functions]
+                  ())]  
+          (traverse-pattern expr
+                            (assoc *traversal-functions*
+                                   :epsilon leaf
+                                   :empty-set leaf
+                                   :sigma leaf
+                                   :type  leaf
+                                   :or multi
+                                   :cat multi
+                                   :and multi
+                                   :not single
+                                   :* single)))))
+
+(defn children [expr]
+  (letfn [(multi [operands _functions]
+            operands)
+          (single [operand _functions]
+            operand)
+          (leaf [_operand _functions]
+            ())]
+    (traverse-pattern expr
+                      (assoc *traversal-functions*
+                             :epsilon leaf
+                             :empty-set leaf
+                             :sigma leaf
+                             :type  leaf
+                             :or multi
+                             :cat multi
+                             :and multi
+                             :not single
+                             :* single))))
+
 (defn count-leaves [expr]
   (letfn [(multi [operands _functions]
             (reduce + 0 (map count-leaves operands)))

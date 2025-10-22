@@ -21,16 +21,16 @@
   (assert (< 0 leaves))
   (if (= 1 leaves)
     (rand-nth inhabited-leaves)
-    (let [left-size (pivot leaves)
-          left  (delay (tree-split-rte left-size pivot))
-          right (delay (tree-split-rte (- leaves left-size) pivot))
-          mid   (delay (tree-split-rte leaves pivot))]
+    (let [left-size (pivot leaves)]
       (assert (< 0 left-size))
-      (weighted-case 20 (rte/Cat @left @right)
-                     30 (rte/And @left @right)
-                     30 (rte/Or @left @right)
-                     5  (rte/Star @mid)
-                     15 (rte/Not @mid)))))
+      (letfn [(left  [] (tree-split-rte left-size pivot))
+              (right [] (tree-split-rte (- leaves left-size) pivot))
+              (mid   [] (tree-split-rte leaves pivot))]
+        (weighted-case 20 (rte/Cat (left) (right))
+                       30 (rte/And (left) (right))
+                       30 (rte/Or (left) (right))
+                       5  (rte/Star (mid))
+                       15 (rte/Not (mid)))))))
 
 
       
