@@ -893,7 +893,7 @@
                       (fn []
                         ~@body)
                       (fn []
-                        ~@on-time-out)))
+                        ~on-time-out)))
 
 (defmacro truthy-let [bindings & body]
   (if (empty? bindings)

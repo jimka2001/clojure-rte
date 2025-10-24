@@ -134,22 +134,27 @@
         exit-value true
         ]
     (doseq [dfa-1 (with-timeout timeout-sec []
+                    ;; sequence of Dfas for doseq iteration
                     [(xym/minimize (gen-dfa :num-states num-states
                                             :num-transitions num-transitions
                                             :exit-value exit-value
                                             :type-size type-size
                                             :probability-indeterminate probability-indeterminate))])
             dfa-2 (with-timeout timeout-sec []
+                    ;; sequence of Dfas for doseq iteration
                     [(xym/minimize (gen-dfa :num-states num-states
-                                           :num-transitions num-transitions
-                                           :exit-value exit-value
-                                           :type-size type-size
-                                           :probability-indeterminate probability-indeterminate))])
+                                            :num-transitions num-transitions
+                                            :exit-value exit-value
+                                            :type-size type-size
+                                            :probability-indeterminate probability-indeterminate))])
             dfa-and (with-timeout timeout-sec []
+                      ;; sequence of Dfas for doseq iteration
                       [(xym/synchronized-intersection dfa-1 dfa-2)])
             dfa-and-not (with-timeout timeout-sec []
+                          ;; sequence of Dfas for doseq iteration
                           [(xym/synchronized-and-not dfa-1 dfa-2)])
             dfa-empty-word (with-timeout timeout-sec []
+                             ;; sequence of Dfas for doseq iteration
                              [(rte-to-dfa :epsilon exit-value)])
             dfa-and-non-trivial (with-timeout timeout-sec []
                                   [(xym/synchronized-and-not dfa-and dfa-empty-word)])
@@ -157,7 +162,7 @@
             :let [subset (xym/dfa-subset? dfa-1 dfa-2)
                   overlap (xym/dfa-inhabited? dfa-and)
                   non-trivial-overlap (xym/dfa-inhabited? dfa-and-non-trivial)
-                  [satisfiability path] (get (xym/find-trace-map @dfa-1) exit-value)]
+                  [satisfiability path] (get (xym/find-trace-map dfa-1) exit-value)]
             ]
 
       (lock/merge-file inhabited-csv
@@ -167,14 +172,14 @@
                          (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
                          ;; min-dfa-state-count ,
-                         (cl-format out-file ",~d" (count (:states @dfa-1)))
+                         (cl-format out-file ",~d" (count (:states dfa-1)))
 
                          ;; min-dfa-transitions-count ,
                          (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
-                                                                    (xym/states-as-seq @dfa-1))))
+                                                                    (xym/states-as-seq dfa-1))))
 
                          ;; count indeterminate transitions
-                         (cl-format out-file ",~d" (count (for [q (xym/states-as-seq @dfa-1)
+                         (cl-format out-file ",~d" (count (for [q (xym/states-as-seq dfa-1)
                                                                 [td _] (:transitions q)
                                                                 :when (= :dont-know (gns/inhabited? td :dont-know))]
                                                             1)))
