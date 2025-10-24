@@ -3,7 +3,7 @@
             [clojure.java.shell :refer [sh]]
             [lock :as lock]
             [vega-plot :as vega]
-            [util :refer [mean std-deviation]]
+            [util :refer [mean std-deviation with-timeout]]
             [genus :as gns]
             [xymbolyco :as xym]
             [xym-tester :refer [gen-dfa]]
@@ -122,76 +122,86 @@
   the language of the dfa.
   "
   [& {:keys [num-states num-transitions
-             type-size probability-indeterminate]
+             type-size probability-indeterminate
+             timeout-sec]
       :or {num-states 10
            num-transitions 30
            type-size 2
            probability-indeterminate 0.15
+           timeout-sec (* 60 2) ;; 2 minutes
            }}]
   (let [;;csv-file-name subset-csv
         exit-value true
-        dfa-1 (future (xym/minimize (gen-dfa :num-states num-states
-                                             :num-transitions num-transitions
-                                             :exit-value exit-value
-                                             :type-size type-size
-                                             :probability-indeterminate probability-indeterminate)))
-        dfa-2 (future (xym/minimize (gen-dfa :num-states num-states
-                                             :num-transitions num-transitions
-                                             :exit-value exit-value
-                                             :type-size type-size
-                                             :probability-indeterminate probability-indeterminate)))
-        dfa-and (xym/synchronized-intersection @dfa-1 @dfa-2)
-        dfa-and-not (xym/synchronized-and-not @dfa-1 @dfa-2)
-        dfa-empty-word (rte-to-dfa :epsilon exit-value)
-        dfa-and-non-trivial (xym/synchronized-and-not dfa-and dfa-empty-word)
-        subset (xym/dfa-subset? @dfa-1 @dfa-2)
-        overlap (xym/dfa-inhabited? dfa-and)
-        non-trivial-overlap (xym/dfa-inhabited? dfa-and-non-trivial)
-        [satisfiability path] (get (xym/find-trace-map @dfa-1) exit-value)
         ]
+    (doseq [dfa-1 (with-timeout timeout-sec []
+                    [(xym/minimize (gen-dfa :num-states num-states
+                                            :num-transitions num-transitions
+                                            :exit-value exit-value
+                                            :type-size type-size
+                                            :probability-indeterminate probability-indeterminate))])
+            dfa-2 (with-timeout timeout-sec []
+                    [(xym/minimize (gen-dfa :num-states num-states
+                                           :num-transitions num-transitions
+                                           :exit-value exit-value
+                                           :type-size type-size
+                                           :probability-indeterminate probability-indeterminate))])
+            dfa-and (with-timeout timeout-sec []
+                      [(xym/synchronized-intersection dfa-1 dfa-2)])
+            dfa-and-not (with-timeout timeout-sec []
+                          [(xym/synchronized-and-not dfa-1 dfa-2)])
+            dfa-empty-word (with-timeout timeout-sec []
+                             [(rte-to-dfa :epsilon exit-value)])
+            dfa-and-non-trivial (with-timeout timeout-sec []
+                                  [(xym/synchronized-and-not dfa-and dfa-empty-word)])
+            
+            :let [subset (xym/dfa-subset? dfa-1 dfa-2)
+                  overlap (xym/dfa-inhabited? dfa-and)
+                  non-trivial-overlap (xym/dfa-inhabited? dfa-and-non-trivial)
+                  [satisfiability path] (get (xym/find-trace-map @dfa-1) exit-value)]
+            ]
 
-    (lock/merge-file inhabited-csv
-                (fn [out-file]
-                  ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
-                  ;; num-states , num-transitions , type-size , probability-indeterminate ,
-                  (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+      (lock/merge-file inhabited-csv
+                       (fn [out-file]
+                         ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, min-dfa-state-count, min-dfa-transitions-count, count indeterminate transitions, inhabited dfa language~%")
+                         ;; num-states , num-transitions , type-size , probability-indeterminate ,
+                         (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
 
-                  ;; min-dfa-state-count ,
-                  (cl-format out-file ",~d" (count (:states @dfa-1)))
+                         ;; min-dfa-state-count ,
+                         (cl-format out-file ",~d" (count (:states @dfa-1)))
 
-                  ;; min-dfa-transitions-count ,
-                  (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
-                                                             (xym/states-as-seq @dfa-1))))
+                         ;; min-dfa-transitions-count ,
+                         (cl-format out-file ",~d" (reduce + 0 (map (fn [st] (count (:transitions st)))
+                                                                    (xym/states-as-seq @dfa-1))))
 
-                  ;; count indeterminate transitions
-                  (cl-format out-file ",~d" (count (for [q (xym/states-as-seq @dfa-1)
-                                                         [td _] (:transitions q)
-                                                         :when (= :dont-know (gns/inhabited? td :dont-know))]
-                                                     1)))
+                         ;; count indeterminate transitions
+                         (cl-format out-file ",~d" (count (for [q (xym/states-as-seq @dfa-1)
+                                                                [td _] (:transitions q)
+                                                                :when (= :dont-know (gns/inhabited? td :dont-know))]
+                                                            1)))
 
-                  ;; inhabited dfa language?
-                  (cl-format out-file ",~a" satisfiability)
+                         ;; inhabited dfa language?
+                         (cl-format out-file ",~a" satisfiability)
 
-                  (cl-format out-file "~%")))
+                         (cl-format out-file "~%")))
 
-    (lock/merge-file subset-csv
-                (fn [out-file]
-                  ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap~%")
-                  
-                  ;; num-states , num-transitions , type-size , probability-indeterminate
-                  (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
-                  
-                  ;; subset ,
-                  (cl-format out-file ",~a" subset)
-                  
-                  ;; overlap ,
-                  (cl-format out-file ",~a" overlap)
-                  
-                  ;; non-trivial-overlap ,
-                  (cl-format out-file ",~a" non-trivial-overlap)
-                  
-                  (cl-format out-file "~%")
-                  ))))
+      (lock/merge-file subset-csv
+                       (fn [out-file]
+                         ;;(cl-format out-file "# num-states, num-transitions, type-size, probability-indeterminate, subset, overlap, non-trivial-overlap~%")
+                         
+                         ;; num-states , num-transitions , type-size , probability-indeterminate
+                         (cl-format out-file "~d,~d,~d,~f" num-states num-transitions type-size probability-indeterminate)
+                         
+                         ;; subset ,
+                         (cl-format out-file ",~a" subset)
+                         
+                         ;; overlap ,
+                         (cl-format out-file ",~a" overlap)
+                         
+                         ;; non-trivial-overlap ,
+                         (cl-format out-file ",~a" non-trivial-overlap)
+                         
+                         (cl-format out-file "~%")
+                         )))))
 
 (defn update-inhabited-subset-csv
   "Run a suite of simulations, appending to resources/statistics/dfa-subset.csv
