@@ -23,9 +23,9 @@
   (:require [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [util :refer [human-readable-current-time]]
-            [statistics :as sut]
-            [statistics-lock :as lock]
-            [statistics-inhabited :refer [subset-csv inhabited-csv update-inhabited-subset-csv]]
+            [demos.vmcai-2026.statistics :as sut]
+            [lock :as lock]
+            [demos.vmcai-2026.statistics-inhabited :refer [subset-csv inhabited-csv update-inhabited-subset-csv]]
 ))
 
 (def test-verbose false)

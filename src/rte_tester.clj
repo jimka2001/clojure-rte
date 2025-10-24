@@ -26,7 +26,6 @@
             [clojure.math :refer [pow round]]
             [genus :as gns]
             [genus-tester :refer [*test-types*]]
-            [rte-tree-partially-balanced :refer [gen-partially-balanced-rte]]
             [rte-randomize-syntax :refer [gen-rte]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-construct :refer [with-compile-env rte-to-dfa  nullable?

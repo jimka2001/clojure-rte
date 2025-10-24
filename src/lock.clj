@@ -1,17 +1,17 @@
-(ns statistics-lock
+(ns lock
   (:require [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
             [clojure.data.csv :as csv]
             [vega-plot :as vega]
             [util :refer [call-in-block with-timeout read-csv-data rename-columns]]
-)
-)
+            )
+  )
 
 
 
 (def statistics-resource (str (.getPath (io/resource "statistics")) "/"))
-(def lock-file (str statistics-resource "statistics.lockfile"))
+(def lock-file (str statistics-resource "../../" "statistics.lockfile"))
 
 
 (defmacro with-lock
@@ -33,8 +33,8 @@
   two different processes because the manipulation of the resource file is managed
   by `util/call-in-block`"
   [csv-file-name write-record]
-  (let [tmp-1 (str statistics-resource (random-uuid))
-        tmp-2 (str statistics-resource (random-uuid))]
+  (let [tmp-1 (str statistics-resource (random-uuid) "~")
+        tmp-2 (str statistics-resource (random-uuid) "~")]
     (with-open [out-file (java.io.FileWriter. tmp-1 true)]
       (write-record out-file))
     (with-lock
@@ -69,17 +69,3 @@
                                          )]
       (rename-columns headers lines {"#num-states" "num-states"}))))
 
-
-(defn plot-resource-csv 
-  "Read data from a csv file `csv-file` using the `read-resource-csv` function.
-  Generate a plot of one column vs another column. `x-axis` and `y-axis` are string
-  specifying the column name of the data to plot."
-  [csv-file x-axis y-axis]
-  (let [[headers lines] (read-resource-csv csv-file)]
-    (vega/series-scatter-plot "some data"
-                              x-axis
-                              y-axis
-                              [[(format "%s vs %s" x-axis y-axis)
-                                (for [line lines]
-                                  [(get line x-axis)
-                                   (get line y-axis)])]])))

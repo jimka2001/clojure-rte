@@ -1,7 +1,7 @@
-(ns statistics-inhabited
+(ns demos.vmcai-2026.statistics-inhabited
   (:require [clojure.pprint :refer [pprint cl-format]]
             [clojure.java.shell :refer [sh]]
-            [statistics-lock :as lock]
+            [lock :as lock]
             [vega-plot :as vega]
             [util :refer [mean std-deviation]]
             [genus :as gns]

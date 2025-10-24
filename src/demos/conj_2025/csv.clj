@@ -1,6 +1,6 @@
 (ns demos.conj-2025.csv
   (:import [java.time LocalDateTime Duration])
-  (:require [demos.conj-2025.lock :as lock]
+  (:require [lock :as lock]
             [clojure.pprint :refer [cl-format]]
             [xymbolyco :as xym]
             [rte-construct :as rte]
