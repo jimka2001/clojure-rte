@@ -1,6 +1,8 @@
 (ns rte-graphviz
   (:import [java.io File FileOutputStream])
   (:require [util :refer [member run-dot]]
+            [genus :as gns]
+            [view :refer [view-image]]
             [xymbolyco :as xym]
             [rte-construct :as rte])
 )
@@ -9,7 +11,7 @@
 ;;import genus.{SEmpty, STop, SimpleTypeD}
 ;;import adjuvant.GraphViz.{multiLineString, runDot}
 
-(defn f-dummy [])
+(defn f-dummy [_ignored])
 (def default-type-vector [:empty-set :sigma ])
 
 
@@ -40,87 +42,94 @@
                               type-legend false
                               habitation true
                               }}]
-  (letfn [(write [str]
-            (doseq [c str]
-              (.write dot-stream (.toByte c))))
-          (simple [str]
-            (fn [_operand _functions]
-              (format "%s" str)))
-          (node-label [expr]
-            (rte/traverse-pattern expr
-                              (assoc rte/*traversal-functions*
-                                     :epsilon (simple "()")
-                                     :empty-set (simple "{}")
-                                     :sigma (simple  "&#931;"  ;; Σ
-                                                     )
-                                     :type (fn [operand _functions]
-                                             (format "%s" operand))
-                                     :or (simple :or)
-                                     :cat (simple :cat)
-                                     :and (simple :and)
-                                     :not (simple :not)
-                                     :* (simple "*"))))
-          (get-types [expr]
-            (letfn [(multi [operands _functions]
-                      (mapcat get-types operands))
-                    (single [operand _functions]
-                      (get-types operand))
-                    (leaf [_operand _functions]
-                      [leaf])]
-              (rte/traverse-pattern expr
-                                (assoc rte/*traversal-functions*
-                                       :epsilon leaf
-                                       :empty-set leaf
-                                       :sigma leaf
-                                       :type  leaf
-                                       :or multi
-                                       :cat multi
-                                       :and multi
-                                       :not single
-                                       :* single))))
+  (assert rte)
+  (letfn [(linearize [rte]
+            (cond (keyword? rte)
+                  [rte]
+
+                  (and (sequential? rte)
+                       (keyword? (first rte)))
+                  (distinct (cons rte (mapcat linearize (rest rte))))
+
+                  :else
+                  [rte]))
+          (children [rte]
+            (cond (keyword? rte)
+                  []
+
+                  (and (sequential? rte)
+                       (keyword? (first rte)))
+                  (rest rte)
+
+                  :else
+                  []))
+          (write [input-str]
+            (doseq [c input-str
+                    :let [ i (int c)]
+                    :when (< i 256) ;; silently skip characters out of frange
+                    ]
+              (.write dot-stream (byte (int c)))))
+          (type-label [td tds]
+            (let [idx (get tds td nil)]
+              (assert idx (format "cannot find type %s\nin given merged-types"
+                                  td))
+              (format "t%d" idx)))
+          (node-label [expr tds]
+            (cond (gns/valid-type? expr)
+                  (type-label expr tds)
+
+                  (rte/valid-rte? expr)
+                  (case expr
+                    (:epsilon) "()"
+                    (:sigma) "&#931;" ;;  Σ
+                    (:empty-set) "{}"
+                    (first expr))))
           ]
     
     (write "digraph G {\n")
     ;; header
+    (write (format "  # %s\n" rte))
     (write "  fontname=courier;\n")
     (write "  rankdir=TB; graph[labeljust=l,nojustify=true]\n")
     (write "  node [fontname=Arial, fontsize=25];\n")
     (write "  edge [fontsize=20];\n")
 
-    (let [linear (map-indexed (fn [idx item] [item idx]) (rte/linearize rte))
-          node-map (into {} linear)
-          used-types (distinct (get-types rte))
+    (let [linear (linearize rte)
+          used-types (distinct (filter gns/valid-type? linear))
+          node-map (into {} (map-indexed (fn [idx item] [item idx]) linear))
           ;; collect all the type designators not already in given-types
           merged-types (concat given-types (filter (fn [td] (not (member td given-types))) used-types ))
-          tds (into {} (map-indexed (fn [item idx] [idx item]) merged-types))
+          tds (into {} (map-indexed (fn [idx item] [item idx]) merged-types))
           ]
-      
-      (doseq [[r idx] linear
-              :let [label (node-label r)]]
+      (doseq [[r idx] node-map
+              :let [label (node-label r tds)]]
         (write (format "R%s [label=\"%s\"" idx label))
         (if habitation
-          (write ", style=filled, fillcolor=")
-          ;; is r equiv to universe ?,
-          ;; i.e. is !r equiv to emptyset ?
-          (cond (xym/dfa-vacuous? (rte/rte-to-dfa (rte/Not r)) false)
-                (write "skyblue, shape=egg, orientation=180")
+          (do
+            (write ", style=filled, fillcolor=")
+            ;; is r equiv to universe ?,
+            ;; i.e. is !r equiv to emptyset ?
+            (cond (xym/dfa-vacuous? (rte/rte-to-dfa (rte/Not r)) false)
+                  (write "skyblue, shape=egg, orientation=180")
 
-                :else
-                (case (xym/dfa-inhabited? (rte/rte-to-dfa r) :dont-know)
-                  (:dont-know) ;; maybe
-                  (write "orange, shape=Mcircle")
+                  :else
+                  (case (xym/dfa-inhabited? (rte/rte-to-dfa r) :dont-know)
+                    (:dont-know) ;; maybe
+                    (write "orange, shape=Mcircle")
 
-                  (true) ;; inhabited
-                  (write "lightgreen, shape=rect")
+                    (true) ;; inhabited
+                    (write "lightgreen, shape=rect")
 
-                  (false)       ;; empty
-                  (write "lightcoral, shape=egg"))))
-        (write "\n"))
+                    (false)       ;; empty
+                    (write "lightcoral, shape=egg")))))
+        (write "]\n"))
 
-      (doseq [[parent idx] linear
-              child (rte/children parent)
+      (doseq [[parent idx] node-map
+              child (children parent)
               :let [child-index (node-map child)]]
         
+        (assert (int? idx))
+        (assert (int? child-index))
         (write (format "R%d -> R%d\n" idx child-index)))
 
 
@@ -151,6 +160,7 @@
                           habitation true
                           type-legend false
                           }}]
+  (assert rte)
   (letfn [(to-png [
                    dot-path-name ;;  String,
                    _latex-path-name ;; ignored
@@ -185,17 +195,13 @@
                         dot-file-CB f-dummy
                         habitation true
                         type-legend false}}]
+  (assert rte)
   (let [[labels png] (rte-to-png rte
                                  :title title
                                  :given-types given-types
                                  :dot-file-CB dot-file-CB
                                  :habitation habitation
-                                 :type-legend type-lebend)]
+                                 :type-legend type-legend)]
     (view-image png)
     [labels png]
     ))
-
-
-
-
-

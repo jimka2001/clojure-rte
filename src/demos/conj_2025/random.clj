@@ -18,6 +18,8 @@
                               union-types))
 
 (defn tree-split-rte [leaves pivot]
+  {:pre [(fn? pivot) (int? leaves)]
+   :post [(rte/valid-rte? %)]}
   (assert (< 0 leaves))
   (if (= 1 leaves)
     (rand-nth inhabited-leaves)
@@ -35,9 +37,11 @@
 
       
 (defn tree-split-rte-linear [leaves]
+  {:post [(rte/valid-rte? %)]}
   (tree-split-rte leaves (fn [n] (max 1 (rand-int n)))))
 
 (defn tree-split-rte-gaussian [leaves]
+  {:post [(rte/valid-rte? %)]}
   (tree-split-rte leaves (fn [n]
                            (case n
                              (1 2 3)
@@ -49,6 +53,7 @@
 
 
 (defn tree-split-rte-inv-gaussian [leaves]
+  {:post [(rte/valid-rte? %)]}
   (tree-split-rte leaves (fn [n]
                            (let [r (max 1 (rand-int (quot n 2)))]
                              (if (= 0 (rand-int 2))
@@ -57,13 +62,15 @@
 
 (defn comb-rte [leaves]
   (tree-split-rte leaves (fn [n]
-                           (case (1 2 3)
+                           (case n
+                             (1 2 3)
                              1
                              2))))
 
 (def flajolet-probability-binary 0.9)
 
 (defn flajolet-rte-by-size [leaves]
+  {:post [(rte/valid-rte? %)]}
   (letfn [(insert [tree d]
             (if (empty? tree)
               [d nil nil]

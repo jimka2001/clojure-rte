@@ -6,6 +6,10 @@
                                    tree-split-rte-inv-gaussian
                                    flajolet-rte-by-size
                                    comb-rte]]
+   [dot]
+   [genus :as gns]
+   [rte-construct :as rte]
+   [rte-graphviz :refer [rte-view]]
    [util :refer [member]]))
 
 
@@ -42,10 +46,11 @@
           ]
     (doall (map deref futures))))
 
-
-;;(gen-csv-by-size 1 "tree-split-linear" "" 6 20 30)
-;;(write-csv-statistic (fn [] (flajolet-rte-by-size 30))
-;;                     "flajolet"
-;;                     "flajolet.csv")
-
-
+(defn sample-view [num-leaves]
+  (doseq [[algo gen] gen-rte
+          :let [rte (gen num-leaves)
+                _ (rte-view rte :title algo)
+                dfa (rte/rte-to-dfa rte)]]
+    (dot/dfa-view dfa algo)))
+    
+;;(sample-view 28)

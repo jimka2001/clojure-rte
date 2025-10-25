@@ -1023,7 +1023,7 @@
   [title prefix to-png]
   (let [uuid (random-uuid)
         png (str prefix "-" title "-" uuid ".png")
-        dot (str prefix "-" title "-" uuid ".png")
+        dot (str prefix "-" title "-" uuid ".dot")
         latex (str prefix "-" title "-" uuid ".tex")
         alt (str prefix "-" title "-" uuid ".plain")
         a (to-png dot latex title)]
