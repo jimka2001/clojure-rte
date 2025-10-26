@@ -1,6 +1,8 @@
 (ns gnuplot
   (:require [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
+            [clojure.string :as str]
+            [clojure.pprint :refer [cl-format]]
             [util :refer [member with-outstring]]
             [view :refer [view-image]]
             ))
@@ -14,15 +16,14 @@
                                   "set output '" output-file-name "'"
                                   )
               gnu-name :in-enc "en_US.UTF-8" :out "en_US.UTF-8")]
-    (println [:s s])
     (:exit s)))
 
-(gnuplot [["plot-1" [ 1.1 2.3 6.5] [10.2 12.3 6.1]]
-          ["plot-2" [ 2.1 3.3 4.5] [10.2 2.3 5.1]]
-          ["plot-3" [ 1.1 4.3 9.5 10.2] [6.2 2.3 7.1 7.5]]]
-         :view true
-         :title "sample plots"
-)
+;; (gnuplot [["plot-1" [ 1.1 2.3 6.5] [10.2 12.3 6.1]]
+;;           ["plot-2" [ 2.1 3.3 4.5] [10.2 2.3 5.1]]
+;;           ["plot-3" [ 1.1 4.3 9.5 10.2] [6.2 2.3 7.1 7.5]]]
+;;          :view true
+;;          :title "sample plots"
+;; )
 
 (defn gnuplot [data-to-plot
                ;; either Seq[[String Seq[Number] Seq[Number]]]
@@ -71,7 +72,6 @@
                                              (reduce min numbers)))))
                                  curves))
         ]
-    (println [:curves curves])
     (assert (member plot-with ["linespoints" "points" "lines"]))
     (assert gnu)
     
@@ -92,8 +92,8 @@
     (write "set xtics font ',10'")
     (write "set ytics font ',10'")
     (if (= "points" plot-with)
-      (doseq [i (count curves)]
-        (write (format "set style line %d pt 7 ps %d" (inc i) point-size))))
+      (doseq [i (range (count curves))]
+        (write (format "set style line %d pt 7 ps %s" (inc i) point-size))))
     
     (write (format "set key %s" key))
     (if (not= "" title)
@@ -126,6 +126,100 @@
     (doseq [terminal terminals
             :let [output-file-name (str output-file-base-name "." terminal)]]
       (run-gnu-plot terminal gnu-name output-file-name)
-      (if verbose
+      (if view
         (view-image output-file-name)))))
-      
+
+(defn histogram [buckets
+                 & {:keys [base-name 
+                           x-label
+                           y-label
+                           title
+                           gnu-file-CB
+                           keep-if
+                           other-label
+                           view]
+                    :or {base-name "histogram"
+                         x-label "x"
+                         y-label "y"
+                         title ""
+                         gnu-file-CB (fn [_str])
+                         other-label "other"
+                         view false}}]
+  (assert (not (str/index-of x-label "\"")))
+  (assert (not (str/index-of y-label "\"")))
+  (assert (not (str/index-of x-label "\\")))
+  (assert (not (str/index-of y-label "\\")))
+  (let [png-file-name (str base-name ".png")
+        gnu-header (cl-format false
+                              "~&~
+                               set boxwidth 0.9 absolute~@
+                               set style fill solid 1.00 border lt -1~@
+                               set style histogram clustered gap 5 title textcolor lt -1~@
+                               set style data histograms~@
+                               set key outside top center horizontal~@
+                               set xtics rotate by -45~@
+                               set grid~@
+                               set xlabel \"~A\"~@
+                               set ylabel \"~A\"~@
+                               set title \"~A\" font ',10'~@
+                               "
+                              x-label
+                              y-label
+                              title)
+        line-1 "plot $MyData using 2:xtic(1) ti col,"
+        lines (for [[i _ign] (rest (map-indexed vector buckets))]
+                (format "   $MyData using %d ti col," (+ 2 i)))
+        gnu-footer (str/join " \\\n" (cons line-1 lines))
+        gnu-file-name (str base-name ".gnu")
+        gnu (io/writer gnu-file-name)
+        write (fn [msg]
+                (.write gnu msg))
+        data (for [[label counts] buckets
+                   :let [_ (println [:counts counts])
+                         fqs (sort-by first (into [] (frequencies counts)))
+                         _ (println [:fqs fqs])
+                         xys (for [[state-count num-samples] fqs
+                                   :when (keep-if state-count)
+                                   :let [percentage (/ (* 100.0 num-samples) (count counts))]]
+                               [[state-count] percentage])
+                         _ (println [:xys xys])
+                         left-over-percent (- 100.0 (reduce + (map second xys)))]]
+               [label (concat (sort-by first xys)
+                              [[[] left-over-percent]])])
+        counts (concat (map (fn [c] [c])
+                            (sort (distinct (for [[label xys] data
+                                                  [col percent] xys
+                                                  c col]
+                                              c))))
+                       [[]])
+        ]
+    (assert gnu (format "cannot open %s" gnu-file-name))
+
+    (write gnu-header)
+    (write "\n\n")
+    (write "$MyData << EOD\n")
+    (write (format "\"%s\"" x-label))
+    (doseq [[label counts] buckets
+            :let [num-samples (count counts)]]
+      (write (format " \"%s samples=%d\"" label num-samples)))
+    (write "\n")
+                 
+    (doseq [sc1 counts
+            :let [label (if (empty? sc1)
+                          other-label
+                          (format "%s" (first sc1)))
+                  percentages (for [[_bucket_label xys] data
+                                    [sc2 percent] xys
+                                    :when (= sc2 sc1)]
+                                (format "%.3f" percent))
+                  text (str/join " " percentages)]]
+      (write (format "\"%s\" %s\n" label text)))
+    (write "EOD\n\n")
+    (write gnu-footer)
+    (write "\n")
+    (.close gnu)
+    (gnu-file-CB gnu-file-name)
+    (run-gnu-plot "png" gnu-file-name png-file-name)
+
+    (if view
+      (view-image png-file-name))))

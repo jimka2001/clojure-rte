@@ -1,10 +1,14 @@
 (ns demos.conj-2025.csv
   (:import [java.time LocalDateTime Duration])
-  (:require [lock :as lock]
-            [clojure.pprint :refer [cl-format]]
+  (:require [clojure.pprint :refer [cl-format]]
+            [clojure.data.csv :as csv]
+            [clojure.java.io :as io]
+            [lock :as lock]
             [xymbolyco :as xym]
             [rte-construct :as rte]
-            [util :refer [with-timeout]]))
+            [util :refer [with-timeout]]            
+            [demos.conj-2025.gen :as gen]
+))
 
 (def statistics-resource "resources/statistics/")
 
@@ -46,3 +50,32 @@
                     duration (.toMillis (Duration/between start end))]
               ]
         (report state-count transition-count min-state-count min-transition-count duration)))))
+
+
+(defn read-csv-lines [algo prefix]
+  (let [csv-file-name (gen/csv algo prefix)
+        keys [:node-count
+              :leaf-count
+              :state-count
+              :transition-count
+              :minimized-state-count
+              :minimized-transition-count
+              :shortest-branch
+              :longest-branch
+              :duration-ms]
+        ]
+    (with-open [reader (io/reader csv-file-name)]
+      (assert reader (format "cannot read from %s" csv-file-name))
+      (doall
+       (for [csv-strings (csv/read-csv reader)
+             :when (not-empty csv-strings)
+             :when (not= \# (first (first csv-strings)))
+             :let [_ (assert (= (count keys) (count csv-strings))
+                             (format "invalid line %s in %s" csv-strings csv-file-name))
+                   csv-line (map Integer/parseInt csv-strings)
+                   parsed (into {} (map-indexed (fn [i k] [k (nth csv-line i)])
+                                                keys))]]
+         parsed)))))
+
+
+    

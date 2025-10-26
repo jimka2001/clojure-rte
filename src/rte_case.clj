@@ -456,13 +456,11 @@
                                  given-clauses)
               ]
           `(let [dfa# (clauses-to-dfa '~pairs)]
-             ;; (dot/dfa-to-dot dfa# :title (gensym "rte") :view true :draw-sink false :dot-file-cb println :png-file-cb println)
              (when *warn-on-unreachable-code*
                (warn-unreachable dfa# '~code-exprs))
              (fn
                ~@(if name (list name) nil) ;; either name or nothing
                [& seq#]
-               ;;(println [:seq seq#])
                
                ;; we must declare fns inside the (fn ...) because
                ;;    the user code might make a recrusive call to `name`
@@ -470,8 +468,6 @@
                (let [fns# ~fns
                      ind# (rte/match dfa# seq# :promise-disjoint true)]
 
-                 ;;(println [:index ind#])
-                 
                  (if ind#
                    ;; get function out of vector fns# and call it
                    (apply (fns# ind#) seq#)
