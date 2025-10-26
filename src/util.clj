@@ -1030,3 +1030,23 @@
     (sh "dot" "-Tplain" dot "-o" alt)
     (sh "dot" "-Tpng" dot "-o" png)
     [a png]))
+
+(defn write-to-string [unary]
+  (let [writer (java.io.StringWriter.)]
+    (unary writer)
+    (.toString writer)))
+
+(defmacro with-output-to-string [var & body]
+  `(write-to-string (fn [~var] ~@body)))
+
+(defmacro with-outstring [w & body]
+  `(with-output-to-string var#
+     (letfn [(~w [msg#]
+               (.write var# msg#))]
+       ~@body)))
+
+
+(with-outstring f
+  (f "hello")
+  (f " ")
+  (f "world\n"))
