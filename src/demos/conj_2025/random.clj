@@ -13,36 +13,40 @@
                                 j (range i (count inhabited-types))
                                 :let [td-2 (nth inhabited-types j)]]
                             (gns/Or td-1 td-2))))
+
 (def inhabited-leaves (concat [:sigma :epsilon]
                               inhabited-types
                               union-types))
 
-(defn tree-split-rte [leaves pivot]
+(defn tree-split-rte [algo leaves pivot]
   {:pre [(fn? pivot) (int? leaves)]
    :post [(rte/valid-rte? %)]}
   (assert (< 0 leaves))
   (if (= 1 leaves)
     (rand-nth inhabited-leaves)
-    (let [left-size (pivot leaves)]
-      (assert (< 0 left-size))
-      (letfn [(left  [] (tree-split-rte left-size pivot))
-              (right [] (tree-split-rte (- leaves left-size) pivot))
-              (mid   [] (tree-split-rte leaves pivot))]
-        (weighted-case 20 (rte/Cat (left) (right))
-                       30 (rte/And (left) (right))
-                       30 (rte/Or (left) (right))
-                       5  (rte/Star (mid))
-                       15 (rte/Not (mid)))))))
+    (let [rte (let [left-size (pivot leaves)]
+                (assert (< 0 left-size))
+                (letfn [(left  [] (tree-split-rte algo left-size pivot))
+                        (right [] (tree-split-rte algo (- leaves left-size) pivot))
+                        (mid   [] (tree-split-rte algo leaves pivot))]
+                  (weighted-case 20 (rte/Cat (left) (right))
+                                 30 (rte/And (left) (right))
+                                 30 (rte/Or (left) (right))
+                                 5  (rte/Star (mid))
+                                 15 (rte/Not (mid)))))
+          leaf-count (rte/count-leaves rte)]
+      ;; (println [:leaves :requested leaves :actual leaf-count])
+      rte)))
 
 
       
 (defn tree-split-rte-linear [leaves]
   {:post [(rte/valid-rte? %)]}
-  (tree-split-rte leaves (fn [n] (max 1 (rand-int n)))))
+  (tree-split-rte "tree-split-linear" leaves (fn [n] (max 1 (rand-int n)))))
 
 (defn tree-split-rte-gaussian [leaves]
   {:post [(rte/valid-rte? %)]}
-  (tree-split-rte leaves (fn [n]
+  (tree-split-rte "tree-split-gauss" leaves (fn [n]
                            (case n
                              (1 2 3)
                              1
@@ -54,14 +58,15 @@
 
 (defn tree-split-rte-inv-gaussian [leaves]
   {:post [(rte/valid-rte? %)]}
-  (tree-split-rte leaves (fn [n]
+  (tree-split-rte "tree-split-inv-gauss"
+                  leaves (fn [n]
                            (let [r (max 1 (rand-int (quot n 2)))]
                              (if (= 0 (rand-int 2))
                                r
                                (- n r))))))
 
 (defn comb-rte [leaves]
-  (tree-split-rte leaves (fn [n]
+  (tree-split-rte "comb" leaves (fn [n]
                            (case n
                              (1 2 3)
                              1
@@ -93,6 +98,10 @@
                                    33 (rte/And (to-rte left) (to-rte right))))))]
     
     (let [skeleton (reduce (fn [acc item]
-                             (insert acc item)) nil (shuffle (range (dec leaves))))]
-      (to-rte skeleton))))
+                             (insert acc item)) nil (shuffle (range (dec leaves))))
+          rte (to-rte skeleton)
+          leaf-count (rte/count-leaves rte)]
+      
+      ;; (println [:flajolet :leaves :requested leaves :actual leaf-count])
+      rte)))
             

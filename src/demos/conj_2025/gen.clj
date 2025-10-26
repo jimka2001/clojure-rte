@@ -7,6 +7,7 @@
                                    flajolet-rte-by-size
                                    comb-rte]]
    [dot]
+   [lock]
    [genus :as gns]
    [rte-construct :as rte]
    [rte-graphviz :refer [rte-view]]
@@ -39,10 +40,14 @@
           :let [size (+ min-leaf (rand-int (- max-leaf min-leaf)))
                 futures (for [q (range lot)]
                           (future (do
-                                    (println [algo size r q])
+                                    (lock/with-lock
+                                      (println [:future :algo algo 
+                                                :leaves size
+                                                :rep (/ r num-repetitions)
+                                                :iteration (/ q lot)]))
                                     (write-csv-statistic (fn [] ((gen-rte algo) size))
-                                                       algo
-                                                       (csv algo prefix)))))]
+                                                         algo
+                                                         (csv algo prefix)))))]
           ]
     (doall (map deref futures))))
 

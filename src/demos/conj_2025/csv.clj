@@ -8,19 +8,20 @@
 
 (def statistics-resource "resources/statistics/")
 
+
 (defn write-csv-statistic [gen-rte prefix csv-file-name]
   (let [rte (gen-rte)
         leaf-count (rte/count-leaves rte)
         node-count (+ leaf-count (rte/count-internal-nodes rte))
         shortest (rte/measure-shortest-branch rte)
         longest (rte/measure-longest-branch rte)
-        time-out-sec (max 5000 (* 4000 longest longest))
+        time-out-sec (max 60 (* 10 longest longest))
         start (LocalDateTime/now)]
     (letfn [(report [state-count transition-count min-state-count min-transition-count duration-ms]
-              (lock/merge-file (str statistics-resource csv-file-name)
+              (lock/merge-file csv-file-name
                                (fn [out-file]
                                  (cl-format out-file "~D,~D," node-count leaf-count)
-                                 (for [s [state-count transition-count min-state-count min-transition-count]]
+                                 (doseq [s [state-count transition-count min-state-count min-transition-count]]
                                    (if s
                                      (cl-format out-file "~D," s)
                                      (cl-format out-file "-1,")))

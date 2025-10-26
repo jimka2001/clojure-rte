@@ -21,12 +21,16 @@ simple: deps
 	clj -M -m demos.conj-2025.cli comb 1
 	clj -M -m demos.conj-2025.cli flajolet 1
 
+test: deps
+	clj -M -m demos.conj-2025.cli tree-split-gauss 1
+
+
 loop:
 	for i in $$(seq 1 10); do \
-		clj -M -m clojureconj-cli tree-split-gauss 1 ; \
-		clj -M -m clojureconj-cli tree-split-inv-gauss 1 ; \
-		clj -M -m clojureconj-cli tree-split-linear 1 ; \
-		clj -M -m clojureconj-cli comb 1 ; \
-		clj -M -m clojureconj-cli flajolet 1 ; \
+		clj -M -m demos.conj-2025.cli tree-split-gauss 10 ; \
+		clj -M -m demos.conj-2025.cli tree-split-inv-gauss 10 ; \
+		clj -M -m demos.conj-2025.cli tree-split-linear 10 ; \
+		clj -M -m demos.conj-2025.cli comb 10 ; \
+		clj -M -m demos.conj-2025.cli flajolet 10 ; \
 	done
 

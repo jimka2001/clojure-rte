@@ -3,6 +3,7 @@
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
             [clojure.data.csv :as csv]
+            [clojure.pprint :refer [pprint]]
             [vega-plot :as vega]
             [util :refer [call-in-block with-timeout read-csv-data rename-columns]]
             )
@@ -33,15 +34,21 @@
   two different processes because the manipulation of the resource file is managed
   by `util/call-in-block`"
   [csv-file-name write-record]
-  (let [tmp-1 (str statistics-resource (random-uuid) "~")
-        tmp-2 (str statistics-resource (random-uuid) "~")]
+  (let [tmp-1 (str statistics-resource "lock-1-" (random-uuid) "~")
+        tmp-2 (str statistics-resource "lock-2-" (random-uuid) "~")]
     (with-open [out-file (java.io.FileWriter. tmp-1 true)]
       (write-record out-file))
     (with-lock
       ;; open the csv file in append mode, i.e., write to the end
-      (sh "sort" "-t," "-k1,3n" "-m" tmp-1 csv-file-name "-o" tmp-2)
-      (sh "mv" tmp-2 csv-file-name))
-    (sh "trash" tmp-1)))
+      (doseq [cmd [["touch" csv-file-name]
+                   ["sort" "-t," "-k1,3n" "-m" tmp-1 csv-file-name "-o" tmp-2]
+                   ["mv" tmp-2 csv-file-name]
+                   ["trash" tmp-1]]
+              :let [s (apply sh cmd)]
+              :when (not= 0 (:exit s))]
+        (do
+          (println cmd)
+          (pprint s))))))
 
 
 (defn slurp-csv-data

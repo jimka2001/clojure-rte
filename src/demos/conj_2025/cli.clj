@@ -5,8 +5,8 @@
   (gen-csv-by-size repetitions algo
                      "" ;; prefix
                      2 ;; lot
-                     (bit-shift-left 1 5) ;; min-leaf
-                     (bit-shift-left 1 6) ;; max-leaf
+                     (bit-shift-left 1 4) ;; min-leaf
+                     (bit-shift-left 1 5) ;; max-leaf
 
                      ))
 
