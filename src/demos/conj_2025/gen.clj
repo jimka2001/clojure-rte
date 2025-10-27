@@ -1,6 +1,6 @@
 (ns demos.conj-2025.gen
   (:require 
-   [demos.conj-2025.csv :refer [statistics-resource write-csv-statistic]]
+   [demos.conj-2025.csv :refer [statistics-resource write-csv-statistic csv-file-name]]
    [demos.conj-2025.random :refer [tree-split-rte-linear
                                    tree-split-rte-gaussian
                                    tree-split-rte-inv-gaussian
@@ -20,8 +20,7 @@
             "flajolet"
             "comb"])
 
-(defn csv [algo prefix]
-  (str statistics-resource prefix algo ".csv"))
+
 
 (def gen-rte {"tree-split-linear" tree-split-rte-linear
               "tree-split-gauss"  tree-split-rte-gaussian
@@ -47,7 +46,7 @@
                                                 :iteration (/ q lot)]))
                                     (write-csv-statistic (fn [] ((gen-rte algo) size))
                                                          algo
-                                                         (csv algo prefix)))))]
+                                                         (csv-file-name algo prefix)))))]
           ]
     (doall (map deref futures))))
 

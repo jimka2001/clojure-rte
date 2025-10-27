@@ -1,0 +1,72 @@
+digraph G {
+  fontname=courier;
+  rankdir=TB; graph[labeljust=l,nojustify=true]
+  node [fontname=Arial, fontsize=25];
+  edge [fontsize=20];
+R0 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R1 [label="Cat", style=filled, fillcolor=lightgreen, shape=rect]
+R2 [label="Cat", style=filled, fillcolor=lightgreen, shape=rect]
+R3 [label="Cat", style=filled, fillcolor=lightgreen, shape=rect]
+R4 [label="t2", style=filled, fillcolor=lightgreen, shape=rect]
+R5 [label="t3", style=filled, fillcolor=lightgreen, shape=rect]
+R6 [label="Cat", style=filled, fillcolor=lightgreen, shape=rect]
+R7 [label="t4", style=filled, fillcolor=lightgreen, shape=rect]
+R8 [label="t5", style=filled, fillcolor=lightgreen, shape=rect]
+R9 [label="*", style=filled, fillcolor=lightgreen, shape=rect]
+R10 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R11 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R12 [label="Cat", style=filled, fillcolor=lightgreen, shape=rect]
+R13 [label="t6", style=filled, fillcolor=lightgreen, shape=rect]
+R14 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R15 [label="Cat", style=filled, fillcolor=lightgreen, shape=rect]
+R16 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R17 [label="t7", style=filled, fillcolor=lightgreen, shape=rect]
+R18 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R19 [label="t8", style=filled, fillcolor=lightgreen, shape=rect]
+R20 [label="*", style=filled, fillcolor=lightgreen, shape=rect]
+R21 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R22 [label="&#931;", style=filled, fillcolor=lightgreen, shape=rect]
+R23 [label="t9", style=filled, fillcolor=lightgreen, shape=rect]
+R24 [label="t10", style=filled, fillcolor=lightgreen, shape=rect]
+R25 [label="t11", style=filled, fillcolor=lightgreen, shape=rect]
+R26 [label="t12", style=filled, fillcolor=lightgreen, shape=rect]
+R27 [label="t13", style=filled, fillcolor=lightgreen, shape=rect]
+R28 [label="And", style=filled, fillcolor=lightgreen, shape=rect]
+R29 [label="Or", style=filled, fillcolor=lightgreen, shape=rect]
+R30 [label="t14", style=filled, fillcolor=lightgreen, shape=rect]
+R31 [label="t15", style=filled, fillcolor=lightgreen, shape=rect]
+R0 -> R1
+R0 -> R2
+R1 -> R3
+R1 -> R4
+R2 -> R5
+R2 -> R6
+R3 -> R7
+R3 -> R8
+R6 -> R9
+R6 -> R10
+R9 -> R11
+R10 -> R12
+R10 -> R13
+R11 -> R14
+R11 -> R15
+R12 -> R16
+R12 -> R17
+R14 -> R18
+R14 -> R19
+R15 -> R20
+R15 -> R21
+R16 -> R22
+R16 -> R23
+R18 -> R24
+R18 -> R25
+R20 -> R26
+R21 -> R27
+R21 -> R28
+R28 -> R23
+R28 -> R29
+R29 -> R30
+R29 -> R31
+  labelloc="t";
+  label="balanced"
+}

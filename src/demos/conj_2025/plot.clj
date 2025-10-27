@@ -65,7 +65,7 @@
               :grid true
               :plot-with "points"
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%s-aspect-ratio" prefix))
+              :gnu-file-CB (plot-cb (format "plot-%sretention-aspect-ratio" prefix))
               :view view)
      (gnuplot descrs
               :title (format "Retention: Ratio node count per state count %s" prefix)
@@ -75,12 +75,12 @@
               :grid true
               :plot-with "lines"
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%s-aspect-ratio-ratsnest" prefix))
+              :gnu-file-CB (plot-cb (format "plot-%sretention-aspect-ratio-ratsnest" prefix))
               :view view))))
 
 
 
-;; (plot-retention "" true)
+(plot-retention "" true)
                   
 (defn plot-dfa-count-vs-aspect-ratio
   ([] (plot-dfa-count-vs-aspect-ratio "" true))
@@ -115,14 +115,51 @@
               :view view))))
 
 
-(plot-dfa-count-vs-aspect-ratio "" true)
+;;(plot-dfa-count-vs-aspect-ratio "" true)
+
+(defn gen-threshold-curve [csv-lines]
+  (let [num-samples (count csv-lines)
+        state-count-to-dfa-count (map (fn [[state-count lines-per-count]]
+                                        [state-count (count lines-per-count)])
+                                      (group-by :state-count csv-lines))
+        _ (println [:state-count-to-dfa-count state-count-to-dfa-count])
+        xys (for [[this-state-count _list] state-count-to-dfa-count
+                  :let [n (reduce + (for [[state-count num-lines] state-count-to-dfa-count
+                                          :when (>= state-count this-state-count)]
+                                      num-lines))]]
+              [this-state-count (* 100.0 (/ n num-samples))])]
+    (sort-by first xys)))
+
+(defn plot-threshold
+  ([] (plot-threshold "" true))
+  ([prefix view]
+   (let [descrs (for [algo algos
+                      :let [csv-lines (read-csv-lines algo prefix)
+                            xys (gen-threshold-curve csv-lines)]]
+                  [(format "%s samples=" algo (count csv-lines))
+                   xys])]
+     (gnuplot descrs
+              :title (format "Fraction of DFAs larger than given state count %s" prefix)
+              :x-axis "DFA state count"
+              :x-log true
+              :y-axis "Percentage"
+              :plot-with "lines"
+              :y-log true
+              :point-size 0.2
+              :gnu-file-CB (plot-cb (format "plot-%sthreshold" prefix))
+              :grid true
+              :view view))))
+
+;; (plot-threshold)
+
+(plot-retention)
 
 (defn -main [& argv]
   (let [view false]
     (plot-histogram "" view)
     (plot-retention "" view)
     (plot-dfa-count-vs-aspect-ratio "" view)
-    
+    (plot-threshold "" view)
     (System/exit 0)
     ))
 

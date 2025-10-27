@@ -1,0 +1,10 @@
+digraph G {
+  fontname=courier;
+  rankdir=TB; graph[labeljust=l,nojustify=true]
+  node [fontname=Arial, fontsize=25];
+  edge [fontsize=20];
+
+N4 [label="4"]
+N5 [label="5"]
+N5 -> N4
+}

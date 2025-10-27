@@ -1,0 +1,18 @@
+\begin{lstlisting}[style=scalaioScala,numbers=none]
+def genRte(depth: Int): Rte = {
+ val terms= Seq(Sigma,EmptySeq,EmptySet)
+ def rte = genRte(depth-1)
+ val generators: = Seq(
+      () => randomChoice(terms),
+      () => Singleton(genType()),
+      () => Or(rte(), rte()),
+      () => And(rte(), rte()),
+      () => Cat(rte()),
+      () => Star(rte()),
+      () => Not(rte()))
+
+ if (depth <= 0)
+   Singleton(genType())
+ else
+   randomChoice(generators)()}
+\end{lstlisting}

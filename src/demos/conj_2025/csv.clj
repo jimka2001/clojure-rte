@@ -7,11 +7,12 @@
             [xymbolyco :as xym]
             [rte-construct :as rte]
             [util :refer [with-timeout]]            
-            [demos.conj-2025.gen :as gen]
 ))
 
 (def statistics-resource "resources/statistics/")
 
+(defn csv-file-name [algo prefix]
+  (str statistics-resource prefix algo ".csv"))
 
 (defn write-csv-statistic [gen-rte prefix csv-file-name]
   (let [rte (gen-rte)
@@ -53,7 +54,7 @@
 
 
 (defn read-csv-lines [algo prefix]
-  (let [csv-file-name (gen/csv algo prefix)
+  (let [csv-file-name (csv-file-name algo prefix)
         keys [:node-count
               :leaf-count
               :state-count

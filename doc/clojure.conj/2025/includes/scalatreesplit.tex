@@ -1,0 +1,19 @@
+\begin{lstlisting}[style=scalaioScala]
+// lopsided comb
+def treeCombRte(leaves:Int):Rte =
+  treeSplitRte(leaves, (n) => {
+    if (n == 2 || n == 3) 1
+    else                  2  })
+
+// linear split
+def treeSplitLinear(leaves:Int):Rte =
+  treeSplitRte(leaves, (n) => between(1, n))
+
+// Gaussian split
+def treeSplitGaussian(leaves:Int):Rte =   
+  treeSplitRte(leaves, (n)=> between(1, n/2) + between(1, n/2))
+
+// inverse Gaussian split
+def treeSplitInvGaussian(leaves:Int):Rte =   
+  treeSplitRte(leaves, (n) => invertedGaussian(1, n))
+\end{lstlisting}

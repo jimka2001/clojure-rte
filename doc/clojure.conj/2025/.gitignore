@@ -4,6 +4,9 @@
 *.snm
 *.sta
 *.toc
+*.aux
+*.fls
+*.fdb_latexmk
 *~
 newton.2025.clojureconj.slides.pdf
 includes/balanced-rte.pdf

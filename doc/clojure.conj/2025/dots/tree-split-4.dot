@@ -1,0 +1,42 @@
+digraph G {
+  fontname=courier;
+  rankdir=TB; graph[labeljust=l,nojustify=true]
+  node [fontname=Arial, fontsize=25];
+  edge [fontsize=20];
+N0 [label="10"]
+N_1_1 [label="3"]
+N_1_2 [label="7"]
+
+N_2_1 [label="1"]
+N_2_2 [label="2"]
+N_1_1 -> N_2_1
+N_1_1 -> N_2_2
+
+N0 -> N_1_1
+N0 -> N_1_2
+
+N_2_3 [label="2"]
+N_2_4 [label="5"]
+
+N_1_2 -> N_2_3
+N_1_2 -> N_2_4
+
+N_3_1 [label="1"]
+N_3_2 [label="1"]
+
+N_2_2 -> N_3_1
+N_2_2 -> N_3_2
+
+N_3_3 [label="1"]
+N_3_4 [label="1"]
+
+N_2_3 -> N_3_3
+N_2_3 -> N_3_4
+
+N_3_5 [label="3"]
+N_3_6 [label="2"]
+
+N_2_4 -> N_3_5
+N_2_4 -> N_3_6
+
+}
