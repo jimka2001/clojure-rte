@@ -77,16 +77,51 @@
               :point-size 0.2
               :gnu-file-CB (plot-cb (format "plot-%s-aspect-ratio-ratsnest" prefix))
               :view view))))
-                      
+
+
 
 ;; (plot-retention "" true)
                   
+(defn plot-dfa-count-vs-aspect-ratio
+  ([] (plot-dfa-count-vs-aspect-ratio "" true))
+  ([prefix view]
+   (let [descrs (for [algo algos
+                      :let [csv-lines (read-csv-lines algo prefix)
+                            num-samples (count csv-lines)
+                            xys (for [cl csv-lines]
+                                  [(imb cl) (:state-count cl)])]]
+                  [(format "%s %d samples" algo num-samples)
+                   (shuffle xys)])]
+     (gnuplot descrs
+              :title (format "DFA state count %s vs Aspect Ratio" prefix)
+              :x-axis "aspect ratio"
+              :y-axis "DFA state count"
+              :plot-with "points"
+              :y-log true
+              :point-size 0.2
+              :gnu-file-CB (plot-cb (format "plot-%sdfa-state-count-vs-aspect-ratio" prefix))
+              :grid true
+              :view view)
+     (gnuplot descrs
+              :title (format "DFA state count %s vs Aspect Ratio" prefix)
+              :x-axis "aspect ratio"
+              :y-axis "DFA state count"
+              :plot-with "lines"
+              :y-log true
+              :point-size 0.2
+              :gnu-file-CB (plot-cb (format "plot-%sdfa-state-count-vs-aspect-ratio-ratsnest"
+                                            prefix))
+              :grid true
+              :view view))))
 
+
+(plot-dfa-count-vs-aspect-ratio "" true)
 
 (defn -main [& argv]
   (let [view false]
     (plot-histogram "" view)
     (plot-retention "" view)
+    (plot-dfa-count-vs-aspect-ratio "" view)
     
     (System/exit 0)
     ))

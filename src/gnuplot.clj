@@ -29,29 +29,29 @@
                ;; either Seq[[String Seq[Number] Seq[Number]]]
                ;; or     Seq[[String Seq[[Number Number]]]
                & {:keys [terminals title comment x-axis-label x-log y-axis-label y-log grid
-                                      output-file-base-name
-                                      plot-with
-                                      point-size
-                                      key
-                                      gnu-file-CB
-                                      verbose
-                                      view]
-                               :as gdp
-                               :or {terminals #{"png"}
-                                    title ""
-                                    comment ""
-                                    x-axis-label ""
-                                    x-log false
-                                    y-axis-label ""
-                                    y-log false
-                                    grid false
-                                    output-file-base-name "curves"
-                                    plot-with "linespoints"
-                                    point-size 0.8
-                                    key "horizontal bmargin"
-                                    gnu-file-CB (fn [_str])
-                                    verbose false
-                                    view false}}]
+                         output-file-base-name
+                         plot-with
+                         point-size
+                         key
+                         gnu-file-CB
+                         verbose
+                         view]
+                  :as gdp
+                  :or {terminals #{"png"}
+                       title ""
+                       comment ""
+                       x-axis-label ""
+                       x-log false
+                       y-axis-label ""
+                       y-log false
+                       grid false
+                       output-file-base-name "curves"
+                       plot-with "linespoints"
+                       point-size 0.8
+                       key "horizontal bmargin"
+                       gnu-file-CB (fn [_str])
+                       verbose false
+                       view false}}]
   (let [curves (for [data data-to-plot] ;;  convert data-t-plot to the form Seq[(String,Seq[Double],Seq[Double])]
                  (if (= 2 (count data))
                    ;; [string [[x,y],[x,y],[x,y]...]]
