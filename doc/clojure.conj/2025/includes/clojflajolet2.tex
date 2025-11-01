@@ -1,0 +1,21 @@
+\begin{lstlisting}[style=conjClojure]
+(defn flajolet-rte-by-size [leaves]
+  {:post [(rte/valid-rte? %)]}
+  (letfn [(insert [tree d]
+            ...)
+          (to-rte [tree]
+            (cond (> (random) 0.9) ;; 90%
+                  (weighted-case 50 (list :not (to-rte tree))
+                                   50 (list :* (to-rte tree)))
+                  
+                  (empty? tree)
+                  (rand-nth inhabited-leaves)
+
+                  :else
+                  (let [[_ left right] tree]
+                    (weighted-case 34 (list :cat (to-rte left) (to-rte right))
+                                    33 (list :or  (to-rte left) (to-rte right))
+                                    33 (list :and (to-rte left) (to-rte right))))))]
+    (let [skeleton ...]
+      (to-rte skeleton))))
+\end{lstlisting}

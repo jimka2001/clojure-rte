@@ -1,0 +1,18 @@
+\begin{lstlisting}[style=conjClojure]
+(defn flajolet-rte-by-size [leaves]
+  {:post [(rte/valid-rte? %)]}
+  (letfn [(insert [tree d]
+            (if (empty? tree)
+              [d nil nil]
+              (let [[n left right] tree]
+                (if (< d n)
+                  [n (insert left d) right]
+                  [n left (insert right d)]))))
+          (to-rte [tree]
+            ...)]
+    
+    (let [skeleton (reduce insert
+                              nil (shuffle (range (dec leaves))))]
+      
+      ...)))
+\end{lstlisting}

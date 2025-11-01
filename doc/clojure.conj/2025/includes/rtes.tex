@@ -70,6 +70,20 @@
   \end{minipage}
 \end{lrbox}
 
+\newsavebox\exnoteexpand
+\begin{lrbox}{\exnoteexpand}
+  \begin{minipage}{7cm}
+    \input{exnoteexpand}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\excoreint
+\begin{lrbox}{\excoreint}
+  \begin{minipage}{7cm}
+    \input{excoreint}
+  \end{minipage}
+\end{lrbox}
+
 
 
 
@@ -93,5 +107,22 @@
 \end{frame}
 
 
-
+\begin{frame}{Inlining}
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+  \begin{itemize}
+  \item Clojure notation: AST\\
+    \usebox\exnotebox
+  \item Clojure Core\\
+    \usebox\excoreint
+  \item Inlined\\
+    \usebox\exnoteexpand
+  \end{itemize}
+    \end{column}%
+    \begin{column}{0.45\textwidth}
+      \scalebox{0.8}{\input{strex-clojure-satisfies}}
+    \end{column}%
+  \end{columns}
+  
+\end{frame}
 

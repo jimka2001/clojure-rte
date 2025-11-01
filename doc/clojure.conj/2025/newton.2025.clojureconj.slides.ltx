@@ -247,7 +247,7 @@ CONCRETELY: uniformly sample Finite Automata by:
 \begin{frame}{Requirements}
   \begin{itemize}
 
-  \item If we want to generate \emph{large} DFAs, we necessarily \textcolor{gold}{should} generate \emph{large} RTE (AST).
+  \item If we want \emph{large} DFAs, we necessarily \textcolor{gold}{should} generate \emph{large} RTE (AST).
 
   \item However, this is not sufficient.  Many large RTEs generate small/trivial DFAs.
 
@@ -287,7 +287,7 @@ CONCRETELY: uniformly sample Finite Automata by:
         \item Gaussian
         \item Inverse Gaussian
         \item Linear
-        \item Lopsided Comb (\emph{de guingois, traviole})
+        \item Lopsided Comb
         \end{itemize}
       }
     \end{column}
@@ -296,24 +296,34 @@ CONCRETELY: uniformly sample Finite Automata by:
 
 
 
-\newsavebox\scalatreesplitcore
-\begin{lrbox}{\scalatreesplitcore}
+\newsavebox\clojtreesplitcore
+\begin{lrbox}{\clojtreesplitcore}
   \begin{minipage}{15cm}
-    \input{scalatreesplitcore}
+    \input{clojtreesplitcore}
   \end{minipage}
 \end{lrbox}
-\begin{frame}{Rte Tree-Split Generator}
-  \usebox\scalatreesplitcore
+\begin{frame}{RTE Tree-Split Generator}
+  \usebox\clojtreesplitcore
 \end{frame}
 
-\newsavebox\scalatreesplit
-\begin{lrbox}{\scalatreesplit}
+\newsavebox\clojtreesplit
+\begin{lrbox}{\clojtreesplit}
   \begin{minipage}{15cm}
-    \input{scalatreesplit}
+    \input{clojtreesplit}
   \end{minipage}
 \end{lrbox}
-\begin{frame}{Rte Tree-Split 4-variants}
-  \usebox\scalatreesplit
+\newsavebox\clojtreesplittwo
+\begin{lrbox}{\clojtreesplittwo}
+  \begin{minipage}{15cm}
+    \input{clojtreesplit2}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\begin{frame}{RTE Tree-Split 4-variants}
+  \only<1>{\usebox\clojtreesplit}%
+  \only<2>{\usebox\clojtreesplittwo}
 \end{frame}
 
 \begin{frame}{Flajolet Algorithm}{Generate a Skeleton}
@@ -340,14 +350,21 @@ CONCRETELY: uniformly sample Finite Automata by:
 
 
 
-\newsavebox\scalaflajolet
-\begin{lrbox}{\scalaflajolet}
+\newsavebox\clojflajolet
+\begin{lrbox}{\clojflajolet}
   \begin{minipage}{15cm}
-    \input{scalaflajolet}
+    \input{clojflajolet}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\clojflajolettwo
+\begin{lrbox}{\clojflajolettwo}
+  \begin{minipage}{15cm}
+    \input{clojflajolet2}
   \end{minipage}
 \end{lrbox}
 \begin{frame}{RTE Flajolet Generator}
-  \usebox\scalaflajolet
+  \only<1>{\usebox\clojflajolet}
+  \only<2>{\usebox\clojflajolettwo}
 \end{frame}
 
 
