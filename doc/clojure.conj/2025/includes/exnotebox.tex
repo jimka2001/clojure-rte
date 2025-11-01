@@ -1,8 +1,6 @@
 %% dont re-indent this file
-\begin{lstlisting}[style=scalaioScala]
-val I:Rte = Atomic(classOf[Int])
-val F:Rte = Atomic(classOf[Float])
-val D:Rte = Atomic(classOf[Double])
-
-val re:Rte = (I ++ (D | F).+ ).*
+\begin{lstlisting}[style=conjClojure]
+(:* (:cat (satisfies int?)
+          (:+ (:or (satisfies float?)
+                   (satisfies rational?)))))
 \end{lstlisting}
