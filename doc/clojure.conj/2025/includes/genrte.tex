@@ -1,15 +1,19 @@
 \begin{lstlisting}[style=conjClojure,numbers=none]
-(def rte-keys '(:sigma :empty-set :epsilon
-                  :type :cat :* :and :or :not))
+(def rte-keys [:sigma :empty-set :epsilon
+               :type :cat :* :and :or :not])
 
 (defn gen-rte [key depth types]
-  (let (g (fn [] (gen-rte (rand-nth rte-keys) 
-                            (dec depth) types))]
+  (letfn [(g [] (gen-rte (rand-nth rte-keys) 
+                         (dec depth)
+                         types))]
     (case key
       (:type) (rand-nth types)
+
       (:sigma :empty-set :epsilon) key
+
       (:and :or :cat)
-        (list key (g) (g)
+        (list key (g) (g))
+
       (:* :not)
-        (list key (g))))))
+        (list key (g)))))
 \end{lstlisting}

@@ -65,14 +65,14 @@
 % use this box via:    \usebox\exnotebox
 \newsavebox\exnotebox
 \begin{lrbox}{\exnotebox}
-  \begin{minipage}{7cm}
+  \begin{minipage}{8.5cm}
     \input{exnotebox}
   \end{minipage}
 \end{lrbox}
 
 \newsavebox\exnoteexpand
 \begin{lrbox}{\exnoteexpand}
-  \begin{minipage}{7cm}
+  \begin{minipage}{8.5cm}
     \input{exnoteexpand}
   \end{minipage}
 \end{lrbox}
@@ -107,9 +107,9 @@
 \end{frame}
 
 
-\begin{frame}{Inlining}
+\begin{frame}{Inlining: thanks \code{clojure.repl.source-fn}}
   \begin{columns}
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.6\textwidth}
   \begin{itemize}
   \item Clojure notation: AST\\
     \usebox\exnotebox
@@ -119,7 +119,7 @@
     \usebox\exnoteexpand
   \end{itemize}
     \end{column}%
-    \begin{column}{0.45\textwidth}
+    \begin{column}{0.4\textwidth}
       \scalebox{0.8}{\input{strex-clojure-satisfies}}
     \end{column}%
   \end{columns}
