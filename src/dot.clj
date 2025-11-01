@@ -29,7 +29,7 @@
             [cl-compat :as cl]
             [view :as view]
             [xymbolyco :as xym]
-            [util :refer [member]]
+            [util :refer [member pprint-indent]]
             [clojure.java.shell :refer [sh]]))
 
 (def ^:dynamic *dot-path*
@@ -175,6 +175,10 @@
           all-final-true (every? (fn [q] (= true (xym/exit-value dfa q)))
                                  accepting-states)]
 
+      (doseq [[td idx] abbrevs]
+        (printf "t%d= "idx)
+        (pprint-indent td :indent "     "))
+              
       ;; print here
       (if (not state-legend)
         (for [q visible-states

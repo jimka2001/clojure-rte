@@ -25,6 +25,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.shell :refer [sh]]
             [clojure.set :refer [rename-keys]]
+            [clojure.pprint :refer [pprint cl-format]]
             [clojure.string :refer [trim]]
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
@@ -1045,8 +1046,16 @@
                (.write var# msg#))]
        ~@body)))
 
+(defn pprint-indent [data & {:keys [indent right-margin]
+                             :or {indent "   "
+                                  right-margin 60
+                                  }}]
 
-(with-outstring f
-  (f "hello")
-  (f " ")
-  (f "world\n"))
+  (cl-format true "~A~%"
+             (binding [clojure.pprint/*print-right-margin* right-margin]
+               (clojure.string/replace
+                (clojure.string/trim-newline (with-out-str
+                                               (pprint data *out*)))
+                "\n" ; search
+                (str "\n" indent) ;; replace
+                ))))

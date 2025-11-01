@@ -18,4 +18,4 @@
     (System/exit 0)
     ))
 
-;; (test-main "comb-rte" 1)
+;;(test-main "comb" 1)

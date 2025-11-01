@@ -57,4 +57,7 @@
                 dfa (rte/rte-to-dfa rte)]]
     (dot/dfa-view dfa algo)))
     
-;;(sample-view 28)
+;; (sample-view 28)
+
+
+    

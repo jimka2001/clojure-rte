@@ -80,7 +80,7 @@
 
 
 
-(plot-retention "" true)
+;; (plot-retention)
                   
 (defn plot-dfa-count-vs-aspect-ratio
   ([] (plot-dfa-count-vs-aspect-ratio "" true))
@@ -152,7 +152,7 @@
 
 ;; (plot-threshold)
 
-(plot-retention)
+;; (plot-retention)
 
 (defn -main [& argv]
   (let [view false]

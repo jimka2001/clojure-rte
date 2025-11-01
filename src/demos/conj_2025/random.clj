@@ -102,6 +102,5 @@
           rte (to-rte skeleton)
           leaf-count (rte/count-leaves rte)]
       
-      ;; (println [:flajolet :leaves :requested leaves :actual leaf-count])
       rte)))
             
