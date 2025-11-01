@@ -13,17 +13,17 @@
     \tikzstyle{level 2}=[sibling distance=20mm]
     \tikzstyle{level 3}=[sibling distance=10mm]
   \node [bottom color=orange!20] {Rte}
-    child { node [bottom color=orange!20] {RteNode}
+    child { node [bottom color=orange!20] {Operator}
       child { node [bottom color=orange!20] {Combination} 
-        child { node {And} }
-        child { node {Or} } }
+        child { node {:and} }
+        child { node {:or} } }
       child { node {Star} }
-      child { node [right=-10mm] {Not} }
-      child { node [right=-15mm] {Cat} } }
-    child { node [bottom color=orange!20] {RteTerminal}
-      child { node [text height=20pt, right=-10mm, top color=white, bottom color=red!20] {Singleton\\SimpleTypeD} }
-      child { node [right=-3mm] {Sigma} }
-      child { node [right=-5mm] {EmptySet} }
-      child { node [right=-3mm] {EmptySeq} } } ;
+      child { node [right=-10mm] {:not} }
+      child { node [right=-15mm] {:cat} } }
+    child { node [bottom color=orange!20] {Terminal}
+      child { node [text height=20pt, right=-10mm, top color=white, bottom color=red!20] {Singleton\\type} }
+      child { node [right=-3mm] {:sigma} }
+      child { node [right=-5mm] {:empty-set} }
+      child { node [right=-3mm] {:epsilon} } } ;
 \end{tikzpicture}
 \end{document}

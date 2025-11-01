@@ -1,5 +1,6 @@
-\begin{frame}[t]{RTE Matching}{How does a pattern predicate work?}
-  \only<1-2,18>{\tt \textcolor{blue}{[13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}\\}%
+\begin{frame}[t]{Example: How does a pattern predicate work?}
+  \only<1-17>{sequence=}%
+  \only<1-2>{\tt \textcolor{blue}{[13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}}%
   \only<3>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
   \only<4>{\tt [\colorbox{orange!30}{\Large 13} 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
   \only<5>{\tt [13 \colorbox{orange!30}{\Large 2.0} 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
@@ -15,41 +16,53 @@
   \only<15>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 \colorbox{orange!30}{\Large 7} 8.0]}%
   \only<16>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 \colorbox{orange!30}{\Large 8.0}]}%
   \only<17>{\tt [13 2.0 6.0 4 "a" "an" "the" -5 2.0 3.0 4.0 7 8.0]}%
-  \only<1-2>{ Does the sequence follow the pattern? \textcolor{greeny}{${(Int \cdot ( Double^{+} ~\vee String^{+}))^{+}}$}}%
-  \only<3-17>{\vspace{\fill}
-    \null
-    \vfill}
-   \begin{columns}
-    \begin{column}{0.4\textwidth}
-      \only<2>{We \textcolor{blue}{construct~a \Emph{deterministic} finite automaton} (DFA).}%
-      \only<3-16>{\textcolor{greeny}{\LARGE ${(Int \cdot ( Double^{+} ~\vee String^{+}))^{+}}$}}\\[2cm]%
-      \only<3-16>{\textcolor{orange}{\LARGE Does it match?}}%
-      \only<17>{\textcolor{greeny}{\LARGE Yes, it's a match!}}%
-      \only<18>{\textcolor{blue}{\includegraphics[height=3.cm]{exploding-head}\\Decision procedure is $O(n)$, \Emph{independent of syntactical complexity} of the RTE.}}
-    \end{column}
-    \begin{column}{0.6\textwidth}
-      \only<2>{\scalebox{0.85}{\input{fig-3}}}%
-      \only<3>{\scalebox{0.95}{\input{fig-3-0}}}%
-      \only<4>{\scalebox{0.95}{\input{fig-3-0-int}}}%
-      \only<5>{\scalebox{0.95}{\input{fig-3-1-double}}}%
-      \only<6>{\scalebox{0.95}{\input{fig-3-2-double}}}%
-      \only<7>{\scalebox{0.95}{\input{fig-3-2-int}}}%
-      \only<8>{\scalebox{0.95}{\input{fig-3-1-String}}}%
-      \only<9>{\scalebox{0.95}{\input{fig-3-3-String}}}%
-      \only<10>{\scalebox{0.95}{\input{fig-3-3-String}}}%
-      \only<11>{\scalebox{0.95}{\input{fig-3-3-int}}}%
-      \only<12>{\scalebox{0.95}{\input{fig-3-1-double}}}%
-      \only<13>{\scalebox{0.95}{\input{fig-3-2-double}}}%
-      \only<14>{\scalebox{0.95}{\input{fig-3-2-double}}}%
-      \only<15>{\scalebox{0.95}{\input{fig-3-2-int}}}%
-      \only<16>{\scalebox{0.95}{\input{fig-3-1-double}}}%
-      \only<17>{\scalebox{0.95}{\input{fig-3-2}}}%
-      \only<18>{\scalebox{0.95}{\input{fig-3}}}%
-    \end{column}
-  \end{columns}
+ \only<18>{\textcolor{blue}{Decision procedure is $O(n)$,\Emph{independent of syntactical complexity} of the RTE.}}%
+
+ \begin{columns}
+   \begin{column}{0.4\textwidth}
+     \only<2>{
+
+       \bigskip
+
+       Does the sequence match the pattern?
+       \textcolor{greeny}{${(Long \cdot ( Double^{+} ~\vee String^{+}))^{+}}$}
+
+       \bigskip
+
+     
+       \textcolor{blue}{  (DFA) \Emph{Deterministic Finite Automaton}}.
+       
+       \bigskip
+       
+       Construct a DFA from an RTE? \Emph{Compile-time}}%
+     \only<3,17,18>{\textcolor{greeny}{\LARGE $pattern={{(Long \cdot ( Double^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<4,7,11,15>{\textcolor{greeny}{\LARGE $pattern={{(\Emph{Long} \cdot ( Double^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<5,6,12-14,16>{\textcolor{greeny}{\LARGE $pattern={{(Long \cdot ( \Emph{Double}^{+} ~\vee String^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<8,9,10>{\textcolor{greeny}{\LARGE $pattern={{(Long \cdot ( Double^{+} ~\vee \Emph{String}^{+}))^{+}}}$}\leavevmode\\[2cm]}%
+     \only<3-16>{\textcolor{orange}{\LARGE Does the sequence match the pattern?} \Emph{Run-time}}%
+     \only<17>{\Emph{\LARGE Yes, it's a match!}}%
+     \only<18>{\includegraphics[height=3.cm]{exploding-head}}
+   \end{column}
+   \begin{column}{0.6\textwidth}
+     \only<2,18>{\scalebox{0.95}{\input{fig-3}}}%
+     \only<3>{\scalebox{0.95}{\input{fig-3-0}}}%
+     \only<4>{\scalebox{0.95}{\input{fig-3-0-int}}}%
+     \only<5>{\scalebox{0.95}{\input{fig-3-1-float}}}%
+     \only<6>{\scalebox{0.95}{\input{fig-3-2-float}}}%
+     \only<7>{\scalebox{0.95}{\input{fig-3-2-int}}}%
+     \only<8>{\scalebox{0.95}{\input{fig-3-1-String}}}%
+     \only<9>{\scalebox{0.95}{\input{fig-3-3-String}}}%
+     \only<10>{\scalebox{0.95}{\input{fig-3-3-String}}}%
+     \only<11>{\scalebox{0.95}{\input{fig-3-3-int}}}%
+     \only<12>{\scalebox{0.95}{\input{fig-3-1-float}}}%
+     \only<13>{\scalebox{0.95}{\input{fig-3-2-float}}}%
+     \only<14>{\scalebox{0.95}{\input{fig-3-2-float}}}%
+     \only<15>{\scalebox{0.95}{\input{fig-3-2-int}}}%
+     \only<16>{\scalebox{0.95}{\input{fig-3-1-float}}}%
+     \only<17>{\scalebox{0.95}{\input{fig-3-2}}}%
+   \end{column}
+ \end{columns}
 \end{frame}
-
-
 
 \begin{frame}{Deterministic (DFA) vs Non-deterministic (NFA)}
 

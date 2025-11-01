@@ -14,18 +14,18 @@
     \tikzstyle{level 3}=[sibling distance=10mm]
     \tikzstyle{level 4}=[sibling distance=15mm]
   \node [bottom color=orange!20] {Rte}
-    child { node [bottom color=orange!20] {RteNode}
+    child { node [bottom color=orange!20] {Operator}
       child { node [bottom color=orange!20] {Combination} 
-        child { node {And} }
-        child { node {Or} } }
-      child { node {Star} }
-      child { node [right=-11mm] {Not} }
-      child { node [right=-18mm] {Cat} } }
+        child { node {:and} }
+        child { node {:or} } }
+      child { node {:*} }
+      child { node [right=-11mm] {:not} }
+      child { node [right=-18mm] {:cat} } }
 child { child {
-    child { node [bottom color=orange!20, left=10mm] {RteTerminal}
-      child { node [text height=20pt, right=-10mm, top color=white, bottom color=red!20] {Singleton\\SimpleTypeD} }
-      child { node [right=0] {Sigma} }
-      child { node [right=-2mm] {EmptySet} }
-      child { node [right=1mm] {EmptySeq} } } } };
+    child { node [bottom color=orange!20, left=10mm] {Terminal}
+      child { node [text height=20pt, right=-10mm, top color=white, bottom color=red!20] {Singleton\\type} }
+      child { node [right=0] {:sigma} }
+      child { node [right=-2mm] {:empty-set} }
+      child { node [right=1mm] {:epsilon} } } } };
 \end{tikzpicture}
 \end{document}

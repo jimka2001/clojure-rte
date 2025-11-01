@@ -1,61 +1,95 @@
-
 \begin{frame}[t]{Regular Type Expressions (RTEs)}
 
-  We'd like to recognize sequences with  \Emph{regular patterns}.
+  
+  \only<1,2,3>{  We'd like to recognize sequences with  \Emph{regular patterns}.
 
   \medskip
-  
-  \only<1-2>{{\LARGE [ {1}, \quad
-        {2},\quad
-      {2.3},\quad
+
+  {\LARGE [ {1}, \quad
+      {2/3},\quad
       {9.3},\quad
       {3},\quad
-      {1.5F},\quad
+      {1.5},\quad
       {6.5},\quad
-      {4.8F},\quad
+      {4.8},\quad
       {2},\quad
-      {2.3}]}
+      {2/3}]}
   }%
-  \only<3,5>{{\Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$},
-    \textcolor{blue}{$\underbrace{2.3, 9.3}_{\text{floating points}}$},
-    \quad \textcolor{greeny}{$\overbrace{3}^{integer}$},
-    \textcolor{blue}{$\underbrace{1.5F, 6.5, 4.8F}_{\text{floating points}}$},
-    \quad \textcolor{greeny}{$\overbrace{2}^{integer}$},
-    \textcolor{blue}{$\underbrace{2.3}_{\text{floating points}}$}]}
 
-  \bigskip 
-
-  }%
   \only<2,3>{
 
-  \bigskip 
+  \bigskip
 
-  {\LARGE What's the pattern?}
+    {\LARGE What's the pattern?}  }%
 
-  }%
+  \only<3>{{\Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3~~ 9.3}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{3}^{integer}$}
+    \textcolor{blue}{$\underbrace{1.5~~ 6.5~~ 4.8}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{2}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3}_{\text{real}}$}]}
+  }%    
 
-%    
-  \only<4>{
-    {\Large String-based \textcolor{blue}{regular expressions}}
-    \begin{columns}
-      \begin{column}{0.65\textwidth}
-        \begin{itemize}
-        \item Match strings like: {\tt "\textcolor{greeny}{i}\textcolor{blue}{D}\textcolor{blue}{D}\textcolor{greeny}{i}\textcolor{blue}{F}\textcolor{blue}{D}\textcolor{blue}{F}\textcolor{greeny}{i}\textcolor{blue}{D}"},
-        \item ... we use surface syntax: \code{"(i(D|F)+)*"}.
-        \item ... representing expression: $(i\cdot (D\vee F)^+)^*$,
-        \end{itemize}%
-      \end{column}%
-      \begin{column}{0.35\textwidth}
-        \only<4>{\scalebox{0.7}{\input{strex}}}
-      \end{column}%
-    \end{columns}
-  }%
-  \only<5>{
-    {\Large Type-based \textcolor{blue}{regular expressions}}
 
-    \[ (Integer \cdot (Double \vee Float)^+)^* \]
+  \bigskip
+
+  \only<4,5>{%
+  \Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3~~ 9.3}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{3}^{integer}$}
+    \textcolor{blue}{$\underbrace{1.5~~ 6.5~~ 4.8}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{2}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3}_{\text{real}}$}]
+
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+          $($
+          \textcolor{greeny}{Long}
+          $\cdot~ ($
+          \textcolor{blue}{Ratio}
+          $\cup$
+          \textcolor{blue}{Double}
+          $) {}^{+} )^{*}$
+    \end{column}%
+    \begin{column}{0.5\textwidth}
+      \only<4>{\scalebox{0.7}{\input{strex-clojure}}}%
+      \only<5>{\scalebox{0.7}{\input{strex-clojure-satisfies}}}%
+    \end{column}
+  \end{columns}
   }
+\end{frame}
 
+
+
+% use this box via:    \usebox\exnotebox
+\newsavebox\exnotebox
+\begin{lrbox}{\exnotebox}
+  \begin{minipage}{7cm}
+    \input{exnotebox}
+  \end{minipage}
+\end{lrbox}
+
+
+
+
+
+
+\begin{frame}{RTEs}{Surface Syntax and AST}
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+  \begin{itemize}
+  \item Mathematical notation:\\
+  \quad\textcolor{greeny}{$(Int \cdot (Float \cup Ratio)^+)^*$}
+  \item Clojure notation: AST\\
+    \usebox\exnotebox
+  \item Leaf nodes interface to Clojure/Java Type System
+  \end{itemize}
+    \end{column}%
+    \begin{column}{0.45\textwidth}
+      \scalebox{0.8}{\input{strex-clojure-satisfies}}
+    \end{column}%
+  \end{columns}%
 \end{frame}
 
 

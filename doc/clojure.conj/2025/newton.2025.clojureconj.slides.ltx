@@ -34,7 +34,7 @@
 
 \begin{frame}{Motivation}
   \begin{itemize}
-  \item<1->{ Property-Based Testing (PBT) requires generating objects of a target type.}%
+  \item<1->{ Testing (and in particular Property-Based Testing, PBT) requires generating randomized objects of a target type.}%
   \item<2->{ Select objects from an infinite set, $T$.
 
     \input{set-t}
@@ -107,36 +107,6 @@ CONCRETELY: uniformly sample Finite Automata by:
 \input{rtes}
 
 
-% use this box via:    \usebox\exnotebox
-\newsavebox\exnotebox
-\begin{lrbox}{\exnotebox}
-  \begin{minipage}{7cm}
-    \input{exnotebox}
-  \end{minipage}
-\end{lrbox}
-
-
-\begin{frame}{RTEs}{Surface Syntax and AST}
-  \begin{columns}
-    \begin{column}{0.55\textwidth}
-  \begin{itemize}
-  \item Mathematical notation:\\
-  \quad\textcolor{greeny}{$(Int \cdot (Double \cup Float)^+)^*$}
-  \item Scala notation: AST\\
-    \usebox\exnotebox
-  \item Leaf nodes interface to Scala Type System
-  \end{itemize}
-    \end{column}%
-    \begin{column}{0.45\textwidth}
-      \scalebox{0.7}{\input{strex-scala}}
-    \end{column}%
-  \end{columns}%
-\end{frame}
-
-
-
-
-
 \begin{frame}{RTE Library}
   \begin{itemize}
   \item RTE operations include union, intersection, complement, Kleene-star
@@ -157,7 +127,7 @@ CONCRETELY: uniformly sample Finite Automata by:
 \end{lrbox}
 
 
-\begin{frame}{\code{RTE} class quasi-ADT}
+\begin{frame}{\code{RTE} Abstract Data Type}
   \scalebox{0.9}{\input{rte-adt}}
 
 \end{frame}
@@ -169,7 +139,7 @@ CONCRETELY: uniformly sample Finite Automata by:
       \scalebox{0.9}{\input{rte-adt-narrow}}
     \end{column}
     \begin{column}{0.55\textwidth}
-  \usebox\examplegenrte      
+  \usebox\examplegenrte
     \end{column}
   \end{columns}
 \end{frame}

@@ -1,18 +1,15 @@
-\begin{lstlisting}[style=scalaioScala,numbers=none]
-def genRte(depth: Int): Rte = {
- val terms= Seq(Sigma,EmptySeq,EmptySet)
- def rte = genRte(depth-1)
- val generators: = Seq(
-      () => randomChoice(terms),
-      () => Singleton(genType()),
-      () => Or(rte(), rte()),
-      () => And(rte(), rte()),
-      () => Cat(rte()),
-      () => Star(rte()),
-      () => Not(rte()))
+\begin{lstlisting}[style=conjClojure,numbers=none]
+(def rte-keys '(:sigma :empty-set :epsilon
+                  :type :cat :* :and :or :not))
 
- if (depth <= 0)
-   Singleton(genType())
- else
-   randomChoice(generators)()}
+(defn gen-rte [key depth types]
+  (let (g (fn [] (gen-rte (rand-nth rte-keys) 
+                            (dec depth) types))]
+    (case key
+      (:type) (rand-nth types)
+      (:sigma :empty-set :epsilon) key
+      (:and :or :cat)
+        (list key (g) (g)
+      (:* :not)
+        (list key (g))))))
 \end{lstlisting}
