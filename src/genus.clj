@@ -312,6 +312,14 @@
         (empty? fn-s-expression)
         nil
 
+        ;; TODO add code to decode rational?
+        ;; (defn rational? 
+        ;;   "Returns true if n is a rational number"
+        ;;   {:added "1.0"
+        ;;    :static true}
+        ;;  [n]
+        ;;   (or (integer? n) (ratio? n) (decimal? n)))
+        ;; TODO -- and perhaps libspec?
         (= 3 (count fn-s-expression))
         (try (let [[_def name-1 [_fn name-2 [var-1] expr]] fn-s-expression]
                (if (and (= name-1 name-2)

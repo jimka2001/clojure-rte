@@ -2,12 +2,11 @@
 (def rte-keys [:sigma :empty-set :epsilon
                :type :cat :* :and :or :not])
 
-(defn gen-rte [key depth types]
-  (letfn [(g [] (gen-rte (rand-nth rte-keys) 
-                         (dec depth)
-                         types))]
+(defn gen-rte [depth]
+  (let [key (rand-nth rte-keys) 
+        g (fn [] (gen-rte (dec depth)))]
     (case key
-      (:type) (rand-nth types)
+      (:type) (rand-nth known-types)
 
       (:sigma :empty-set :epsilon) key
 
