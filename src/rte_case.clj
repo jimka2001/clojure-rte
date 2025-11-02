@@ -465,7 +465,6 @@
               ;; we must call warn-unreachable at macro expansion time
               ;; because we want the message emitted at compile time.
               _ (when *warn-on-unreachable-code*
-                  (dot/dfa-view (clauses-to-dfa pairs) "missile-demo")
                   (warn-unreachable (clauses-to-dfa pairs) code-exprs))
               ]
           `(let [dfa# (clauses-to-dfa '~pairs)]
