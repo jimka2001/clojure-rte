@@ -34,8 +34,7 @@
 (def ^:dynamic *warn-on-unreachable-code* true)
 
 
-(defn-memoized [clauses-to-dfa
-                clauses-to-dfa-impl]
+(defn clauses-to-dfa
   "Returns a complete dfa which is the union of the input clauses.
   E.g.,
   (clauses-to-dfa [[0 rte-0] [1 rte-1] [3 rte-3] [2 rte-2] ...])
@@ -454,10 +453,12 @@
               pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
                                    [idx (lambda-list-to-rte lambda-list types-map)])
                                  given-clauses)
+              ;; we must call warn-unreachable at macro expansion time
+              ;; because we want the message emitted at compile time.
+              _ (when *warn-on-unreachable-code*
+                  (warn-unreachable (clauses-to-dfa pairs) code-exprs))
               ]
           `(let [dfa# (clauses-to-dfa '~pairs)]
-             (when *warn-on-unreachable-code*
-               (warn-unreachable dfa# '~code-exprs))
              (fn
                ~@(if name (list name) nil) ;; either name or nothing
                [& seq#]
