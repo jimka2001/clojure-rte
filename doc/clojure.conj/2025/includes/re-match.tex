@@ -73,3 +73,67 @@
   \only<1>{\scalebox{0.95}{\input{fig-nfa-subtype}}}%
   \only<2>{\scalebox{0.95}{\input{fig-dfa-subtype}}}%
 \end{frame}
+
+\newsavebox\missiledemo
+\begin{lrbox}{\missiledemo}
+  \begin{minipage}{15cm}
+    \input{missiledemo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\missiledemoone
+\begin{lrbox}{\missiledemoone}
+  \begin{minipage}{15cm}
+    \input{missiledemoone}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\missiledemotwo
+\begin{lrbox}{\missiledemotwo}
+  \begin{minipage}{15cm}
+    \input{missiledemotwo}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\begin{frame}{Example, \code{destructuring-case} macro}
+
+\only<1,2>{Macro \code{destructuring-case} evaluates clause matching the correct template.}
+\only<2>{\\And discriminates \emph{based on types} of imbedded values.}
+  
+\medskip
+
+\only<1>{\usebox\missiledemotwo}%
+\only<2>{\usebox\missiledemoone}%
+\only<3>{\usebox\missiledemo}%
+
+\only<3>{We would like to know \Emph{at compile time} whether there is a possible value of \code{input-seq}
+  which will \Emph{launch the missiles}?}
+\end{frame}
+
+\begin{frame}{Code converted to DFA}
+  \begin{columns}
+  
+\begin{column}{.6\textwidth}
+\begin{minipage}[t]{\linewidth}
+  \includegraphics[width=\textwidth, keepaspectratio]{missile-demo-dfa}
+\end{minipage}
+\end{column}
+
+    \begin{column}{.4\textwidth}
+      \begin{align*}
+        t_0 &= Boolean\\
+        t_1 &= Byte \cup Integer \cup Long \cup Short\\
+        t_2 &= String\\
+        t_3 &= Long\\
+        t_4 &= Byte \cup Integer \cup Short
+      \end{align*}
+    \end{column}
+
+  \end{columns}
+
+  Macro-expansion warning: \\
+  \textcolor{red}{\texttt{Unreachable code: (launch-the-missiles a b)}}\\
+  because DFA has no path to \code{launch-the-missiles}!
+\end{frame}
+

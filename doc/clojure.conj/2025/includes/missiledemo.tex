@@ -1,0 +1,15 @@
+\begin{lstlisting}[style=conjClojure,numbers=none]
+(defn missile-demo [input-seq]
+  (destructuring-case input-seq
+    [[a b]        {a Boolean b (or String Boolean)}]
+    (rename-file a b)
+
+    [[a b]        {a Boolean b (or String (satisfies int?))}]
+    (delete-file a b)
+
+    [[a b c & d]  {[a d] Boolean b String c (satisfies int?)}]
+    (copy-file a b c d)
+
+    [[a b]        {a Boolean b (or String Long)}]
+    (~~launch-the-missiles~~ a b)))
+\end{lstlisting}

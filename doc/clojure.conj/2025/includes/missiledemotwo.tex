@@ -1,0 +1,12 @@
+\begin{lstlisting}[style=conjClojure,numbers=none]
+(defn missile-demo [input-seq]
+  (destructuring-case input-seq
+    [[a b]]
+    (rename-file a b)
+
+    [[a b]]
+    (delete-file a b)
+
+    [[a b c & d]]
+    (copy-file a b c d)))
+\end{lstlisting}

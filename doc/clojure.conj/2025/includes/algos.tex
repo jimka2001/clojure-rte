@@ -1,0 +1,108 @@
+
+{\setbeamercolor{background canvas}{bg=toccolor}
+\begin{frame}
+
+\Large {Algorithms for Balanced Generation}
+  
+\end{frame}
+}
+
+\begin{frame}{Tree-Split Algorithm}{Divide and Conquer}
+
+  To generate tree having $n$ leaves, find $p=pivot$ between 1 and
+  $n$; build tree with $p$ leaves on left and $n-p$ leaves on right.
+  Repeat recursively.
+  \begin{columns}
+    \begin{column}{.5\textwidth}
+      \only<1>{\includegraphics[height=.8\textheight]{tree-split-1}}%
+      \only<2>{\includegraphics[height=.8\textheight]{tree-split-2}}%
+      \only<3>{\includegraphics[height=.8\textheight]{tree-split-3}}%
+      \only<4>{\includegraphics[height=.8\textheight]{tree-split-4}}%
+      \only<5>{\includegraphics[height=.8\textheight]{tree-split-5}}%
+      \only<6->{\includegraphics[height=.8\textheight]{tree-split-6}}%
+    \end{column}\hspace{-1cm}    
+    \begin{column}{.5\textwidth}
+      \only<7>{Question is how to produce the pivot?
+        \begin{itemize}
+        \item Gaussian
+        \item Inverse Gaussian
+        \item Linear
+        \item Lopsided Comb
+        \end{itemize}
+      }
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+\newsavebox\clojtreesplitcore
+\begin{lrbox}{\clojtreesplitcore}
+  \begin{minipage}{15cm}
+    \input{clojtreesplitcore}
+  \end{minipage}
+\end{lrbox}
+\begin{frame}{RTE Tree-Split Generator}
+  \usebox\clojtreesplitcore
+\end{frame}
+
+\newsavebox\clojtreesplit
+\begin{lrbox}{\clojtreesplit}
+  \begin{minipage}{15cm}
+    \input{clojtreesplit}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\clojtreesplittwo
+\begin{lrbox}{\clojtreesplittwo}
+  \begin{minipage}{15cm}
+    \input{clojtreesplit2}
+  \end{minipage}
+\end{lrbox}
+
+
+
+\begin{frame}{RTE Tree-Split 4-variants}
+  \only<1>{\usebox\clojtreesplit}%
+  \only<2>{\usebox\clojtreesplittwo}
+\end{frame}
+
+\begin{frame}{Flajolet Algorithm}{Generate a Skeleton}
+
+  Inserting 0 \ldots 9 in random order into Binary Search Tree: \code{[5 4 2 8 7 9 0 3 6 1]}
+  \begin{columns}
+    \begin{column}{.5\textwidth}
+  \only<1>{\includegraphics[height=.8\textheight]{flajolet-1-5}}%
+  \only<2>{\includegraphics[height=.8\textheight]{flajolet-2-45}}%
+  \only<3>{\includegraphics[height=.8\textheight]{flajolet-3-245}}%
+  \only<4>{\includegraphics[height=.8\textheight]{flajolet-4-2458}}%
+  \only<5>{\includegraphics[height=.8\textheight]{flajolet-5-24578}}%
+  \only<6>{\includegraphics[height=.8\textheight]{flajolet-6-245789}}%
+  \only<7>{\includegraphics[height=.8\textheight]{flajolet-7-0245689}}%
+  \only<8>{\includegraphics[height=.8\textheight]{flajolet-8-02345789}}%
+  \only<9>{\includegraphics[height=.8\textheight]{flajolet-9-023456789}}%
+  \only<10->{\includegraphics[height=.8\textheight]{flajolet-10-0123456789}}%
+    \end{column}\hspace{-1cm}    
+    \begin{column}{.5\textwidth}
+      \only<11>{After generating skeleton, we fit an RTE to that skeleton.    }
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+\newsavebox\clojflajolet
+\begin{lrbox}{\clojflajolet}
+  \begin{minipage}{15cm}
+    \input{clojflajolet}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\clojflajolettwo
+\begin{lrbox}{\clojflajolettwo}
+  \begin{minipage}{15cm}
+    \input{clojflajolet2}
+  \end{minipage}
+\end{lrbox}
+\begin{frame}{RTE Flajolet Generator}
+  \only<1>{\usebox\clojflajolet}
+  \only<2>{\usebox\clojflajolettwo}
+\end{frame}

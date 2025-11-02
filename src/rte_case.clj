@@ -23,7 +23,7 @@
   (:require [xymbolyco :as xym]
             [dot]
             [genus :as gns]
-            [util :refer [defn-memoized member non-empty?]]
+            [util :refer [defn-memoized member non-empty? with-outstring]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
@@ -69,13 +69,16 @@
 
 
 (defn print-unreachable-warning [code-exprs]
-  (binding [*out* *err*]
-    (printf "Unreachable code: ")
-    (if (sequential? code-exprs)
-      (doseq [word (interpose " " (map str code-exprs))]
-        (printf "%s" word))
-      (printf "%s" code-exprs))
-    (printf "\n")))
+  (let [msg (with-outstring pr
+              (pr "Unreachable code: ")
+              (if (sequential? code-exprs)
+                (doseq [word (interpose " " (map str code-exprs))]
+                  (pr (format "%s" word)))
+                (pr (format "%s" code-exprs)))
+              (pr "\n"))]
+
+    (binding [*out* *err*]
+      (printf "%s" msg))))
 
 (defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
@@ -351,6 +354,12 @@
         ~@consequences)]))
 
 
+;;(defmacro careful [x]
+;;  (when (symbol? x)
+;;    (alter-var-root #'warnings conj {:form x :msg "Use numbers, not symbols!"}))
+;;  `~x)
+
+
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return
   value conforms to any of the given lambda lists and type restrictions.
@@ -456,6 +465,7 @@
               ;; we must call warn-unreachable at macro expansion time
               ;; because we want the message emitted at compile time.
               _ (when *warn-on-unreachable-code*
+                  (dot/dfa-view (clauses-to-dfa pairs) "missile-demo")
                   (warn-unreachable (clauses-to-dfa pairs) code-exprs))
               ]
           `(let [dfa# (clauses-to-dfa '~pairs)]

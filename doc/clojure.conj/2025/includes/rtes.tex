@@ -1,3 +1,16 @@
+{\setbeamercolor{background canvas}{bg=toccolor}
+\begin{frame}
+
+\Large What are Regular Type Expressions (RTEs), viewed as ASTs.
+  
+  \centering
+  
+  \includegraphics[width=0.9\textwidth]{regexp.png}
+
+\end{frame}
+}
+
+
 \begin{frame}[t]{Regular Type Expressions (RTEs)}
 
   
@@ -33,7 +46,7 @@
 
   \bigskip
 
-  \only<4,5>{%
+  \only<4>{%
   \Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$}
     \textcolor{blue}{$\underbrace{2/3~~ 9.3}_{\text{real}}$}
     \quad \textcolor{greeny}{$\overbrace{3}^{integer}$}
@@ -54,7 +67,6 @@
     \end{column}%
     \begin{column}{0.5\textwidth}
       \only<4>{\scalebox{0.7}{\input{strex-clojure}}}%
-      \only<5>{\scalebox{0.7}{\input{strex-clojure-satisfies}}}%
     \end{column}
   \end{columns}
   }
@@ -67,6 +79,12 @@
 \begin{lrbox}{\exnotebox}
   \begin{minipage}{8.5cm}
     \input{exnotebox}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\exnoteboxpre
+\begin{lrbox}{\exnoteboxpre}
+  \begin{minipage}{8.5cm}
+    \input{exnoteboxpre}
   \end{minipage}
 \end{lrbox}
 
@@ -96,12 +114,16 @@
   \item Mathematical notation:\\
   \quad\textcolor{greeny}{$(Int \cdot (Float \cup Ratio)^+)^*$}
   \item Clojure notation: AST\\
-    \usebox\exnotebox
+    \only<1>{\usebox\exnoteboxpre}%
+    \only<2>{\usebox\exnotebox}%
   \item Leaf nodes interface to Clojure/Java Type System
   \end{itemize}
     \end{column}%
     \begin{column}{0.45\textwidth}
-      \scalebox{0.8}{\input{strex-clojure-satisfies}}
+      \only<1>{\scalebox{0.8}{\input{strex-clojure}}}%
+      \only<2>{\scalebox{0.8}{\input{strex-clojure-satisfies}}}
+
+
     \end{column}%
   \end{columns}%
 \end{frame}
