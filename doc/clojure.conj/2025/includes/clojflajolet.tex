@@ -1,15 +1,15 @@
 \begin{lstlisting}[style=conjClojure,numbers=none]
 (defn flajolet-rte-by-size [leaves]
-  (letfn [(insert [tree d]
+  (letfn [(insert-BST [tree d]
             (if (empty? tree)
               [d nil nil]
               (let [[n left right] tree]
                 (if (< d n)
-                  [n (insert left d) right]
-                  [n left (insert right d)]))))
+                  [n (insert-BST left d) right]
+                  [n left (insert-BST right d)]))))
           ...]
     
-    (let [skeleton (reduce insert
+    (let [skeleton (reduce insert-BST
                            nil
                            (shuffle (range (dec leaves))))]
       

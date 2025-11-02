@@ -5,9 +5,8 @@
       \includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot--histogram}      
     \end{column}\hspace{-1cm}
     \begin{column}{.33\textwidth}
-      Balanced sampling results $\approx 24$ to 26\% of DFAs with 10 states or larger.
-      Tree-split (uneven) results $\approx 27\%$.
-      Worst performing is the comb distribution.
+      Balanced sampling results $\approx 15$ to 20\% of DFAs with 10 states or larger.
+      Flajolet performing best; comb performing worst.
     \end{column}
   \end{columns}
 \end{frame}
@@ -60,7 +59,12 @@
   \begin{columns}
     \begin{column}{.85\textwidth}
       \only<1>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio}}%
-      \only<2>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest}}%
+      \only<7>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest}}%
+      \only<2>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-1}}%
+      \only<3>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-2}}%
+      \only<4>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-3}}%
+      \only<5>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-4}}%
+      \only<6>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-5}}%
     \end{column}\hspace{-1cm}
     \begin{column}{.35\textwidth}
       DFA state count \\vs Aspect Ratio
@@ -81,11 +85,11 @@
 
       \medskip
       
-      Flajolet and tree-split-mid (Gaussian) produces 10\% of DFAs larger than 50 states.
+      Flajolet produces 10\% of DFAs larger than 25 states.
 
-      Tree-split-edge (inverted Gaussian) and tree-split-linear produces 11\% larger than 10 states.
+      Tree-split produces 10\% of DFAs larger than 15 states.
 
-      Imbalanced produces 1\% larger than 11 states.
+      Imbalanced produces 10\% larger than 8 states.
     \end{column}
   \end{columns}
 \end{frame}
@@ -101,8 +105,6 @@
       \only<2>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-retention-aspect-ratio-ratsnest}}
     \end{column}\hspace{-1cm}
     \begin{column}{.33\textwidth}
-      \textcolor{orange}{Restricted to RTEs having exactly 128 leaf nodes.}
-
       Retention measures resistance to lossage.
 
       High lossage means large RTEs result in small DFAs.

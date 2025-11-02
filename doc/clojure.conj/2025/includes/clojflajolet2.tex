@@ -1,6 +1,6 @@
 \begin{lstlisting}[style=conjClojure,numbers=none]
 (defn flajolet-rte-by-size [leaves]
-  (letfn [(insert [tree d]
+  (letfn [(insert-BST [tree d]
             ...)
           (to-rte [tree]
             (cond (> (random) 0.90) ;; 10% probability
