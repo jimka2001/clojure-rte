@@ -387,7 +387,7 @@
                  ]]
 
       (let [dfa (rte-to-dfa rte)]
-        (dfa-to-dot dfa :title (gensym "bdd") :view testing-view :verbose false)
+        (dfa-to-dot dfa :title (gensym "bdd") :view testing-view :verbose false :report-labels false)
         (is (xym/dfa-inhabited? dfa))))))
 
 (deftest t-spanning-paths
@@ -410,7 +410,7 @@
              {-11 [:satisfiable '(0 35 6)],
               12 [:satisfiable '(0 20 13 9 28)],
              42 [:indeterminate '(0 16 45 37)]}))
-       (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view)
+       (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view :report-labels false)
       )))
 
 
@@ -444,7 +444,7 @@
                    [:satisfiable String] 
                    [:satisfiable String]]]}))
 
-      (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view)
+      (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view :report-labels false)
       )))
 
 (deftest t-reclojure-1
@@ -459,8 +459,8 @@
 
       (is pat-1)
       (is rte)
-      (dfa-to-dot pat-1 :draw-sink true :title "reClojure 1" :view testing-view)
-      (dfa-to-dot pat-2 :draw-sink true :title "reClojure 2" :view testing-view))))
+      (dfa-to-dot pat-1 :draw-sink true :title "reClojure 1" :view testing-view :report-labels false)
+      (dfa-to-dot pat-2 :draw-sink true :title "reClojure 2" :view testing-view :report-labels false))))
 
 
 
@@ -478,7 +478,8 @@
                   rte (get (dfa-to-rte min-dfa) exit-value :empty-set)]]
       (is rte)
       (if testing-view
-        (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions))))))
+        (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions)
+                      :report-labels false)))))
 
 (deftest t-dfa-loop-1
   (testing "testing dfa loop 1"

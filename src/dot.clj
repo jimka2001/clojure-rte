@@ -111,7 +111,7 @@
   be used.  This makes it much easier for the human to understand the
   dfa drawings being viewed."
   [dfa & {:keys [title prefix view abbrev draw-sink right-margin
-                 state-legend type-legend dot-file-cb png-file-cb abbrevs]
+                 state-legend type-legend report-labels dot-file-cb png-file-cb abbrevs]
           :as all-optionals
           :or {title "no-title"
                prefix "dfa"
@@ -122,6 +122,7 @@
                right-margin 120
                state-legend true
                type-legend true
+               report-labels true
                dot-file-cb (fn [_file_name] nil)
                png-file-cb (fn [_file_name] nil)}}]
   (cond
@@ -175,9 +176,10 @@
           all-final-true (every? (fn [q] (= true (xym/exit-value dfa q)))
                                  accepting-states)]
 
-      (doseq [[td idx] abbrevs]
-        (printf "t%d= "idx)
-        (pprint-indent td :indent "     "))
+      (when report-labels
+        (doseq [[td idx] abbrevs]
+          (printf "t%d= "idx)
+          (pprint-indent td :indent "     ")))
               
       ;; print here
       (if (not state-legend)
@@ -271,8 +273,9 @@
   "Draw a dfa graphically using `dfa-to-dot` returning a map which
   maps types to abbreviation.  This map is an extension of the given abbrevs map."
 
-  [dfa title & {:keys [abbrevs draw-sink]
+  [dfa title & {:keys [abbrevs draw-sink report-labels]
                 :or {abbrevs {}
+                     report-labels true
                      draw-sink false}}]
   (dfa-to-dot dfa
               :view true
@@ -280,6 +283,7 @@
               :draw-sink draw-sink
               :state-legend false
               :type-legend false
+              :report-labels report-labels
               :dot-file-cb println
               :png-file-cb println
               :abbrevs abbrevs
