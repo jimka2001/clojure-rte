@@ -1,0 +1,22 @@
+% Modeled after the following
+% A simple Tree
+% Author: Stefan Kottwitz
+% https://www.packtpub.com/hardware-and-creative/latex-cookbook
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\begin{document}
+\begin{tikzpicture}[sibling distance=10em,
+  every node/.style = {shape=rectangle, rounded corners,
+    draw, align=center,
+    top color=white, bottom color=orange!20}]]
+    \tikzstyle{level 2}=[sibling distance=28mm]
+    \tikzstyle{level 4}=[sibling distance=45mm]
+  \node {$:*$}
+  child { node { $:cat$ } 
+    child { node [bottom color=blue!20] {\text{int?} }}
+    child { node {$:+$} 
+      child { node {$:or$}
+        child { node [bottom color=blue!20] {\text{ratio?} } }
+        child { node [bottom color=blue!20] {\text{float?} } } } } } ;
+\end{tikzpicture}
+\end{document}

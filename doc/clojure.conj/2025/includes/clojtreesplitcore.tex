@@ -1,0 +1,14 @@
+\begin{lstlisting}[style=conjClojure,numbers=none]
+(defn tree-split-rte [leaves pivot]
+  (if (= 1 leaves)
+    (rand-nth inhabited-leaves)
+    (let [left-size (pivot leaves)
+          left  (fn [] (tree-split-rte left-size pivot))
+          right (fn [] (tree-split-rte (- leaves left-size) pivot))
+          mid   (fn [] (tree-split-rte leaves pivot))]
+      (weighted-case 20 (list :cat (left) (right))
+                     30 (list :and (left) (right))
+                     30 (list :or (left) (right))
+                      5 (list :* (mid))
+                     15 (list :not (mid))))))
+\end{lstlisting}

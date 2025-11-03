@@ -1,0 +1,29 @@
+% Modeled after the following
+% A simple Tree
+% Author: Stefan Kottwitz
+% https://www.packtpub.com/hardware-and-creative/latex-cookbook
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\begin{document}
+\begin{tikzpicture}[thick, sibling distance=10em,
+  every node/.style = {shape=rectangle, rounded corners,
+    draw, align=center,
+    top color=white, bottom color=blue!20}]]
+    \tikzstyle{level 1}=[sibling distance=70mm]
+    \tikzstyle{level 2}=[sibling distance=20mm]
+    \tikzstyle{level 3}=[sibling distance=10mm]
+  \node [bottom color=orange!20] {Rte}
+    child { node [bottom color=orange!20] {Operator}
+      child { node [bottom color=orange!20] {Combination} 
+        child { node {:and} }
+        child { node {:or} } }
+      child { node {Star} }
+      child { node [right=-10mm] {:not} }
+      child { node [right=-15mm] {:cat} } }
+    child { node [bottom color=orange!20] {Terminal}
+      child { node [text height=20pt, right=-10mm, top color=white, bottom color=red!20] {Singleton\\type} }
+      child { node [right=-3mm] {:sigma} }
+      child { node [right=-5mm] {:empty-set} }
+      child { node [right=-3mm] {:epsilon} } } ;
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,60 @@
+\begin{frame}{Motivation}
+  \begin{itemize}
+  \item<1->{ Testing (and in particular Property-Based Testing, PBT) requires generating randomized objects of a target type.}%
+  \item<2->{ Select objects from an infinite set, $T$.
+
+    \input{set-t}
+  }%
+  \item<3->{Selection should be \emph{surjective}.\\
+    \Ie any conceivable object of the target type should be possible.}%
+  \item<4->{Selection should be \emph{uniform}. \textcolor{gold}{controversial}\\
+    \Ie, any two objects are equally likely.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item<1->{Selecting surjectively and uniformly in $T$ may be difficult.}
+
+    \item<2->{We may prefer to sample in another space $S$.}%      
+    \item<2->{$f:S\to T$ ... and then convert object $s\in S$ to $f(s) = t \in T$.
+
+    \input{map-s-to-t}
+  }%
+  \end{itemize}
+\end{frame}
+    
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+  \item<1->{Sadly uniform selection in $S$  may not deliver uniformity in $T$.
+    \input{map-s-bias-to-t}}%
+  \item<2->{OBSERVATION:  When we select $s\in S$ then generate $f(s)\in T$ we often find that $f(s)$ is  trivial.  }
+  \item<3->{GOAL: improve uniformity in $T$ by biasing the selection in $S$.
+    \input{map-s-to-t-bias}}%
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Motivation}
+CONCRETELY: uniformly sample Finite Automata by:
+    \begin{enumerate}
+    \item  Biased sample of Regular Expressions
+    \item  Convert Regular Expression to Finite Automaton
+    \end{enumerate}
+
+    Uniform generation of Deterministic Finite Automata (DFA) is \textcolor{red}{difficult}.\\
+    Conversion from RE to DFA is a  \textcolor{greeny}{solved problem}.
+
+    \input{thought-balloon}
+\end{frame}
+
+\begin{frame}{Generalization}
+ Uniformly sample the \Emph{Semantic Space}:
+    \begin{itemize}
+    \item  By biased sampling in the \Emph{Syntactic Space}
+    \end{itemize}
+
+    \input{thought-balloon-generalized}
+\end{frame}
+
+

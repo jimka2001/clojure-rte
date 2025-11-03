@@ -1,0 +1,52 @@
+\usepackage{listings}
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codebackcolor}{rgb}{0.95,0.92,0.92}
+
+
+
+\lstdefinestyle{conjClojure}{
+  language=lisp,
+  aboveskip=2mm,
+  belowskip=2mm,
+  numbers=left,
+  showstringspaces=false,
+  columns=fixed,
+  basicstyle={\footnotesize\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  alsoletter={?,\:},
+  morekeywords={cat,subtype?,float?,ratio?,Integer,Short,instance?,Long,satisfies,odd?,Ratio,Number,Double,Boolean,defn,satisfies,int?},
+  tabsize=2,
+  moredelim=**[is][\color{red}]{~~}{~~}
+}
+
+\lstdefinestyle{scalaioScala}{
+  language=scala,
+  aboveskip=2mm,
+  belowskip=2mm,
+  numbers=left,
+  showstringspaces=false,
+%  columns=flexible,
+  basicstyle={\footnotesize\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=2,
+  moredelim=**[is][\color{red}]{~~}{~~}
+}
+\lstset{style=scalaioScala}

@@ -645,16 +645,16 @@
     (if (xym/dfa-equivalent? dfa-2-1 null-dfa)
       (is true)
       (do
-        (dot/dfa-to-dot null-dfa :title "null" :view true)
-        (dot/dfa-to-dot dfa-2-1 :title "800" :view true)
+        (dot/dfa-to-dot null-dfa :title "null" :view true :report-labels false)
+        (dot/dfa-to-dot dfa-2-1 :title "800" :view true :report-labels false)
         (is (xym/dfa-equivalent? dfa-2-1 null-dfa)
             (cl-format false "800: ~%rte-1=~A~%     =~A~%rte-2=~A~%2-1=~A"
                        rte-1 (canonicalize-pattern rte-1) rte-2
                        rte-2-1b))))
     (if (xym/dfa-equivalent? dfa-1-2 null-dfa)
       (is true)
-      (do (dot/dfa-to-dot null-dfa :title "null" :view true)
-          (dot/dfa-to-dot dfa-1-2 :title "802" :view true)
+      (do (dot/dfa-to-dot null-dfa :title "null" :view true :report-labels false)
+          (dot/dfa-to-dot dfa-1-2 :title "802" :view true :report-labels false)
           (is (xym/dfa-equivalent? dfa-1-2 null-dfa)
               (cl-format false "802: ~%rte-1=~A~%     =~A~%rte-2=~A~%1-2=~A"
                          rte-1 (canonicalize-pattern rte-1) rte-2
@@ -695,7 +695,7 @@
                                                     (:and (:not ~rt-2) ~rt-1))))
          empty-dfa (rte-to-dfa empty)]
      (when (not (xym/dfa-vacuous? empty-dfa))
-       (dot/dfa-to-dot empty-dfa :title "empty" :view true))
+       (dot/dfa-to-dot empty-dfa :title "empty" :view true :report-labels false))
      (check (xym/dfa-vacuous? empty-dfa)
             (cl-format nil "~&~
                             rt-1=~W~@

@@ -312,6 +312,14 @@
         (empty? fn-s-expression)
         nil
 
+        ;; TODO add code to decode rational?
+        ;; (defn rational? 
+        ;;   "Returns true if n is a rational number"
+        ;;   {:added "1.0"
+        ;;    :static true}
+        ;;  [n]
+        ;;   (or (integer? n) (ratio? n) (decimal? n)))
+        ;; TODO -- and perhaps libspec?
         (= 3 (count fn-s-expression))
         (try (let [[_def name-1 [_fn name-2 [var-1] expr]] fn-s-expression]
                (if (and (= name-1 name-2)
@@ -1381,7 +1389,6 @@
   [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
-  ;; (println [:t1 t1 :t2 t2 :inh-1 (inhabited? t1 :dont-know) :inh-2 (inhabited? t2 :dont-know)])
   (cond
     (= false (inhabited? t1 :dont-know)) ;; if t1 is empty, t1 and t2 are disjoint
     true
@@ -1986,7 +1993,6 @@
    :post [(member % '(true false :dont-know))]}
   (letfn [(calc-inhabited [type-designator default]
               (loop [[k & ks] (sort-method-keys -inhabited?)]
-                ;; (println [:calc type-designator :k k :inhabited? ((k (methods -inhabited?)) type-designator)])
                 (case ((k (methods -inhabited?)) type-designator)
                   (true) true
                   (false) false

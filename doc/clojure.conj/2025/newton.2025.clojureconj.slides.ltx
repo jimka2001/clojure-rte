@@ -1,0 +1,73 @@
+\documentclass[aspectratio=169]{beamer}
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{footline}[frame number]
+\usepackage{xspace}
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shapes.arrows}
+\tikzstyle{accepting}=[accepting by double]
+%%\tikzset{outer sep=2mm, accepting/.style={double distance=3.5mm}}
+\usepackage{appendixnumberbeamer}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage{textcomp}
+\usepackage{color}
+\usepackage[subpreambles=true]{standalone}
+
+\input{conj-colors}
+\input{conj-commands}
+\input{conj-listings}
+
+
+\title{Balanced Sampling as a Tool for Useful PBT Random Tree Generation}
+\author{Jim E. Newton\\and Ghiles Ziat}
+\institute{EPITA Research Laboratory}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%%\section{Motivation}
+
+\input{motivation}
+
+{\setbeamercolor{background canvas}{bg=toccolor}
+\begin{frame}{Overview}
+  \tableofcontents
+\end{frame}
+}
+
+\section{What are Regular Type Expressions (RTEs), viewed as ASTs.}
+
+
+\input{rtes}
+
+\input{rte-lib}
+
+\section{How do RTEs relate to Deterministic Finite Automata (DFAs)?}
+
+\input{dfa}
+
+
+\section{Algorithms for Balanced Generation}
+
+\input{algos}
+
+
+\section{Experimental Results}
+\input{results}
+
+\section{Final Thoughts}
+
+\input{conclusion}
+
+% \input{unused-plots}
+
+\end{document}
+
+% LocalWords:  surjective surjectively PBT EPITA Ghiles Ziat greeny
+% LocalWords:  DFA toccolor RTEs ASTs Kleene xymbolyco RTE DFAs AST
+% LocalWords:  keepaspectratio annihilators Flajolet

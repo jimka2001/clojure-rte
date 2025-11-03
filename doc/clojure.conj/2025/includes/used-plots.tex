@@ -1,0 +1,121 @@
+
+\begin{frame}
+  \begin{columns}
+    \begin{column}{.85\textwidth}
+      \includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot--histogram}      
+    \end{column}\hspace{-1cm}
+    \begin{column}{.33\textwidth}
+      Balanced sampling results $\approx 15$ to 20\% of DFAs with 10 states or larger.
+      Flajolet performing best; comb performing worst.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+
+
+
+\begin{frame}{How to measure aspect-ratio of a binary tree}
+
+  \emph{CLAIM}: a \emph{Landscape-style} AST performs better than \emph{Portrait-style}.
+
+
+  \scalebox{1.1}{\input{aspect-ratio}}
+  \vspace{-8mm}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \[\rho = \text{aspect ratio} = \frac{d}{\log_2 n} = \frac{\text{longest path}}{\log_2(\text{leaf count})}\]      
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \begin{align*}
+      \rho = 1 & \implies \text{balanced}\\
+      \rho < 1 & \implies \text{landscape}\\
+      \rho > 1 & \implies \text{portrait}
+    \end{align*}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+
+
+
+
+% use this box via:    \usebox\arbox
+\newsavebox\arbox
+\begin{lrbox}{\arbox}
+  \begin{minipage}{4cm}
+    \[\rho = \frac{longest~path}{\log_2(leaf~count)}\]
+
+    \begin{align*}
+      \rho = 1 & \implies \text{balanced}\\
+      \rho < 1 & \implies \text{landscape}\\
+      \rho > 1 & \implies \text{portrait}
+    \end{align*}
+  \end{minipage}
+\end{lrbox}
+
+\begin{frame}
+  \begin{columns}
+    \begin{column}{.85\textwidth}
+      \only<1>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio}}%
+      \only<7>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest}}%
+      \only<2>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-1}}%
+      \only<3>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-2}}%
+      \only<4>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-3}}%
+      \only<5>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-4}}%
+      \only<6>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-dfa-state-count-vs-Aspect-Ratio-ratsnest-5}}%
+    \end{column}\hspace{-1cm}
+    \begin{column}{.35\textwidth}
+      DFA state count \\vs Aspect Ratio
+      \usebox\arbox
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+\begin{frame}
+  \begin{columns}
+    \begin{column}{.85\textwidth}
+\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-threshold}
+    \end{column}\hspace{-1cm}
+    \begin{column}{.35\textwidth}
+      Which percent of all DFAs have larger than x-many states?
+
+      \medskip
+      
+      Flajolet produces 10\% of DFAs larger than 25 states.
+
+      Tree-split produces 10\% of DFAs larger than 15 states.
+
+      Imbalanced produces 10\% larger than 8 states.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+
+
+\begin{frame}
+  \begin{columns}
+    \begin{column}{.85\textwidth}
+      \only<1>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-retention-aspect-ratio}}%
+      \only<2>{\includegraphics[width=0.95\textwidth, height=0.95\textheight, keepaspectratio]{plot-retention-aspect-ratio-ratsnest}}
+    \end{column}\hspace{-1cm}
+    \begin{column}{.33\textwidth}
+      Retention measures resistance to lossage.
+
+      High lossage means large RTEs result in small DFAs.
+      High retention means more DFAs are large (don't \emph{lose} as many states).
+
+      \medskip
+
+      $\rho = \frac{state~count}{node~count}$
+
+      $\rho > 1$ is good.
+
+    \end{column}
+  \end{columns}
+\end{frame}

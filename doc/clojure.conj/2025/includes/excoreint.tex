@@ -1,0 +1,8 @@
+%% dont re-indent this file
+\begin{lstlisting}[style=conjClojure,numbers=none]
+(defn int? [x]
+  (or (instance? Long x)
+      (instance? Integer x)
+      (instance? Short x)
+      (instance? Byte x)))
+\end{lstlisting}

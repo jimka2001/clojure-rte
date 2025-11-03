@@ -23,7 +23,7 @@
   (:require [xymbolyco :as xym]
             [dot]
             [genus :as gns]
-            [util :refer [defn-memoized member non-empty?]]
+            [util :refer [defn-memoized member non-empty? with-outstring]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]
@@ -33,9 +33,26 @@
 
 (def ^:dynamic *warn-on-unreachable-code* true)
 
+(defn print-unreachable-warning [code-exprs]
+  (let [msg (with-outstring pr
+              (pr "Unreachable code: ")
+              (if (sequential? code-exprs)
+                (doseq [word (interpose " " (map str code-exprs))]
+                  (pr (format "%s" word)))
+                (pr (format "%s" code-exprs)))
+              (pr "\n"))]
 
-(defn-memoized [clauses-to-dfa
-                clauses-to-dfa-impl]
+    (binding [*out* *err*]
+      (printf "%s" msg))))
+
+(defn warn-unreachable [dfa code-exprs]
+  (let [traces (xym/find-spanning-map dfa)]
+    (doseq [ev (range (count code-exprs))
+            :when (not (traces ev))]
+      (print-unreachable-warning (nth code-exprs ev)))))
+
+
+(defn clauses-to-dfa
   "Returns a complete dfa which is the union of the input clauses.
   E.g.,
   (clauses-to-dfa [[0 rte-0] [1 rte-1] [3 rte-3] [2 rte-2] ...])
@@ -69,14 +86,7 @@
         index))
 
 
-(defn print-unreachable-warning [code-exprs]
-  (binding [*out* *err*]
-    (printf "Unreachable code: ")
-    (if (sequential? code-exprs)
-      (doseq [word (interpose " " (map str code-exprs))]
-        (printf "%s" word))
-      (printf "%s" code-exprs))
-    (printf "\n")))
+
 
 (defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
@@ -352,6 +362,12 @@
         ~@consequences)]))
 
 
+;;(defmacro careful [x]
+;;  (when (symbol? x)
+;;    (alter-var-root #'warnings conj {:form x :msg "Use numbers, not symbols!"}))
+;;  `~x)
+
+
 (defmacro destructuring-case
   "After evaluating the expression (only once) determine whether its return
   value conforms to any of the given lambda lists and type restrictions.
@@ -454,15 +470,15 @@
               pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
                                    [idx (lambda-list-to-rte lambda-list types-map)])
                                  given-clauses)
+              ;; we must call warn-unreachable at macro expansion time
+              ;; because we want the message emitted at compile time.
+              _ (when *warn-on-unreachable-code*
+                  (warn-unreachable (clauses-to-dfa pairs) code-exprs))
               ]
           `(let [dfa# (clauses-to-dfa '~pairs)]
-             ;; (dot/dfa-to-dot dfa# :title (gensym "rte") :view true :draw-sink false :dot-file-cb println :png-file-cb println)
-             (when *warn-on-unreachable-code*
-               (warn-unreachable dfa# '~code-exprs))
              (fn
                ~@(if name (list name) nil) ;; either name or nothing
                [& seq#]
-               ;;(println [:seq seq#])
                
                ;; we must declare fns inside the (fn ...) because
                ;;    the user code might make a recrusive call to `name`
@@ -470,8 +486,6 @@
                (let [fns# ~fns
                      ind# (rte/match dfa# seq# :promise-disjoint true)]
 
-                 ;;(println [:index ind#])
-                 
                  (if ind#
                    ;; get function out of vector fns# and call it
                    (apply (fns# ind#) seq#)
@@ -481,11 +495,7 @@
 
 
 
-(defn warn-unreachable [dfa code-exprs]
-  (let [traces (xym/find-spanning-map dfa)]
-    (doseq [ev (range (count code-exprs))
-            :when (not (traces ev))]
-      (print-unreachable-warning (nth code-exprs ev)))))
+
 
 (defmacro destructuring-fn
   "params => positional-params* , or positional-params* & next-param

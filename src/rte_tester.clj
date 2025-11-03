@@ -26,7 +26,6 @@
             [clojure.math :refer [pow round]]
             [genus :as gns]
             [genus-tester :refer [*test-types*]]
-            [rte-tree-partially-balanced :refer [gen-partially-balanced-rte]]
             [rte-randomize-syntax :refer [gen-rte]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-construct :refer [with-compile-env rte-to-dfa  nullable?
@@ -199,11 +198,6 @@
            dfa-complement (xym/complement dfa)
            dfa-not-rte (rte-to-dfa (list :not rte))
            ]
-       ;;(dot/dfa-to-dot dfa-complete :view true :title "dfa-complete" :state-legend false)
-       ;;(dot/dfa-to-dot dfa-complement :view true :title "dfa-complement" :state-legend false)
-       ;;(dot/dfa-to-dot dfa-not-rte :view true :title "dfa-not-rte" :state-legend false)
-       ;;(dot/dfa-to-dot (xym/synchronized-xor dfa dfa) :view true :title "182 dfa xor dfa" :state-legend false) 
-       ;;(dot/dfa-to-dot dfa :view true :title "183 dfa" :state-legend false)
 
        (is-fn (xym/dfa-equivalent? dfa
                                    dfa)

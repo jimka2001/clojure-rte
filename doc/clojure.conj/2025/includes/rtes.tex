@@ -1,0 +1,150 @@
+{\setbeamercolor{background canvas}{bg=toccolor}
+\begin{frame}
+
+\Large What are Regular Type Expressions (RTEs), viewed as ASTs.
+  
+  \centering
+  
+  \includegraphics[width=0.9\textwidth]{regexp.png}
+
+\end{frame}
+}
+
+
+\begin{frame}[t]{Regular Type Expressions (RTEs)}
+
+  
+  \only<1,2,3>{  We'd like to recognize sequences with  \Emph{regular patterns}.
+
+  \medskip
+
+  {\LARGE [ {1}, \quad
+      {2/3},\quad
+      {9.3},\quad
+      {3},\quad
+      {1.5},\quad
+      {6.5},\quad
+      {4.8},\quad
+      {2},\quad
+      {2/3}]}
+  }%
+
+  \only<2,3>{
+
+  \bigskip
+
+    {\LARGE What's the pattern?}  }%
+
+  \only<3>{{\Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3~~ 9.3}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{3}^{integer}$}
+    \textcolor{blue}{$\underbrace{1.5~~ 6.5~~ 4.8}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{2}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3}_{\text{real}}$}]}
+  }%    
+
+
+  \bigskip
+
+  \only<4>{%
+  \Large [ \textcolor{greeny}{$\overbrace{1}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3~~ 9.3}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{3}^{integer}$}
+    \textcolor{blue}{$\underbrace{1.5~~ 6.5~~ 4.8}_{\text{real}}$}
+    \quad \textcolor{greeny}{$\overbrace{2}^{integer}$}
+    \textcolor{blue}{$\underbrace{2/3}_{\text{real}}$}]
+
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+          $($
+          \textcolor{greeny}{Long}
+          $\cdot~ ($
+          \textcolor{blue}{Ratio}
+          $\cup$
+          \textcolor{blue}{Double}
+          $) {}^{+} )^{*}$
+    \end{column}%
+    \begin{column}{0.5\textwidth}
+      \only<4>{\scalebox{0.7}{\input{strex-clojure}}}%
+    \end{column}
+  \end{columns}
+  }
+\end{frame}
+
+
+
+% use this box via:    \usebox\exnotebox
+\newsavebox\exnotebox
+\begin{lrbox}{\exnotebox}
+  \begin{minipage}{8.5cm}
+    \input{exnotebox}
+  \end{minipage}
+\end{lrbox}
+\newsavebox\exnoteboxpre
+\begin{lrbox}{\exnoteboxpre}
+  \begin{minipage}{8.5cm}
+    \input{exnoteboxpre}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\exnoteexpand
+\begin{lrbox}{\exnoteexpand}
+  \begin{minipage}{8.5cm}
+    \input{exnoteexpand}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox\excoreint
+\begin{lrbox}{\excoreint}
+  \begin{minipage}{7cm}
+    \input{excoreint}
+  \end{minipage}
+\end{lrbox}
+
+
+
+
+
+
+\begin{frame}{RTEs}{Surface Syntax and AST}
+  \begin{columns}
+    \begin{column}{0.55\textwidth}
+  \begin{itemize}
+  \item Mathematical notation:\\
+  \quad\textcolor{greeny}{$(Int \cdot (Float \cup Ratio)^+)^*$}
+  \item Clojure notation: AST\\
+    \only<1>{\usebox\exnoteboxpre}%
+    \only<2>{\usebox\exnotebox}%
+  \item Leaf nodes interface to Clojure/Java Type System
+  \end{itemize}
+    \end{column}%
+    \begin{column}{0.45\textwidth}
+      \only<1>{\scalebox{0.8}{\input{strex-clojure}}}%
+      \only<2>{\scalebox{0.8}{\input{strex-clojure-satisfies}}}
+
+
+    \end{column}%
+  \end{columns}%
+\end{frame}
+
+
+\begin{frame}{Inlining: thanks \code{clojure.repl.source-fn}}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+  \begin{itemize}
+  \item Clojure notation: AST\\
+    \usebox\exnotebox
+  \item Clojure Core\\
+    \usebox\excoreint
+  \item Inlined\\
+    \usebox\exnoteexpand
+  \end{itemize}
+    \end{column}%
+    \begin{column}{0.4\textwidth}
+      \scalebox{0.8}{\input{strex-clojure-satisfies}}
+    \end{column}%
+  \end{columns}
+  
+\end{frame}
+

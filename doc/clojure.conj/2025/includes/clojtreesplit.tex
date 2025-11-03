@@ -1,0 +1,14 @@
+\begin{lstlisting}[style=conjClojure,numbers=none]
+;; lopsided comb
+(defn comb-rte [leaves]
+  (tree-split-rte leaves
+                  (fn [n]
+                     (case n
+                       (1 2 3)  1
+                       2))))
+
+;; linear split
+(defn tree-split-rte-linear [leaves]
+  (tree-split-rte leaves 
+                  (fn [n] (max 1 (rand-int n)))))
+\end{lstlisting}

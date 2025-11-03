@@ -1,0 +1,15 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+
+\begin{document}
+\begin{tikzpicture}[>=Stealth, thick]
+
+  % Draw sets S and T as circles
+  \draw[red!60, thick]  (3,0) circle (1.0cm) node[above right] {$T$};
+
+  % Elements s and t
+  \filldraw[red!80]  (3,-0.3) circle (2pt) node[below right] {$t$};
+
+\end{tikzpicture}
+\end{document}

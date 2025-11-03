@@ -25,6 +25,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.shell :refer [sh]]
             [clojure.set :refer [rename-keys]]
+            [clojure.pprint :refer [pprint cl-format]]
             [clojure.string :refer [trim]]
             [clojure.core.memoize :as m]
             [clojure.core.cache :as c]))
@@ -893,7 +894,7 @@
                       (fn []
                         ~@body)
                       (fn []
-                        ~@on-time-out)))
+                        ~on-time-out)))
 
 (defmacro truthy-let [bindings & body]
   (if (empty? bindings)
@@ -975,10 +976,86 @@
          ]}
   (let [num-leaves (+ (round (pow 2 depth))
                       (rand-int (round (pow 2 depth))))
-        _ (println [:depth depth :num-leaves num-leaves])
         population (into () (shuffle (range num-leaves)))
         tree (build-012-tree probability-binary population)
         ]
     ;; (printf "target num-leaves=%d %s\n" num-leaves tree)
     tree
     ))
+
+(defn weighted-case-impl
+  "functional implementation of the weighted-case macro"
+  [& body]
+  (let [r (rand-int 100)]
+    (loop [total 0
+           [[p thunk] & clauses] (partition 2 body)]
+      (assert (int? p))
+      (assert (fn? thunk))
+      (if (<= r (+ p total))
+        (thunk)
+        (recur (+ p total) clauses)))))
+
+(defmacro weighted-case 
+  "E.g., (weighted-case 50 :a
+                        20 :b
+                        30 :c)
+    Randonmly one of the clauses and evaluate its body.
+    The random selection is biased so that each clause is selected
+    with the given probability.  In this example :a is selected 50%
+    of the time, :b 20% of the time, and :c 30% of the time.
+    "
+  [& args]
+  (assert (even? (count args)))
+  (let [pairs (partition 2 args)
+        percent (reduce + 0 (map first pairs))
+        args (mapcat (fn [[p body]]
+                       [p `(fn [] ~body)])
+                     pairs)]
+    (assert (= 100 percent)
+            (format "does not sum to 100: %s" (pr-str (map first pairs))))
+    `(weighted-case-impl ~@args)))
+
+(defn run-dot
+  "to-png is a function (String, String, String)=>A
+  run-dot returns the pair [`a` `png-file-name`]
+     where `a` is the return value of `to-png`
+     and `png-file-name` is the name of the .png file which has been created by dot.
+  "
+  [title prefix to-png]
+  (let [uuid (random-uuid)
+        png (str prefix "-" title "-" uuid ".png")
+        dot (str prefix "-" title "-" uuid ".dot")
+        latex (str prefix "-" title "-" uuid ".tex")
+        alt (str prefix "-" title "-" uuid ".plain")
+        a (to-png dot latex title)]
+    (sh "dot" "-Tplain" dot "-o" alt)
+    (sh "dot" "-Tpng" dot "-o" png)
+    [a png]))
+
+(defn write-to-string [unary]
+  (let [writer (java.io.StringWriter.)]
+    (unary writer)
+    (.toString writer)))
+
+(defmacro with-output-to-string [var & body]
+  `(write-to-string (fn [~var] ~@body)))
+
+(defmacro with-outstring [w & body]
+  `(with-output-to-string var#
+     (letfn [(~w [msg#]
+               (.write var# msg#))]
+       ~@body)))
+
+(defn pprint-indent [data & {:keys [indent right-margin]
+                             :or {indent "   "
+                                  right-margin 60
+                                  }}]
+
+  (cl-format true "~A~%"
+             (binding [clojure.pprint/*print-right-margin* right-margin]
+               (clojure.string/replace
+                (clojure.string/trim-newline (with-out-str
+                                               (pprint data *out*)))
+                "\n" ; search
+                (str "\n" indent) ;; replace
+                ))))

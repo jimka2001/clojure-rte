@@ -25,8 +25,9 @@
   (:refer-clojure :exclude [complement])
   (:require [cl-compat :as cl]
             [util :refer [fixed-point member group-map
-                                      defn-memoized find-first
-                                      non-empty? exists setof]]
+                          defn-memoized find-first
+                          timeout-reached?
+                          non-empty? exists setof]]
             [genus :as gns]
             [genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format]]
@@ -515,6 +516,8 @@
         ids-map (zipmap pi-minimized ids)]
     (assert (sequential? pi-minimized))
     (letfn [(merge-parallel [transitions]
+              (when (timeout-reached?)
+                (throw (ex-info "Thread interrupted during minimize")))
               ;; if there are two transitions with the same src/dest, then
               ;;   combine the labels with (or ...)
               ;; We do not, currently, try to reduce the union type.
@@ -527,6 +530,8 @@
                                       transitions)]
                 
                 (map (fn [[[from to] transitions]]
+                       (when (timeout-reached?)
+                         (throw (ex-info "Thread interrupted during minimize")))
                        [from (gns/canonicalize-type (gns/create-or (map second transitions)) :dnf) to])
                      grouped)))
             (new-id [state]

@@ -1,0 +1,36 @@
+\begin{frame}{RTE Library}
+  \begin{itemize}
+  \item RTE operations include union, intersection, complement, Kleene-star
+  \item Habitation, Subset, Emptiness checks
+  \item Membership check (RE-matching)
+  \item Need to test RTE library
+    \begin{itemize}
+    \item Random generation of RTE/AST
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\newsavebox\examplegenrte
+\begin{lrbox}{\examplegenrte}
+  \begin{minipage}{12cm}
+    \input{genrte}
+  \end{minipage}
+\end{lrbox}
+
+
+\begin{frame}{\code{RTE} Abstract Data Type}
+  \scalebox{0.9}{\input{rte-adt}}
+
+\end{frame}
+
+
+\begin{frame}{Generate a Random RTE/AST (depth-based)}
+  \begin{columns}
+    \begin{column}{0.35\textwidth}
+      \scalebox{0.9}{\input{rte-adt-narrow}}
+    \end{column}
+    \begin{column}{0.60\textwidth}
+  \usebox\examplegenrte
+    \end{column}
+  \end{columns}
+\end{frame}
