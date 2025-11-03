@@ -33,6 +33,24 @@
 
 (def ^:dynamic *warn-on-unreachable-code* true)
 
+(defn print-unreachable-warning [code-exprs]
+  (let [msg (with-outstring pr
+              (pr "Unreachable code: ")
+              (if (sequential? code-exprs)
+                (doseq [word (interpose " " (map str code-exprs))]
+                  (pr (format "%s" word)))
+                (pr (format "%s" code-exprs)))
+              (pr "\n"))]
+
+    (binding [*out* *err*]
+      (printf "%s" msg))))
+
+(defn warn-unreachable [dfa code-exprs]
+  (let [traces (xym/find-spanning-map dfa)]
+    (doseq [ev (range (count code-exprs))
+            :when (not (traces ev))]
+      (print-unreachable-warning (nth code-exprs ev)))))
+
 
 (defn clauses-to-dfa
   "Returns a complete dfa which is the union of the input clauses.
@@ -68,17 +86,7 @@
         index))
 
 
-(defn print-unreachable-warning [code-exprs]
-  (let [msg (with-outstring pr
-              (pr "Unreachable code: ")
-              (if (sequential? code-exprs)
-                (doseq [word (interpose " " (map str code-exprs))]
-                  (pr (format "%s" word)))
-                (pr (format "%s" code-exprs)))
-              (pr "\n"))]
 
-    (binding [*out* *err*]
-      (printf "%s" msg))))
 
 (defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
@@ -487,11 +495,7 @@
 
 
 
-(defn warn-unreachable [dfa code-exprs]
-  (let [traces (xym/find-spanning-map dfa)]
-    (doseq [ev (range (count code-exprs))
-            :when (not (traces ev))]
-      (print-unreachable-warning (nth code-exprs ev)))))
+
 
 (defmacro destructuring-fn
   "params => positional-params* , or positional-params* & next-param
