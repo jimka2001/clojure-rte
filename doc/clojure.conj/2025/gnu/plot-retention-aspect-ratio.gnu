@@ -1,5 +1,6 @@
 # 
 set logscale y
+set yrange [0.005:100]
 set xlabel 'aspect ratio' font ',10' offset 3.5,0.5
 set ylabel 'retention' font ',10' offset 3.0,0
 set grid
