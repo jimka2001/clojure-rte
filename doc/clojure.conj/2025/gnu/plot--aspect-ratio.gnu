@@ -12,7 +12,7 @@ set style line 3 pt 7 ps 0.2
 set style line 4 pt 7 ps 0.2
 set style line 5 pt 7 ps 0.2
 set key horizontal bmargin
-set title 'Retention: Ratio node count per state count ' font ',12'
+set title 'Retention: Ratio node count per state count ' font ',12' offset 0,-0.8
 plot '-' using 1:2 with points ls 1 title 'tree-split-linear 402 samples',\
     '-' using 1:2 with points ls 1 title 'tree-split-gauss 402 samples',\
     '-' using 1:2 with points ls 2 title 'tree-split-inv-gauss 402 samples',\

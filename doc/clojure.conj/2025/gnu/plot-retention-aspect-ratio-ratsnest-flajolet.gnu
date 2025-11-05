@@ -10,14 +10,14 @@ set ytics font ',10'
 set style line 1 pt 7 ps 0.2
 set style line 2 pt 7 ps 0.2
 set style line 3 pt 7 ps 0.2
-set style line 4 pt 7 ps 0.2
+set style line 4 dashtype (5,5) ps 0.2
 set style line 5 pt 7 ps 0.2
 set key horizontal bmargin
 set title 'Retention: Ratio node count per state count ' font ',12' offset 0,-0.8
 plot '-' using 1:2 with points ls 1 title 'tree-split-linear 402 samples',\
-    '-' using 1:2 with points ls 1 title 'tree-split-gauss 402 samples',\
-    '-' using 1:2 with points ls 2 title 'tree-split-inv-gauss 402 samples',\
-    '-' using 1:2 with points ls 3 title 'flajolet 402 samples',\
+    '-' using 1:2 with points ls 2 title 'tree-split-gauss 402 samples',\
+    '-' using 1:2 with points ls 3  title 'tree-split-inv-gauss 402 samples',\
+    '-' using 1:2 with lines title 'flajolet 402 samples',\
     '-' using 1:2 with points ls 4 title 'comb 397 samples'
 # tree-split-linear 402 samples
 2.087 0.074
