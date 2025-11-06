@@ -24,7 +24,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]
-            [genus :as gns]
+            [genus.genus :as gns]
             [rte-construct :refer [rte-to-dfa]]
             [cl-compat :as cl]
             [view :as view]

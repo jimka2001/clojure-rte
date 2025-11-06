@@ -22,7 +22,7 @@
 (ns rte-case
   (:require [xymbolyco :as xym]
             [dot]
-            [genus :as gns]
+            [genus.genus :as gns]
             [util :refer [defn-memoized member non-empty? with-outstring]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]

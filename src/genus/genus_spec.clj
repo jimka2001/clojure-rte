@@ -19,8 +19,8 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns genus-spec
-  (:require [genus :as gns]
+(ns genus.genus-spec
+  (:require [genus.genus :as gns]
             [util :refer [casep defn-memoized exists seq-matcher]]
             [clojure.pprint :refer [cl-format]]
             [clojure.spec.alpha :as s]
@@ -28,7 +28,7 @@
 ))
 
 ;; allow gns/ prefix even in this file.
-(alias 'gs 'genus-spec)
+(alias 'gs 'genus.genus-spec)
 
 (def gs/spec?
   "Detect sequence starting with the simple symbol spec"
@@ -63,7 +63,8 @@
   :dont-know)
 
 (defn symbol= [x y]
-  (let [ns (find-ns 'genus-spec)]
+  (let [ns (find-ns 'genus.genus-spec)]
+    (assert ns "cannot find name space")
     (= (ns-resolve ns x)
        (ns-resolve ns y))))
 
@@ -125,7 +126,7 @@
                         (s/*)   (cons :* (transform-sequence-patterns operands))
                         (s/?)   (cons :? (transform-sequence-patterns operands))
                         (s/+)   (cons :+ (transform-sequence-patterns operands))
-                        (s/&) (unsupported pattern)
+                        (s/&)   (unsupported pattern)
                         (list 'spec pattern)))
                     (list 'spec pattern)))
                 (transform-sequence-patterns [patterns]
@@ -165,7 +166,7 @@
                                     s/alt
                                     s/*
                                     s/?
-                                    s/+)   (template (rte ~(transform-sequence-pattern pattern)))
+                                    s/+) (template (rte ~(transform-sequence-pattern pattern)))
                                    (s/&) (unsupported pattern)
                                    
                                    pattern)
@@ -187,3 +188,17 @@
                         pattern (:pattern (ex-data ei)))
              (list 'spec pattern))
            (throw ei)))))
+
+
+;; (defmacro xyzzy [x]
+;;   ;; Desktop/algebra-1-grader
+;;   (let [m (meta &form)]
+;;     (printf "something warning, %s:%d:%d - message\n"
+;;             *file* (:line m) (:column m) m))
+;;   `(list ~x))
+         
+
+;; (defn abc []
+;;   (xyzzy 100))
+
+

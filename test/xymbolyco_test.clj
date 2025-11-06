@@ -26,9 +26,9 @@
             [rte-extract :refer [dfa-to-rte]]
             [xymbolyco :as xym]
             [xym-tester :refer [gen-dfa build-state-map]]
-            [bdd :as bdd]
+            [genus.bdd :as bdd]
             [clojure.pprint :refer [cl-format pprint]]
-            [genus :as gns]
+            [genus.genus :as gns]
             [util :refer [member human-readable-current-time]]
             [dot :refer [dfa-to-dot]]
             [clojure.test :refer [deftest is] :exclude [testing]]))

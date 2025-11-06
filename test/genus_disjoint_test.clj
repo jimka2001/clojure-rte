@@ -21,8 +21,8 @@
 
 (ns genus-disjoint-test
   (:require [rte-core]
-            [genus :as gns]
-            [genus-tester :refer [gen-type]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is testing]]))

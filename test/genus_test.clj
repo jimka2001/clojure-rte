@@ -22,8 +22,8 @@
 (ns genus-test
   (:require [rte-core]
             [rte-construct :refer [with-compile-env]]
-            [genus :as gns]
-            [genus-tester :refer [gen-type *test-values*]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type *test-values*]]
             [util :refer [member human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
@@ -481,7 +481,8 @@
     (is (= (gns/extract-type-from-expression 'X '(or (integer? n) (ratio? n) (decimal? n)))
            nil))
     (is (= (gns/extract-type-from-expression 'n '(or (integer? n) (ratio? n) (decimal? n)))
-           '(or (or Integer Long clojure.lang.BigInt BigInteger Short Byte) clojure.lang.Ratio BigDecimal)))))
+           '(or (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
+                clojure.lang.Ratio BigDecimal)))))
 
 (deftest t-type-predicate-to-type-designator 
   (testing "type-predicate-to-type-designator"

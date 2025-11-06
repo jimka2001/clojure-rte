@@ -21,11 +21,14 @@ simple: deps
 	clj -M -m demos.conj-2025.cli comb 1
 	clj -M -m demos.conj-2025.cli flajolet 1
 
-test:
+tests:
 	lein test
 
+test-genus-spec:
+	lein test :only genus-spec-test
+
 test-genus:
-	lein test :only genus-test
+	lein test :only genus-test genus-conversion-test genus-disjoint-test genus-equiv-test genus-spec-test genus-statistics-test genus-subtype-test
 
 loop:
 	for i in $$(seq 1 10); do \

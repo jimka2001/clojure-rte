@@ -21,7 +21,7 @@
 
 (ns thompson-test
   (:require [thompson :as tom]
-            [genus :as gns]
+            [genus.genus :as gns]
             [util :refer [human-readable-current-time]]
             [rte-core]
             [rte-construct :as rte]

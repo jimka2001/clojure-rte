@@ -4,7 +4,7 @@
             [lock :as lock]
             [vega-plot :as vega]
             [util :refer [mean std-deviation with-timeout]]
-            [genus :as gns]
+            [genus.genus :as gns]
             [xymbolyco :as xym]
             [xym-tester :refer [gen-dfa]]
             [rte-construct :refer [rte-to-dfa]]

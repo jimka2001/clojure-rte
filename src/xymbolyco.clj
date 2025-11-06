@@ -28,10 +28,10 @@
                           defn-memoized find-first
                           timeout-reached?
                           non-empty? exists setof]]
-            [genus :as gns]
-            [genus-tester :refer [gen-type]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format]]
-            [bdd]
+            [genus.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
             [dijkstra :refer [dijkstra-to-final dijkstra]]

@@ -23,14 +23,15 @@
   (:require [rte-core]
             [clojure.pprint :refer [cl-format]]
             [util :refer [sort-operands partition-by-pred
-                                      call-with-collector
-                                      visit-permutations
-                                      remove-once fixed-point member
-                                      call-with-found
-                                      lazy-pairs
-                                      or-else
-                                      trace-graph
-                                      ]]
+                          call-with-collector
+                          visit-permutations
+                          remove-once fixed-point member
+                          call-with-found
+                          lazy-pairs
+                          or-else
+                          trace-graph
+                          casep
+                          ]]
             [clojure.string :as str]
             [clojure.test :refer [deftest testing is]]))
 
@@ -506,3 +507,22 @@
             [[["a" 1] ["b" 2]]
              [["a" 2]]
              [["b" 2] ["a" 0]]]]))))
+
+(deftest t-casep
+  (testing "casep"
+    (is (= (casep (fn [x y] (= (first x) (first y))) [1]
+             ([1] [2] [3]) 1
+             ([4] [5] [6]) 2)
+           1))
+    (is (= (casep (fn [x y] (= (first x) (first y))) [100]
+             ([1] [2] [3]) 1
+             ([4] [5] [6]) 2)
+           nil))
+
+    (is (= (casep (fn [x y] (= (first x) (first y))) [100]
+             ([1] [2] [3]) 1
+             ([4] [5] [6]) 2
+             :none)
+           :none))))
+
+    

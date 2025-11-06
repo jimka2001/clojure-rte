@@ -10,7 +10,7 @@
                           ]]
             [view]
             [vega-plot :as vega]
-            [genus :as gns]
+            [genus.genus :as gns]
             [rte-construct :refer [rte-to-dfa]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-tester :refer [rte-depth rte-count-leaves]]

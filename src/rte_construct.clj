@@ -21,7 +21,7 @@
 
 (ns rte-construct
   (:refer-clojure :exclude [compile])
-  (:require [genus :as gns]
+  (:require [genus.genus :as gns]
             [util :refer [member exists setof forall
                           call-with-collector defn-memoized defmulti-memoized defmethod-memoized
                           visit-permutations fixed-point
@@ -39,7 +39,7 @@
             [clojure.set :refer [union]]
             [cl-compat :as cl]
             [backtick :refer [template]]
-            [genus-spec :as gs]
+            [genus.genus-spec :as gs]
             )
 )
 

@@ -19,8 +19,8 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns genus-tester
-  (:require [genus :as gns]
+(ns genus.genus-tester
+  (:require [genus.genus :as gns]
             [util :refer [rand-tree-012]]
             [backtick :refer [template]]))
 

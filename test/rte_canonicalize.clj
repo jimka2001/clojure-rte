@@ -26,7 +26,7 @@
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [util :refer [count-if-not human-readable-current-time]]
-            [genus :as gns]))
+            [genus.genus :as gns]))
 
 (def test-verbose false)
 

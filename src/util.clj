@@ -487,16 +487,19 @@
               (f)
               (recur (rest pairs)))))))
 
-(defmacro casep [test obj & pairs]
+(defmacro casep
+  "Like case, but uses the given test function rather than = to test
+  whether the given object corresponds to any of the given choices."
+  [test obj & pairs]
   (loop [pairs pairs
-         default (fn [] nil)
+         default `(fn ~'casep-nil-default [] nil) ;; TODO name this fn
          acc ()]
     (cond (empty? pairs)
           `(-casep-helper ~test ~obj ~default ~@(reverse acc))
 
           (empty? (rest pairs))
           (recur ()
-                 `(fn [] ~(first pairs))
+                 `(fn ~'casep-specified-default [] ~(first pairs)) ;; TODO name this fn
                  acc)
 
           :else
@@ -504,7 +507,7 @@
                 value (second pairs)]
             (recur (rest (rest pairs))
                    default
-                   (cons `['~key (fn [] ~value)] acc)
+                   (cons `['~key (fn ~'casep-value [] ~value)] acc) ;; TODO name this fn
                  )))))
 
 ;; code thanks to https://clojurians.slack.com/archives/C053AK3F9/p1605188036049500

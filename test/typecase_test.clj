@@ -21,7 +21,7 @@
 
 (ns typecase-test
   (:require [typecase :as sut]
-            [genus]
+            [genus.genus]
             [clojure.test :as t :refer [is]]))
 
 (defn -main []

@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns genus
+(ns genus.genus
   (:refer-clojure :exclude [satisfies? == * +])
   (:require [clojure.set :refer [subset?]]
             [clojure.pprint :refer [cl-format]]
@@ -37,7 +37,7 @@
             ))
 
 ;; allow gns/ prefix even in this file.
-(alias 'gns 'genus)
+(alias 'gns 'genus.genus)
 
 (declare ^:dynamic canonicalize-type -canonicalize-type)
 (declare ^:dynamic inhabited? -inhabited?)
@@ -276,7 +276,6 @@
      ==> nil
   "
   [var-1 expr]
-  ;;  (println [:extract-type-from-expression :var-1 var-1 :expr expr])
   (cond
     (not (sequential? expr))
     nil

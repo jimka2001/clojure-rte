@@ -22,11 +22,11 @@
 (ns genus-spec-test
   (:require [rte-core]
             [rte-construct :as rte]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format pprint]]
             [util :refer [forall human-readable-current-time]]
-            [genus :as gns]
+            [genus.genus :as gns]
             [clojure.spec.alpha :as s]
-            [genus-spec :as gs]
+            [genus.genus-spec :as gs]
             [backtick :refer [template]]
             [clojure.test :as t]))
 
@@ -43,6 +43,23 @@
        (when ~verbose
          (println [:finished  (human-readable-current-time)]))
      )))
+
+;;(pprint  (methods gns/valid-type?))
+
+(t/deftest t-valid-rte
+  (testing "valid type rte"
+    (t/is (gns/valid-type? :sigma))
+    (t/is (gns/valid-type? '(rte :sigma)))))
+  
+
+
+
+
+(t/deftest t-spec-to-rte-0
+  (testing "spec-to-rte 0"
+    (let [sp (s/form (s/* (s/alt :x  (s/cat :a neg? :b pos-int?)  
+                                 :y  (s/cat :c pos? :d neg-int?))))]
+      (t/is (gs/spec-to-rte sp) "test x0"))))
 
 (t/deftest t-spec-to-rte
   (testing "spec-to-rte"
@@ -429,14 +446,14 @@
 (s/def ::email-type (s/and string? #(re-matches email-regex %)))
 (t/deftest t-email-address
   (testing "email address"
-    (t/is (s/valid? ::email-type "jimka.issy@gmail.com"))
-    (t/is (not (s/valid? ::email-type "jimka.issy")))
+    (t/is (s/valid? ::email-type "jimka.issy@gmail.com") :432)
+    (t/is (not (s/valid? ::email-type "jimka.issy")) :433)
 
-    (t/is (gns/typep "jimka.issy@gmail.com" (template (spec ~::email-type))))
-    (t/is (not (gns/typep "jimka.issy" (template (spec ~::email-type)))))
+    (t/is (gns/typep "jimka.issy@gmail.com" (template (spec ~::email-type))) :435)
+    (t/is (not (gns/typep "jimka.issy" (template (spec ~::email-type)))) :436)
 
-    (t/is (gns/typep "jimka.issy@gmail.com" (gns/canonicalize-type (template (spec ~::email-type)))))
-    (t/is (not (gns/typep "jimka.issy" (gns/canonicalize-type (template (spec ~::email-type))))))
+    (t/is (gns/typep "jimka.issy@gmail.com" (gns/canonicalize-type (template (spec ~::email-type)))) :438)
+    (t/is (not (gns/typep "jimka.issy" (gns/canonicalize-type (template (spec ~::email-type))))) :439)
     ))
 
 (s/def ::acctid int?)

@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns typecase
-  (:require [genus :as gns]
+  (:require [genus.genus :as gns]
             [util :refer [setof]]
             [backtick :refer [template]]))
 

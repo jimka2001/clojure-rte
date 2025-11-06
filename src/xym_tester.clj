@@ -1,10 +1,10 @@
 (ns xym-tester
-  (:require [genus :as gns]
+  (:require [genus.genus :as gns]
             [dot]
             [clojure.pprint :refer [pprint]]
             [rte-construct :refer [rte-to-dfa]]
             [rte-extract :refer [dfa-to-rte]]
-            [genus-tester :refer [gen-inhabited-type
+            [genus.genus-tester :refer [gen-inhabited-type
                                   gen-indeterminate-type]]
             [xymbolyco :as xym]
             [util :refer [member time-expr find-first]]

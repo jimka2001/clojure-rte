@@ -29,9 +29,9 @@
                                       partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]
             [rte-construct :as rte]
-            [genus :as gns]
+            [genus.genus :as gns]
             [clojure.pprint :refer [cl-format]]
-            [bdd]
+            [genus.bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
             [xymbolyco :as xym]
