@@ -21,9 +21,11 @@ simple: deps
 	clj -M -m demos.conj-2025.cli comb 1
 	clj -M -m demos.conj-2025.cli flajolet 1
 
-test: deps
-	clj -M -m demos.conj-2025.cli tree-split-gauss 1
+test:
+	lein test
 
+test-genus:
+	lein test :only genus-test
 
 loop:
 	for i in $$(seq 1 10); do \
