@@ -21,7 +21,7 @@
 
 (ns typecase
   (:require [genus.genus :as gns]
-            [util :refer [setof]]
+            [util.util :refer [setof]]
             [backtick :refer [template]]))
 
 (defn- collect-leaf-types [tds]

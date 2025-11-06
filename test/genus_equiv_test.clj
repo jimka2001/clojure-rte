@@ -22,7 +22,7 @@
 (ns genus-equiv-test
   (:require [rte-core]
             [genus.genus :as gns]
-            [util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time]]
             [genus.genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]

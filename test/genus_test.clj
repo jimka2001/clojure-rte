@@ -24,7 +24,7 @@
             [rte-construct :refer [with-compile-env]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type *test-values*]]
-            [util :refer [member human-readable-current-time]]
+            [util.util :refer [member human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
 

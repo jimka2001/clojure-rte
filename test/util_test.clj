@@ -22,16 +22,7 @@
 (ns util-test
   (:require [rte-core]
             [clojure.pprint :refer [cl-format]]
-            [util :refer [sort-operands partition-by-pred
-                          call-with-collector
-                          visit-permutations
-                          remove-once fixed-point member
-                          call-with-found
-                          lazy-pairs
-                          or-else
-                          trace-graph
-                          casep
-                          ]]
+            [util.util :as sut]
             [clojure.string :as str]
             [clojure.test :refer [deftest testing is]]))
 
@@ -40,28 +31,28 @@
 
 (deftest t-partition-by-pred
   (testing "partition-by-pred"
-    (let [[odd even] (partition-by-pred odd? (range 100))]
+    (let [[odd even] (sut/partition-by-pred odd? (range 100))]
       (is (every? odd? odd))
       (is (every? even? even)))))
 
 (deftest t-sort-operands-1
   (testing "sort-operands"
-    (is (= (sort-operands ())
+    (is (= (sut/sort-operands ())
            ()))
-    (is (= (sort-operands [])
+    (is (= (sut/sort-operands [])
            ()))
-    (is (= (sort-operands '(::Cat ::Lion))
+    (is (= (sut/sort-operands '(::Cat ::Lion))
            '(::Cat ::Lion)))
-    (is (= (sort-operands '(::Lion ::Cat))
+    (is (= (sut/sort-operands '(::Lion ::Cat))
            '(::Cat ::Lion)))
-    (is (= (sort-operands '((:not ::Cat) (:not ::Lion)))
+    (is (= (sut/sort-operands '((:not ::Cat) (:not ::Lion)))
            '((:not ::Cat) (:not ::Lion))))
-    (is (= (sort-operands '((:not ::Lion) (:not ::Cat)))
+    (is (= (sut/sort-operands '((:not ::Lion) (:not ::Cat)))
            '((:not ::Cat) (:not ::Lion))))))
     
 (deftest t-sort-operands-2
   (testing "sort-operands 2"
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -75,7 +66,7 @@
                           (:* :sigma)
                           :sigma
                           :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -89,7 +80,7 @@
                           :sigma
                           (:* :sigma)
                           :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -103,7 +94,7 @@
                           (:* :sigma)
                           (:or (:and :sigma BigInteger) (:and :sigma Byte) (:and :sigma Integer) (:and :sigma Long) (:and :sigma Short) (:and :sigma clojure.lang.BigInt))
                           :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -117,7 +108,7 @@
                           (:or (:and :sigma BigInteger) (:and :sigma Byte) (:and :sigma Integer) (:and :sigma Long) (:and :sigma Short) (:and :sigma clojure.lang.BigInt))
                           :sigma
                           :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -132,7 +123,7 @@
                           :sigma
                           (:* :sigma)))
     
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -146,7 +137,7 @@
                           :sigma
                           (:* :sigma)
                           :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
 
@@ -160,26 +151,26 @@
                           (:or (:and :sigma BigInteger) (:and :sigma Byte) (:and :sigma Integer) (:and :sigma Long) (:and :sigma Short) (:and :sigma clojure.lang.BigInt))
                           :sigma
                           :sigma (:* :sigma)))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma))) (:not (:cat :sigma (:* :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma))) (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma) :sigma :sigma :sigma (:* :sigma)
                           :sigma :sigma (:* :sigma) :sigma (:or :epsilon :sigma)
                           (:* :sigma) (:or (:and :sigma BigInteger) (:and :sigma Byte)
                                            (:and :sigma Integer) (:and :sigma Long)
                                            (:and :sigma Short) (:and :sigma clojure.lang.BigInt))))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma))) (:not (:cat :sigma (:* :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma))) (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma) :sigma :sigma :sigma (:* :sigma) :sigma (:* :sigma)
                           :sigma (:or :epsilon :sigma) (:* :sigma)
                           (:or (:and :sigma BigInteger)
                                (:and :sigma Byte) (:and :sigma Integer)
                                (:and :sigma Long) (:and :sigma Short)
                                (:and :sigma clojure.lang.BigInt)) :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma))) (:not (:cat :sigma (:* :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma))) (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma) :sigma :sigma :sigma :sigma (:* :sigma) :sigma (:* :sigma)
                           :sigma (:or :epsilon :sigma) (:* :sigma)
                           (:or (:and :sigma BigInteger)
                                (:and :sigma Byte) (:and :sigma Integer)
                                (:and :sigma Long) (:and :sigma Short) (:and :sigma clojure.lang.BigInt))))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -193,7 +184,7 @@
                           :sigma :sigma
                           (:* :sigma)
                           :sigma))
-    (sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
+    (sut/sort-operands '(:cat (:not (:* (:or :epsilon :sigma)))
                           (:not (:cat :sigma (:* :sigma)))
                           (:or :epsilon :sigma)
                           :sigma
@@ -212,18 +203,18 @@
 
 (deftest t-sort-operands-4
   (testing "sort length"
-    (is (= (sort-operands (list (list 1 2 3) (list 1 2 3 4)))
+    (is (= (sut/sort-operands (list (list 1 2 3) (list 1 2 3 4)))
            (list (list 1 2 3) (list 1 2 3 4))))
-    (is (= (sort-operands (list (list 1 2 3 4) (list 1 2 3)))
+    (is (= (sut/sort-operands (list (list 1 2 3 4) (list 1 2 3)))
            (list (list 1 2 3) (list 1 2 3 4))))))
     
 
 (deftest t-sort-operands-5
   (testing "sort-operands 5"
-    (is (sort-operands (list even? odd? even?)))
-    (is (sort-operands (list 1 3 2 6)))
-    (is (sort-operands [1 3 2 6]))
-    (is (sort-operands (list Integer String Number)))
+    (is (sut/sort-operands (list even? odd? even?)))
+    (is (sut/sort-operands (list 1 3 2 6)))
+    (is (sut/sort-operands [1 3 2 6]))
+    (is (sut/sort-operands (list Integer String Number)))
 ))
 
 
@@ -246,27 +237,27 @@
                      c-cons d-cons 
                      a-list a-vec b-cons e-cons b-list 
                      a-lazy b-lazy)]
-      (is (= (sort-operands data)
+      (is (= (sut/sort-operands data)
              data)))))
 
 (deftest t-visit-permuations
   (testing "visit-permutations"
-    (is (= (set (call-with-collector
+    (is (= (set (sut/call-with-collector
                  (fn [collect]
-                   (visit-permutations collect '()))))
+                   (sut/visit-permutations collect '()))))
            #{()}))
-    (is (= (set (call-with-collector
+    (is (= (set (sut/call-with-collector
                  (fn [collect]
-                   (visit-permutations collect '(1)))))
+                   (sut/visit-permutations collect '(1)))))
            #{'(1)}))
-    (is (= (set (call-with-collector
+    (is (= (set (sut/call-with-collector
                  (fn [collect]
-                   (visit-permutations collect '(1 2)))))
+                   (sut/visit-permutations collect '(1 2)))))
            (set '((1 2)
                   (2 1)))))
-    (is (= (set (call-with-collector
+    (is (= (set (sut/call-with-collector
                  (fn [collect]
-                   (visit-permutations collect '(1 2 3)))))
+                   (sut/visit-permutations collect '(1 2 3)))))
            (set '((1 2 3)
                   (1 3 2)
                   (2 1 3)
@@ -277,32 +268,32 @@
     
 (deftest t-call-with-collector
   (testing "call-with-collector"
-    (is (= (call-with-collector (fn [collect]
+    (is (= (sut/call-with-collector (fn [collect]
                                   (collect 1)
                                   (collect 3)
                                   (collect 2)))
            '(2 3 1)))
-    (is (= (call-with-collector (fn [_collect]
+    (is (= (sut/call-with-collector (fn [_collect]
                                   ))
            ()))))
 
 (deftest t-remove-once
   (testing "remove-once"
-    (is (= (remove-once 4 '(1 2 3))
+    (is (= (sut/remove-once 4 '(1 2 3))
            '(1 2 3)))
-    (is (= (remove-once 1 '())
+    (is (= (sut/remove-once 1 '())
            ()))
 
-    (is (= (remove-once 1 '(1 2 3))
+    (is (= (sut/remove-once 1 '(1 2 3))
            '(2 3)))
 
-    (is (= (remove-once 1 '(1 1 2 3))
+    (is (= (sut/remove-once 1 '(1 1 2 3))
            '(1 2 3)))
 
-    (is (= (remove-once 1 '(1 2 1 3))
+    (is (= (sut/remove-once 1 '(1 2 1 3))
            '(2 1 3)))
 
-    (is (= (remove-once 2 '(1 2 1 2 3 2))
+    (is (= (sut/remove-once 2 '(1 2 1 2 3 2))
            '(1 1 2 3 2)))
     ))
 
@@ -312,41 +303,41 @@
 
 (deftest t-sort-operands-5
   (testing "sort-operands 5"
-    (sort-operands
+    (sut/sort-operands
      test-data)))
 
 (deftest t-fixed-point
   (testing "fixed-point"
-    (is (= (fixed-point 1 identity =) 1))
-    (is (= (fixed-point 10 (fn [n] (if (> n 0) (- n 1) n)) =) 0))))
+    (is (= (sut/fixed-point 1 identity =) 1))
+    (is (= (sut/fixed-point 10 (fn [n] (if (> n 0) (- n 1) n)) =) 0))))
 
 (deftest t-util-member
   (testing "util member"
-    (is (member 1 '(1 2 3)))
-    (is (member 2 '(1 2 3)))
-    (is (member 3 '(1 2 3)))
-    (is (not (member 4 '(1 2 3))))
+    (is (sut/member 1 '(1 2 3)))
+    (is (sut/member 2 '(1 2 3)))
+    (is (sut/member 3 '(1 2 3)))
+    (is (not (sut/member 4 '(1 2 3))))
     
-    (is (member 1 [1 2 3]))
-    (is (member 2 [1 2 3]))
-    (is (member 3 [1 2 3]))
-    (is (not (member 4 [1 2 3])))
+    (is (sut/member 1 [1 2 3]))
+    (is (sut/member 2 [1 2 3]))
+    (is (sut/member 3 [1 2 3]))
+    (is (not (sut/member 4 [1 2 3])))
 
-    (is (member false '(1 false 2)))
-    (is (not (member false '(1 2 3))))
-    (is (not (member false '(1 nil 2 3))))
+    (is (sut/member false '(1 false 2)))
+    (is (not (sut/member false '(1 2 3))))
+    (is (not (sut/member false '(1 nil 2 3))))
 
-    (is (member nil '(1 nil 2)))
-    (is (not (member nil '(1 false 2 3))))
-    (is (not (member nil '(1 2 3))))
+    (is (sut/member nil '(1 nil 2)))
+    (is (not (sut/member nil '(1 false 2 3))))
+    (is (not (sut/member nil '(1 2 3))))
 
-    (is (member true '(1 true 2)))
-    (is (not (member true '(1 false 2 3))))
-    (is (not (member true '(1 nil 2 3))))
-    (is (not (member true '(1 2 3))))
+    (is (sut/member true '(1 true 2)))
+    (is (not (sut/member true '(1 false 2 3))))
+    (is (not (sut/member true '(1 nil 2 3))))
+    (is (not (sut/member true '(1 2 3))))
 
-    (is (not (member 1 [])))
-    (is (not (member 1 ())))))
+    (is (not (sut/member 1 [])))
+    (is (not (sut/member 1 ())))))
 
 (deftest t-fold
   (testing "fold"
@@ -359,8 +350,8 @@
                  [1 2 3 4 5 6 7 8
                   10 20 30 40 50 60 70 80
                   100 200 300 400 500 600 700 800]]]
-      (doseq [fold [util/pairwise-fold
-                    util/tree-fold]]
+      (doseq [fold [sut/pairwise-fold
+                    sut/tree-fold]]
         (is (= (reduce + 0 seq)
                (fold + 0 seq))
             (cl-format false "351: ~A" fold))
@@ -389,8 +380,8 @@
     (let [s (map / [23 29 31 37 41 43 47 53 57 67
                     71 73 79 83 89 97])
           ]
-      (doseq [fold [util/pairwise-fold
-                    util/tree-fold]]
+      (doseq [fold [sut/pairwise-fold
+                    sut/tree-fold]]
 
         (reduce + 0 s)
         (fold + 0 s)
@@ -400,7 +391,7 @@
 
 (deftest t-fold-3
   (testing "fold 3"
-    (doseq [f [reduce util/pairwise-fold util/tree-fold]]
+    (doseq [f [reduce sut/pairwise-fold sut/tree-fold]]
       (let [x (atom 0)
             s [1/23 1/29
                1/31 1/37
@@ -430,37 +421,37 @@
       (doseq [n (range (count words))
               :let [suffix (drop n words)]]
         (is (= (reduce (fn [acc item] (+ acc (count item))) 0 suffix)
-               (util/tree-fold + count 0 suffix))))
+               (sut/tree-fold + count 0 suffix))))
 
       (doseq [n (range (count words))
               :let [suffix (drop n words)
                     f (fn [acc item] (str/join [acc item]))]
               ]
         (is (= (reduce f "" suffix)
-               (util/tree-fold f "" suffix)))))))
+               (sut/tree-fold f "" suffix)))))))
 
 
 (deftest t-call-with-found
   (testing "call-with-found"
-    (is (= false (call-with-found (constantly false) '(1 2 3))))
-    (is (= false (call-with-found (constantly nil) '(1 2 3) :if-found (constantly true))))
-    (is (= :hello (call-with-found odd? '(0 2 4 5 6 8)
+    (is (= false (sut/call-with-found (constantly false) '(1 2 3))))
+    (is (= false (sut/call-with-found (constantly nil) '(1 2 3) :if-found (constantly true))))
+    (is (= :hello (sut/call-with-found odd? '(0 2 4 5 6 8)
                                    :if-not-found 42
                                    :if-found (constantly :hello))))
-    (is (= 42 (call-with-found odd? '(0 2 4 6 8)
+    (is (= 42 (sut/call-with-found odd? '(0 2 4 6 8)
                                :if-not-found 42
                                :if-found (constantly :hello))))))
 
 (deftest t-lazy-pairs
   (testing "lazy-pairs"
-    (let [pairs (lazy-pairs (range 10))]
+    (let [pairs (sut/lazy-pairs (range 10))]
       (is (= (/ (* 10 9) 2)
              (count pairs)))
       (doseq [i (range 10)
               j (range i)]
-        (is (member [j i] pairs))
-        (is (not (member [i j] pairs)))
-        (is (not (member [i i] pairs))))
+        (is (sut/member [j i] pairs))
+        (is (not (sut/member [i j] pairs)))
+        (is (not (sut/member [i i] pairs))))
 
       ;; ([0 1] [1 2] [0 2] [2 3] [1 3] [0 3] [3 4] [2 4] [1 4] [0 4])
       ;; At the point in the sequence where [a b] occurs, every pair [x y] thereafter
@@ -480,12 +471,12 @@
   
 (deftest t-or-else
   (testing "or-else"
-    (is :dont-know (or-else))
-    (is (= 1 (or-else (fn [] 1))))
-    (is (= 1 (or-else (fn [] 1) (fn [] 2))))
-    (is (= 1 (or-else (fn [] :dont-know) (fn [] 1))))
-    (is (= 1 (or-else (fn [] 1) (fn [] :dont-know) (fn [] 2))))
-    (is (= 1 (or-else  (fn [] :dont-know)
+    (is :dont-know (sut/or-else))
+    (is (= 1 (sut/or-else (fn [] 1))))
+    (is (= 1 (sut/or-else (fn [] 1) (fn [] 2))))
+    (is (= 1 (sut/or-else (fn [] :dont-know) (fn [] 1))))
+    (is (= 1 (sut/or-else (fn [] 1) (fn [] :dont-know) (fn [] 2))))
+    (is (= 1 (sut/or-else  (fn [] :dont-know)
                        (fn [] :dont-know)
                        (fn [] :dont-know)
                        (fn [] :dont-know)
@@ -502,7 +493,7 @@
         (1) [["a" 2]]
         [["b" 2]
          ["a" 0]]))
-    (is (= (trace-graph 0 edges)
+    (is (= (sut/trace-graph 0 edges)
            [[0 1 2]
             [[["a" 1] ["b" 2]]
              [["a" 2]]
@@ -510,16 +501,16 @@
 
 (deftest t-casep
   (testing "casep"
-    (is (= (casep (fn [x y] (= (first x) (first y))) [1]
+    (is (= (sut/casep (fn [x y] (= (first x) (first y))) [1]
              ([1] [2] [3]) 1
              ([4] [5] [6]) 2)
            1))
-    (is (= (casep (fn [x y] (= (first x) (first y))) [100]
+    (is (= (sut/casep (fn [x y] (= (first x) (first y))) [100]
              ([1] [2] [3]) 1
              ([4] [5] [6]) 2)
            nil))
 
-    (is (= (casep (fn [x y] (= (first x) (first y))) [100]
+    (is (= (sut/casep (fn [x y] (= (first x) (first y))) [100]
              ([1] [2] [3]) 1
              ([4] [5] [6]) 2
              :none)

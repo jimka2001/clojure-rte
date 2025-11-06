@@ -23,7 +23,7 @@
   (:require [rte-core]
             [rte-construct :as rte]
             [clojure.pprint :refer [cl-format pprint]]
-            [util :refer [forall human-readable-current-time]]
+            [util.util :refer [forall human-readable-current-time]]
             [genus.genus :as gns]
             [clojure.spec.alpha :as s]
             [genus.genus-spec :as gs]

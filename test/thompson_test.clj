@@ -22,7 +22,7 @@
 (ns thompson-test
   (:require [xym.thompson :as tom]
             [genus.genus :as gns]
-            [util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time]]
             [rte-core]
             [rte-construct :as rte]
             [xym.xymbolyco :as xym]

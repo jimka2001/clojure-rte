@@ -6,12 +6,12 @@
                                    tree-split-rte-inv-gaussian
                                    flajolet-rte-by-size
                                    comb-rte]]
-   [dot]
-   [lock]
-   [genus :as gns]
+   [graph.dot]
+   [util.lock]
+   [genus.genus :as gns]
    [rte-construct :as rte]
    [rte-graphviz :refer [rte-view]]
-   [util :refer [member]]))
+   [util.util :refer [member]]))
 
 
 (def algos ["tree-split-linear"

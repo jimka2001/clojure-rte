@@ -24,14 +24,14 @@
   (:require [clojure.set :refer [subset?]]
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
-            [util :refer [exists-pair forall-pairs exists fixed-point
+            [util.util :refer [exists-pair forall-pairs exists fixed-point
                                       remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized call-with-found find-first
                                       gc-friendly-memoize
                                       unchunk or-else]]
-            [cl-compat :as cl]
+            [util.cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
             ))

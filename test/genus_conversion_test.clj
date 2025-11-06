@@ -21,7 +21,7 @@
 
 (ns genus-conversion-test
   (:require [rte-core]
-            [util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time]]
             [genus.genus :as gns]
             [backtick :refer [template]]
             [clojure.test :refer [deftest is]]))

@@ -22,7 +22,7 @@
 (ns rte-extract
   (:require [clojure.pprint :refer [cl-format]]
             [rte-construct :as rte]
-            [util :refer [timeout-reached?]]
+            [util.util :refer [timeout-reached?]]
             [xym.xymbolyco :as xym]))
 
 (defn extract-rte

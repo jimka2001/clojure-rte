@@ -22,7 +22,7 @@
 (ns rte-case-test
   (:require [rte-core]
             [genus.genus :as gns]
-            [util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time]]
             [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [rte-case :refer [rte-case destructuring-case

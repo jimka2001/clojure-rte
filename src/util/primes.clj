@@ -1,4 +1,4 @@
-(ns primes
+(ns util.primes
   (:require [clojure.pprint :refer [pprint]]
             [clojure.math :refer [sqrt round pow]]))
 

@@ -19,17 +19,17 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns dot
+(ns graph.dot
   (:require [clojure.pprint :refer [cl-format pprint]]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]
             [genus.genus :as gns]
             [rte-construct :refer [rte-to-dfa]]
-            [cl-compat :as cl]
-            [view :as view]
+            [util.cl-compat :as cl]
+            [graph.view :as view]
             [xym.xymbolyco :as xym]
-            [util :refer [member pprint-indent]]
+            [util.util :refer [member pprint-indent]]
             [clojure.java.shell :refer [sh]]))
 
 (def ^:dynamic *dot-path*

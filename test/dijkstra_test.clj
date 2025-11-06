@@ -1,5 +1,5 @@
 (ns dijkstra-test
-  (:require [dijkstra :as sut]
+  (:require [util.dijkstra :as sut]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []

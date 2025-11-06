@@ -21,7 +21,7 @@
 
 (ns genus.genus-spec
   (:require [genus.genus :as gns]
-            [util :refer [casep defn-memoized exists seq-matcher]]
+            [util.util :refer [casep defn-memoized exists seq-matcher]]
             [clojure.pprint :refer [cl-format]]
             [clojure.spec.alpha :as s]
             [backtick :refer [template]]

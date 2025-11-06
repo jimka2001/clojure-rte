@@ -1,6 +1,6 @@
 (ns demos.conj-2025.demo
   (:require [clojure.pprint :refer [cl-format]]
-            [dot]
+            [graph.dot :as dot]
             [rte-graphviz :refer [rte-view]]
             [xym.xymbolyco :as xym]
             [rte-case :refer [rte-case destructuring-case]]

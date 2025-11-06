@@ -4,12 +4,12 @@
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.pprint :refer [pprint cl-format]]
-            [util :refer [member time-expr mean std-deviation read-csv-data rename-columns
+            [util.util :refer [member time-expr mean std-deviation read-csv-data rename-columns
                           call-in-block with-timeout human-readable-current-time
                           truthy-let
                           ]]
-            [view]
-            [vega-plot :as vega]
+            [graph.view :as view]
+            [graph.vega-plot :as vega]
             [genus.genus :as gns]
             [rte-construct :refer [rte-to-dfa]]
             [rte-extract :refer [dfa-to-rte]]
@@ -19,7 +19,7 @@
             [rte-randomize-syntax :refer [gen-rte]]
             [xym.xym-tester :refer [gen-dfa]]
             [xym.xymbolyco :as xym]
-            [lock :as lock]
+            [util.lock :as lock]
             [demos.vmcai-2026.statistics-inhabited]
             [demos.vmcai-2026.statistics-rte]
             ))

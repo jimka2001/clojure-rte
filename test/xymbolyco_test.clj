@@ -29,8 +29,8 @@
             [genus.bdd :as bdd]
             [clojure.pprint :refer [cl-format pprint]]
             [genus.genus :as gns]
-            [util :refer [member human-readable-current-time]]
-            [dot :refer [dfa-to-dot]]
+            [util.util :refer [member human-readable-current-time]]
+            [graph.dot :refer [dfa-to-dot] :as dot]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (def testing-view

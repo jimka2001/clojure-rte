@@ -23,8 +23,8 @@
   "Implementation of Thompson construction of Sigma Complete Deterministic
   Finite Automata"
   (:refer-clojure :exclude [complement])
-  (:require [cl-compat :as cl]
-            [util :refer [fixed-point member
+  (:require [util.cl-compat :as cl]
+            [util.util :refer [fixed-point member
                                       defn-memoized find-first
                                       partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]

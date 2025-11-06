@@ -1,11 +1,11 @@
-(ns lock
+(ns util.lock
   (:require [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
             [clojure.data.csv :as csv]
             [clojure.pprint :refer [pprint]]
-            [vega-plot :as vega]
-            [util :refer [call-in-block with-timeout read-csv-data rename-columns]]
+            [graph.vega-plot :as vega]
+            [util.util :refer [call-in-block with-timeout read-csv-data rename-columns]]
             )
   )
 

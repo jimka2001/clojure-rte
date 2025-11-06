@@ -23,8 +23,8 @@
   "Implementation of Sigma Complete Deterministic Finite Automata
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
-  (:require [cl-compat :as cl]
-            [util :refer [fixed-point member group-map
+  (:require [util.cl-compat :as cl]
+            [util.util :refer [fixed-point member group-map
                           defn-memoized find-first
                           timeout-reached?
                           non-empty? exists setof]]
@@ -34,7 +34,7 @@
             [genus.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [dijkstra :refer [dijkstra-to-final dijkstra]]
+            [util.dijkstra :refer [dijkstra-to-final dijkstra]]
             ))
 
 (defrecord State 

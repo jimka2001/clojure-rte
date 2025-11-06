@@ -21,7 +21,7 @@
 
 (ns rte-test-memoize
   (:require [rte-core]
-            [util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time]]
             [rte-construct :as rte]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]))

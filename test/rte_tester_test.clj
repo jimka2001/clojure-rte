@@ -21,7 +21,7 @@
 
 (ns rte-tester-test
   (:require [rte-core]
-            [util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [rte-construct :as rte :refer [canonicalize-pattern]]
             [xym.xymbolyco :as xym]

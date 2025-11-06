@@ -21,8 +21,8 @@
 
 (ns cl-compat-test
   (:require [rte-core]
-            [cl-compat :as cl]
-            [util :refer [call-with-collector human-readable-current-time]]
+            [util.cl-compat :as cl]
+            [util.util :refer [call-with-collector human-readable-current-time]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
@@ -143,7 +143,7 @@
 (deftest t-ldiff
   (testing "ldiff"
     (is (= (let [L '(1 2 3 4)]
-             (cl-compat/ldiff L (rest (rest L))))
+             (cl/ldiff L (rest (rest L))))
            '(1 2)))
-    (is (= (cl-compat/ldiff '(1 2 3 4) '(3 4))
+    (is (= (cl/ldiff '(1 2 3 4) '(3 4))
            '(1 2)))))

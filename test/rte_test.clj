@@ -31,11 +31,11 @@
             [clojure.pprint :refer [cl-format]]
             [rte-extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [util :refer [member human-readable-current-time]]
+            [util.util :refer [member human-readable-current-time]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [*test-types* gen-type]]
             [rte-randomize-syntax :refer [gen-rte]]
-            [dot :as dot]
+            [graph.dot :as dot]
             [backtick :refer [template]]
             [xym.xymbolyco :as xym]))
 

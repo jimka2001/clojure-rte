@@ -21,7 +21,7 @@
 
 (ns genus.genus-tester
   (:require [genus.genus :as gns]
-            [util :refer [rand-tree-012]]
+            [util.util :refer [rand-tree-012]]
             [backtick :refer [template]]))
 
 (defn safe-odd? 

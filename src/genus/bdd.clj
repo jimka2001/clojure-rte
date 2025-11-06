@@ -22,7 +22,7 @@
 (ns genus.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [util :refer [call-with-collector non-empty? forall exists]]
+  (:require [util.util :refer [call-with-collector non-empty? forall exists]]
             [genus.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))

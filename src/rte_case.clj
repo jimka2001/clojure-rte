@@ -21,9 +21,9 @@
 
 (ns rte-case
   (:require [xym.xymbolyco :as xym]
-            [dot]
+            [graph.dot :as dot]
             [genus.genus :as gns]
-            [util :refer [defn-memoized member non-empty? with-outstring]]
+            [util.util :refer [defn-memoized member non-empty? with-outstring]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format]]

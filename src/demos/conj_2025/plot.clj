@@ -4,7 +4,7 @@
             [clojure.math :refer [log]]
             [demos.conj-2025.gen :refer [algos]]
             [demos.conj-2025.csv :refer [read-csv-lines]]
-            [gnuplot :refer [run-gnu-plot histogram gnuplot]]
+            [graph.gnuplot :refer [run-gnu-plot histogram gnuplot]]
             [clojure.java.io :as io]))
 
 (defn plot-cb [base]
