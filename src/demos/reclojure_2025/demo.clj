@@ -2,7 +2,7 @@
   (:require [rte-case :refer [rte-case dscase rte-case-fn dsdefn]]
             [genus :as gns]
             [rte-construct :as rte]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [typecase :refer [typecase]]
             [dot])
 )

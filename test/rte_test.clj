@@ -37,7 +37,7 @@
             [rte-randomize-syntax :refer [gen-rte]]
             [dot :as dot]
             [backtick :refer [template]]
-            [xymbolyco :as xym]))
+            [xym.xymbolyco :as xym]))
 
 (def test-verbose false)
 

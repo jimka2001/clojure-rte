@@ -2,7 +2,7 @@
   (:require [clojure.pprint :refer [cl-format]]
             [dot]
             [rte-graphviz :refer [rte-view]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [rte-case :refer [rte-case destructuring-case]]
             [rte-construct :as rte]
             

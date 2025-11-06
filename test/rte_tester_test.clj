@@ -24,7 +24,7 @@
             [util :refer [human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [rte-construct :as rte :refer [canonicalize-pattern]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
                                             test-canonicalize-pattern
                                             test-rte-canonicalize-nullable

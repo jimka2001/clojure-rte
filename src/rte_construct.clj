@@ -34,7 +34,7 @@
                           count-if-not find-simplifier
                           timeout-reached?
                           ]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.set :refer [union]]
             [cl-compat :as cl]

@@ -21,7 +21,7 @@
 
 (ns rte-tester
   (:require [tester]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.math :refer [pow round]]
             [genus.genus :as gns]

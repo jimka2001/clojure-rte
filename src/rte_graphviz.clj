@@ -3,7 +3,7 @@
   (:require [util :refer [member run-dot]]
             [genus.genus :as gns]
             [view :refer [view-image]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [rte-construct :as rte])
 )
 

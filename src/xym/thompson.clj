@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns thompson
+(ns xym.thompson
   "Implementation of Thompson construction of Sigma Complete Deterministic
   Finite Automata"
   (:refer-clojure :exclude [complement])
@@ -34,7 +34,7 @@
             [genus.bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [clojure.set :as set]
             ))
 

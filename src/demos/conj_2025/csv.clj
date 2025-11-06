@@ -4,7 +4,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lock :as lock]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [rte-construct :as rte]
             [util :refer [with-timeout]]            
 ))

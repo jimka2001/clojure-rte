@@ -5,8 +5,8 @@
             [vega-plot :as vega]
             [util :refer [mean std-deviation with-timeout]]
             [genus.genus :as gns]
-            [xymbolyco :as xym]
-            [xym-tester :refer [gen-dfa]]
+            [xym.xymbolyco :as xym]
+            [xym.xym-tester :refer [gen-dfa]]
             [rte-construct :refer [rte-to-dfa]]
 ))
 

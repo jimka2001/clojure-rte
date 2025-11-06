@@ -28,7 +28,7 @@
             [rte-construct :refer [rte-to-dfa]]
             [cl-compat :as cl]
             [view :as view]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [util :refer [member pprint-indent]]
             [clojure.java.shell :refer [sh]]))
 

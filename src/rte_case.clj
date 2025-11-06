@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-case
-  (:require [xymbolyco :as xym]
+  (:require [xym.xymbolyco :as xym]
             [dot]
             [genus.genus :as gns]
             [util :refer [defn-memoized member non-empty? with-outstring]]
