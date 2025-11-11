@@ -6,8 +6,8 @@
                                    tree-split-rte-inv-gaussian
                                    flajolet-rte-by-size
                                    comb-rte]]
-   [graph.dot]
-   [util.lock]
+   [graph.dot :as dot]
+   [util.lock :as lock]
    [genus.genus :as gns]
    [rte-construct :as rte]
    [rte-graphviz :refer [rte-view]]

@@ -2,7 +2,7 @@
   (:require [rte-construct :as rte]
             [genus.genus :as gns]
             [clojure.math :refer [random]]
-            [genus-tester :refer [*test-types*]]
+            [genus.genus-tester :refer [*test-types*]]
             [util.util :refer [member weighted-case]]))
 
 
