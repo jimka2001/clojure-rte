@@ -1,6 +1,8 @@
 # 
 set logscale x
 set logscale y
+set xlabel 'DFA states' font ',10' offset 3.5,0.5
+set ylabel 'Percentage' font ',10' offset 3.0,0
 set grid
 set key font ',10'
 set xtics font ',10'
