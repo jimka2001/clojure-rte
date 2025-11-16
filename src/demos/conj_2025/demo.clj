@@ -43,9 +43,9 @@
     [:launch-the-missiles a b]
     ))
 
-(missile-demo '(true true))
-(missile-demo '(false "hello" 3 true true true))
-(missile-demo '(true "hello"))
-(missile-demo '(true 3))
-(missile-demo '(true "3" 3))
-(missile-demo '(true "3" 3 true))
+;; (missile-demo '(true true))
+;; (missile-demo '(false "hello" 3 true true true))
+;; (missile-demo '(true "hello"))
+;; (missile-demo '(true 3))
+;; (missile-demo '(true "3" 3))
+;; (missile-demo '(true "3" 3 true))

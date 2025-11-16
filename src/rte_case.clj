@@ -385,7 +385,8 @@
   (cond
     (not= 0 (mod (count operands) 2))
     (throw (ex-info (cl-format false
-                               "destructuring-case expects multiple of 2 number of operands after the first: not ~A, ~A"
+                               "destructuring-case expects multiple of 2 number of operands after the first:~
+                                not ~A, ~A"
                                (count operands) (apply list 'destructuring-case expr operands))
                     {:error-type :invalid-destructuring-case-call-site
                      :expr expr
@@ -417,7 +418,8 @@
   (cond
     (not= 0 (mod (count operands) 2))
     (throw (ex-info (cl-format false
-                               "dscase expects multiple of 2 number of operands after the first: not ~A, ~A"
+                               "dscase expects multiple of 2 number of operands after the first:~
+                                not ~A, ~A"
                                (count operands) (apply list 'dscase expr operands))
                     {:error-type :invalid-dscase-call-site
                      :expr expr

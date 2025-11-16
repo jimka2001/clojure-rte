@@ -58,24 +58,24 @@
                   [(format "%s %d samples" algo (count csv-lines))
                    (shuffle xys)])]
      (gnuplot descrs
-              :title (format "Retention: Ratio node count per state count %s" prefix)
+              :title (format "retention: ratio node count per state count %s" prefix)
               :x-axis-label "aspect ratio"
               :y-axis-label "retention"
               :y-log true
               :grid true
               :plot-with "points"
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%sretention-aspect-ratio" prefix))
+              :gnu-file-cb (plot-cb (format "plot-%sretention-aspect-ratio" prefix))
               :view view)
      (gnuplot descrs
-              :title (format "Retention: Ratio node count per state count %s" prefix)
+              :title (format "retention: ratio node count per state count %s" prefix)
               :x-axis-label "aspect ratio"
               :y-axis-label "retention"
               :y-log true
               :grid true
               :plot-with "lines"
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%sretention-aspect-ratio-ratsnest" prefix))
+              :gnu-file-cb (plot-cb (format "plot-%sretention-aspect-ratio-ratsnest" prefix))
               :view view))))
 
 
@@ -93,23 +93,23 @@
                   [(format "%s %d samples" algo num-samples)
                    (shuffle xys)])]
      (gnuplot descrs
-              :title (format "DFA state count %s vs Aspect Ratio" prefix)
+              :title (format "dfa state count %s vs aspect ratio" prefix)
               :x-axis "aspect ratio"
-              :y-axis "DFA state count"
+              :y-axis "dfa state count"
               :plot-with "points"
               :y-log true
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%sdfa-state-count-vs-aspect-ratio" prefix))
+              :gnu-file-cb (plot-cb (format "plot-%sdfa-state-count-vs-aspect-ratio" prefix))
               :grid true
               :view view)
      (gnuplot descrs
-              :title (format "DFA state count %s vs Aspect Ratio" prefix)
+              :title (format "dfa state count %s vs aspect ratio" prefix)
               :x-axis "aspect ratio"
-              :y-axis "DFA state count"
+              :y-axis "dfa state count"
               :plot-with "lines"
               :y-log true
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%sdfa-state-count-vs-aspect-ratio-ratsnest"
+              :gnu-file-cb (plot-cb (format "plot-%sdfa-state-count-vs-aspect-ratio-ratsnest"
                                             prefix))
               :grid true
               :view view))))
@@ -139,14 +139,14 @@
                   [(format "%s samples=" algo (count csv-lines))
                    xys])]
      (gnuplot descrs
-              :title (format "Fraction of DFAs larger than given state count %s" prefix)
-              :x-axis "DFA state count"
+              :title (format "fraction of dfas larger than given state count %s" prefix)
+              :x-axis "dfa state count"
               :x-log true
-              :y-axis "Percentage"
+              :y-axis "percentage"
               :plot-with "lines"
               :y-log true
               :point-size 0.2
-              :gnu-file-CB (plot-cb (format "plot-%sthreshold" prefix))
+              :gnu-file-cb (plot-cb (format "plot-%sthreshold" prefix))
               :grid true
               :view view))))
 
