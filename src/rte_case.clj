@@ -33,7 +33,7 @@
 
 (def ^:dynamic *warn-on-unreachable-code* true)
 
-(defn print-unreachable-warning [code-exprs]
+(defn print-unreachable-warning [code-exprs call-site-meta-data]
   (let [msg (with-outstring pr
               (pr "Unreachable code: ")
               (if (sequential? code-exprs)
@@ -43,13 +43,18 @@
               (pr "\n"))]
 
     (binding [*out* *err*]
-      (printf "%s" msg))))
+      (printf "%s:%s:%s:%s"
+              (:file call-site-meta-data)
+              (:line call-site-meta-data)
+              (:column call-site-meta-data)
+              msg
+              ))))
 
-(defn warn-unreachable [dfa code-exprs]
+(defn warn-unreachable [dfa code-exprs call-site-meta-data]
   (let [traces (xym/find-spanning-map dfa)]
     (doseq [ev (range (count code-exprs))
             :when (not (traces ev))]
-      (print-unreachable-warning (nth code-exprs ev)))))
+      (print-unreachable-warning (nth code-exprs ev) call-site-meta-data))))
 
 
 (defn clauses-to-dfa
@@ -86,8 +91,6 @@
         index))
 
 
-
-
 (defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
   This function is used in the macro expansion of rte-case but
@@ -98,7 +101,7 @@
   is called and its value is returned.
   The sequence is traversed a maximum of once, but may not traverse
   entirely if it is determined early that no rte matches."
-  [pairs code-exprs]
+  [pairs code-exprs call-site-meta-data]
   (let [dfa (reduce xym/synchronized-union 
                     (for [[rte thunk] pairs]
                       (do (assert (rte/valid-rte? rte)
@@ -110,7 +113,7 @@
     (when *warn-on-unreachable-code*
       (doall (map (fn [[rte thunk] code-expr]
                     (when (not (traces thunk))
-                      (print-unreachable-warning code-expr)))
+                      (print-unreachable-warning code-expr call-site-meta-data)))
                   pairs code-exprs)))
     ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
     (fn f-101 [s]
@@ -139,7 +142,6 @@
         clauses (if odd-clauses
                   `(~@(butlast clauses)
                     ~sigma-* ~(last clauses))
-                  clauses)]
 
     ;; This macro expansion may seem a bit more complicated that it
     ;; needs to be.  I think there's a way to avoid the complication
@@ -394,12 +396,16 @@
 
     :else
     (let [pairs (partition 2 operands)
+          meta-data (assoc (meta &form) :file *file*
+                                       :form &form
+                                       :line (:line (meta &form))
+                                       :column (:column (meta &form)))
           ;; e.g. pairs =   (([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
           ;;                  1)
           ;;                 ([[_a _b]          {_a Boolean _b (or String Boolean)}]
           ;;                  2))
           ]
-      `(apply (-destructuring-fn-many nil ~@pairs) ~expr))))
+      `(apply (-destructuring-fn-many ~meta-data nil ~@pairs) ~expr))))
 
 (defmacro dscase
   "Semantically similar to destructuring-case but arguably simpler syntax.
@@ -447,17 +453,18 @@
   "Internal macro used in the expansion of destructuring-fn
    E.g.
   (-destructuring-fn-many
+    meta-data
     nil
     ([[[a b] c d] {}] (list :first a b c d))
     ([[a [b c] d] {}] (list :second a b c d)))
   "
-  [& args]
+  [meta-data & args]
   (cond (empty? args)
         nil
 
         (and (not (symbol? (first args)))
              (not (= nil (first args))))
-        `(-destructuring-fn-many nil ~@args)
+        `(-destructuring-fn-many ~meta-data nil ~@args)
 
         :else
         ;; e.g. given-clauses =     (([[[a b] c d] {}] (list :first a b c d))
@@ -475,7 +482,7 @@
               ;; we must call warn-unreachable at macro expansion time
               ;; because we want the message emitted at compile time.
               _ (when *warn-on-unreachable-code*
-                  (warn-unreachable (clauses-to-dfa pairs) code-exprs))
+                  (warn-unreachable (clauses-to-dfa pairs) code-exprs meta-data))
               ]
           `(let [dfa# (clauses-to-dfa '~pairs)]
              (fn
@@ -494,9 +501,6 @@
                    (throw (ex-info "No pattern matching given sequence"
                                    {:sequence seq#}))
                    )))))))
-
-
-
 
 
 (defmacro destructuring-fn
@@ -527,11 +531,16 @@
             "destructuring-fn, invalid function body or clauses clauses")) 
 
     (vector? (second args)) ; if lambda-list is a vector
-    (let [[name lambda-list & others] args]
+    (let [[name lambda-list & others] args
+          meta-data {:form &form
+                     :file *file*
+                     :meta-form (meta &form)
+                     :env &env}]
       `(-destructuring-fn-many
-        ~name
-        (~lambda-list
-         ~@others)))
+         ~meta-data
+         ~name
+         (~lambda-list
+          ~@others)))
 
     (every? (fn [clause]
               (and (sequential? clause)
@@ -539,10 +548,15 @@
                    (not-empty clause)
                    (vector? (first clause))))
             (rest args))
-    (let [[name & clauses] args]
+    (let [[name & clauses] args
+          meta-data {:form &form
+                     :file *file*
+                     :meta-form (meta &form)
+                     :env &env}]
       `(-destructuring-fn-many
-        ~name
-        ~@clauses))
+         ~meta-data
+         ~name
+         ~@clauses))
     
     :else
     (throw (IllegalArgumentException. 
