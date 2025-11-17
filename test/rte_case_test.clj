@@ -284,9 +284,9 @@
     (is (= 1
            (let [f
                  (-destructuring-fn-many
-                  {:file "dummy"
-                   :line 0
-                   :column 0}
+                     :file "dummy"
+                     :line 0
+                     :column 0
                   ([[_a _b]          {_a Boolean _b (or String Boolean)}]
                    2)
                   ([[_a [_b _c] & _d]  {_a Boolean _b String d Boolean}]
@@ -300,9 +300,9 @@
   ;; we run them here to assure that we don't get index invalid.
   (let [f
         (-destructuring-fn-many
-         {:file "dummy"
+            :file "dummy"
           :line 0
-          :column 0}
+          :column 0
          ([[_a _b]            {_a Boolean _b (or String Boolean)}]
           2)
          ([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
