@@ -23,7 +23,7 @@
   (:require [xym.xymbolyco :as xym]
             [graph.dot :as dot]
             [genus.genus :as gns]
-            [util.util :refer [defn-memoized member non-empty? with-outstring parse-prefixed-keyword-args]]
+            [util.util :refer [defn-memoized member non-empty? with-outstring parse-prefixed-keyword-args flatten-1]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format pprint]]
@@ -411,7 +411,8 @@
             ;;                 ([[_a _b]          {_a Boolean _b (or String Boolean)}]
             ;;                  2))
             ]
-        `(apply (-destructuring-fn-many ~@(flatten (seq call-site-meta-data)) nil ~@pairs) ~expr)))))
+        `(apply (-destructuring-fn-many ~@(flatten-1 call-site-meta-data) nil ~@pairs)
+                ~expr)))))
 
 (defmacro dscase
   "Semantically similar to destructuring-case but arguably simpler syntax.
@@ -455,7 +456,7 @@
                       [[lambda-list meta-data]  consequent]))
                   )]
           `(destructuring-case ~expr 
-             ~@(flatten (seq call-site-meta-data))
+             ~@(flatten-1 call-site-meta-data)
              ~@(mapcat conv-1-pair pairs)))))))
 
 
@@ -477,7 +478,7 @@
           
           (and (not (symbol? (first args)))
                (not (= nil (first args))))
-          `(-destructuring-fn-many ~@(flatten (seq call-site-meta-data)) nil ~@args)
+          `(-destructuring-fn-many ~@(flatten-1 call-site-meta-data) nil ~@args)
 
           :else
           ;; e.g. given-clauses =     (([[[a b] c d] {}] (list :first a b c d))
@@ -530,8 +531,8 @@
             (destructuring-fn name? ([[params*] constr-map ] exprs*)+)]}
   [& args]
   (let [[keywords args] (parse-prefixed-keyword-args args)
-        call-site-meta-data (flatten (seq (merge (assoc (meta &form) :file *file*)
-                                                 keywords)))]
+        call-site-meta-data (flatten-1 (merge (assoc (meta &form) :file *file*)
+                                              keywords))]
     (cond
       (empty? args)
       (throw (IllegalArgumentException. 
@@ -596,15 +597,15 @@
         (and (or (nil? (first forms))
                  (symbol? (first forms)))
              (vector? (second forms)))
-        `(dsfn ~@(flatten (seq call-site-meta-data))
+        `(dsfn ~@(flatten-1 call-site-meta-data)
                ~(first forms) (~@(rest forms)))
       
         (vector? (first forms))
-        `(dsfn ~@(flatten (seq call-site-meta-data)) (~@forms))
+        `(dsfn ~@(flatten-1 call-site-meta-data) (~@forms))
         
         :else
         `(destructuring-fn
-           ~@(flatten (seq call-site-meta-data))
+           ~@(flatten-1 call-site-meta-data)
            ~@(map process forms))))))
 
 (defmacro dsdefn 
@@ -629,6 +630,6 @@
   (let [[keywords forms] (parse-prefixed-keyword-args forms)
         call-site-meta-data (merge (assoc (meta &form) :file *file*)
                                    keywords)]
-    `(def ~name (dsfn ~@(flatten (seq call-site-meta-data)) ~@forms))))
+    `(def ~name (dsfn ~@(flatten-1 call-site-meta-data) ~@forms))))
 
 

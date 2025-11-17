@@ -1088,3 +1088,8 @@
 
           :else
           [keywords args])))
+
+(defn flatten-1 
+  "flatten one level"
+  [s]
+  (mapcat identity (seq s)))
