@@ -23,6 +23,7 @@
   (:refer-clojure :exclude [complement])
   (:require [rte-core ]
             [rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
+            [rte-tester :refer [test-rte-not-1]]
             [rte-extract :refer [dfa-to-rte]]
             [xym.xymbolyco :as xym]
             [xym.xym-tester :refer [gen-dfa build-state-map]]
@@ -257,6 +258,22 @@
                                                           rte))))]
         ;; (println [:inx inx :rte rte])
         (t-acceptance-test-rte rte)))))
+
+(deftest t-discovered-261
+  (testing "discovered test case 261"
+    ;;   actual: java.lang.AssertionError: Assert failed: 187: dfa not equivalent with self rte=(:contains-every :epsilon (= (1 2 3)) (satisfies seq?) (:and java.io.Serializable java.lang.CharSequence (:contains-every (:? (:contains-any)) (:and (:? :epsilon)))))
+    (let [r1 '(:contains-every :epsilon
+                               (= (1 2 3))
+                               (satisfies seq?)
+                               (:and java.io.Serializable
+                                     java.lang.CharSequence
+                                     (:contains-every (:? (:contains-any))
+                                                      (:and (:? :epsilon)))))
+          dfa1 (rte-to-dfa r1)]
+      (is dfa1)
+      (test-rte-not-1 r1)
+      ;; (dot/dfa-view (rte-to-dfa r1) "t-discovered-261")
+      )))
 
 (deftest t-test-1
   (testing "particular case 1 which was failing"
