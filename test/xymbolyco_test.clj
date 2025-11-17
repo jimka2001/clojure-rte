@@ -35,7 +35,7 @@
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (def testing-view
-  "This value specifies whether dfa-view is called during testing.  It default to false
+  "This value specifies whether dfa-view is called during testing.  It defaults to false
   so that dfa-view does not get called in batch testing."
   false)
 
@@ -262,17 +262,51 @@
 (deftest t-discovered-261
   (testing "discovered test case 261"
     ;;   actual: java.lang.AssertionError: Assert failed: 187: dfa not equivalent with self rte=(:contains-every :epsilon (= (1 2 3)) (satisfies seq?) (:and java.io.Serializable java.lang.CharSequence (:contains-every (:? (:contains-any)) (:and (:? :epsilon)))))
-    (let [r1 '(:contains-every :epsilon
+    (doseq [r1 ['(:contains-every :epsilon
                                (= (1 2 3))
                                (satisfies seq?)
                                (:and java.io.Serializable
                                      java.lang.CharSequence
                                      (:contains-every (:? (:contains-any))
                                                       (:and (:? :epsilon)))))
-          dfa1 (rte-to-dfa r1)]
-      (is dfa1)
+                '(:cat (:contains-every (:not (:cat (member a b c 1 2 3)))
+                                        (satisfies seq?)
+                                        (:? :epsilon))
+                       (:or (= (1 2 3)) (:cat :epsilon (:or (= -1)))
+                            (:+ :empty-set))
+                       :sigma
+                       (:cat (:or (:cat (:and)) :empty-set)
+                             (:or :sigma (:contains-every (:+ (:and))))
+                             (:cat :epsilon (:not (:contains-none)))))]]
+
+      (with-compile-env []
+        (let [dfa (rte-to-dfa r1)
+              dfa-complement (xym/complement dfa)
+              dfa-not-rte (rte-to-dfa (list :not r1))
+              eq1 (xym/dfa-equivalent? dfa
+                                       dfa)
+              eq2 (xym/dfa-equivalent? dfa-not-rte
+                                       dfa-not-rte)
+              eq3 (xym/dfa-equivalent? dfa-complement
+                                   dfa-not-rte)
+              ]
+          (if (not eq1)
+            (do (dot/dfa-view (xym/synchronized-xor dfa dfa) "xor")
+                (dot/dfa-view dfa "dfa")))
+          (is eq1
+              (cl-format false
+                         "z1: dfa not equivalent (returned ~A) with self r1=~A" eq1 r1))
+
+          (is eq2
+              (cl-format false
+                         "z2: dfa of :not, not equivalent (returned ~A) with self r1=~A" eq2 (list :not r1)))
+
+          (is eq3
+              (cl-format false
+                         "z3: !dfa != (dfa (not r1)), (returned ~A) when r1=~A" eq3 r1))
+          ))
       (test-rte-not-1 r1)
-      ;; (dot/dfa-view (rte-to-dfa r1) "t-discovered-261")
+
       )))
 
 (deftest t-test-1

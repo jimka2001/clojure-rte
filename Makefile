@@ -27,6 +27,9 @@ tests:
 test-genus-spec:
 	lein test :only genus-spec-test
 
+test-xymbolyco:
+	lein test :only xymbolyco-test
+
 test-genus:
 	lein test :only genus-test genus-conversion-test genus-disjoint-test genus-equiv-test genus-spec-test genus-statistics-test genus-subtype-test
 

@@ -994,7 +994,7 @@
                  default)))
 
 (defn dfa-equivalent?
-  "Returns a Boolean (or None) indicating whether the two given Dfas
+  "Returns a Boolean (or :dont-know) indicating whether the two given Dfas
   recognize the same language.
   A return value of :dont-know (or given default) indicates that it could not be proven yes or
   no whether the dfas are equivalent."
