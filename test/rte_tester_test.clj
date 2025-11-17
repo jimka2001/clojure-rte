@@ -26,11 +26,11 @@
             [rte-construct :as rte :refer [canonicalize-pattern]]
             [xym.xymbolyco :as xym]
             [rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
-                                            test-canonicalize-pattern
-                                            test-rte-canonicalize-nullable
-                                            test-rte-not
-                                            rte-components
-                                            ]]
+                                test-canonicalize-pattern
+                                test-rte-canonicalize-nullable
+                                test-rte-not
+                                rte-components
+                                ]]
             [rte-randomize-syntax :refer [gen-rte *rte-keywords*]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [*test-types* gen-inhabited-type]]
