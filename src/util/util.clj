@@ -1053,7 +1053,6 @@
                              :or {indent "   "
                                   right-margin 60
                                   }}]
-
   (cl-format true "~A~%"
              (binding [clojure.pprint/*print-right-margin* right-margin]
                (clojure.string/replace
@@ -1062,3 +1061,30 @@
                 "\n" ; search
                 (str "\n" indent) ;; replace
                 ))))
+
+(defn parse-prefixed-keyword-args 
+  "This helper function is useful inside defmacro.
+  It is used to detect a series of keyword/value pairs at the beginning
+  of a sequence of clauses such as
+  (:x 100 :y 200 (clause1) (clause2) (clause3)...)
+  parsing it into [{:x 100 :y 200}
+                   ((clause1) (clause2) (clause3)...)]
+  "
+  [args]
+  {:pre [(sequential?  args)]
+   :post [(= 2 (count %))
+          (map? (first %))
+          (or (nil? (second %))
+              (sequential? (second %)))
+          ]}
+  (loop [args args
+         keywords {}]
+    (cond (= 1 (count args))
+          [keywords args]
+
+          (keyword? (first args))
+          (recur (rest (rest args))
+                 (assoc keywords (first args) (second args)))
+
+          :else
+          [keywords args])))
