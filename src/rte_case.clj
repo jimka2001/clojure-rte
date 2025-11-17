@@ -611,7 +611,7 @@
     ([a b [^Ratio c d]] 14)
     (^{c (satisfies integer?)} [a b [c d]] 14)
     ([a b [^Double c d]] 16))
-"
+  "
   [name & forms]
   `(def ~name (dsfn ~@forms)))
 
