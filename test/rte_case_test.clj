@@ -21,8 +21,8 @@
 
 (ns rte-case-test
   (:require [rte-core]
-            [genus :as gns]
-            [util :refer [human-readable-current-time]]
+            [genus.genus :as gns]
+            [util.util :refer [human-readable-current-time]]
             [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [rte-case :refer [rte-case destructuring-case
@@ -284,6 +284,9 @@
     (is (= 1
            (let [f
                  (-destructuring-fn-many
+                     :file "dummy"
+                     :line 0
+                     :column 0
                   ([[_a _b]          {_a Boolean _b (or String Boolean)}]
                    2)
                   ([[_a [_b _c] & _d]  {_a Boolean _b String d Boolean}]
@@ -296,8 +299,10 @@
   ;; some of these were/are getting index invalid
   ;; we run them here to assure that we don't get index invalid.
   (let [f
-
         (-destructuring-fn-many
+            :file "dummy"
+          :line 0
+          :column 0
          ([[_a _b]            {_a Boolean _b (or String Boolean)}]
           2)
          ([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
@@ -840,51 +845,51 @@
   (is (= 41 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys false}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 144)))
              :bar true)))
   (is (= 41 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys true}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 244)))
              :bar true :xyzzy 1)))
-  (is (= 44 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys false}]      (do (when test-verbose (prn [bar])) 41))
+  (is (= 344 ((dsfn ([& {:keys [^Boolean bar] :allow-other-keys false}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar] :allow-other-keys true}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar] :allow-other-keys true}]               (do (when test-verbose (prn [bar])) 344)))
              :bar true :xyzzy 1))
       "test 765 a")
   (is (= 41 ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 444)))
              :bar true)))
   (is (= 42 ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 544)))
              :bar 12)))
   (is (= 43 ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 644)))
              :foo 3))
       "test 765 b")
-  (is (= 44 ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
+  (is (= 744 ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 744)))
              :bar "hello")))
 
   (is (thrown? Exception ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                     ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                     ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                    ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44))))))
+                    ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 844))))))
 
   (is (= 41 ((dsfn ([& {:keys [^Boolean bar]
                         :or {bar false}}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44))))))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 944))))))
 
   (is (= 42 ((dsfn ([& {:keys [^Boolean bar]}]      (do (when test-verbose (prn [bar])) 41))
                    ([& {:keys [^Long bar]
@@ -895,7 +900,7 @@
                    ([& {:keys [^Long bar]
                         :or {bar 12}}]         (do (when test-verbose (prn [bar])) 42))
                    ([& {:keys [foo]}]               (do (when test-verbose (prn [foo])) 43))
-                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 44)))
+                   ([& {:keys [bar]}]               (do (when test-verbose (prn [bar])) 1044)))
              :foo 12))
       "test 797"))
 

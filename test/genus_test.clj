@@ -22,9 +22,9 @@
 (ns genus-test
   (:require [rte-core]
             [rte-construct :refer [with-compile-env]]
-            [genus :as gns]
-            [genus-tester :refer [gen-type *test-values*]]
-            [util :refer [member human-readable-current-time]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type *test-values*]]
+            [util.util :refer [member human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))
 
@@ -467,7 +467,50 @@
     (is (gns/valid-type? '(rte (:cat String :sigma))))
     (is (gns/valid-type? '(satisfies even?)))
     (is (gns/valid-type? (gns/Satisfies even?)))
-
-
 ))
+
+
+
+
+
+(deftest t-extract-type-from-expression
+  (testing "extract-type-from-expression"
+    (is (= (gns/extract-type-from-expression 'n '(instance? BigDecimal n))
+           'BigDecimal))
+    ;; variable 'X different from variable within expression, so return nil
+    (is (= (gns/extract-type-from-expression 'X '(or (integer? n) (ratio? n) (decimal? n)))
+           nil))
+    (is (= (gns/extract-type-from-expression 'n '(or (integer? n) (ratio? n) (decimal? n)))
+           '(or (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
+                clojure.lang.Ratio BigDecimal)))))
+
+(deftest t-type-predicate-to-type-designator 
+  (testing "type-predicate-to-type-designator"
+    (is (= (gns/type-predicate-to-type-designator 'int?)
+           '(or Long
+                Integer
+                Short
+                Byte)))
+    (is (= (gns/type-predicate-to-type-designator 'decimal?)
+           'BigDecimal))
+
+    (is (= (gns/type-predicate-to-type-designator 'symbol?)
+           'clojure.lang.Symbol))
     
+    (is (= (gns/type-predicate-to-type-designator 'integer?)
+           '(or Integer
+                Long
+                clojure.lang.BigInt
+                BigInteger
+                Short
+                Byte)))
+    (is (= (gns/type-predicate-to-type-designator 'ratio?) 'clojure.lang.Ratio))
+    (is (= (gns/type-predicate-to-type-designator 'rational?)
+           '(or (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
+                clojure.lang.Ratio BigDecimal)))
+    (is (= (gns/type-predicate-to-type-designator 'ident?)
+           '(or clojure.lang.Keyword clojure.lang.Symbol)))
+    ;; unable to expand 'libspec
+    (is (= (gns/type-predicate-to-type-designator 'libspec?)
+           nil))
+))

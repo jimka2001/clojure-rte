@@ -23,6 +23,6 @@
   (:require [rte-construct]
             [rte-case]
             [rte-extract]
-            [genus-spec]
+            [genus.genus-spec]
             [typecase]
             ))

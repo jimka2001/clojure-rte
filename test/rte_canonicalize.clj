@@ -25,8 +25,8 @@
              :refer [canonicalize-pattern with-compile-env ]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [util :refer [count-if-not human-readable-current-time]]
-            [genus :as gns]))
+            [util.util :refer [count-if-not human-readable-current-time]]
+            [genus.genus :as gns]))
 
 (def test-verbose false)
 

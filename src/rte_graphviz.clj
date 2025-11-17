@@ -1,9 +1,9 @@
 (ns rte-graphviz
   (:import [java.io File FileOutputStream])
-  (:require [util :refer [member run-dot]]
-            [genus :as gns]
-            [view :refer [view-image]]
-            [xymbolyco :as xym]
+  (:require [util.util :refer [member run-dot]]
+            [genus.genus :as gns]
+            [graph.view :refer [view-image]]
+            [xym.xymbolyco :as xym]
             [rte-construct :as rte])
 )
 

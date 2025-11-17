@@ -19,15 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns bdd
+(ns genus.bdd
   "Definition of Bdd."
   (:refer-clojure :exclude [and or not])
-  (:require [util :refer [call-with-collector non-empty? forall exists]]
-            [genus :as gns]
+  (:require [util.util :refer [call-with-collector non-empty? forall exists]]
+            [genus.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             ))
 
 (alias 'c 'clojure.core)
+(alias 'bdd 'genus.bdd)
 
 (defrecord Bdd
     [label positive negative])
@@ -258,9 +259,9 @@
         (do (swap! *label-to-index* assoc type-designator (count @*label-to-index*))
             (@*label-to-index* type-designator))))
 
-(declare bdd/and) ;; bdd/and
-(declare bdd/or)  ;; bdd/or
-(declare bdd/not) ;; bdd/not
+(declare genus.bdd/and) ;; bdd/and
+(declare genus.bdd/or)  ;; bdd/or
+(declare genus.bdd/not) ;; bdd/not
 (declare node)
 
 (defn bdd

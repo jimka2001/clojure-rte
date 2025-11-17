@@ -24,3 +24,6 @@ java*.hprof
 .DS_Store
 *.hprof
 .clj-kondo/imports/rewrite-clj/rewrite-clj/config.edn
+*.plain
+*.dot
+*.png

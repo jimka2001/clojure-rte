@@ -19,25 +19,25 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns genus
+(ns genus.genus
   (:refer-clojure :exclude [satisfies? == * +])
   (:require [clojure.set :refer [subset?]]
             [clojure.pprint :refer [cl-format]]
             [clojure.repl :refer [source-fn]]
-            [util :refer [exists-pair forall-pairs exists fixed-point
+            [util.util :refer [exists-pair forall-pairs exists fixed-point
                                       remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
                                       seq-matcher member find-simplifier defn-memoized
                                       defn-memoized call-with-found find-first
                                       gc-friendly-memoize
                                       unchunk or-else]]
-            [cl-compat :as cl]
+            [util.cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
             ))
 
 ;; allow gns/ prefix even in this file.
-(alias 'gns 'genus)
+(alias 'gns 'genus.genus)
 
 (declare ^:dynamic canonicalize-type -canonicalize-type)
 (declare ^:dynamic inhabited? -inhabited?)
@@ -259,10 +259,22 @@
       :else
       (read-string src-str))))
 
-(defn- extract-type-from-expression
+(defn extract-type-from-expression
   "After the expression representing the code body has been extracted from the code body
   of a type predicate, use several heursitics to match the code, to extract the type
-  which is being implemented in the expression."
+  which is being implemented in the expression.
+  Return nil, if the match is not successful.
+  Otherwise return a type-designator.
+  Examples:
+    (extract-type-from-expression 'n '(instance? BigDecimal n))
+      ==> BigDecimal
+    (extract-type-from-expression 'n '(or (integer? n) (ratio? n) (decimal? n)))
+      ==> (or (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
+              clojure.lang.Ratio BigDecimal)
+    ;; if variable 'X is different from variable used inside expression, return nil
+    (extract-type-from-expression 'X '(instance? BigDecimal n))
+     ==> nil
+  "
   [var-1 expr]
   (cond
     (not (sequential? expr))
@@ -302,7 +314,15 @@
 (def type-predicate-to-type-designator 
   "Look at the function definition s-expression of the named function, type-predicate,
   and apply heuristics to attempt to reverse-engineer the type being checked.  
-  This works for type predicates as they are defined in core.clj."
+  This works for type predicates as they are defined in core.clj.
+  Examples:
+  (type-predicate-to-type-designator 'int?)
+     ==>  '(or Long Integer Short Byte)
+  (type-predicate-to-type-designator 'rational?)
+    ==> (or (or Integer Long clojure.lang.BigInt BigInteger Short Byte)
+            clojure.lang.Ratio BigDecimal)
+  (type-predicate-to-type-designator 'ident?)
+  ==> (or clojure.lang.Keyword clojure.lang.Symbol)"
   (fn [type-predicate]
     (let [fn-s-expression (get-fn-source type-predicate)]
       (cond
@@ -312,14 +332,6 @@
         (empty? fn-s-expression)
         nil
 
-        ;; TODO add code to decode rational?
-        ;; (defn rational? 
-        ;;   "Returns true if n is a rational number"
-        ;;   {:added "1.0"
-        ;;    :static true}
-        ;;  [n]
-        ;;   (or (integer? n) (ratio? n) (decimal? n)))
-        ;; TODO -- and perhaps libspec?
         (= 3 (count fn-s-expression))
         (try (let [[_def name-1 [_fn name-2 [var-1] expr]] fn-s-expression]
                (if (and (= name-1 name-2)

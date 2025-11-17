@@ -23,7 +23,7 @@
 (ns dot-test
   (:require [rte-core]
             [rte-construct :as rte :refer [with-compile-env]]
-            [dot :as sut]
+            [graph.dot :as sut]
             [clojure.test :refer [deftest testing]]))
 
 (defn -main []

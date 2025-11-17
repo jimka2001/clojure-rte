@@ -3,10 +3,10 @@
   (:require [clojure.pprint :refer [cl-format]]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
-            [lock :as lock]
-            [xymbolyco :as xym]
+            [util.lock :as lock]
+            [xym.xymbolyco :as xym]
             [rte-construct :as rte]
-            [util :refer [with-timeout]]            
+            [util.util :refer [with-timeout]]            
 ))
 
 (def statistics-resource "resources/statistics/")

@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns typecase
-  (:require [genus :as gns]
-            [util :refer [setof]]
+  (:require [genus.genus :as gns]
+            [util.util :refer [setof]]
             [backtick :refer [template]]))
 
 (defn- collect-leaf-types [tds]

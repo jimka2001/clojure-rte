@@ -1,7 +1,7 @@
 (ns demos.vmcai-2026.rte-tree-totally-balanced
-  (:require [lock :as lock]
-            [util :refer [rand-tree-012]]
-            [genus-tester :refer [*test-types*]])
+  (:require [util.lock :as lock]
+            [util.util :refer [rand-tree-012]]
+            [genus.genus-tester :refer [*test-types*]])
 )
 
 

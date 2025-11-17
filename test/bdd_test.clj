@@ -22,11 +22,11 @@
 
 (ns bdd-test
   (:require [rte-core]
-            [bdd :as bdd]
-            [genus :as gns]
-            [genus-tester :refer [gen-type]]
+            [genus.bdd :as bdd]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format *print-pretty*]]
-            [util :refer [member]]
+            [util.util :refer [member]]
             [clojure.test :refer [deftest is testing]])
   ;; this imports the name of the Bdd record, which is otherwise not imported by :require
   ;;(:import [clojure_rte.bdd Bdd])

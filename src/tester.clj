@@ -21,7 +21,7 @@
 
 (ns tester
   (:require [clojure.pprint :refer [cl-format]]
-            [util :refer [map-eagerly]])
+            [util.util :refer [map-eagerly]])
   )
 
 

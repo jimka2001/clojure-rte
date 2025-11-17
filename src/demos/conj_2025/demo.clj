@@ -1,8 +1,8 @@
 (ns demos.conj-2025.demo
   (:require [clojure.pprint :refer [cl-format]]
-            [dot]
+            [graph.dot :as dot]
             [rte-graphviz :refer [rte-view]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [rte-case :refer [rte-case destructuring-case]]
             [rte-construct :as rte]
             
@@ -43,9 +43,9 @@
     [:launch-the-missiles a b]
     ))
 
-(missile-demo '(true true))
-(missile-demo '(false "hello" 3 true true true))
-(missile-demo '(true "hello"))
-(missile-demo '(true 3))
-(missile-demo '(true "3" 3))
-(missile-demo '(true "3" 3 true))
+;; (missile-demo '(true true))
+;; (missile-demo '(false "hello" 3 true true true))
+;; (missile-demo '(true "hello"))
+;; (missile-demo '(true 3))
+;; (missile-demo '(true "3" 3))
+;; (missile-demo '(true "3" 3 true))

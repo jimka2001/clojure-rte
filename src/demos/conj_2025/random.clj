@@ -1,9 +1,9 @@
 (ns demos.conj-2025.random
   (:require [rte-construct :as rte]
-            [genus :as gns]
+            [genus.genus :as gns]
             [clojure.math :refer [random]]
-            [genus-tester :refer [*test-types*]]
-            [util :refer [member weighted-case]]))
+            [genus.genus-tester :refer [*test-types*]]
+            [util.util :refer [member weighted-case]]))
 
 
 

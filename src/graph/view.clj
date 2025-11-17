@@ -1,4 +1,4 @@
-(ns view
+(ns graph.view
   (:require [clojure.java.shell :refer [sh]]
             [clojure.java.browse :refer [browse-url]]))
 

@@ -1,13 +1,14 @@
 (ns demos.vmcai-2026.statistics-inhabited
   (:require [clojure.pprint :refer [pprint cl-format]]
             [clojure.java.shell :refer [sh]]
-            [lock :as lock]
-            [vega-plot :as vega]
-            [util :refer [mean std-deviation with-timeout]]
-            [genus :as gns]
-            [xymbolyco :as xym]
-            [xym-tester :refer [gen-dfa]]
+            [util.lock :as lock]
+            [graph.vega-plot :as vega]
+            [util.util :refer [mean std-deviation with-timeout]]
+            [genus.genus :as gns]
+            [xym.xymbolyco :as xym]
+            [xym.xym-tester :refer [gen-dfa]]
             [rte-construct :refer [rte-to-dfa]]
+            [graph.view :as view]
 ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

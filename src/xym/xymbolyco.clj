@@ -19,22 +19,22 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns xymbolyco
+(ns xym.xymbolyco
   "Implementation of Sigma Complete Deterministic Finite Automata
   to represent and compute regular type expressions."
   (:refer-clojure :exclude [complement])
-  (:require [cl-compat :as cl]
-            [util :refer [fixed-point member group-map
+  (:require [util.cl-compat :as cl]
+            [util.util :refer [fixed-point member group-map
                           defn-memoized find-first
                           timeout-reached?
                           non-empty? exists setof]]
-            [genus :as gns]
-            [genus-tester :refer [gen-type]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format]]
-            [bdd]
+            [genus.bdd :as bdd]
             [clojure.set :refer [union difference intersection]]
             [backtick :refer [template]]
-            [dijkstra :refer [dijkstra-to-final dijkstra]]
+            [util.dijkstra :refer [dijkstra-to-final dijkstra]]
             ))
 
 (defrecord State 
@@ -994,7 +994,7 @@
                  default)))
 
 (defn dfa-equivalent?
-  "Returns a Boolean (or None) indicating whether the two given Dfas
+  "Returns a Boolean (or :dont-know) indicating whether the two given Dfas
   recognize the same language.
   A return value of :dont-know (or given default) indicates that it could not be proven yes or
   no whether the dfas are equivalent."

@@ -21,11 +21,11 @@
 
 (ns rte-tester
   (:require [tester]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.math :refer [pow round]]
-            [genus :as gns]
-            [genus-tester :refer [*test-types*]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [*test-types*]]
             [rte-randomize-syntax :refer [gen-rte]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-construct :refer [with-compile-env rte-to-dfa  nullable?
@@ -183,7 +183,6 @@
                        rte-components
                        verbose
                        )))
-
 
 (defn test-rte-not-1
   "Assert that the same result occurs from complementing a dfa

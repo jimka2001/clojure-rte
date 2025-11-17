@@ -20,12 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns thompson-test
-  (:require [thompson :as tom]
-            [genus :as gns]
-            [util :refer [human-readable-current-time]]
+  (:require [xym.thompson :as tom]
+            [genus.genus :as gns]
+            [util.util :refer [human-readable-current-time]]
             [rte-core]
             [rte-construct :as rte]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [rte-tester :as test]
             [rte-randomize-syntax :refer [gen-rte]]
             [clojure.test :refer [deftest is]]))
@@ -50,7 +50,7 @@
 ;;   and set it to a smaller number for a quicker run of the tests.
 (def num_random_tests 1000)
 
-(def Dfa xymbolyco.Dfa)
+(def Dfa xym.xymbolyco.Dfa)
 
 (deftest t-transitions
   (testing "transitions"

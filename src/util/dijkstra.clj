@@ -5,9 +5,9 @@
 ;;               or https://truegrok.com/.
 ;; https://clojurians.slack.com/archives/C03S1KBA2/p1744060041343069?thread_ts=1744055580.190099&cid=C03S1KBA2
 
-(ns dijkstra
+(ns util.dijkstra
   (:require [clojure.data.priority-map :refer [priority-map]]
-            [util :refer [member]]))
+            [util.util :refer [member]]))
 
  
 (defn remove-keys [m pred]

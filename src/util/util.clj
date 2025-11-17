@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns util
+(ns util.util
   (:require [clojure.pprint :refer [cl-format]]
             [clojure.math :refer [round pow]]
             [clojure.data.csv :as csv]
@@ -487,16 +487,19 @@
               (f)
               (recur (rest pairs)))))))
 
-(defmacro casep [test obj & pairs]
+(defmacro casep
+  "Like case, but uses the given test function rather than = to test
+  whether the given object corresponds to any of the given choices."
+  [test obj & pairs]
   (loop [pairs pairs
-         default (fn [] nil)
+         default `(fn ~'casep-nil-default [] nil) ;; TODO name this fn
          acc ()]
     (cond (empty? pairs)
           `(-casep-helper ~test ~obj ~default ~@(reverse acc))
 
           (empty? (rest pairs))
           (recur ()
-                 `(fn [] ~(first pairs))
+                 `(fn ~'casep-specified-default [] ~(first pairs)) ;; TODO name this fn
                  acc)
 
           :else
@@ -504,7 +507,7 @@
                 value (second pairs)]
             (recur (rest (rest pairs))
                    default
-                   (cons `['~key (fn [] ~value)] acc)
+                   (cons `['~key (fn ~'casep-value [] ~value)] acc) ;; TODO name this fn
                  )))))
 
 ;; code thanks to https://clojurians.slack.com/archives/C053AK3F9/p1605188036049500
@@ -1050,7 +1053,6 @@
                              :or {indent "   "
                                   right-margin 60
                                   }}]
-
   (cl-format true "~A~%"
              (binding [clojure.pprint/*print-right-margin* right-margin]
                (clojure.string/replace
@@ -1059,3 +1061,30 @@
                 "\n" ; search
                 (str "\n" indent) ;; replace
                 ))))
+
+(defn parse-prefixed-keyword-args 
+  "This helper function is useful inside defmacro.
+  It is used to detect a series of keyword/value pairs at the beginning
+  of a sequence of clauses such as
+  (:x 100 :y 200 (clause1) (clause2) (clause3)...)
+  parsing it into [{:x 100 :y 200}
+                   ((clause1) (clause2) (clause3)...)]
+  "
+  [args]
+  {:pre [(sequential?  args)]
+   :post [(= 2 (count %))
+          (map? (first %))
+          (or (nil? (second %))
+              (sequential? (second %)))
+          ]}
+  (loop [args args
+         keywords {}]
+    (cond (= 1 (count args))
+          [keywords args]
+
+          (keyword? (first args))
+          (recur (rest (rest args))
+                 (assoc keywords (first args) (second args)))
+
+          :else
+          [keywords args])))

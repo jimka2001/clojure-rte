@@ -21,9 +21,9 @@
 
 (ns genus-subtype-test
   (:require [rte-core]
-            [genus :as gns]
-            [util :refer [human-readable-current-time]]
-            [genus-tester :refer [gen-type]]
+            [genus.genus :as gns]
+            [util.util :refer [human-readable-current-time]]
+            [genus.genus-tester :refer [gen-type]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is]]))

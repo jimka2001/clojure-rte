@@ -1,17 +1,19 @@
 # 
 set logscale x
 set logscale y
+set xlabel 'DFA states' font ',10' offset 3.5,0.5
+set ylabel 'Percentage' font ',10' offset 3.0,0
 set grid
 set key font ',10'
 set xtics font ',10'
 set ytics font ',10'
 set key horizontal bmargin
-set title 'Fraction of DFAs larger than given state count ' font ',12'
-plot '-' using 1:2 with lines title 'tree-split-linear samples=',\
-    '-' using 1:2 with lines title 'tree-split-gauss samples=',\
-    '-' using 1:2 with lines title 'tree-split-inv-gauss samples=',\
-    '-' using 1:2 with lines title 'flajolet samples=',\
-    '-' using 1:2 with lines title 'comb samples='
+set title 'Fraction of DFAs larger than given state count (approx 400 samples per algorithm)' font ',12'
+plot '-' using 1:2 with lines title 'tree-split-linear',\
+    '-' using 1:2 with lines title 'tree-split-gauss',\
+    '-' using 1:2 with lines title 'tree-split-inv-gauss',\
+    '-' using 1:2 with lines title 'flajolet',\
+    '-' using 1:2 with lines title 'comb'
 # tree-split-linear samples=
 2.000 100.000
 3.000 70.149

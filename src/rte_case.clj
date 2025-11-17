@@ -20,20 +20,20 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-case
-  (:require [xymbolyco :as xym]
-            [dot]
-            [genus :as gns]
-            [util :refer [defn-memoized member non-empty? with-outstring]]
+  (:require [xym.xymbolyco :as xym]
+            [graph.dot :as dot]
+            [genus.genus :as gns]
+            [util.util :refer [defn-memoized member non-empty? with-outstring parse-prefixed-keyword-args]]
             [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format pprint]]
             [backtick :refer [template]]
             )
   )
 
 (def ^:dynamic *warn-on-unreachable-code* true)
 
-(defn print-unreachable-warning [code-exprs]
+(defn print-unreachable-warning [code-exprs call-site-meta-data]
   (let [msg (with-outstring pr
               (pr "Unreachable code: ")
               (if (sequential? code-exprs)
@@ -43,13 +43,18 @@
               (pr "\n"))]
 
     (binding [*out* *err*]
-      (printf "%s" msg))))
+      (printf "%s:%s:%s:%s"
+              (:file call-site-meta-data)
+              (:line call-site-meta-data)
+              (:column call-site-meta-data)
+              msg
+              ))))
 
-(defn warn-unreachable [dfa code-exprs]
+(defn warn-unreachable [dfa code-exprs call-site-meta-data]
   (let [traces (xym/find-spanning-map dfa)]
     (doseq [ev (range (count code-exprs))
             :when (not (traces ev))]
-      (print-unreachable-warning (nth code-exprs ev)))))
+      (print-unreachable-warning (nth code-exprs ev) call-site-meta-data))))
 
 
 (defn clauses-to-dfa
@@ -86,8 +91,6 @@
         index))
 
 
-
-
 (defn rte-case-fn
   "`pairs` is a set of pairs, each of the form [rte 0-ary-function]
   This function is used in the macro expansion of rte-case but
@@ -98,7 +101,8 @@
   is called and its value is returned.
   The sequence is traversed a maximum of once, but may not traverse
   entirely if it is determined early that no rte matches."
-  [pairs code-exprs]
+  [pairs code-exprs call-site-meta-data]
+  {:pre [(map? call-site-meta-data)]}
   (let [dfa (reduce xym/synchronized-union 
                     (for [[rte thunk] pairs]
                       (do (assert (rte/valid-rte? rte)
@@ -110,7 +114,7 @@
     (when *warn-on-unreachable-code*
       (doall (map (fn [[rte thunk] code-expr]
                     (when (not (traces thunk))
-                      (print-unreachable-warning code-expr)))
+                      (print-unreachable-warning code-expr call-site-meta-data)))
                   pairs code-exprs)))
     ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
     (fn f-101 [s]
@@ -135,52 +139,57 @@
 
   ;; if odd number of clauses, then don't complain if the final
   ;;   clause is unreachable
-  (let [odd-clauses (odd? (count clauses))
+  (let [[keywords clauses] (parse-prefixed-keyword-args clauses)
+        odd-clauses (odd? (count clauses))
         clauses (if odd-clauses
                   `(~@(butlast clauses)
                     ~sigma-* ~(last clauses))
-                  clauses)]
+                  clauses)
+        ;; This macro expansion may seem a bit more complicated that it
+        ;; needs to be.  I think there's a way to avoid the complication
+        ;; but I have thus far not been able to do so.
+        ;; We need the Dfa to be constructed only once.  This one-time construction
+        ;; is accomplished by the (let ...) in the macro expansion making
+        ;; a call to rte-case-fn, which is a memoized function.
+        ;; In order for the memoization to work the arguments passed to
+        ;; must be all static, i.e., containing no function objects.
+        ;; Therefore we cannot put (fn [...] ....) into the call rte-case-fn.
+        ;; Instead, we replace the clojures with indexes into an array
+        ;; of closures which also sits in the (let [...] ...)
+        ;; rte-case-fn returns a function which can be called with a sequence,
+        ;; and will return an index into the array.  The index is used to
+        ;; grab a 0-ary function from the array and call it.
+        parts (partition 2 2 clauses)
+        n-parts (count parts)
+        n-parts-to-check (if odd-clauses
+                           (dec n-parts)
+                           n-parts)
+        pairs (into [] (for [k (range n-parts)
+                             :let [[rte expr] (nth parts k)
+                                   name (symbol (format "rte-case-fn-%s" k))]]
+                         ;; we have to use ~'rte-fn because we don't
+                         ;; want backquote to slap a namespace on
+                         ;; the symbol
+                         `['~rte (fn ~name [] ~expr)]))
+        code-exprs (for [[_ expr] parts]
+                     expr)
 
-    ;; This macro expansion may seem a bit more complicated that it
-    ;; needs to be.  I think there's a way to avoid the complication
-    ;; but I have thus far not been able to do so.
-    ;; We need the Dfa to be constructed only once.  This one-time construction
-    ;; is accomplished by the (let ...) in the macro expansion making
-    ;; a call to rte-case-fn, which is a memoized function.
-    ;; In order for the memoization to work the arguments passed to
-    ;; must be all static, i.e., containing no function objects.
-    ;; Therefore we cannot put (fn [...] ....) into the call rte-case-fn.
-    ;; Instead, we replace the clojures with indexes into an array
-    ;; of closures which also sits in the (let [...] ...)
-    ;; rte-case-fn returns a function which can be called with a sequence,
-    ;; and will return an index into the array.  The index is used to
-    ;; grab a 0-ary function from the array and call it.
-    (let [parts (partition 2 2 clauses)
-          n-parts (count parts)
-          n-parts-to-check (if odd-clauses
-                             (dec n-parts)
-                             n-parts)
-          pairs (into [] (for [k (range n-parts)
-                               :let [[rte expr] (nth parts k)
-                                     name (symbol (format "rte-case-fn-%s" k))]]
-                           ;; we have to use ~'rte-fn because we don't
-                           ;; want backquote to slap a namespace on
-                           ;; the symbol
-                           `['~rte (fn ~name [] ~expr)]))
-          code-exprs (for [[_ expr] parts]
-                       expr)
-          ]
-      `(let [f# (rte-case-fn ~pairs '~code-exprs)
-             seq# ~sequence
-             thunk# (f# seq#)
-             ]
-         (if (fn? thunk#)
-           ;; f# has returned false if the sequence didn't match
-           ;; any of the rtes.  Otherwise it returned a 0-ary function,
-           ;; so we can call this 0-ary function.
-           (thunk#)
-           (throw (ex-info "No pattern matching given sequence"
-                           {:sequence seq#})))))))
+        call-site-meta-data (merge (assoc (meta &form)
+                                          :file *file*)
+                                   keywords)
+        ]
+    
+    `(let [f# (rte-case-fn ~pairs '~code-exprs '~call-site-meta-data)
+           seq# ~sequence
+           thunk# (f# seq#)
+           ]
+       (if (fn? thunk#)
+         ;; f# has returned false if the sequence didn't match
+         ;; any of the rtes.  Otherwise it returned a 0-ary function,
+         ;; so we can call this 0-ary function.
+         (thunk#)
+         (throw (ex-info "No pattern matching given sequence"
+                         {:sequence seq#}))))))
 
 (defn remove-extra-syntax 
   "lambda-list is a vector which is almost compatible with the
@@ -382,23 +391,27 @@
      2)
 "
   [expr & operands]
-  (cond
-    (not= 0 (mod (count operands) 2))
-    (throw (ex-info (cl-format false
-                               "destructuring-case expects multiple of 2 number of operands after the first: not ~A, ~A"
-                               (count operands) (apply list 'destructuring-case expr operands))
-                    {:error-type :invalid-destructuring-case-call-site
-                     :expr expr
-                     :operands operands}))
-
-    :else
-    (let [pairs (partition 2 operands)
-          ;; e.g. pairs =   (([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
-          ;;                  1)
-          ;;                 ([[_a _b]          {_a Boolean _b (or String Boolean)}]
-          ;;                  2))
-          ]
-      `(apply (-destructuring-fn-many nil ~@pairs) ~expr))))
+  (let [[keywords operands] (parse-prefixed-keyword-args operands)]
+    (cond
+      (not= 0 (mod (count operands) 2))
+      (throw (ex-info (cl-format false
+                                 "destructuring-case expects multiple of 2 number of operands after the first:~
+                                not ~A, ~A"
+                                 (count operands) (apply list 'destructuring-case expr operands))
+                      {:error-type :invalid-destructuring-case-call-site
+                       :expr expr
+                       :operands operands}))
+      
+      :else
+      (let [pairs (partition 2 operands)
+            call-site-meta-data (merge (assoc (meta &form) :file *file*)
+                                       keywords)
+            ;; e.g. pairs =   (([[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
+            ;;                  1)
+            ;;                 ([[_a _b]          {_a Boolean _b (or String Boolean)}]
+            ;;                  2))
+            ]
+        `(apply (-destructuring-fn-many ~@(flatten (seq call-site-meta-data)) nil ~@pairs) ~expr)))))
 
 (defmacro dscase
   "Semantically similar to destructuring-case but arguably simpler syntax.
@@ -414,87 +427,93 @@
   is applicable to the value specified by evaluatable-value.
   "
   [expr & operands]
-  (cond
-    (not= 0 (mod (count operands) 2))
-    (throw (ex-info (cl-format false
-                               "dscase expects multiple of 2 number of operands after the first: not ~A, ~A"
-                               (count operands) (apply list 'dscase expr operands))
-                    {:error-type :invalid-dscase-call-site
-                     :expr expr
-                     :operands operands}))
-
-    :else
-    (let [pairs (partition 2 operands)]
-      (letfn [(conv-1-pair [[lambda-list consequent]]
-                (when (not (vector? lambda-list))
-                  (throw (ex-info (cl-format false
-                                             "dscase expecting vector not ~A" lambda-list)
-                                  {:error-type :invalid-dscase-lambda-list
-                                   :expr expr
-                                   :operands operands})))
-                (let [meta-data (meta lambda-list)]
-                  (if (nil? meta-data)
-                    [[lambda-list {}] consequent]
-                    [[lambda-list meta-data]  consequent]))
-                )]
-        `(destructuring-case ~expr
-                             ~@(mapcat conv-1-pair pairs))))))
+  (let [[keywords operands] (parse-prefixed-keyword-args operands)]
+    (cond
+      (not= 0 (mod (count operands) 2))
+      (throw (ex-info (cl-format false
+                                 "dscase expects multiple of 2 number of operands after the first:~
+                                not ~A, ~A"
+                                 (count operands) (apply list 'dscase expr operands))
+                      {:error-type :invalid-dscase-call-site
+                       :expr expr
+                       :operands operands}))
+      
+      :else
+      (let [pairs (partition 2 operands)
+            call-site-meta-data (merge (assoc (meta &form) :file *file*)
+                                       keywords)]
+        (letfn [(conv-1-pair [[lambda-list consequent]]
+                  (when (not (vector? lambda-list))
+                    (throw (ex-info (cl-format false
+                                               "dscase expecting vector not ~A" lambda-list)
+                                    {:error-type :invalid-dscase-lambda-list
+                                     :expr expr
+                                     :operands operands})))
+                  (let [meta-data (meta lambda-list)]
+                    (if (nil? meta-data)
+                      [[lambda-list {}] consequent]
+                      [[lambda-list meta-data]  consequent]))
+                  )]
+          `(destructuring-case ~expr 
+             ~@(flatten (seq call-site-meta-data))
+             ~@(mapcat conv-1-pair pairs)))))))
 
 
 (defmacro -destructuring-fn-many
   "Internal macro used in the expansion of destructuring-fn
    E.g.
   (-destructuring-fn-many
+    meta-data
     nil
     ([[[a b] c d] {}] (list :first a b c d))
     ([[a [b c] d] {}] (list :second a b c d)))
   "
   [& args]
-  (cond (empty? args)
-        nil
+  (let [[keywords args] (parse-prefixed-keyword-args args)
+        call-site-meta-data (merge (assoc (meta &form) :file *file*)
+                                   keywords)]
+    (cond (empty? args)
+          nil
+          
+          (and (not (symbol? (first args)))
+               (not (= nil (first args))))
+          `(-destructuring-fn-many ~@(flatten (seq call-site-meta-data)) nil ~@args)
 
-        (and (not (symbol? (first args)))
-             (not (= nil (first args))))
-        `(-destructuring-fn-many nil ~@args)
-
-        :else
-        ;; e.g. given-clauses =     (([[[a b] c d] {}] (list :first a b c d))
-        ;;                           ([[a [b c] d] {}] (list :second a b c d)))
-        (let [[name & given-clauses] args
-              parsed (map conv-1-case-clause
-                          (map first given-clauses)
-                          (map rest given-clauses)
-                          (range (count given-clauses)))
-              fns (into [] (map second parsed))
-              code-exprs (into [] (map rest given-clauses))
-              pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
-                                   [idx (lambda-list-to-rte lambda-list types-map)])
-                                 given-clauses)
-              ;; we must call warn-unreachable at macro expansion time
-              ;; because we want the message emitted at compile time.
-              _ (when *warn-on-unreachable-code*
-                  (warn-unreachable (clauses-to-dfa pairs) code-exprs))
-              ]
-          `(let [dfa# (clauses-to-dfa '~pairs)]
-             (fn
-               ~@(if name (list name) nil) ;; either name or nothing
-               [& seq#]
-               
-               ;; we must declare fns inside the (fn ...) because
-               ;;    the user code might make a recrusive call to `name`
-               ;;    see test case `t-dsfn-recursive` in rte_case_test.clj
-               (let [fns# ~fns
-                     ind# (rte/match dfa# seq# :promise-disjoint true)]
-
-                 (if ind#
-                   ;; get function out of vector fns# and call it
-                   (apply (fns# ind#) seq#)
-                   (throw (ex-info "No pattern matching given sequence"
-                                   {:sequence seq#}))
-                   )))))))
-
-
-
+          :else
+          ;; e.g. given-clauses =     (([[[a b] c d] {}] (list :first a b c d))
+          ;;                           ([[a [b c] d] {}] (list :second a b c d)))
+          (let [[name & given-clauses] args
+                parsed (map conv-1-case-clause
+                            (map first given-clauses)
+                            (map rest given-clauses)
+                            (range (count given-clauses)))
+                fns (into [] (map second parsed))
+                code-exprs (into [] (map rest given-clauses))
+                pairs (map-indexed (fn destr-443 [idx [[lambda-list types-map] _]]
+                                     [idx (lambda-list-to-rte lambda-list types-map)])
+                                   given-clauses)
+                ;; we must call warn-unreachable at macro expansion time
+                ;; because we want the message emitted at compile time.
+                _ (when *warn-on-unreachable-code*
+                    (warn-unreachable (clauses-to-dfa pairs) code-exprs call-site-meta-data))
+                ]
+            `(let [dfa# (clauses-to-dfa '~pairs)]
+               (fn
+                 ~@(if name (list name) nil) ;; either name or nothing
+                 [& seq#]
+                 
+                 ;; we must declare fns inside the (fn ...) because
+                 ;;    the user code might make a recrusive call to `name`
+                 ;;    see test case `t-dsfn-recursive` in rte_case_test.clj
+                 (let [fns# ~fns
+                       ind# (rte/match dfa# seq# :promise-disjoint true)]
+                   
+                   (if ind#
+                     ;; get function out of vector fns# and call it
+                     (apply (fns# ind#) seq#)
+                     (throw (ex-info "No pattern matching given sequence"
+                                     {:sequence seq#}))
+                     ))))))))
 
 
 (defmacro destructuring-fn
@@ -510,14 +529,17 @@
   {:forms '[(destructuring-fn name? [[params* ] constr-map] exprs*)
             (destructuring-fn name? ([[params*] constr-map ] exprs*)+)]}
   [& args]
-  (cond
-    (empty? args)
-    (throw (IllegalArgumentException. 
-            "destructuring-fn, empty argument list not supported")) 
-
-    (not (or (symbol? (first args))
-             (= nil (first args))))
-    `(destructuring-fn nil ~@args)
+  (let [[keywords args] (parse-prefixed-keyword-args args)
+        call-site-meta-data (flatten (seq (merge (assoc (meta &form) :file *file*)
+                                                 keywords)))]
+    (cond
+      (empty? args)
+      (throw (IllegalArgumentException. 
+              "destructuring-fn, empty argument list not supported")) 
+      
+      (not (or (symbol? (first args))
+               (= nil (first args))))
+      `(destructuring-fn ~@call-site-meta-data nil ~@args)
     
 
     (= 1 (count args))
@@ -527,9 +549,10 @@
     (vector? (second args)) ; if lambda-list is a vector
     (let [[name lambda-list & others] args]
       `(-destructuring-fn-many
-        ~name
-        (~lambda-list
-         ~@others)))
+           ~@call-site-meta-data
+         ~name
+         (~lambda-list
+          ~@others)))
 
     (every? (fn [clause]
               (and (sequential? clause)
@@ -539,8 +562,9 @@
             (rest args))
     (let [[name & clauses] args]
       `(-destructuring-fn-many
-        ~name
-        ~@clauses))
+           ~@call-site-meta-data
+         ~name
+         ~@clauses))
     
     :else
     (throw (IllegalArgumentException. 
@@ -549,7 +573,7 @@
                        args
                        (map (fn [clause]
                               (type clause)) (rest args))
-                       )))))
+                       ))))))
 
 (defmacro dsfn
   "Syntactically easier wrapper around destructuring-fn.
@@ -565,18 +589,23 @@
               (let [meta-data (meta (first form))]
                 (cons [(first form) (if (nil? meta-data) {} meta-data) ] (rest form)))
               form))]
-    (cond
-      (and (or (nil? (first forms))
-               (symbol? (first forms)))
-           (vector? (second forms)))
-      `(dsfn ~(first forms) (~@(rest forms)))
-
-      (vector? (first forms))
-      `(dsfn (~@forms))
-
-      :else
-      `(destructuring-fn
-        ~@(map process forms)))))
+    (let [[keywords forms] (parse-prefixed-keyword-args forms)
+          call-site-meta-data (merge (assoc (meta &form) :file *file*)
+                                       keywords)]
+      (cond
+        (and (or (nil? (first forms))
+                 (symbol? (first forms)))
+             (vector? (second forms)))
+        `(dsfn ~@(flatten (seq call-site-meta-data))
+               ~(first forms) (~@(rest forms)))
+      
+        (vector? (first forms))
+        `(dsfn ~@(flatten (seq call-site-meta-data)) (~@forms))
+        
+        :else
+        `(destructuring-fn
+           ~@(flatten (seq call-site-meta-data))
+           ~@(map process forms))))))
 
 (defmacro dsdefn 
   "E.g.,
@@ -595,8 +624,11 @@
     ([a b [^Ratio c d]] 14)
     (^{c (satisfies integer?)} [a b [c d]] 14)
     ([a b [^Double c d]] 16))
-"
+  "
   [name & forms]
-  `(def ~name (dsfn ~@forms)))
+  (let [[keywords forms] (parse-prefixed-keyword-args forms)
+        call-site-meta-data (merge (assoc (meta &form) :file *file*)
+                                   keywords)]
+    `(def ~name (dsfn ~@(flatten (seq call-site-meta-data)) ~@forms))))
 
 

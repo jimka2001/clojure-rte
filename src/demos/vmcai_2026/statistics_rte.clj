@@ -4,26 +4,24 @@
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.pprint :refer [pprint cl-format]]
-            [util :refer [member time-expr mean std-deviation read-csv-data rename-columns
+            [util.util :refer [member time-expr mean std-deviation read-csv-data rename-columns
                           call-in-block with-timeout human-readable-current-time
                           truthy-let
                           ]]
-            [view]
-            [vega-plot :as vega]
-            [genus :as gns]
+            [graph.view :as view]
+            [graph.vega-plot :as vega]
+            [genus.genus :as gns]
             [rte-construct :refer [rte-to-dfa]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-tester :refer [rte-depth rte-count-leaves]]
             [demos.vmcai-2026.rte-tree-partially-balanced :refer [gen-partially-balanced-rte]]
             [demos.vmcai-2026.rte-tree-totally-balanced :refer [gen-totally-balanced-rte]]
             [rte-randomize-syntax :refer [gen-rte]]
-            [xym-tester :refer [gen-dfa]]
-            [xymbolyco :as xym]
-            [lock :as lock]
+            [xym.xym-tester :refer [gen-dfa]]
+            [xym.xymbolyco :as xym]
+            [util.lock :as lock]
             [demos.vmcai-2026.statistics-inhabited]
             [demos.vmcai-2026.statistics-rte]
-            
-
             ))
 
 

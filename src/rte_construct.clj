@@ -21,8 +21,8 @@
 
 (ns rte-construct
   (:refer-clojure :exclude [compile])
-  (:require [genus :as gns]
-            [util :refer [member exists setof forall
+  (:require [genus.genus :as gns]
+            [util.util :refer [member exists setof forall
                           call-with-collector defn-memoized defmulti-memoized defmethod-memoized
                           visit-permutations fixed-point
                           sort-operands
@@ -34,12 +34,12 @@
                           count-if-not find-simplifier
                           timeout-reached?
                           ]]
-            [xymbolyco :as xym]
+            [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.set :refer [union]]
-            [cl-compat :as cl]
+            [util.cl-compat :as cl]
             [backtick :refer [template]]
-            [genus-spec :as gs]
+            [genus.genus-spec :as gs]
             )
 )
 

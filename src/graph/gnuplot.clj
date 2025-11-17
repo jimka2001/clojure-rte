@@ -1,10 +1,10 @@
-(ns gnuplot
+(ns graph.gnuplot
   (:require [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as str]
             [clojure.pprint :refer [cl-format]]
-            [util :refer [member with-outstring]]
-            [view :refer [view-image]]
+            [util.util :refer [member with-outstring]]
+            [graph.view :refer [view-image]]
             ))
 
 (defn run-gnu-plot [terminal gnu-name output-file-name]

@@ -1,16 +1,13 @@
-(ns xym-tester
-  (:require [genus :as gns]
-            [dot]
+(ns xym.xym-tester
+  (:require [genus.genus :as gns]
+            [graph.dot :as dot]
             [clojure.pprint :refer [pprint]]
             [rte-construct :refer [rte-to-dfa]]
             [rte-extract :refer [dfa-to-rte]]
-            [genus-tester :refer [gen-inhabited-type
+            [genus.genus-tester :refer [gen-inhabited-type
                                   gen-indeterminate-type]]
-            [xymbolyco :as xym]
-            [util :refer [member time-expr find-first]]
-
-  ))
-
+            [xym.xymbolyco :as xym]
+            [util.util :refer [member time-expr find-first]]))
 
 (defn build-state-map
   "This is a helper function for use in `gen-dfa` and is not intended

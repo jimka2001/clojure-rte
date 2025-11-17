@@ -1,7 +1,7 @@
 (ns demos.vmcai-2026.rte-tree-partially-balanced
   (:require [clojure.math :refer [pow round]]
-            [lock :as lock]
-            [genus-tester :refer [*test-types*]])
+            [util.lock :as lock]
+            [genus.genus-tester :refer [*test-types*]])
 )
 
 

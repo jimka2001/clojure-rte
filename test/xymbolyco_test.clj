@@ -23,18 +23,19 @@
   (:refer-clojure :exclude [complement])
   (:require [rte-core ]
             [rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
+            [rte-tester :refer [test-rte-not-1]]
             [rte-extract :refer [dfa-to-rte]]
-            [xymbolyco :as xym]
-            [xym-tester :refer [gen-dfa build-state-map]]
-            [bdd :as bdd]
+            [xym.xymbolyco :as xym]
+            [xym.xym-tester :refer [gen-dfa build-state-map]]
+            [genus.bdd :as bdd]
             [clojure.pprint :refer [cl-format pprint]]
-            [genus :as gns]
-            [util :refer [member human-readable-current-time]]
-            [dot :refer [dfa-to-dot]]
+            [genus.genus :as gns]
+            [util.util :refer [member human-readable-current-time]]
+            [graph.dot :refer [dfa-to-dot] :as dot]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
 (def testing-view
-  "This value specifies whether dfa-view is called during testing.  It default to false
+  "This value specifies whether dfa-view is called during testing.  It defaults to false
   so that dfa-view does not get called in batch testing."
   false)
 
@@ -257,6 +258,56 @@
                                                           rte))))]
         ;; (println [:inx inx :rte rte])
         (t-acceptance-test-rte rte)))))
+
+(deftest t-discovered-261
+  (testing "discovered test case 261"
+    ;;   actual: java.lang.AssertionError: Assert failed: 187: dfa not equivalent with self rte=(:contains-every :epsilon (= (1 2 3)) (satisfies seq?) (:and java.io.Serializable java.lang.CharSequence (:contains-every (:? (:contains-any)) (:and (:? :epsilon)))))
+    (doseq [r1 ['(:contains-every :epsilon
+                               (= (1 2 3))
+                               (satisfies seq?)
+                               (:and java.io.Serializable
+                                     java.lang.CharSequence
+                                     (:contains-every (:? (:contains-any))
+                                                      (:and (:? :epsilon)))))
+                '(:cat (:contains-every (:not (:cat (member a b c 1 2 3)))
+                                        (satisfies seq?)
+                                        (:? :epsilon))
+                       (:or (= (1 2 3)) (:cat :epsilon (:or (= -1)))
+                            (:+ :empty-set))
+                       :sigma
+                       (:cat (:or (:cat (:and)) :empty-set)
+                             (:or :sigma (:contains-every (:+ (:and))))
+                             (:cat :epsilon (:not (:contains-none)))))]]
+
+      (with-compile-env []
+        (let [dfa (rte-to-dfa r1)
+              dfa-complement (xym/complement dfa)
+              dfa-not-rte (rte-to-dfa (list :not r1))
+              eq1 (xym/dfa-equivalent? dfa
+                                       dfa)
+              eq2 (xym/dfa-equivalent? dfa-not-rte
+                                       dfa-not-rte)
+              eq3 (xym/dfa-equivalent? dfa-complement
+                                   dfa-not-rte)
+              ]
+          (if (not eq1)
+            (do (dot/dfa-view (xym/synchronized-xor dfa dfa) "xor")
+                (dot/dfa-view dfa "dfa")))
+          (is eq1
+              (cl-format false
+                         "z1: dfa not equivalent (returned ~A) with self r1=~A" eq1 r1))
+
+          (is eq2
+              (cl-format false
+                         "z2: dfa of :not, not equivalent (returned ~A) with self r1=~A" eq2 (list :not r1)))
+
+          (is eq3
+              (cl-format false
+                         "z3: !dfa != (dfa (not r1)), (returned ~A) when r1=~A" eq3 r1))
+          ))
+      (test-rte-not-1 r1)
+
+      )))
 
 (deftest t-test-1
   (testing "particular case 1 which was failing"

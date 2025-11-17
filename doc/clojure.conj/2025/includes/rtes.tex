@@ -108,6 +108,7 @@
 
 
 \begin{frame}{RTEs}{Surface Syntax and AST}
+  \emph{What is an RTE?}
   \begin{columns}
     \begin{column}{0.55\textwidth}
   \begin{itemize}
@@ -116,14 +117,16 @@
   \item Clojure notation: AST\\
     \only<1>{\usebox\exnoteboxpre}%
     \only<2>{\usebox\exnotebox}%
-  \item Leaf nodes interface to Clojure/Java Type System
+    \begin{itemize}
+    \item Either: Leaf node designating a Clojure/Java type
+    \item Or: List of keyword followed by more RTEs
+    \end{itemize}
+  \item Semantics: an  RTE corresponds to a \Emph{set of sequences}: Union, Intersection
   \end{itemize}
     \end{column}%
     \begin{column}{0.45\textwidth}
       \only<1>{\scalebox{0.8}{\input{strex-clojure}}}%
-      \only<2>{\scalebox{0.8}{\input{strex-clojure-satisfies}}}
-
-
+      \only<2->{\scalebox{0.8}{\input{strex-clojure-satisfies}}}
     \end{column}%
   \end{columns}%
 \end{frame}

@@ -21,9 +21,9 @@
 
 (ns genus-statistics-test
   (:require [rte-core]
-            [util :refer [human-readable-current-time]]
-            [genus :as gns]
-            [genus-tester :refer [gen-type gen-inhabited-type]]
+            [util.util :refer [human-readable-current-time]]
+            [genus.genus :as gns]
+            [genus.genus-tester :refer [gen-type gen-inhabited-type]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
