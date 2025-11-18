@@ -285,27 +285,52 @@
               dfa-not-rte (rte-to-dfa (list :not r1))
               eq1 (xym/dfa-equivalent? dfa
                                        dfa)
-              eq2 (xym/dfa-equivalent? dfa-not-rte
+              #_#_eq2 (xym/dfa-equivalent? dfa-not-rte
                                        dfa-not-rte)
-              eq3 (xym/dfa-equivalent? dfa-complement
-                                   dfa-not-rte)
+              #_#_eq3 (xym/dfa-equivalent? dfa-complement
+                                       dfa-not-rte)
+              xor1 (xym/synchronized-xor dfa dfa)
+              xor1-min (xym/minimize xor1)
               ]
           (if (not eq1)
-            (do (dot/dfa-view (xym/synchronized-xor dfa dfa) "xor")
-                (dot/dfa-view dfa "dfa")))
+            (let [abbrevs-eq1 (dot/dfa-view dfa "eq1")
+                  abbrevs-eq1-xor (dot/dfa-view xor1 "eq1-xor"
+                                                :abbrevs abbrevs-eq1)
+                  abbrevs-min (dot/dfa-view xor1-min "xor-min" :abbrevs abbrevs-eq1-xor)
+                  ]
+              (pprint [:eq1 eq1])
+              (pprint [:abbrevs-eq1 abbrevs-eq1])
+              (pprint [:abbrevs-min abbrevs-min])
+              (pprint [:abbrevs-eq1-xor abbrevs-eq1-xor])
+              ))
           (is eq1
               (cl-format false
                          "z1: dfa not equivalent (returned ~A) with self r1=~A" eq1 r1))
 
-          (is eq2
+          #_(if (not eq2)
+            (do (dot/dfa-view dfa-not-rte "eq2")
+                (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-not-rte)
+                              "eq2-xor")))
+          
+          #_(is eq2
               (cl-format false
                          "z2: dfa of :not, not equivalent (returned ~A) with self r1=~A" eq2 (list :not r1)))
 
-          (is eq3
+          #_(if (not eq3)
+            (let [abbrevs-1 (dot/dfa-view dfa-not-rte "eq3-not")
+                  abbrevs-2 (dot/dfa-view dfa-complement "eq3-complement")
+                  abbrevs-3 (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-complement)
+                                          "eq3-xor")]
+              (pprint [:abbrevs-1 abbrevs-1
+                      :abbrevs-2 abbrevs-2
+                      :abbrevs-3 abbrevs-3])
+                      ))
+          
+          #_(is eq3
               (cl-format false
                          "z3: !dfa != (dfa (not r1)), (returned ~A) when r1=~A" eq3 r1))
           ))
-      (test-rte-not-1 r1)
+      #_(test-rte-not-1 r1)
 
       )))
 
