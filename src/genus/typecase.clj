@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns typecase
+(ns genus.typecase
   (:require [genus.genus :as gns]
             [util.util :refer [setof]]
             [backtick :refer [template]]))

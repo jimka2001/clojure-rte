@@ -24,5 +24,5 @@
             [rte-case]
             [rte-extract]
             [genus.genus-spec]
-            [typecase]
+            [genus.typecase]
             ))

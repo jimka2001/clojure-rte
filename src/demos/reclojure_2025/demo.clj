@@ -3,7 +3,7 @@
             [genus.genus :as gns]
             [rte-construct :as rte]
             [xym.xymbolyco :as xym]
-            [typecase :refer [typecase]]
+            [genus.typecase :refer [typecase]]
             [graph.dot :as dot])
 )
 

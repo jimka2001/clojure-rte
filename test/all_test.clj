@@ -38,7 +38,7 @@
              genus-conversion-test
              util-test             
              genus-spec-test
-             typecase
+             typecase-test
              )
   (:gen-class))
 
@@ -61,7 +61,7 @@
                           'genus-conversion-test
                           'util-test
                           'genus-spec-test
-                          'typecase
+                          'typecase-test
                           ))
 
 (defn -main []

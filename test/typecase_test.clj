@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns typecase-test
-  (:require [typecase :as sut]
+  (:require [genus.typecase :as sut]
             [genus.genus]
             [clojure.test :as t :refer [is]]))
 

@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-tester
-  (:require [tester]
+  (:require [util.tester :as tester]
             [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.math :refer [pow round]]
