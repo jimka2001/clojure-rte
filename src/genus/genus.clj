@@ -1302,11 +1302,11 @@
    conversion-C13
    conversion-C14
    conversion-C15
-   conversion-C16
+   ;;conversion-C16
    conversion-C17
    conversion-D1
    conversion-C8
-   conversion-C10
+   ;;conversion-C10
    conversion-D3
    conversion-C98
    (fn conversion-C99-nf [td] (conversion-C99 td nf))])
