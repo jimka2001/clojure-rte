@@ -388,26 +388,30 @@
          (rest pattern)))
 
 (defmethod expand-1 :contains-any method-expand-1-contains-any [pattern _functions]
-  (apply (fn
-           ([] :epsilon)
-           ([operand] operand)
-           ([_ & _]
-            (let [operands (rest pattern)]
-              `(:cat ~sigma-*
-                     (:or ~@operands)
-                     ~sigma-*))))
-         (rest pattern)))
+  ;; (:contains-any A B C)
+  ;; expands to
+  ;; (:cat (:* :sigma)
+  ;;       (:or A B C)
+  ;;       (:* :sigma))
+  ;; which is the same as
+  ;; (:or (:cat (:* :sigma) A (:* :sigma))
+  ;;      (:cat (:* :sigma) B (:* :sigma))
+  ;;      (:cat (:* :sigma) C (:* :sigma)))
+  (let [operands (rest pattern)]
+    `(:cat ~sigma-*
+           (:or ~@operands)
+           ~sigma-*)))
 
 (defmethod expand-1 :contains-every method-expand-1-contains-every [pattern _functions]
-  (apply (fn
-           ([] :epsilon)
-           ([operand] operand)
-           ([_ & _]
-            (let [wrapped (map (fn map-wrapped [operand]
-                                    `(:cat ~sigma-* ~operand ~sigma-*)) 
-                                  (rest pattern))]
-              `(:and ~@wrapped))))
-         (rest pattern)))
+  ;; (:contains-every A B C)
+  ;; expands to
+  ;; (:and (:cat (:* :sigma) A (:* :sigma))
+  ;;       (:cat (:* :sigma) B (:* :sigma))
+  ;;       (:cat (:* :sigma) C (:* :sigma)))
+  (let [wrapped (map (fn map-wrapped [operand]
+                       `(:cat ~sigma-* ~operand ~sigma-*)) 
+                     (rest pattern))]
+    `(:and ~@wrapped)))
 
 (defmethod expand-1 :contains-none method-expand-1-contains-none [pattern _functions]
   ;; TODO, not sure what (:contains-none) should mean with no arguments.
