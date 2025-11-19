@@ -25,7 +25,7 @@
   (:refer-clojure :exclude [complement])
   (:require [util.cl-compat :as cl]
             [util.util :refer [fixed-point member
-                                      defn-memoized find-first
+                                      find-first
                                       partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]
             [rte-construct :as rte]

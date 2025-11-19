@@ -27,9 +27,9 @@
             [util.util :refer [exists-pair forall-pairs exists fixed-point
                                       remove-element uniquify non-empty? forall
                                       search-replace setof sort-operands
-                                      seq-matcher member find-simplifier defn-memoized
-                                      defn-memoized call-with-found find-first
-                                      gc-friendly-memoize
+                                      seq-matcher member find-simplifier
+                                      call-with-found find-first
+                                      gc-friendly-memoize clear-memoize-cache!
                                       unchunk or-else]]
             [util.cl-compat :as cl]
             [clojure.reflect :as refl]
@@ -41,11 +41,11 @@
 
 (declare ^:dynamic canonicalize-type -canonicalize-type)
 (declare ^:dynamic inhabited? -inhabited?)
-(declare ^:dynamic disjoint? disjoint?-impl -disjoint?)
+(declare ^:dynamic disjoint? -disjoint?)
 
 
 (declare annihilator)
-(declare check-disjoint check-disjoint-impl)
+(declare check-disjoint)
 (declare combinator)
 (declare combo-filter)
 (declare create-and)
@@ -162,9 +162,10 @@
 ;;(resolve-class 'Number)
 ;;(resolve-class 'Ratio)
 
-(defn-memoized [type-equivalent? type-equivalent?-impl]
+(def type-equivalent?
   "Test whether two type designators represent the same type."
-  [t1 t2 default]
+  (gc-friendly-memoize
+    (fn [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
   (let [can1 (delay (canonicalize-type t1 :dnf))
@@ -185,7 +186,7 @@
       true
 
       :else
-      default)))
+          default)))))
 
 (defn type-dispatch 
   "Dispatch function for several defmulti's.  If the type-designator is a sequence,
@@ -220,10 +221,11 @@
   [f]
   (cons :primary (remove #{:primary :default} (keys (methods f)))))
 
-(defn-memoized [class-primary-flag class-primary-flag-impl]
+(def class-primary-flag
   "Takes a class-name and returns either :abstract, :interface, :public, or :final,
   or throws an ex-info exception."
-  [t]
+  (gc-friendly-memoize
+    (fn [t]
   (let [c (find-class t)
         r (refl/type-reflect c)
         flags (:flags r)]
@@ -243,7 +245,7 @@
       (throw (ex-info (format "disjoint? type %s flags %s not yet implemented" t flags)
                       {:error-type :invalid-type-flags
                        :a-type t
-                       :flags flags})))))
+                           :flags      flags})))))))
 
 (defn- get-fn-source
   "Use the clojure.repl/source-fn function to extract a string representing the
@@ -493,16 +495,17 @@
 ;; implementation of canonicalize-typef and the methods of -canonicalize-type
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn-memoized [canonicalize-type-2-arg canonicalize-type-2-arg-impl]
+(def canonicalize-type-2-arg
   "We cannot memoize canonicalize-type because its return value depends
   on the value of the dynamic variable, so  canonicalize-type calls
   canonicalize-type-2-arg with that value as 2nd argument.  This
   function is a fixed-point wrapper around -canonicalize-type."
-  [type-designator nf]
+  (gc-friendly-memoize
+    (fn [type-designator nf]
   (fixed-point type-designator
                (fn [td]
                  (-canonicalize-type td nf))
-               =))
+                   =))))
 
 (defn canonicalize-type
   "Simplify the given type-designator to a stable form"
@@ -1394,11 +1397,12 @@
 ;; implementation of disjoint? and -disjoint?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn-memoized [disjoint? disjoint?-impl]
+(def disjoint?
   "Predicate to determine whether the two types overlap.
   If it cannot be determined whether the two designated types
   are disjoint, then the default value is returned."
-  [t1 t2 default]
+  (gc-friendly-memoize
+    (fn [t1 t2 default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
   (cond
@@ -1417,11 +1421,12 @@
           (if (and (= t1-simple t1)
                    (= t2-simple t2))
             default
-            (check-disjoint t1-simple t2-simple default)))))))
+                (check-disjoint t1-simple t2-simple default)))))))))
 
-(defn-memoized [check-disjoint check-disjoint-impl]
+(def check-disjoint
   "Internal function used in top level disjoint? implementation."
-  [t1' t2' default]
+  (gc-friendly-memoize
+    (fn [t1' t2' default]
   (loop [[k & ks] (sort-method-keys -disjoint?)]
     (let [f (k (methods -disjoint?))]
       (case (f t1' t2')
@@ -1432,7 +1437,7 @@
           (false) false
           (if ks
             (recur ks)
-            default))))))
+                default))))))))
 
 (defmulti -disjoint?
   "This function should never be called.
@@ -1996,11 +2001,12 @@
 ;; implementation of inhabite? and -inhabited?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn-memoized [inhabited? inhabited?-impl]
+(def inhabited?
   "Given a type-designator, perhaps application specific,
   determine whether the type is inhabited, i.e., not the
   empty type."
-  [type-designator default]
+  (gc-friendly-memoize
+    (fn [type-designator default]
   {:pre [(member default '(true false :dont-know))]
    :post [(member % '(true false :dont-know))]}
   (letfn [(calc-inhabited [type-designator default]
@@ -2020,7 +2026,7 @@
               default
               
               :else
-              (calc-inhabited @td-canon default)))))
+                (calc-inhabited @td-canon default)))))))
 
 (defn vacuous? 
   "Determine whether the specified type is empty, i.e., not inhabited."
@@ -2236,13 +2242,12 @@
                (disj type-set td))))))
 
 (defn call-with-genus-env [thunk]
-  (binding [gns/check-disjoint (gc-friendly-memoize gns/check-disjoint-impl)
-            gns/canonicalize-type-2-arg (gc-friendly-memoize gns/canonicalize-type-2-arg-impl)
-            gns/disjoint? (gc-friendly-memoize gns/disjoint?-impl)
-            gns/inhabited? (gc-friendly-memoize gns/inhabited?-impl)
-            gns/type-equivalent? (gc-friendly-memoize gns/type-equivalent?-impl)
-            ]
-  (thunk)))
+  (try
+    (thunk)
+    (finally
+      (run! clear-memoize-cache!
+            [gns/check-disjoint gns/canonicalize-type-2-arg gns/disjoint?
+             gns/inhabited? gns/type-equivalent?]))))
 
 ;; programmatic constructors
 (def gns/And

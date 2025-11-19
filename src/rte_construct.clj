@@ -23,7 +23,7 @@
   (:refer-clojure :exclude [compile])
   (:require [genus.genus :as gns]
             [util.util :refer [member exists setof forall
-                          call-with-collector defn-memoized defmulti-memoized defmethod-memoized
+                          call-with-collector clear-memoize-cache! defmulti-memoized defmethod-memoized
                           visit-permutations fixed-point
                           sort-operands
                           human-readable-current-time
@@ -46,11 +46,11 @@
 ;; allow rte/ prefix even in this file.
 (alias 'rte 'rte-construct)
 
-(declare ^:dynamic canonicalize-pattern canonicalize-pattern-impl)
-(declare ^:dynamic compile rte-to-dfa)
-(declare ^:dynamic canonicalize-pattern-once canonicalize-pattern-once-impl)
-(declare ^:dynamic rte-inhabited? rte-inhabited?-impl)
-(declare ^:dynamic nullable? nullable?-impl)
+(declare canonicalize-pattern)
+(declare rte/compile rte-to-dfa)
+(declare canonicalize-pattern-once)
+(declare rte-inhabited?)
+(declare nullable?)
 
 (declare traverse-pattern)
 (declare match)
@@ -74,14 +74,12 @@
 (defn call-with-compile-env [thunk]
   (gns/call-with-genus-env
    (fn []
-     (binding [rte/compile (gc-friendly-memoize rte-to-dfa)
-               canonicalize-pattern-once (gc-friendly-memoize canonicalize-pattern-once-impl)
-               xym/optimized-transition-function (gc-friendly-memoize xym/optimized-transition-function-impl)
-               canonicalize-pattern (gc-friendly-memoize canonicalize-pattern-impl)
-               rte-inhabited? (gc-friendly-memoize rte-inhabited?-impl)
-               nullable? (gc-friendly-memoize nullable?-impl)
-               gs/spec-to-rte (gc-friendly-memoize gs/spec-to-rte-impl)]
-       (thunk)))))
+      (try
+        (thunk)
+        (finally
+          (run! clear-memoize-cache!
+                [rte/rte-to-dfa canonicalize-pattern-once xym/optimized-transition-function
+                 canonicalize-pattern rte-inhabited? nullable? gs/spec-to-rte]))))))
 
 (defmacro with-compile-env [[] & body]
   `(call-with-compile-env (fn [] ~@body)))
@@ -97,7 +95,7 @@
                                   \"world\" 1.0 2.0])))"
   [bindings thunk]
   ;; TODO need to detect if every a local key is defined differently,
-  ;; and if so purge the memoize cache of rte/compile.
+  ;; and if so purge the memoize cache of rte/rte-to-dfa.
   (with-compile-env ()
     (binding [*rte-known* (apply assoc *rte-known* bindings)]
       (thunk))))
@@ -130,7 +128,7 @@
 
 (defmethod gns/-inhabited? 'rte [t1]
   (if (rte? t1)
-    (rte-inhabited? (rte/compile (second t1)) :dont-know)
+    (rte-inhabited? (rte/rte-to-dfa (second t1)) :dont-know)
     :dont-know))
 
 (defmethod gns/-inhabited? :not-rte [t1]
@@ -166,7 +164,7 @@
         (rte? t2)
         (let [[_ pat1] t1
               [_ pat2] t2]
-          (rte-vacuous? (rte/compile `(:and ~pat1 ~pat2)) :dont-know))
+          (rte-vacuous? (rte/rte-to-dfa `(:and ~pat1 ~pat2)) :dont-know))
 
         ;; (disjoint? (rte ...) clojure.lang.IPersistentVector )
         (and (gns/class-designator? t2)
@@ -178,12 +176,12 @@
              (rte? (second t2)))
         (let [[_ pat1] t1
               [_ [_ pat2]] t2]
-          (rte-vacuous? (rte/compile `(:and ~pat1 (:not ~pat2))) :dont-know))
+          (rte-vacuous? (rte/rte-to-dfa `(:and ~pat1 (:not ~pat2))) :dont-know))
         
         (and (gns/class-designator? t2)
              (isa? (gns/find-class t2) java.lang.CharSequence))
         (let [[_ pat1] t1]
-          (rte-vacuous? (rte/compile `(:and ~pat1 (:* java.lang.Character))) :dont-know))
+          (rte-vacuous? (rte/rte-to-dfa `(:and ~pat1 (:* java.lang.Character))) :dont-know))
         
         (and (gns/class-designator? t2)
              (not (isa? (gns/find-class t2) clojure.lang.Sequential)))
@@ -203,7 +201,7 @@
                (rte? super-designator))
           (let [[_ pat-sub] sub-designator
                 [_ pat-super] super-designator]
-            (rte-vacuous? (rte/compile `(:and ~pat-sub (:not ~pat-super))) :dont-know))
+            (rte-vacuous? (rte/rte-to-dfa `(:and ~pat-sub (:not ~pat-super))) :dont-know))
           
           (and (rte? super-designator)
                (gns/class-designator? sub-designator)
@@ -587,10 +585,11 @@
              ;; cond-else (:keyword args) or list-expr ;; (:and x y)
              :else (if-multiple-operands pattern))))))
 
-(defn-memoized [nullable? nullable?-impl]
+(def nullable?
   "Determine whether the given rational type expression is nullable.
   I.e., does the empty-word satisfy the expression."
-  [expr]
+  (gc-friendly-memoize
+    (fn [expr]
   (boolean
    (traverse-pattern expr
                      (assoc *traversal-functions*
@@ -607,7 +606,7 @@
                             :or (fn [operands _functions]
                                   (some nullable? operands))
                             :not (fn [operand _functions]
-                                   (not (nullable? operand)))))))
+                                   (not (nullable? operand)))))))))
 
 (defn extract-types
   "Return a sequence of leaf-level types in the given rte.
@@ -1881,7 +1880,7 @@
                              [r]))
                          (operands self)))))
 
-(defn-memoized [canonicalize-pattern-once canonicalize-pattern-once-impl]
+(def canonicalize-pattern-once
   "Rewrite the given rte pattern to a canonical form.
   This involves recursive re-writing steps for each sub form,
   including searches for syntatical and semantical reductions.
@@ -1889,7 +1888,8 @@
   which finds a fixed-point of canonicalize-pattern-once, i.e.,
   keeps calling canonicalize-pattern-once until it finally
   stops changing."
-  [re]
+  (gc-friendly-memoize
+    (fn [re]
   (traverse-pattern re
                     (assoc *traversal-functions*
                            :type (fn [tag _functions]
@@ -1969,18 +1969,19 @@
                                                    conversion-combo-17
                                                    conversion-combo-22
                                                    conversion-combo-99
-                                                   conversion-combo-5])))))
+                                                  conversion-combo-5])))))))
 
 
 ;;(def count-canonicalize-pattern (atom 0))
 
-(defn-memoized [canonicalize-pattern canonicalize-pattern-impl]
+(def canonicalize-pattern
   "find the fixed point of canonicalize-pattern-once"
-  [pattern]
+  (gc-friendly-memoize
+    (fn [pattern]
   ;;(swap! count-canonicalize-pattern inc)
   ;;(when (zero? (mod @count-canonicalize-pattern 100))
   ;;  (prn [:count @count-canonicalize-pattern]))
-  (fixed-point pattern canonicalize-pattern-once =))
+      (fixed-point pattern canonicalize-pattern-once =))))
 
 (defn compute-compound-derivative
   "wrt may be a compound type designator such as (and A (not B)).
@@ -2147,10 +2148,12 @@
                           (first (rte/find-all-derivatives pattern))))))
 
 
-(defn-memoized [rte/compile rte-to-dfa]
+(def rte-to-dfa
   "Use the Brzozowski derivative aproach to compute a finite automaton
   representing the given rte patten.  The finite automaton is in the
   form of an array of States.  The n'th State is array[n]."
+  (gc-friendly-memoize
+    (fn rte-to-dfa
   ([pattern]
    (rte-to-dfa pattern true))
   ([pattern exit-value]
@@ -2202,9 +2205,9 @@
          ]
 
      (xym/extend-with-sink-state
-      dfa))))
+           dfa))))))
 
-
+(def compile rte-to-dfa)
 
 (defn dispatch [obj _caller]
   (cond (instance? (xym/record-name) ;; parser cannot handle xym/Dfa
@@ -2222,7 +2225,7 @@
 
 (defmethod rte-trace :pattern
   [pattern]
-  (rte-trace (rte/compile pattern)))
+  (rte-trace (rte/rte-to-dfa pattern)))
 
 (defmethod rte-trace :Dfa
   [dfa]
@@ -2276,7 +2279,7 @@
 (defmethod rte/match :pattern
   [pattern items & {_promise-disjoint :promise-disjoint
                     hot-spot :hot-spot}]
-  (rte/match (rte/compile pattern) items :promise-disjoint true :hot-spot hot-spot))
+  (rte/match (rte/rte-to-dfa pattern) items :promise-disjoint true :hot-spot hot-spot))
 
 (defn slow-transition-function
   "Returns a unary function which can serve as the transfer function of a state

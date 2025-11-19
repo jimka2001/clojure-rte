@@ -323,14 +323,9 @@
   [g]
   (m/memoizer g (c/soft-cache-factory {})))
 
-(defmacro defn-memoized
-  [[public-name internal-name] docstring & body]
-  (assert (string? docstring))
-  `(do
-     (declare ~public-name) ;; so that the internal function can call the public function if necessary
-     (defn ~internal-name ~@body)
-     (def ~(with-meta public-name {:dynamic true}) ~docstring (gc-friendly-memoize ~internal-name))
-     ))
+(defn clear-memoize-cache!
+  [f]
+  (m/memo-clear! f))
 
 (def memoized-multis (atom {}))
 (defmacro defmulti-memoized

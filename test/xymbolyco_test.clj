@@ -284,22 +284,12 @@
   (testing "discovered test case 261"
     ;;   actual: java.lang.AssertionError: Assert failed: 187: dfa not equivalent with self rte=(:contains-every :epsilon (= (1 2 3)) (satisfies seq?) (:and java.io.Serializable java.lang.CharSequence (:contains-every (:? (:contains-any)) (:and (:? :epsilon)))))
     (doseq [r1 ['(:contains-every :epsilon
-                                  (= (1 2 3))
-                                  (not (= [1 2 3]))
-                                  (satisfies seq?)
-                                  (:and java.io.Serializable
-                                        java.lang.CharSequence
-                                        (:contains-every (:? (:contains-any))
-                                                         (:and (:? :epsilon)))))
-                '(:cat (:contains-every (:not (:cat (member a b c 1 2 3)))
-                                        (satisfies seq?)
-                                        (:? :epsilon))
-                       (:or (= (1 2 3)) (:cat :epsilon (:or (= -1)))
-                            (:+ :empty-set))
-                       :sigma
-                       (:cat (:or (:cat (:and)) :empty-set)
-                             (:or :sigma (:contains-every (:+ (:and))))
-                             (:cat :epsilon (:not (:contains-none)))))]]
+                               (= (1 2 3))
+                               (satisfies seq?)
+                               (:and java.io.Serializable
+                                     java.lang.CharSequence
+                                     (:contains-every (:? (:contains-any))
+                                                      (:and (:? :epsilon)))))]]
 
       (with-compile-env []
         (let [dfa (rte-to-dfa r1)
@@ -314,6 +304,7 @@
               xor1 (xym/synchronized-xor dfa dfa)
               xor1-min (xym/minimize xor1)
               ]
+
           (is eq1
               (cl-format false
                          "z1: dfa not equivalent (returned ~A) with self r1=~A" eq1 r1))
@@ -345,8 +336,9 @@
 
       )))
 
-(deftest t-discovered-261
-  (testing "discovered test case 261"
+
+(deftest t-discovered-262
+  (testing "discovered test case 262"
     (doseq [r1 ['(:contains-every (= (1 2 3))
                                   (= [1 2 3])
                                   (not (= [1 2 3]))

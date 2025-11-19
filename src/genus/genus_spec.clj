@@ -21,7 +21,7 @@
 
 (ns genus.genus-spec
   (:require [genus.genus :as gns]
-            [util.util :refer [casep defn-memoized exists seq-matcher]]
+            [util.util :refer [casep exists seq-matcher gc-friendly-memoize]]
             [clojure.pprint :refer [cl-format]]
             [clojure.spec.alpha :as s]
             [backtick :refer [template]]
@@ -96,9 +96,10 @@
         :else
         pattern))
 
-(defn-memoized [spec-to-rte spec-to-rte-impl]
+(def spec-to-rte
   "Convert spec to rte"
-  [pattern]
+  (gc-friendly-memoize
+    (fn [pattern]
   (cond (s/regex? pattern)
         (spec-to-rte (s/form pattern))
 
@@ -176,7 +177,7 @@
 
         :else
         (list 'spec pattern)
-        ))
+            ))))
 
 (defmethod gns/-canonicalize-type 'spec method-canonicalize-type-spec
   [[_spec pattern] _nf]

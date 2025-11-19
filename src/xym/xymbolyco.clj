@@ -25,7 +25,7 @@
   (:refer-clojure :exclude [complement])
   (:require [util.cl-compat :as cl]
             [util.util :refer [fixed-point member group-map
-                          defn-memoized find-first
+                               gc-friendly-memoize find-first
                           timeout-reached?
                           non-empty? exists setof]]
             [genus.genus :as gns]
@@ -242,7 +242,7 @@
             (recur (:negative bdd')
                    (cons (list 'not (:label bdd')) lineage)))))))))
 
-(defn-memoized [optimized-transition-function optimized-transition-function-impl]
+(def optimized-transition-function
   "Given a set of transitions each of the form [type-designator state-index],
   return a unary transfer function which can be called with an candidate element
   of a sequence, and the function will return the id of the next state.  When called
@@ -256,7 +256,8 @@
   ;;  It is not necessary to know whether the transitions cover the
   ;;  universe because the indicator function has a second argument
   ;;  to return if there is no match.
-  [transitions promise-disjoint sink-state-id]
+  (gc-friendly-memoize
+    (fn [transitions promise-disjoint sink-state-id]
   (bdd/with-hash []
     (letfn [
             ;; local function find-duplicates
@@ -301,7 +302,7 @@
 
           ;; if all duplicate types are empty types
           :else
-          (gen-function transitions promise-disjoint sink-state-id))))))
+                           (gen-function transitions promise-disjoint sink-state-id))))))))
 
 (defn delta
   "Given a state and target-label, find the destination state (object of type State)"

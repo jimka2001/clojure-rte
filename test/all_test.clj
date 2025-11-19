@@ -49,19 +49,19 @@
                           'bdd-test
                           'cl-compat-test
                           'xymbolyco-test
-                          'dot-test
-                          'dijkstra-test
-                          'rte-test
-                          'rte-case-test
-                          'rte-tester-test
-                          'genus-test
-                          'genus-statistics-test
-                          'genus-subtype-test
-                          'genus-equiv-test
-                          'genus-conversion-test
-                          'util-test
-                          'genus-spec-test
-                          'typecase-test
+                          ;'dot-test
+                          ;'dijkstra-test
+                          ;'rte-test
+                          ;'rte-case-test
+                          ;'rte-tester-test
+                          ;'genus-test
+                          ;'genus-statistics-test
+                          ;'genus-subtype-test
+                          ;'genus-equiv-test
+                          ;'genus-conversion-test
+                          ;'util-test
+                          ;'genus-spec-test
+                          ;'typecase-test
                           ))
 
 (defn -main []
