@@ -43,7 +43,7 @@
       (doseq [cmd [["touch" csv-file-name]
                    ["sort" "-t," "-k1,3n" "-m" tmp-1 csv-file-name "-o" tmp-2]
                    ["mv" tmp-2 csv-file-name]
-                   ["trash" tmp-1]]
+                   #_["trash" tmp-1]]
               :let [s (apply sh cmd)]
               :when (not= 0 (:exit s))]
         (do

@@ -41,7 +41,7 @@
   (testing "with-rte 5"
     (rte/with-rte [::x (:+ Long)
                ::y (:+ Double)]
-      (let [pat (rte/compile '(:cat ::x  ::y))]
+      (let [pat (rte/rte-to-dfa '(:cat ::x  ::y))]
         ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
         (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
         (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
@@ -56,7 +56,7 @@
       (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
              '(:cat String (:* String) Double (:* Double)))
           "452 canonicalize-pattern got wrong memoized value")
-      (let [pat (rte/compile '(:cat ::x  ::y))]
+      (let [pat (rte/rte-to-dfa '(:cat ::x  ::y))]
         ;; the same as (rte/compile '(:cat (:+ String) (:+ Double)))
         (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
                '(:cat String (:* String) Double (:* Double)))
@@ -67,7 +67,7 @@
         ))
     
 
-    (let [pat (rte/compile '(:cat (rte (:+ Long)) (rte (:+ Double))))]
+    (let [pat (rte/rte-to-dfa '(:cat (rte (:+ Long)) (rte (:+ Double))))]
       (is (not (rte/match pat [1 2 3 1.2 3.4 5.6 7.8])))
       (is (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))))
 
@@ -75,7 +75,7 @@
   (testing "with-rte 5a"
     (rte/with-rte [::x (:+ Long)]
 
-      (let [pat (rte/compile '(:cat ::x))]
+      (let [pat (rte/rte-to-dfa '(:cat ::x))]
         ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
         (is (rte/match pat [1 2 3]))
         (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
@@ -94,7 +94,7 @@
   (testing "with-rte 5b"
     (rte/with-rte [::x (:+ Long)
                    ::y (:+ Double)]
-      (let [pat (rte/compile '(:cat ::x  ::y))]
+      (let [pat (rte/rte-to-dfa '(:cat ::x  ::y))]
         ;; the same as (rte/compile '(:cat (:+ Long) (:+ Double)))
         (is (rte/match pat [1 2 3 1.2 3.4 5.6 7.8]))
         (is (not (rte/match pat [[1 2 3] [1.2 3.4 5.6 7.8]])))
@@ -132,7 +132,7 @@
       (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
              '(:cat String (:* String) Double (:* Double)))
           "452b canonicalize-pattern got wrong memoized value")
-      (let [_pat (rte/compile '(:cat ::x  ::y))]
+      (let [_pat (rte/rte-to-dfa '(:cat ::x  ::y))]
         ;; the same as (rte/compile '(:cat (:+ String) (:+ Double)))
         (is (= (rte/canonicalize-pattern '(:cat ::x  ::y))
                '(:cat String (:* String) Double (:* Double)))

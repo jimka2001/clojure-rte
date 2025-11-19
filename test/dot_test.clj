@@ -33,7 +33,7 @@
   (testing "dfa-to-dot"
     (with-compile-env ()
       (sut/dfa-to-dot
-       (rte/compile '(:and (:cat :sigma :sigma) (:cat (:not String) Long)))
+       (rte/rte-to-dfa '(:and (:cat :sigma :sigma) (:cat (:not String) Long)))
        :title "Example"
        :report-labels false
        :view false))))

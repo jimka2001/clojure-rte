@@ -30,7 +30,7 @@
             [rte-extract :refer [dfa-to-rte]]
             [rte-construct :refer [with-compile-env rte-to-dfa  nullable?
                                    canonicalize-pattern canonicalize-pattern-once
-                                   canonicalize-pattern-once-impl]]
+                                   canonicalize-pattern-once]]
             ))
 
 (defn rte-components [pattern]
@@ -158,7 +158,6 @@
   (with-compile-env []
     ;;(cl-format true "canonicalizing:~%")
     ;; TODO doall this lazy seq
-    (binding [canonicalize-pattern-once (memoize canonicalize-pattern-once-impl)]
       (let [can (canonicalize-pattern rte)]
         ;;(cl-format true "canonicalized: ~A~%" can)
         (if (nullable? rte)
@@ -169,7 +168,7 @@
           (is-fn (not (nullable? can))
                   (cl-format false
                              "rte ~A is not nullable but its canonicalization ~A is nullable"
-                             rte can)))))))
+                          rte can))))))
 
 (defn test-rte-canonicalize-nullable
   "Run some tests to assure that if an rte r is nullable if and only

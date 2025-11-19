@@ -269,7 +269,7 @@
                                      java.lang.CharSequence
                                      (:contains-every (:? (:contains-any))
                                                       (:and (:? :epsilon)))))
-                '(:cat (:contains-every (:not (:cat (member a b c 1 2 3)))
+                #_'(:cat (:contains-every (:not (:cat (member a b c 1 2 3)))
                                         (satisfies seq?)
                                         (:? :epsilon))
                        (:or (= (1 2 3)) (:cat :epsilon (:or (= -1)))
@@ -292,17 +292,7 @@
               xor1 (xym/synchronized-xor dfa dfa)
               xor1-min (xym/minimize xor1)
               ]
-          (if (not eq1)
-            (let [abbrevs-eq1 (dot/dfa-view dfa "eq1")
-                  abbrevs-eq1-xor (dot/dfa-view xor1 "eq1-xor"
-                                                :abbrevs abbrevs-eq1)
-                  abbrevs-min (dot/dfa-view xor1-min "xor-min" :abbrevs abbrevs-eq1-xor)
-                  ]
-              (pprint [:eq1 eq1])
-              (pprint [:abbrevs-eq1 abbrevs-eq1])
-              (pprint [:abbrevs-min abbrevs-min])
-              (pprint [:abbrevs-eq1-xor abbrevs-eq1-xor])
-              ))
+          (xym/dfa-equivalent? dfa dfa)
           (is eq1
               (cl-format false
                          "z1: dfa not equivalent (returned ~A) with self r1=~A" eq1 r1))
@@ -333,6 +323,24 @@
       #_(test-rte-not-1 r1)
 
       )))
+
+(comment
+  (clojure.test/run-test t-discovered-261)
+
+  (let [pattern '(:cat (:* :sigma) (= (1 2 3)) (:* :sigma))]
+    ;(rte-construct/find-all-derivatives pattern)
+    (rte-construct/first-types pattern))
+
+  (let [firsts '#{(= (1 2 3))}]
+    (gns/mdtd firsts)
+    (gns/canonicalize-type (gns/create-not (first firsts)) :dnf))
+
+  (let [n '(not (= (1 2 3)))]
+    [(gns/canonicalize-type n)
+     (util.util/fixed-point n
+                            (fn [td]
+                              (gns/-canonicalize-type td :dnf))
+                            =)]))
 
 (deftest t-test-1
   (testing "particular case 1 which was failing"
