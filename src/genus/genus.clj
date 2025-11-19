@@ -1623,7 +1623,15 @@
           :dont-know)))))
 
 (defmethod -disjoint? '= [t1 t2]
-  (cond (gns/=? t1)
+  (cond (and (gns/=? t1)
+             (some sequential? (rest t1)))
+        :dont-know
+
+        (and (gns/=? t2)
+             (some sequential? (rest t2)))
+        :dont-know
+
+        (gns/=? t1)
         (not (typep (second t1) t2))
         
         ;; (= ...) is finite, types are infinite
@@ -1841,6 +1849,14 @@
   (cond (not (gns/=? sub))
         :dont-know
 
+        ;; I'd like to force this subtype? to return :dont-know
+        ;;   because (= [1 2 3]) is the same type but
+        ;;     [1 2 3] does not satisfy seq?
+        ;; (subtype? '(= (1 2 3)) '(satisfies seq?))
+        ;; --> :dont-know
+        (sequential? (second sub))
+        :dont-know
+
         (gns/=? super)
         (= (operand sub) (operand super))
 
@@ -1897,6 +1913,13 @@
   (cond (gns/member? sub)
         (every? (fn [e1]
                   (typep e1 super)) (rest sub))
+
+        (some sequential? (rest sub))
+        :dont-know
+
+        (and (gns/member? super)
+             (some sequential? (rest super)))
+        :dont-know
 
         ;; (subtype? 'Long '(member 1 2 3))
         (and (gns/member? super)
