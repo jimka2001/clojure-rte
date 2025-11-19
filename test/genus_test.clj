@@ -389,6 +389,25 @@
                `(~'and  (~'not clojure.lang.ExceptionInfo) java.lang.Exception)
                'clojure.lang.ExceptionInfo})))))
 
+(deftest t-curious-mdtd
+  (testing "curious mdtd"
+    (let [tds (map first (gns/mdtd #{'(not (= [1 2 3]))
+                                     '(= (1 2 3))
+                                     '(satisfies seq?) }))]
+      (doseq [x '[[1 2 3]
+                  (1 2 3)
+                  [1 2 3 4 5]
+                  (1 2 3 4 5)
+                  1
+                  "123"]
+              :let [match-types (filter #(gns/typep x %) tds)]]
+        ;; x should be a member of exactly one of the types in tds
+        (is (= 1 (count match-types))
+            (format "element x=%s should be a member of exactly 1 type: not %s"
+                    x (into [] match-types)))))))
+
+
+
 (deftest t-type-membership
   (testing "random type membership"
     
@@ -400,7 +419,10 @@
             value *test-values*]
       (is (= (gns/typep value td)
              (gns/typep value td-canonical))
-          (cl-format false "~%value=~A belongs to type but not its canonicalized form~%  td=~A~%  canonicalized=~A~%  nf=~A" value td td-canonical nf)))))
+          (cl-format false "~%value=~A belongs to type but not its canonicalized form~@
+                             td=~A~@
+                             canonicalized=~A~@
+                             nf=~A" value td td-canonical nf)))))
 
 (deftest t-nf-subset
   (testing ""
