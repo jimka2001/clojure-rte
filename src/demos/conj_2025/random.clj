@@ -1,7 +1,7 @@
 (ns demos.conj-2025.random
   (:require [rte-construct :as rte]
             [genus.genus :as gns]
-            [clojure.math :refer [random]]
+            [clojure.math :refer [random pow]]
             [genus.genus-tester :refer [*test-types*]]
             [util.util :refer [member weighted-case]]))
 
@@ -74,16 +74,52 @@
 
 (def flajolet-probability-binary 0.9)
 
-(defn flajolet-rte-by-size [leaves]
-  {:post [(rte/valid-rte? %)]}
+(defn flajolet-skeleton [leaves]
   (letfn [(insert [tree d]
             (if (empty? tree)
               [d nil nil]
               (let [[n left right] tree]
                 (if (< d n)
                   [n (insert left d) right]
-                  [n left (insert right d)]))))
-          (to-rte [tree]
+                  [n left (insert right d)]))))]
+    (reduce (fn [acc item]
+              (insert acc item)) nil (shuffle (range (dec leaves))))))
+
+(defn tbnl-rte-by-size [leaves]
+  {:post [(rte/valid-rte? %)]}
+  (letfn [(depth [tree]
+            (if (empty? tree)
+              0
+              (let [[_ left right] tree]
+                (+ 1 (max (depth left)
+                          (depth right))))))
+          (to-rte [tree and-probability]
+            (cond (> (random) flajolet-probability-binary)
+                  (weighted-case 50 (rte/Not (to-rte tree and-probability))
+                                 50 (rte/Star (to-rte tree and-probability)))
+                  
+                  (empty? tree)
+                  (rand-nth inhabited-leaves)
+
+
+                  :else
+                  (let [[_ left right] tree
+                        p (* and-probability 2)]
+                    (if (< (random) and-probability)
+                      (rte/And (to-rte left p)
+                               (to-rte right p))
+
+                      (weighted-case 50 (rte/Cat (to-rte left p) (to-rte right p))
+                                     50 (rte/Or  (to-rte left p) (to-rte right p)))))))]
+    
+    (let [and-probability-leaf 0.333
+          skeleton (flajolet-skeleton leaves)]
+      (to-rte skeleton (* and-probability-leaf (pow 2 (- (depth skeleton))))))))
+
+
+(defn flajolet-rte-by-size [leaves]
+  {:post [(rte/valid-rte? %)]}
+  (letfn [(to-rte [tree]
             (cond (> (random) flajolet-probability-binary)
                   (weighted-case 50 (rte/Not (to-rte tree))
                                  50 (rte/Star (to-rte tree)))
@@ -97,10 +133,5 @@
                                    33 (rte/Or  (to-rte left) (to-rte right))
                                    33 (rte/And (to-rte left) (to-rte right))))))]
     
-    (let [skeleton (reduce (fn [acc item]
-                             (insert acc item)) nil (shuffle (range (dec leaves))))
-          rte (to-rte skeleton)
-          leaf-count (rte/count-leaves rte)]
-      
-      rte)))
+    (to-rte (flajolet-skeleton leaves))))
             

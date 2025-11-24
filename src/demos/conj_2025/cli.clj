@@ -3,12 +3,12 @@
 
 (defn test-main [algo repetitions]
   (gen-csv-by-size repetitions algo
-                     "" ;; prefix
-                     2 ;; lot
-                     (bit-shift-left 1 4) ;; min-leaf
-                     (bit-shift-left 1 5) ;; max-leaf
+                   "" ;; prefix
+                   2 ;; lot
+                   (bit-shift-left 1 4) ;; min-leaf
+                   (bit-shift-left 1 5) ;; max-leaf
 
-                     ))
+                   ))
 
 (defn -main [& argv]
   (let [algo (nth argv 0)

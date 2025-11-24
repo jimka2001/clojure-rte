@@ -5,6 +5,7 @@
                                    tree-split-rte-gaussian
                                    tree-split-rte-inv-gaussian
                                    flajolet-rte-by-size
+                                   tbnl-rte-by-size
                                    comb-rte]]
    [graph.dot :as dot]
    [util.lock :as lock]
@@ -18,6 +19,7 @@
             "tree-split-gauss"
             "tree-split-inv-gauss"
             "flajolet"
+            "tbnl" ; to be named later
             "comb"])
 
 
@@ -26,6 +28,7 @@
               "tree-split-gauss"  tree-split-rte-gaussian
               "tree-split-inv-gauss" tree-split-rte-inv-gaussian
               "flajolet" flajolet-rte-by-size
+              "tbnl" tbnl-rte-by-size
               "comb" comb-rte})
 
 (defn gen-csv-by-size [num-repetitions
@@ -40,14 +43,15 @@
                 futures (for [q (range lot)]
                           (future (do
                                     (lock/with-lock
+                                      ;; using with-lock to prevent multiple printlns
+                                      ;; happing at the same time and writing a confusing log file
                                       (println [:future :algo algo 
                                                 :leaves size
                                                 :rep (/ r num-repetitions)
-                                                :iteration (/ q lot)]))
+                                                :iteration (/ q lot)]))                                      
                                     (write-csv-statistic (fn [] ((gen-rte algo) size))
                                                          algo
-                                                         (csv-file-name algo prefix)))))]
-          ]
+                                                         (csv-file-name algo prefix)))))]]
     (doall (map deref futures))))
 
 (defn sample-view [num-leaves]

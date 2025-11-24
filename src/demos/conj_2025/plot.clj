@@ -136,7 +136,7 @@
    (let [descrs (for [algo algos
                       :let [csv-lines (read-csv-lines algo prefix)
                             xys (gen-threshold-curve csv-lines)]]
-                  [(format "%s samples=" algo (count csv-lines))
+                  [(format "%s samples=%d" algo (count csv-lines))
                    xys])]
      (gnuplot descrs
               :title (format "fraction of dfas larger than given state count %s" prefix)
@@ -145,7 +145,7 @@
               :y-axis "percentage"
               :plot-with "lines"
               :y-log true
-              :point-size 0.2
+              :point-size 0.4
               :gnu-file-cb (plot-cb (format "plot-%sthreshold" prefix))
               :grid true
               :view view))))

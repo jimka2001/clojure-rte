@@ -1915,16 +1915,18 @@
           :dont-know)))
 
 (defmethod -subtype? 'member subtype-member [sub super]
-  (cond (gns/member? sub)
-        (every? (fn [e1]
-                  (typep e1 super)) (rest sub))
-
-        (some sequential? (rest sub))
+  (cond (and (gns/member? sub)
+             (some sequential? (rest sub)))
         :dont-know
 
         (and (gns/member? super)
              (some sequential? (rest super)))
         :dont-know
+
+        (gns/member? sub)
+        (every? (fn [e1]
+                  (typep e1 super)) (rest sub))
+
 
         ;; (subtype? 'Long '(member 1 2 3))
         (and (gns/member? super)
