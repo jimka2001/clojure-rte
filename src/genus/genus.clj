@@ -2221,13 +2221,13 @@
     :dont-know))
 
 (defn mdtd
-  "Given a set of type designators, return a newly computed list of type
-  designators which implement the Maximal Disjoint Type Decomposition.
+  "Given a set of type designators, compute  type designators
+  which implement the Maximal Disjoint Type Decomposition.
   I.e., the computed list designates a set whose union is the universe,
   and all the elements are mutually disjoint.
   Every set, x, in the return value has the property that if y is in
   the given type-set, then either x and y are disjoint, or x is a subset of y.
-  The return value is a vector of triples.
+  RETURNS: The return value is a vector of triples.
   Each triple has the form [td list-of-super-type-tds list-of-disjoint-type-tds]"
   [type-set]
   (loop [decomposition [[:sigma '(:sigma) '(:empty-set)]]

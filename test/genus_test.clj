@@ -23,9 +23,9 @@
   (:require [rte-core]
             [rte-construct :refer [with-compile-env]]
             [genus.genus :as gns]
-            [genus.genus-tester :refer [gen-type *test-values*]]
+            [genus.genus-tester :refer [gen-type *test-values* *test-types*]]
             [util.util :refer [member human-readable-current-time]]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format pprint]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
@@ -389,11 +389,86 @@
                `(~'and  (~'not clojure.lang.ExceptionInfo) java.lang.Exception)
                'clojure.lang.ExceptionInfo})))))
 
+
+
+(deftest t-mdtd-disjoint
+  (testing "mdtd disjoint"
+    (doseq [_ (range 100)
+            num-td (range 2 5)
+            :let [tds (into #{} (for [_ (range num-td)]
+                                  (rand-nth *test-types*)))]]
+      (let [m (gns/mdtd tds)
+            disjoined (map first m)]
+        (with-compile-env () 
+          (doseq [v *test-values*
+                  :let [matches (filter #(gns/typep v %) disjoined)]]
+            (is (= 1 (count matches))
+                (cl-format false
+                           "~&~
+                            expecting length 1 not ~A~@
+                            tds=~A~@
+                            disjoined=~A~@
+                            matches=~A~@
+                            v=~A~@
+                            
+                           "
+                           (count matches)
+                           tds
+                           disjoined
+                           matches
+                           v))))))))
+
+(deftest t-mdtd-supers
+  (testing "mdtd supers"
+    (doseq [_ (range 100)
+            num-td (range 2 5)
+            :let [tds (into #{} (for [_ (range num-td)]
+                                  (rand-nth *test-types*)))]]
+      (let [m (gns/mdtd tds)
+            disjoined (map first m)]
+        (with-compile-env () 
+          (doseq [v *test-values*
+                  ]
+            (doseq [[td supers disjoints] m]
+              (if (gns/typep v td)
+                (doseq [super supers]
+                  (is (gns/typep v super)
+                      (cl-format false
+                                 "~&~
+                                  expecting ~A in ~A~@
+                                  td=~A~@
+                                  supers~A"
+                                 v super td supers)))))))))))
+
+(deftest t-mdtd-disjoints
+  (testing "mdtd disjoint"
+    (doseq [_ (range 100)
+            num-td (range 2 5)
+            :let [tds (into #{} (for [_ (range num-td)]
+                                  (rand-nth *test-types*)))]]
+      (let [m (gns/mdtd tds)
+            disjoined (map first m)]
+        (with-compile-env () 
+          (doseq [v *test-values*]
+            (doseq [[td supers disjoints] m]
+              (if (gns/typep v td)
+                (doseq [d disjoints]
+                  (is (not (gns/typep v d))
+                      (cl-format false
+                                 "~&~
+                                  expecting ~A not in ~A~@
+                                  td=~A~@
+                                  disjoints~A"
+                                 v d td disjoints)))))))))))
+                
 (deftest t-curious-mdtd
   (testing "curious mdtd"
     (let [tds (map first (gns/mdtd #{'(not (= [1 2 3]))
                                      '(= (1 2 3))
                                      '(satisfies seq?) }))]
+      (pprint (gns/mdtd #{'(not (= [1 2 3]))
+                          '(= (1 2 3))
+                          '(satisfies seq?) }))
       (doseq [x '[[1 2 3]
                   (1 2 3)
                   [1 2 3 4 5]

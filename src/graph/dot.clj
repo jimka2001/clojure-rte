@@ -276,18 +276,15 @@
   [dfa title & {:keys [abbrevs draw-sink report-labels]
                 :or {abbrevs {}
                      report-labels true
-                     draw-sink false}}]
+                     draw-sink false}
+                :as opts}]
   (dfa-to-dot dfa
-              :view true
-              :title title
-              :draw-sink draw-sink
-              :state-legend false
-              :type-legend false
-              :report-labels report-labels
-              :dot-file-cb println
-              :png-file-cb println
-              :abbrevs abbrevs
-))
+              (assoc opts
+                     :view true
+                     :state-legend false
+                     :type-legend false
+                     :dot-file-cb println
+                     :png-file-cb println)))
 
 (defn bdd-to-dot 
   "Create (and possibly display) a graphical image rendering the given Bdd

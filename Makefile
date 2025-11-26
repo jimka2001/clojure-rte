@@ -10,6 +10,9 @@ partially-balanced:
 totally-balanced:
 	clj -M -m statistics-rte totally-balanced 100
 
+tbnl:
+	clj -M -m statistics-rte tbnl 100
+
 deps:
 	clj -Sdeps '{:deps {io.github.borkdude/lein2deps {:mvn/version "0.1.1"}}}' \
 		-M -m lein2deps.api --print --write-file deps.edn
@@ -20,6 +23,10 @@ simple: deps
 	clj -M -m demos.conj-2025.cli tree-split-linear 1
 	clj -M -m demos.conj-2025.cli comb 1
 	clj -M -m demos.conj-2025.cli flajolet 1
+
+test-tbnl:
+	clj -M -m demos.conj-2025.cli tbnl 50
+
 
 tests:
 	lein test
