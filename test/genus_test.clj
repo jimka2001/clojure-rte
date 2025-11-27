@@ -407,6 +407,7 @@
           ;; approx 650 iterations
           (doseq [conversion (gns/combination-simplifiers nf)          
                   :let [conv-td (conversion td)]
+                  :when (not= td conv-td)
                   v *test-values*
                   :let [b1 (gns/typep v td)
                         b2 (gns/typep v conv-td)]]
@@ -414,13 +415,13 @@
                    (boolean b2))
                 (cl-format false
                            "~&~
-                      problem detected with conversion= ~A~@
-                      v= ~A~@
-                      td     = ~A~@
-                      conv-td= ~A~@
-                      nf= ~A~@
-                      b1= ~A~@
-                      b1= ~A"
+                           problem detected with conversion= ~A~@
+                           v= ~A~@
+                           td     = ~A~@
+                           conv-td= ~A~@
+                           nf= ~A~@
+                           b1= ~A~@
+                           b1= ~A"
                            conversion
                            v
                            td
