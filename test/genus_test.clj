@@ -381,6 +381,55 @@
            'Boolean) "line 444")
     ))
 
+(deftest t-simplifiers
+  (testing "simplifiers"
+    (dotimes [_ 100] ;; approx 65000 assertions
+      (let [t1 (rand-nth *test-types*)
+            t2 (rand-nth *test-types*)
+            t3 (rand-nth *test-types*)
+            t4 (rand-nth *test-types*)
+            td (rand-nth [(gns/And t1 t2 t3)
+                          (gns/And t1 t2 t3 t4)
+                          (gns/Or t1 t2 t3)
+                          (gns/Or t1 t2 t3 t4)
+                          (gns/Or (gns/Not t1) t2 t3)
+                          (gns/Or (gns/Not t1) t2 t3 t4)
+                          (gns/Or (gns/Not t1) (gns/Not t2) (gns/Not t3))
+                          (gns/Or (gns/Not t1) (gns/Not t2) (gns/Not t3) (gns/Not t4))
+                          (gns/And (gns/Not t1) t2 t3)
+                          (gns/And (gns/Not t1) t2 t3 t4)
+                          (gns/And (gns/Not t1) (gns/Not t2) (gns/Not t3))
+                          (gns/And (gns/Not t1) (gns/Not t2) (gns/Not t3) (gns/Not t4))
+                          ])
+            nf (rand-nth '(:cnf :dnf))]
+        (if (or (gns/and? td)
+                (gns/or? td))
+          ;; approx 650 iterations
+          (doseq [conversion (gns/combination-simplifiers nf)          
+                  :let [conv-td (conversion td)]
+                  v *test-values*
+                  :let [b1 (gns/typep v td)
+                        b2 (gns/typep v conv-td)]]
+            (is (= (boolean b1)
+                   (boolean b2))
+                (cl-format false
+                           "~&~
+                      problem detected with conversion= ~A~@
+                      v= ~A~@
+                      td     = ~A~@
+                      conv-td= ~A~@
+                      nf= ~A~@
+                      b1= ~A~@
+                      b1= ~A"
+                           conversion
+                           v
+                           td
+                           conv-td
+                           v
+                           nf
+                           b1
+                           b2))))))))
+      
 (deftest t-mdtd
   (testing "mdtd"
     (with-compile-env ()
@@ -394,7 +443,7 @@
 (deftest t-mdtd-disjoint
   (testing "mdtd disjoint"
     (doseq [_ (range 100)
-            num-td (range 2 5)
+            num-td (range 2 7)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
@@ -409,9 +458,7 @@
                             tds=~A~@
                             disjoined=~A~@
                             matches=~A~@
-                            v=~A~@
-                            
-                           "
+                            v=~A"
                            (count matches)
                            tds
                            disjoined
@@ -421,7 +468,7 @@
 (deftest t-mdtd-supers
   (testing "mdtd supers"
     (doseq [_ (range 100)
-            num-td (range 2 5)
+            num-td (range 2 6)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
@@ -443,7 +490,7 @@
 (deftest t-mdtd-disjoints
   (testing "mdtd disjoint"
     (doseq [_ (range 100)
-            num-td (range 2 5)
+            num-td (range 2 6)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
