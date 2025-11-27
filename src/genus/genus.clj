@@ -2227,44 +2227,58 @@
   and all the elements are mutually disjoint.
   Every set, x, in the return value has the property that if y is in
   the given type-set, then either x and y are disjoint, or x is a subset of y.
-  RETURNS: The return value is a vector of triples.
-  Each triple has the form [td list-of-super-type-tds list-of-disjoint-type-tds]"
+  RETURNS: The return value is a vector of hashmaps, each with keys
+  :td, :factors, :disjoints."
   [type-set]
-  (loop [decomposition [[:sigma '(:sigma) '(:empty-set)]]
+  (loop [decomposition [{:td :sigma
+                         :factors [:sigma]
+                         :disjoints [:empty-set]}]
          type-set (disj type-set :sigma)]
     (if (empty? type-set)
       decomposition
-      (let [td (first type-set) ;; take any element, doesn't matter which
-            n (gns/create-not td)
+      (let [td-0 (first type-set) ;; take any element, doesn't matter which
+            n (gns/create-not td-0)
             nc (canonicalize-type n :dnf)
             f (fn [triple]
-                (let [[td-1 factors disjoints] triple
-                      a (delay (canonicalize-type (gns/create-and [td td-1]) :dnf))
-                      b (delay (canonicalize-type (gns/create-and [nc td-1]) :dnf))
-                      d-td (delay (disjoint? td td-1 :dont-know))
-                      d-n (delay (disjoint? n td-1 :dont-know))
+                (let [{:keys [td factors disjoints]} triple
+                      a (delay (canonicalize-type (gns/create-and [td-0 td]) :dnf))
+                      b (delay (canonicalize-type (gns/create-and [nc td]) :dnf))
+                      d-td (delay (disjoint? td-0 td :dont-know))
+                      d-n (delay (disjoint? n td :dont-know))
                       ]
                   (cond (= true @d-td)
-                        [[td-1 (cons n factors) (cons td disjoints)]]
+                        [{:td td
+                          :factors (conj factors n)
+                          :disjoints (conj disjoints td-0)}]
                         
                         (= true @d-n)
-                        [[td-1 (cons td factors) (cons n disjoints)]]
+                        [{:td td
+                          :factors (conj factors td-0)
+                          :disjoints (conj disjoints n)}]
 
                         ;; dont call the expensive inhabited? function unless disjoint? returned :dont-know
                         (and (= :dont-know @d-td)
                              (not (inhabited? @a true)))
-                        [[td-1 (cons n factors) (cons td disjoints)]]
+                        [{:td td
+                          :factors (conj factors n)
+                          :disjoints (conj disjoints td-0)}]
                         
                         ;; dont call the expensive inhabited? function unless disjoint? returned :dont-know
                         (and (= :dont-know @d-n)
                              (not (inhabited? @b true)))
-                        [[td-1 (cons td factors) (cons n disjoints)]]
+                        [{:td td
+                          :factors (conj factors td-0)
+                          :disjoints (conj disjoints n)}]
                         
                         :else
-                        [[@a (cons td factors) (cons n disjoints)]
-                         [@b (cons n factors) (cons td disjoints)]])))]
+                        [{:td @a
+                          :factors (conj factors td-0)
+                          :disjoints (conj disjoints n)}
+                         {:td @b
+                          :factors (conj factors n)
+                          :disjoints (conj disjoints td-0)}])))]
         (recur (mapcat f decomposition)
-               (disj type-set td))))))
+               (disj type-set td-0))))))
 
 (defn call-with-genus-env [thunk]
   (try

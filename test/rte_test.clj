@@ -215,7 +215,7 @@
                   '(= 0)
                   'Long
                   'Byte}))
-      (doseq [[td factors disjoints] (gns/mdtd ft)]
+      (doseq [{:keys [td factors disjoints]} (gns/mdtd ft)]
         (let [deriv (derivative rt td factors disjoints)
               can (canonicalize-pattern deriv)]
           nil

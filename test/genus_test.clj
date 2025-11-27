@@ -434,7 +434,7 @@
 (deftest t-mdtd
   (testing "mdtd"
     (with-compile-env ()
-      (is (= (set (map first (gns/mdtd #{'java.lang.Exception 'clojure.lang.ExceptionInfo})))
+      (is (= (set (map :td (gns/mdtd #{'java.lang.Exception 'clojure.lang.ExceptionInfo})))
              #{`(~'not java.lang.Exception)
                `(~'and  (~'not clojure.lang.ExceptionInfo) java.lang.Exception)
                'clojure.lang.ExceptionInfo})))))
@@ -448,7 +448,7 @@
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
-            disjoined (map first m)]
+            disjoined (map :td m)]
         (with-compile-env () 
           (doseq [v *test-values*
                   :let [matches (filter #(gns/typep v %) disjoined)]]
@@ -473,11 +473,11 @@
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
-            disjoined (map first m)]
+            disjoined (map :td m)]
         (with-compile-env () 
           (doseq [v *test-values*
                   ]
-            (doseq [[td supers disjoints] m]
+            (doseq [{:keys [td supers disjoints]} m]
               (if (gns/typep v td)
                 (doseq [super supers]
                   (is (gns/typep v super)
@@ -495,10 +495,10 @@
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
-            disjoined (map first m)]
+            disjoined (map :td m)]
         (with-compile-env () 
           (doseq [v *test-values*]
-            (doseq [[td supers disjoints] m]
+            (doseq [{:keys [td supers disjoints]} m]
               (if (gns/typep v td)
                 (doseq [d disjoints]
                   (is (not (gns/typep v d))
@@ -511,7 +511,7 @@
                 
 (deftest t-curious-mdtd
   (testing "curious mdtd"
-    (let [tds (map first (gns/mdtd #{'(not (= [1 2 3]))
+    (let [tds (map :td (gns/mdtd #{'(not (= [1 2 3]))
                                      '(= (1 2 3))
                                      '(satisfies seq?) }))]
       (pprint (gns/mdtd #{'(not (= [1 2 3]))
