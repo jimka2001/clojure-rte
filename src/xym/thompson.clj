@@ -328,7 +328,7 @@
                     ;;   step 2. for { (td,pairs) ...} compute the seq of next states corresponding
                     ;;      to each type.
                     ;;      The pair returned from step 2 is exactly what is needed by traceGraph
-                    tr2 (for [[td factors _] (gns/mdtd tds)
+                    tr2 (for [{:keys [td factors]}  (gns/mdtd tds)
                               q qs
                               [_ td1 y] (get grouped q [])
                               :when (member td1 factors)]

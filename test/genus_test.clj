@@ -466,70 +466,73 @@
                            matches
                            v))))))))
 
-(deftest t-mdtd-supers
-  (testing "mdtd supers"
+(deftest t-mdtd-factors
+  (testing "mdtd factors"
     (doseq [_ (range 100)
             num-td (range 2 6)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
-      (let [m (gns/mdtd tds)
-            disjoined (map :td m)]
-        (with-compile-env () 
+      (with-compile-env () 
+        (let [m (gns/mdtd tds)]
           (doseq [v *test-values*
-                  ]
-            (doseq [{:keys [td supers disjoints]} m]
-              (if (gns/typep v td)
-                (doseq [super supers]
-                  (is (gns/typep v super)
-                      (cl-format false
-                                 "~&~
-                                  expecting ~A in ~A~@
-                                  td=~A~@
-                                  supers~A"
-                                 v super td supers)))))))))))
+                  {:keys [td factors]} m
+                  :when (gns/typep v td)
+                  super factors]
+            (is (gns/typep v super)
+                (cl-format false
+                           "~&~
+                            expecting ~A in ~A~@
+                            td=~A~@
+                            supers~A"
+                           v super td factors))))))))
 
 (deftest t-mdtd-disjoints
   (testing "mdtd disjoint"
     (doseq [_ (range 100)
             num-td (range 2 6)
             :let [tds (into #{} (for [_ (range num-td)]
-                                  (rand-nth *test-types*)))]]
-      (let [m (gns/mdtd tds)
-            disjoined (map :td m)]
-        (with-compile-env () 
-          (doseq [v *test-values*]
-            (doseq [{:keys [td supers disjoints]} m]
-              (if (gns/typep v td)
-                (doseq [d disjoints]
-                  (is (not (gns/typep v d))
-                      (cl-format false
-                                 "~&~
-                                  expecting ~A not in ~A~@
-                                  td=~A~@
-                                  disjoints~A"
-                                 v d td disjoints)))))))))))
+                                  (rand-nth *test-types*)))
+                  m (gns/mdtd tds)]]
+      (with-compile-env () 
+        (doseq [v *test-values*
+                {:keys [td disjoints]} m
+                :when (gns/typep v td)
+                d disjoints]
+          (is (not (gns/typep v d))
+              (cl-format false
+                         "~&~
+                          expecting ~A not in ~A~@
+                          td=~A~@
+                          disjoints~A"
+                         v d td disjoints))))))))
                 
 (deftest t-curious-mdtd
   (testing "curious mdtd"
-    (let [tds (map :td (gns/mdtd #{'(not (= [1 2 3]))
-                                     '(= (1 2 3))
-                                     '(satisfies seq?) }))]
-      (pprint (gns/mdtd #{'(not (= [1 2 3]))
+    (with-compile-env () 
+      (let [m (gns/mdtd #{'(not (= [1 2 3]))
                           '(= (1 2 3))
-                          '(satisfies seq?) }))
-      (doseq [x '[[1 2 3]
-                  (1 2 3)
-                  [1 2 3 4 5]
-                  (1 2 3 4 5)
-                  1
-                  "123"]
-              :let [match-types (filter #(gns/typep x %) tds)]]
-        ;; x should be a member of exactly one of the types in tds
-        (is (= 1 (count match-types))
-            (format "element x=%s should be a member of exactly 1 type: not %s"
-                    x (into [] match-types)))))))
+                          '(satisfies seq?) })
+            tds (map :td m)]
+        (doseq [t1 (map :td m)
+                t2 (map :td m)
+                :when (not= t1 t2)]
+          (is (gns/disjoint? t1 t2 true)
+              (format "not disjoint %s and %s"
+                      t1 t2)))
 
+        (pprint m)
 
+        (doseq [x '[[1 2 3]
+                    (1 2 3)
+                    [1 2 3 4 5]
+                    (1 2 3 4 5)
+                    1
+                    "123"]
+                :let [match-types (filter #(gns/typep x %) tds)]]
+          ;; x should be a member of exactly one of the types in tds
+          (is (= 1 (count match-types))
+              (format "element x=%s should be a member of exactly 1 type: not %s"
+                      x (into [] match-types))))))))
 
 (deftest t-type-membership
   (testing "random type membership"
@@ -546,10 +549,6 @@
                              td=~A~@
                              canonicalized=~A~@
                              nf=~A" value td td-canonical nf)))))
-
-(deftest t-nf-subset
-  (testing ""
-    ()))
 
 ;; TODO enable this
 ;;
