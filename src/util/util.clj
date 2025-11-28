@@ -1089,21 +1089,6 @@
   [s]
   (mapcat identity (seq s)))
 
-(defn smart-merge
-  "Simply wrapper around merge.  if 2nd argument is a map, then
-  call merge, but if the second argument is a sequence like (:a 100 :b 200)
-  then do convert 2nd arg to map and then call merge."
-  [a b]
-  (assert (map? a))
-  (cond (map? b)
-        (merge a b)
-
-        (sequential? b)
-        (merge a (apply hash-map b))
-
-        :else
-        (throw (ex-info (cl-format nil "unexpected ~A value b=~A" (type b) b) {:a a :b b}))))
-
 (defmacro jdefn
   "Wrapper around defn which allows default values in the associative destructuring.
   E.g., 
