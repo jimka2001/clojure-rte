@@ -521,8 +521,6 @@
               (format "not disjoint %s and %s"
                       t1 t2)))
 
-        (pprint m)
-
         (doseq [x '[[1 2 3]
                     (1 2 3)
                     [1 2 3 4 5]
@@ -551,8 +549,6 @@
                              canonicalized=~A~@
                              nf=~A" value td td-canonical nf)))))
 
-;; TODO enable this
-;;
 (deftest t-compute-nf
   (testing "to-nf"
     (let [a '(= "a")

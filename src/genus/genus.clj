@@ -22,7 +22,7 @@
 (ns genus.genus
   (:refer-clojure :exclude [satisfies? == * +])
   (:require [clojure.set :refer [subset?]]
-            [clojure.pprint :refer [cl-format]]
+            [clojure.pprint :refer [cl-format pprint]]
             [clojure.repl :refer [source-fn]]
             [util.util :refer [exists-pair forall-pairs exists fixed-point
                                       remove-element uniquify non-empty? forall
@@ -480,11 +480,23 @@
                                   :a-type a-type
                                   :f f})))))
 
-(defmethod typep '= [a-value [_type value]]
-  (= value a-value))
 
-(defmethod typep 'member [a-value [_type & others]]
-  (member a-value others))
+;; a given value is an element of type (= x)
+;; if it is = to x (according to the clojure = function)
+;; and also it has the same type.   Thus a lazy list is not equal to a list
+;; and a vector is not equal to a list.
+(defmethod typep '= [a-value [_type value]]
+  (boolean (and (= value a-value)
+                (= (type a-value) (type value)))))
+
+;; a given value, v, is an element of the type (member x y z)
+;; if v == x or v == y or v == z (according to the clojure = function)
+;; AND if they have the same type.
+(defmethod typep 'member [a-value [_type & alternatives]]
+  (let [a-type (type a-value)]
+    (boolean (some (fn [x]
+                     (and (= x a-value)
+                          (= (type x) a-type))) alternatives))))
 
 (defmethod typep 'or [a-value [_a-type & others]]
   (boolean (some (fn [t1]
@@ -2233,10 +2245,14 @@
   (loop [decomposition [{:td :sigma
                          :factors [:sigma]
                          :disjoints [:empty-set]}]
-         type-set (disj type-set :sigma)]
-    (if (empty? type-set)
+         type-todo (into () (disj type-set :sigma))]
+    ;; we are starting with a decomposition of the universe
+    ;; we will iterate across it some some element of type-set
+    ;; and generate a new decomposition.
+    ;; when type-set is empty, then we've finished.
+    (if (empty? type-todo)
       decomposition
-      (let [td-0 (first type-set) ;; take any element, doesn't matter which
+      (let [td-0 (first type-todo) ;; take any element, doesn't matter which
             n (gns/create-not td-0)
             nc (canonicalize-type n :dnf)
             f (fn [triple]
@@ -2256,14 +2272,16 @@
                           :factors (conj factors td-0)
                           :disjoints (conj disjoints n)}]
 
-                        ;; dont call the expensive inhabited? function unless disjoint? returned :dont-know
+                        ;; dont call the expensive inhabited? function unless disjoint?
+                        ;;    returned :dont-know
                         (and (= :dont-know @d-td)
                              (not (inhabited? @a true)))
                         [{:td td
                           :factors (conj factors n)
                           :disjoints (conj disjoints td-0)}]
                         
-                        ;; dont call the expensive inhabited? function unless disjoint? returned :dont-know
+                        ;; dont call the expensive inhabited? function unless disjoint?
+                        ;;    returned :dont-know
                         (and (= :dont-know @d-n)
                              (not (inhabited? @b true)))
                         [{:td td
@@ -2278,7 +2296,7 @@
                           :factors (conj factors n)
                           :disjoints (conj disjoints td-0)}])))]
         (recur (mapcat f decomposition)
-               (disj type-set td-0))))))
+               (rest type-todo))))))
 
 (defn call-with-genus-env [thunk]
   (try
