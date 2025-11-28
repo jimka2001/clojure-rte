@@ -25,6 +25,7 @@
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type *test-values* *test-types*]]
             [util.util :refer [member human-readable-current-time]]
+            [backtick :refer [template]]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.test :refer [deftest is]]))
 

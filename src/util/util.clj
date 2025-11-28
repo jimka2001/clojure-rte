@@ -1104,9 +1104,6 @@
   not explicitly given on the call-site of foo.
   "
   [name doc-string lambda-list & body]
-  #_(pprint [:expanding-jdefn :name name
-           #_#_:docstring doc-string
-           :lambda-list lambda-list])
   (assert (ident? name))
   (assert (string? doc-string))
   (assert (vector? lambda-list))
@@ -1124,22 +1121,23 @@
         _ (assert (every? keyword? (keys defaults))
                   (cl-format false "all keys of the :default map must themselves be keywords: not ~A"
                              (keys defaults)))
+        condition-map (if (and (> (count body) 1)
+                                 (map? (first body)))
+                        [(first body)]
+                        [])
+        body (if condition-map
+               (rest body)
+               body)
         ]
     `(defn ~name ~doc-string
        #_{:arglists '([~@prefix & ~the-map])}
-       [~@prefix & ~the-var]
-       #_(pprint [:running-expanded '~name :the-var '~the-var :defaults '~defaults :value-of-the-var ~the-var])
-         (let [~stripped-map (smart-merge ~defaults
-                                    ~the-var)]
-           ~@body))
-      ))
-    
+       [~@prefix & {:as ~the-var}]
+         (let [~stripped-map (merge ~defaults
+                                    ~the-var)
+               f# (fn [] ~@condition-map ~@body)
+               ]
+           (f#)))
+    ))
 
-(jdefn test-f "the doc string"
-    [a b & {:defaults {:a 100 :b 200}
-            :keys [a b]
-            :as my-args
-            }]
-       (list)
-       (list)
-       (list))
+(defn wrap [v _unused_key]
+  v)

@@ -30,6 +30,7 @@
                ;; or     Seq[[String Seq[[Number Number]]]
                & {:keys [terminals title comment x-axis-label x-log y-axis-label y-log grid
                          output-file-base-name
+                         dir
                          plot-with
                          point-size
                          key
@@ -46,6 +47,7 @@
                        y-log false
                        grid false
                        output-file-base-name "curves"
+                       dir "/tmp"
                        plot-with "linespoints"
                        point-size 0.8
                        key "horizontal bmargin"
@@ -58,7 +60,7 @@
                    (let [[label seq-of-pairs] data]
                      [label (map first seq-of-pairs) (map second seq-of-pairs)])
                    data))
-        gnu-name (str output-file-base-name ".gnu")
+        gnu-name (str dir "/" output-file-base-name ".gnu")
         gnu (io/writer gnu-name)
         write (fn [msg]
                 (.write gnu msg)
@@ -130,7 +132,8 @@
         (view-image output-file-name)))))
 
 (defn histogram [buckets
-                 & {:keys [base-name 
+                 & {:keys [base-name
+                           dir
                            x-label
                            y-label
                            title
@@ -139,6 +142,7 @@
                            other-label
                            view]
                     :or {base-name "histogram"
+                         dir "/tmp"
                          x-label "x"
                          y-label "y"
                          title ""
@@ -149,7 +153,7 @@
   (assert (not (str/index-of y-label "\"")))
   (assert (not (str/index-of x-label "\\")))
   (assert (not (str/index-of y-label "\\")))
-  (let [png-file-name (str base-name ".png")
+  (let [png-file-name (str dir "/" base-name ".png")
         gnu-header (cl-format false
                               "~&~
                                set boxwidth 0.9 absolute~@

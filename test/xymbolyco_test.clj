@@ -323,9 +323,6 @@
                     abbrevs-2 (dot/dfa-view dfa-complement "eq3-complement")
                     abbrevs-3 (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-complement)
                                             "eq3-xor")]
-                (pprint [:abbrevs-1 abbrevs-1
-                         :abbrevs-2 abbrevs-2
-                         :abbrevs-3 abbrevs-3])
                 ))
           
           (is eq3
@@ -363,10 +360,9 @@
                                                   :abbrevs abbrevs-eq1)
                 [_ abbrevs-min] (dot/dfa-view xor1-min "xor-min" :abbrevs abbrevs-eq1-xor)
                 ]
-            (pprint [:eq1 eq1])
-            (pprint [:abbrevs-eq1 (abbrev-to-readable abbrevs-eq1)])
-            (pprint [:abbrevs-min (abbrev-to-readable abbrevs-min)])
-            (pprint [:abbrevs-eq1-xor (abbrev-to-readable abbrevs-eq1-xor)])
+            (is (map? abbrevs-eq1))
+            (is (map? abbrevs-eq1-xor))
+            (is (map? abbrevs-min))
             )
           (is eq1
               (cl-format false
@@ -501,7 +497,7 @@
                  ]]
 
       (let [dfa (rte-to-dfa rte)]
-        (dfa-to-dot dfa :title (gensym "bdd") :view testing-view :verbose false :report-labels false)
+        (dfa-to-dot dfa :title (gensym "bdd") :view testing-view :verbose false)
         (is (xym/dfa-inhabited? dfa))))))
 
 (deftest t-spanning-paths
@@ -524,7 +520,7 @@
              {-11 [:satisfiable '(0 35 6)],
               12 [:satisfiable '(0 20 13 9 28)],
              42 [:indeterminate '(0 16 45 37)]}))
-       (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view :report-labels false)
+       (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view)
       )))
 
 
@@ -558,7 +554,7 @@
                    [:satisfiable String] 
                    [:satisfiable String]]]}))
 
-      (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view :report-labels false)
+      (dfa-to-dot dfa-x :draw-sink true :title "union 4" :view testing-view)
       )))
 
 (deftest t-reclojure-1
@@ -573,8 +569,8 @@
 
       (is pat-1)
       (is rte)
-      (dfa-to-dot pat-1 :draw-sink true :title "reClojure 1" :view testing-view :report-labels false)
-      (dfa-to-dot pat-2 :draw-sink true :title "reClojure 2" :view testing-view :report-labels false))))
+      (dfa-to-dot pat-1 :draw-sink true :title "reClojure 1" :view testing-view)
+      (dfa-to-dot pat-2 :draw-sink true :title "reClojure 2" :view testing-view))))
 
 
 
@@ -592,8 +588,7 @@
                   rte (get (dfa-to-rte min-dfa) exit-value :empty-set)]]
       (is rte)
       (if testing-view
-        (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions)
-                      :report-labels false)))))
+        (dot/dfa-view min-dfa (format "min-dfa-%d-%d" num-states num-transitions))))))
 
 (deftest t-dfa-loop-1
   (testing "testing dfa loop 1"

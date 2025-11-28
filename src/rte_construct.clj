@@ -2139,8 +2139,8 @@
       (let [[pattern & to-do-patterns] to-do-patterns]
         (if (done pattern)
           (recur to-do-patterns done triples)
-          (letfn [(f [[acc-triples acc-derivs] [wrt-type factors disjoints]]
-                    (let [triple [pattern wrt-type (derivative pattern wrt-type factors disjoints)]]
+          (letfn [(f [[acc-triples acc-derivs] {:keys [td factors disjoints]}]
+                    (let [triple [pattern td (derivative pattern td factors disjoints)]]
                       [(conj acc-triples triple)
                        (if (done (triple 2))
                          acc-derivs
