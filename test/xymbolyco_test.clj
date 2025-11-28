@@ -352,15 +352,16 @@
               eq1 (xym/dfa-equivalent? dfa
                                        dfa)
               
-              
               xor1 (xym/synchronized-xor dfa dfa)
               xor1-min (xym/minimize xor1)
               ]
 
-          (let [abbrevs-eq1 (dot/dfa-view dfa "eq1")
-                abbrevs-eq1-xor (dot/dfa-view xor1 "eq1-xor"
-                                              :abbrevs abbrevs-eq1)
-                abbrevs-min (dot/dfa-view xor1-min "xor-min" :abbrevs abbrevs-eq1-xor)
+          (dot/dfa-view dfa "eq1")
+
+          (let [[_ abbrevs-eq1] (dot/dfa-view dfa "eq1")
+                [_ abbrevs-eq1-xor] (dot/dfa-view xor1 "eq1-xor"
+                                                  :abbrevs abbrevs-eq1)
+                [_ abbrevs-min] (dot/dfa-view xor1-min "xor-min" :abbrevs abbrevs-eq1-xor)
                 ]
             (pprint [:eq1 eq1])
             (pprint [:abbrevs-eq1 (abbrev-to-readable abbrevs-eq1)])

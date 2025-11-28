@@ -24,7 +24,7 @@
   (:require [rte-core]
             [rte-construct :as rte :refer [with-compile-env]]
             [graph.dot :as sut]
-            [clojure.test :refer [deftest testing]]))
+            [clojure.test :refer [deftest testing is]]))
 
 (defn -main []
   (clojure.test/run-tests 'dot-test))
@@ -32,10 +32,10 @@
 (deftest t-dfa-to-dot
   (testing "dfa-to-dot"
     (with-compile-env ()
-      (sut/dfa-to-dot
-       (rte/rte-to-dfa '(:and (:cat :sigma :sigma) (:cat (:not String) Long)))
-       :title "Example"
-       :report-labels false
-       :view false))))
-
-      
+      (let [dfa (rte/rte-to-dfa '(:and (:cat :sigma :sigma) (:cat (:not String) Long)))]
+        (is dfa)
+        (sut/dfa-to-dot
+         dfa
+         :title "Example"
+         :report-labels false
+         :view false)))))

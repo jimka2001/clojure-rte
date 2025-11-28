@@ -504,7 +504,7 @@
                           expecting ~A not in ~A~@
                           td=~A~@
                           disjoints~A"
-                         v d td disjoints))))))))
+                         v d td disjoints)))))))
                 
 (deftest t-curious-mdtd
   (testing "curious mdtd"
@@ -552,32 +552,31 @@
 
 ;; TODO enable this
 ;;
-;; (deftest t-compute-nf
-;;   (testing "to-nf"
-;;     (let [a '(:= "a")
-;;           b '(:= "b")
-;;           c '(:= "c")
-;;           x '(:= "x")
-;;           y '(:= "y")
-;;           ]
-          
-;;       (is (= (gns/canonicalize-type (template (not (and ~a ~b ~c))) :dnf)
-;;              (template (or (not ~a) (not ~b) (not ~c))))
-;;           645)
-;;       (is (= (gns/canonicalize-type (template (not (and a b c))) :cnf)
-;;              (template (or (not a) (not b) (not c))))
-;;           648)
-;;       (is (= (gns/canonicalize-type '(not (or ~a ~b ~c)) :dnf)
-;;              (template (and (not ~a) (not ~b) (not ~c))))
-;;           651)
+(deftest t-compute-nf
+  (testing "to-nf"
+    (let [a '(= "a")
+          b '(= "b")
+          c '(= "c")
+          x '(= "x")
+          y '(= "y")
+          ]
       
-;;       (is (= (gns/canonicalize-type (template (not (or ~a ~b ~c))) :cnf)
-;;              (template (and (not a) (not b) (not c))))
-;;           655)
-;;       (is (= (gns/canonicalize-type (template (not (and (or ~a ~b) (or ~x ~y)))) :dnf)
-;;              nil)
-;;           661))))
-
+      (is (= (gns/to-nf (template (not (and ~a ~b ~c))) :dnf)
+             (template (or (not ~a) (not ~b) (not ~c))))
+          645)
+      (is (= (gns/to-nf (template (not (and a b c))) :cnf)
+             (template (or (not a) (not b) (not c))))
+          648)
+      (is (= (gns/to-nf (template (not (or ~a ~b ~c))) :dnf)
+             (template (and (not ~a) (not ~b) (not ~c))))
+          651)
+      
+      (is (= (gns/to-nf (template (not (or ~a ~b ~c))) :cnf)
+             (template (and (not ~a) (not ~b) (not ~c))))
+          655)
+      (is (= (gns/to-nf (template (not (and (or ~a ~b) (or ~x ~y)))) :dnf)
+             (template (or (not (or ~a ~b)) (not (or ~x ~y)))))
+          661))))
 
 (deftest t-construction
   (testing "programmatic type construction"
