@@ -412,9 +412,31 @@
     `(:and ~@wrapped)))
 
 (defmethod expand-1 :contains-none method-expand-1-contains-none [pattern _functions]
-  ;; TODO, not sure what (:contains-none) should mean with no arguments.
-  ;;    as implemented it is equivalent to (:not :epsilon) which seems wierd.
+  ;; (:contains-none A B C)
+  ;; (:not (:cat (:* :sigma)
+  ;;             (:or A B C)
+  ;;             (:* :sigma)))
+  ;; which is semantically equivalent to
+  ;; (:not (:or (:cat (:* :sigma) A (:* :sigma))
+  ;;            (:cat (:* :sigma) B (:* :sigma))
+  ;;            (:cat (:* :sigma) C (:* :sigma))))
+  ;; which is the same (by demorgan's law) as
+  ;; (:and (:not (:cat (:* :sigma) A (:* :sigma)))
+  ;;       (:not (:cat (:* :sigma) B (:* :sigma)))
+  ;;       (:not (:cat (:* :sigma) C (:* :sigma))))  
   `(:not (:contains-any ~@(rest pattern))))
+
+(defmethod expand-1 :missing-any method-expand-1-contains-none [pattern _functions]
+  ;; (:missing-any A B C)
+  ;; expands to
+  ;; (:not (:and (:cat (:* :sigma) A (:* :sigma))
+  ;;             (:cat (:* :sigma) B (:* :sigma))
+  ;;             (:cat (:* :sigma) C (:* :sigma))))
+  ;; which is the same (by demorgan's law) as
+  ;; (:or (:not (:cat (:* :sigma) A (:* :sigma)))
+  ;;      (:not (:cat (:* :sigma) B (:* :sigma)))
+  ;;      (:not (:cat (:* :sigma) C (:* :sigma))))  
+  `(:not (:contains-every ~@(rest pattern))))
 
 
 
