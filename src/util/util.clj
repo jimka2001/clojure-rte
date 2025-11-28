@@ -1088,3 +1088,73 @@
   "flatten one level"
   [s]
   (mapcat identity (seq s)))
+
+(defn smart-merge
+  "Simply wrapper around merge.  if 2nd argument is a map, then
+  call merge, but if the second argument is a sequence like (:a 100 :b 200)
+  then do convert 2nd arg to map and then call merge."
+  [a b]
+  (assert (map? a))
+  (cond (map? b)
+        (merge a b)
+
+        (sequential? b)
+        (merge a (apply hash-map b))
+
+        :else
+        (throw (ex-info (cl-format nil "unexpected ~A value b=~A" (type b) b) {:a a :b b}))))
+
+(defmacro jdefn
+  "Wrapper around defn which allows default values in the associative destructuring.
+  E.g., 
+  (jdefn foo \"docstring\"
+    [a b c & {:defs [x y]
+              :as xy-args
+              :defaults {:x 100
+                         :y 200}}]
+    ...)
+  The :defaults key differs from the (clojure built-in) :or  in that
+  xy-args gets bound to a value which can be used to pass along to another
+  function call, and will inluce :x and :y with as default values even if
+  not explicitly given on the call-site of foo.
+  "
+  [name doc-string lambda-list & body]
+  #_(pprint [:expanding-jdefn :name name
+           #_#_:docstring doc-string
+           :lambda-list lambda-list])
+  (assert (ident? name))
+  (assert (string? doc-string))
+  (assert (vector? lambda-list))
+  (assert (drop-while #(not= % '&) lambda-list))
+  (let [prefix (take-while #(not= % '&) lambda-list)
+        tail (rest (drop-while #(not= % '&) lambda-list))
+        _ (assert (= 1 (count tail)) (cl-format false "expecting singleton tail, not ~A" tail))
+        _ (assert (map? (first tail)))
+        the-map (first tail)
+        _ (assert (contains? the-map :as))
+        _ (assert (contains? the-map :defaults))
+        the-var (:as the-map)
+        stripped-map (dissoc the-map :defaults)
+        defaults (:defaults the-map)
+        _ (assert (every? keyword? (keys defaults))
+                  (cl-format false "all keys of the :default map must themselves be keywords: not ~A"
+                             (keys defaults)))
+        ]
+    `(defn ~name ~doc-string
+       #_{:arglists '([~@prefix & ~the-map])}
+       [~@prefix & ~the-var]
+       #_(pprint [:running-expanded '~name :the-var '~the-var :defaults '~defaults :value-of-the-var ~the-var])
+         (let [~stripped-map (smart-merge ~defaults
+                                    ~the-var)]
+           ~@body))
+      ))
+    
+
+(jdefn test-f "the doc string"
+    [a b & {:defaults {:a 100 :b 200}
+            :keys [a b]
+            :as my-args
+            }]
+       (list)
+       (list)
+       (list))
