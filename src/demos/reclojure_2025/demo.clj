@@ -26,12 +26,12 @@
   ([a b [c d]]   14))
 
 
-(f 0 0)
-(f 0 0 0)
+#_(f 0 0)
+#_(f 0 0 0)
 
 
 ;; Vain attempt to define destructuring function
-(defn f
+#_(defn f
    ([[a b] c d]   12)
    ([a [b c] d]   13)
    ([a b [c d]]   14))
@@ -45,7 +45,7 @@
 (f true 2)
 (f 1 2)
 
-(defn f
+#_(defn f
   ([a]   12)
   ([^Ratio a b]   13)
   ([a b [c d]]   14))
@@ -55,7 +55,7 @@
   ([^clojure.lang.Ratio a b]   13)
   ([a b [c d]]   14))
 
-(defn f
+#_(defn f
   ([a]   12)
   ([^int? a b]   13)
   ([a b [c d]]   14))
@@ -126,7 +126,7 @@
 (f [0 1] 2 3)  ;; --> 12
 (f 0 [1 2] 3)  ;; --> 13
 (f 0 1 [2 3])  ;; --> 14
-(f 0)
+#_(f 0)
 
 
 (dsdefn f 
@@ -157,7 +157,7 @@
 (gns/subtype? 'Long 'Integer)
 
 ;; Vain attempt to define with int?
-(dsdefn f
+#_(dsdefn f
   ([[a b] c d] 12)
   ([a [b c] d] 13)
   ([a b [^Ratio c d]] 14)
@@ -168,7 +168,7 @@
 
 (f 1 2 [10 20])
 
-(dsdefn f 
+#_(dsdefn f 
   ([[a b] c d] 12)q
   ([a [b c] d] 13)
   ([a b [^Ratio c d]] 14)q
@@ -176,7 +176,7 @@
   ([a b [^Number c d]] 16)
   ([a b [^Double c d]] 17))
 
-(dsdefn f 
+(dsdefn f
   ([[a b] c d] 12)
   ([a [b c] d] 13)
   ([a b [^Ratio c d]] 14)
@@ -188,10 +188,10 @@
 
 (f 1 2 [10 20])
 (f 1 2 [10 "twelve"])
-(f 1 2 [10 ""])
+#_(f 1 2 [10 ""])
 (f 1 2 [10.0 20])
 (f 1 2 [10/3 20])
-(f 1 2 [false 20])
+#_(f 1 2 [false 20])
 
 
 
@@ -251,7 +251,7 @@
   2
 )
 
-(rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
+#_(rte-case [1 2 true 2 3 false 'a-symbol 'b-symbol]
   (:* (:cat (:* Number) Boolean))
   1
 
@@ -338,7 +338,7 @@
 (rte/match '(:cat (:* :sigma) Ratio (:* :sigma))
            demo-seq-1)
 
-(some #(instance? Ratio %)           demo-seq-1)
+#_(some #(instance? Ratio %)           demo-seq-1)
 (some #(instance? clojure.lang.Ratio %)           demo-seq-1)
 
 (rte/match '(:cat (:* :sigma) Ratio (:* :sigma))
