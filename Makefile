@@ -24,6 +24,9 @@ simple: deps
 	clj -M -m demos.conj-2025.cli comb 1
 	clj -M -m demos.conj-2025.cli flajolet 1
 
+cloverage:
+	lein cloverage
+
 test-tbnl:
 	clj -M -m demos.conj-2025.cli tbnl 50
 
