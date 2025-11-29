@@ -168,13 +168,13 @@
 
 (f 1 2 [10 20])
 
-#_(dsdefn f 
-  ([[a b] c d] 12)q
-  ([a [b c] d] 13)
-  ([a b [^Ratio c d]] 14)q
-  ([a b [^(satisfies int?) c d]] 15)
-  ([a b [^Number c d]] 16)
-  ([a b [^Double c d]] 17))
+;; #_(dsdefn f 
+;;   ([[a b] c d] 12)q
+;;   ([a [b c] d] 13)
+;;   ([a b [^Ratio c d]] 14)q
+;;   ([a b [^(satisfies int?) c d]] 15)
+;;   ([a b [^Number c d]] 16)
+;;   ([a b [^Double c d]] 17))
 
 (dsdefn f
   ([[a b] c d] 12)
