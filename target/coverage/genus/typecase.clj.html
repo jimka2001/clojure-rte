@@ -1,0 +1,785 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> genus/typecase.clj </title>
+ </head>
+ <body>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                001&nbsp;&nbsp;;;&nbsp;Copyright&nbsp;(c)&nbsp;2020,21&nbsp;EPITA&nbsp;Research&nbsp;and&nbsp;Development&nbsp;Laboratory
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;;;&nbsp;Permission&nbsp;is&nbsp;hereby&nbsp;granted,&nbsp;free&nbsp;of&nbsp;charge,&nbsp;to&nbsp;any&nbsp;person&nbsp;obtaining
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;;;&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;software&nbsp;and&nbsp;associated&nbsp;documentation
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;;;&nbsp;files&nbsp;(the&nbsp;&quot;Software&quot;),&nbsp;to&nbsp;deal&nbsp;in&nbsp;the&nbsp;Software&nbsp;without&nbsp;restriction,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;;;&nbsp;including&nbsp;without&nbsp;limitation&nbsp;the&nbsp;rights&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;merge,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;;;&nbsp;publish,&nbsp;distribute,&nbsp;sublicense,&nbsp;and&#x2F;or&nbsp;sell&nbsp;copies&nbsp;of&nbsp;the&nbsp;Software,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;;;&nbsp;and&nbsp;to&nbsp;permit&nbsp;persons&nbsp;to&nbsp;whom&nbsp;the&nbsp;Software&nbsp;is&nbsp;furnished&nbsp;to&nbsp;do&nbsp;so,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;;;&nbsp;subject&nbsp;to&nbsp;the&nbsp;following&nbsp;conditions:
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;;;&nbsp;The&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;shall&nbsp;be
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;&nbsp;included&nbsp;in&nbsp;all&nbsp;copies&nbsp;or&nbsp;substantial&nbsp;portions&nbsp;of&nbsp;the&nbsp;Software.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;&nbsp;THE&nbsp;SOFTWARE&nbsp;IS&nbsp;PROVIDED&nbsp;&quot;AS&nbsp;IS&quot;,&nbsp;WITHOUT&nbsp;WARRANTY&nbsp;OF&nbsp;ANY&nbsp;KIND,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;&nbsp;EXPRESS&nbsp;OR&nbsp;IMPLIED,&nbsp;INCLUDING&nbsp;BUT&nbsp;NOT&nbsp;LIMITED&nbsp;TO&nbsp;THE&nbsp;WARRANTIES&nbsp;OF
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;&nbsp;MERCHANTABILITY,&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE&nbsp;AND
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;&nbsp;NONINFRINGEMENT.&nbsp;IN&nbsp;NO&nbsp;EVENT&nbsp;SHALL&nbsp;THE&nbsp;AUTHORS&nbsp;OR&nbsp;COPYRIGHT&nbsp;HOLDERS&nbsp;BE
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;&nbsp;LIABLE&nbsp;FOR&nbsp;ANY&nbsp;CLAIM,&nbsp;DAMAGES&nbsp;OR&nbsp;OTHER&nbsp;LIABILITY,&nbsp;WHETHER&nbsp;IN&nbsp;AN&nbsp;ACTION
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;&nbsp;OF&nbsp;CONTRACT,&nbsp;TORT&nbsp;OR&nbsp;OTHERWISE,&nbsp;ARISING&nbsp;FROM,&nbsp;OUT&nbsp;OF&nbsp;OR&nbsp;IN&nbsp;CONNECTION
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;&nbsp;WITH&nbsp;THE&nbsp;SOFTWARE&nbsp;OR&nbsp;THE&nbsp;USE&nbsp;OR&nbsp;OTHER&nbsp;DEALINGS&nbsp;IN&nbsp;THE&nbsp;SOFTWARE.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                022&nbsp;&nbsp;(ns&nbsp;genus.typecase
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[genus.genus&nbsp;:as&nbsp;gns]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[util.util&nbsp;:refer&nbsp;[setof]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[backtick&nbsp;:refer&nbsp;[template]]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                027&nbsp;&nbsp;(defn-&nbsp;collect-leaf-types&nbsp;[tds]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                028&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(collect&nbsp;[td]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                029&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(gns&#x2F;not?&nbsp;td)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                030&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(collect&nbsp;(second&nbsp;td))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                031&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;and?&nbsp;td)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(mapcat&nbsp;collect&nbsp;(rest&nbsp;td))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;or?&nbsp;td)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(mapcat&nbsp;collect&nbsp;(rest&nbsp;td))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;td))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(mapcat&nbsp;collect&nbsp;tds)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                040&nbsp;&nbsp;(defn-&nbsp;canonicalize-pairs
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;&quot;pairs&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;items&nbsp;which&nbsp;are&nbsp;implicitly&nbsp;(not&nbsp;explicitly&nbsp;grouped),
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;e.g.,&nbsp;pairs&nbsp;=&nbsp;(a&nbsp;100&nbsp;b&nbsp;200&nbsp;c&nbsp;300).&nbsp;&nbsp;This&nbsp;function&nbsp;interprets&nbsp;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;[pairs]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;pairs)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;()
+                </span><br/>
+<span class="covered" title="22 out of 22 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[td&nbsp;consequent&nbsp;&amp;&nbsp;others]&nbsp;pairs]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`([~(gns&#x2F;canonicalize-type&nbsp;td)&nbsp;~consequent]&nbsp;~@(canonicalize-pairs&nbsp;others)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                050&nbsp;&nbsp;(defn-&nbsp;substitute-1-type
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;&quot;Helper&nbsp;function&nbsp;for&nbsp;substitute-type,&nbsp;which&nbsp;does&nbsp;the&nbsp;search&#x2F;replace
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;one&nbsp;given&nbsp;type&nbsp;designators,&nbsp;td-domain.&nbsp;&nbsp;This&nbsp;function&nbsp;search&nbsp;for
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;occurances&nbsp;of&nbsp;td-search&nbsp;in&nbsp;td-domain,&nbsp;and&nbsp;if&nbsp;found,&nbsp;replaces&nbsp;with
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;td-replace.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;[td-search&nbsp;td-replace&nbsp;td-domain]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(=&nbsp;td-search&nbsp;td-domain)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;td-replace
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;not?&nbsp;td-domain)
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(template&nbsp;(not&nbsp;~(substitute-1-type&nbsp;td-search&nbsp;td-replace&nbsp;(second&nbsp;td-domain))))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;and?&nbsp;td-domain)
+                </span><br/>
+<span class="covered" title="18 out of 18 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(template&nbsp;(and&nbsp;~@(map&nbsp;(fn&nbsp;[td]&nbsp;(substitute-1-type&nbsp;td-search&nbsp;td-replace&nbsp;td))&nbsp;(rest&nbsp;td-domain))))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;or?&nbsp;td-domain)
+                </span><br/>
+<span class="covered" title="18 out of 18 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(template&nbsp;(or&nbsp;~@(map&nbsp;(fn&nbsp;[td]&nbsp;(substitute-1-type&nbsp;td-search&nbsp;td-replace&nbsp;td))&nbsp;(rest&nbsp;td-domain))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;td-domain))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                066&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                067&nbsp;&nbsp;(defn-&nbsp;substitute-type
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;&quot;pairs&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;items&nbsp;each&nbsp;of&nbsp;the&nbsp;form&nbsp;[type-designator&nbsp;consequent].
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;attempts&nbsp;to&nbsp;simplify&nbsp;each&nbsp;of&nbsp;the&nbsp;type&nbsp;designators,&nbsp;return&nbsp;a
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;new&nbsp;sequence&nbsp;of&nbsp;the&nbsp;same&nbsp;length,&nbsp;with&nbsp;the&nbsp;consequents&nbsp;untouched.&nbsp;&nbsp;Each
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;type-designator&nbsp;has&nbsp;had&nbsp;occurances&nbsp;of&nbsp;the&nbsp;type&nbsp;designator&nbsp;td-old&nbsp;replaced
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;td-new.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;[td-old&nbsp;td-new&nbsp;pairs]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="29 out of 29 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[[td&nbsp;consequent]&nbsp;pairs]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(gns&#x2F;canonicalize-type&nbsp;(substitute-1-type&nbsp;td-old&nbsp;td-new&nbsp;td))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consequent]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                079&nbsp;&nbsp;(defn-&nbsp;substitute-types
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&quot;Helper&nbsp;function&nbsp;which&nbsp;performs&nbsp;multiple&nbsp;type&nbsp;designator&nbsp;substitutions.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;[td-olds&nbsp;td-new&nbsp;pairs]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;(loop&nbsp;[td-olds&nbsp;td-olds
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pairs&nbsp;pairs]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;td-olds)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pairs
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;(rest&nbsp;td-olds)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(substitute-type&nbsp;(first&nbsp;td-olds)&nbsp;td-new&nbsp;pairs)))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                089&nbsp;&nbsp;(defn-&nbsp;prune-pairs
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&quot;This&nbsp;is&nbsp;a&nbsp;helper&nbsp;function&nbsp;used&nbsp;in&nbsp;optimizing&nbsp;the&nbsp;macro&nbsp;expansion
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;typecase.&nbsp;&nbsp;pairs&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;objects,&nbsp;each&nbsp;of&nbsp;the&nbsp;form&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;[type-designator&nbsp;expression].&nbsp;&nbsp;This&nbsp;function&nbsp;returns&nbsp;a&nbsp;new&nbsp;sequence
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;prunes&nbsp;(removes&nbsp;the&nbsp;trailing&nbsp;elements)&nbsp;the&nbsp;sequence&nbsp;at&nbsp;the&nbsp;first
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;occurance&nbsp;of&nbsp;[:sigma&nbsp;...],&nbsp;if&nbsp;such&nbsp;occurs,&nbsp;removes&nbsp;any&nbsp;pair
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form&nbsp;[:empty-set&nbsp;...].&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;[pairs]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(empty?&nbsp;pairs)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[[td&nbsp;consequent]&nbsp;&amp;&nbsp;others]&nbsp;pairs]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;td
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:sigma)&nbsp;(list&nbsp;[:sigma&nbsp;consequent])
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:empty-set)&nbsp;(prune-pairs&nbsp;others)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;[td&nbsp;consequent]&nbsp;(prune-pairs&nbsp;others))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                107&nbsp;&nbsp;(defn-&nbsp;calc-influence&nbsp;[all-freq&nbsp;all-leaves&nbsp;leaf]
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[disjoints&nbsp;(setof&nbsp;[t&nbsp;all-leaves]&nbsp;(=&nbsp;true&nbsp;(gns&#x2F;disjoint?&nbsp;t&nbsp;leaf&nbsp;:dont-know)))
+                </span><br/>
+<span class="covered" title="13 out of 13 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;proper-supers&nbsp;&nbsp;&nbsp;&nbsp;(setof&nbsp;[t&nbsp;all-leaves]&nbsp;(and&nbsp;(not=&nbsp;t&nbsp;leaf)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;(gns&#x2F;subtype?&nbsp;leaf&nbsp;t&nbsp;:dont-know))))
+                </span><br/>
+<span class="covered" title="13 out of 13 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;proper-subs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(setof&nbsp;[t&nbsp;all-leaves]&nbsp;(and&nbsp;(not=&nbsp;t&nbsp;leaf)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;(gns&#x2F;subtype?&nbsp;t&nbsp;leaf&nbsp;:dont-know))))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;(fn&nbsp;[sum&nbsp;leaf]&nbsp;(+&nbsp;sum&nbsp;(get&nbsp;all-freq&nbsp;leaf)))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;influence&nbsp;&nbsp;&nbsp;(+&nbsp;(get&nbsp;all-freq&nbsp;leaf)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;f&nbsp;0&nbsp;disjoints)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;f&nbsp;0&nbsp;proper-supers)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;f&nbsp;0&nbsp;proper-subs))]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[leaf&nbsp;influence&nbsp;disjoints&nbsp;proper-supers&nbsp;proper-subs]))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                119&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                120&nbsp;&nbsp;(defn-&nbsp;maximize-influence&nbsp;[canonicalized-pairs]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                121&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[all-leaves&nbsp;(collect-leaf-types&nbsp;(map&nbsp;first&nbsp;canonicalized-pairs))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-freq&nbsp;(frequencies&nbsp;all-leaves)
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;first-leaves&nbsp;(collect-leaf-types&nbsp;(list&nbsp;(first&nbsp;(first&nbsp;canonicalized-pairs))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;find&nbsp;the&nbsp;leaf&nbsp;in&nbsp;first-leaves&nbsp;with&nbsp;the&nbsp;maximum&nbsp;occurances&nbsp;counting&nbsp;disjoints,&nbsp;supers,&nbsp;and&nbsp;subs&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;(fn&nbsp;[[most-freq&#x27;&nbsp;influence&#x27;&nbsp;disjoints&#x27;&nbsp;supers&#x27;&nbsp;subs&#x27;]&nbsp;leaf]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[most-freq&nbsp;influence&nbsp;disjoints&nbsp;supers&nbsp;subs]&nbsp;(calc-influence&nbsp;all-freq&nbsp;all-leaves&nbsp;leaf)]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(&gt;&nbsp;influence&#x27;&nbsp;influence)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                129&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[most-freq&#x27;&nbsp;influence&#x27;&nbsp;disjoints&#x27;&nbsp;supers&#x27;&nbsp;subs&#x27;]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[most-freq&nbsp;&nbsp;influence&nbsp;&nbsp;disjoints&nbsp;&nbsp;supers&nbsp;&nbsp;subs])))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:ignore&nbsp;0&nbsp;()&nbsp;()&nbsp;()]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;first-leaves)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                134&nbsp;&nbsp;(defmacro&nbsp;optimized-let
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;&quot;Macro&nbsp;used&nbsp;in&nbsp;the&nbsp;macro&nbsp;expansion&nbsp;of&nbsp;typecase.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;very&nbsp;simple&nbsp;let&nbsp;form&nbsp;which&nbsp;checks&nbsp;for&nbsp;a&nbsp;very&nbsp;special
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                137&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;such&nbsp;as&nbsp;(let&nbsp;[x&nbsp;x]&nbsp;y)&nbsp;and&nbsp;optimizes&nbsp;it&nbsp;simply&nbsp;to&nbsp;y.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;&nbsp;&nbsp;[[a&nbsp;b]&nbsp;c]
+                </span><br/>
+<span class="covered" title="29 out of 29 forms covered">
+                139&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;a&nbsp;b)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(let&nbsp;[~a&nbsp;~b]&nbsp;~c)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                142&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                143&nbsp;&nbsp;(defmacro&nbsp;optimized-typep
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                144&nbsp;&nbsp;&nbsp;&nbsp;&quot;Macro&nbsp;used&nbsp;to&nbsp;optimize&nbsp;the&nbsp;a&nbsp;call&nbsp;such&nbsp;as&nbsp;(typep&nbsp;x&nbsp;&#x27;(satisfies&nbsp;y))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;(y&nbsp;x)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                146&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                147&nbsp;&nbsp;&nbsp;&nbsp;(optimized-typep&nbsp;234&nbsp;(not&nbsp;(satisfies&nbsp;y)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                148&nbsp;&nbsp;&nbsp;&nbsp;--&gt;&nbsp;(not&nbsp;(optimized-typep&nbsp;234&nbsp;(satisfies&nbsp;y)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                149&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                150&nbsp;&nbsp;&nbsp;&nbsp;(optimized-typep&nbsp;234&nbsp;(satisfies&nbsp;y))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                151&nbsp;&nbsp;&nbsp;&nbsp;--&gt;&nbsp;(boolean&nbsp;(y&nbsp;234))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                152&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                153&nbsp;&nbsp;&nbsp;&nbsp;(optimized-typep&nbsp;234&nbsp;xyzzy)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                154&nbsp;&nbsp;&nbsp;&nbsp;--&gt;&nbsp;(gns&#x2F;typep&nbsp;234&nbsp;&#x27;xyzzy)&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                155&nbsp;&nbsp;&nbsp;&nbsp;[v&nbsp;t]
+                </span><br/>
+<span class="partial" title="45 out of 46 forms covered">
+                156&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(gns&#x2F;satisfies?&nbsp;t)
+                </span><br/>
+<span class="covered" title="23 out of 23 forms covered">
+                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[_&nbsp;pred]&nbsp;t]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(boolean&nbsp;(~pred&nbsp;~v)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                159&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;not?&nbsp;t)
+                </span><br/>
+<span class="not-covered" title="0 out of 26 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[_not&nbsp;ty]&nbsp;t]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(not&nbsp;(optimized-typep&nbsp;~v&nbsp;~ty)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                163&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="11 out of 12 forms covered">
+                164&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(symbol?&nbsp;t)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                165&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;safe-resolve&nbsp;t)&nbsp;;;&nbsp;only&nbsp;flatten&nbsp;class&nbsp;names&nbsp;which&nbsp;safely&nbsp;resolve
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;i.e.,&nbsp;Number&nbsp;but&nbsp;not&nbsp;Ratio
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;resolve-class&nbsp;t))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(instance?&nbsp;~t&nbsp;~v)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                169&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:otherwise
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(gns&#x2F;typep&nbsp;~v&nbsp;&#x27;~t)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                172&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                173&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                174&nbsp;&nbsp;(defmacro&nbsp;typecase&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;&quot;Takes&nbsp;an&nbsp;expression&nbsp;and&nbsp;a&nbsp;set&nbsp;of&nbsp;clauses
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                176&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form&nbsp;...&nbsp;type-designator&nbsp;consequent&nbsp;...
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                177&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;an&nbsp;optional&nbsp;final&nbsp;default&nbsp;value.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                178&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                179&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;evaluation&nbsp;semantics&nbsp;are&nbsp;the&nbsp;following:
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                180&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;first&nbsp;(type-designator&nbsp;consequent)&nbsp;value&nbsp;is&nbsp;chosen
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;which&nbsp;the&nbsp;given&nbsp;value&nbsp;is&nbsp;of&nbsp;that&nbsp;type&nbsp;(as&nbsp;per&nbsp;genus&#x2F;typep),
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                182&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;the&nbsp;consequent&nbsp;is&nbsp;evaluated.&nbsp;&nbsp;If&nbsp;multiple&nbsp;type-designators
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                183&nbsp;&nbsp;&nbsp;&nbsp;match&nbsp;the&nbsp;value,&nbsp;only&nbsp;the&nbsp;first&nbsp;consequent&nbsp;is&nbsp;evaluated.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                184&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                185&nbsp;&nbsp;&nbsp;&nbsp;E.g.,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                186&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;42
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;(println&nbsp;100)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;String&nbsp;(satisfies&nbsp;oddp))&nbsp;(println&nbsp;200)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;Integer&nbsp;(satisfies&nbsp;evenp))&nbsp;(println&nbsp;300)&nbsp;;;&nbsp;&lt;--&nbsp;this&nbsp;is&nbsp;chosen&nbsp;and&nbsp;evaluated
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;String&nbsp;Integer)&nbsp;(println&nbsp;400)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;500))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                192&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                193&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;type-designators&nbsp;are&nbsp;those&nbsp;as&nbsp;specified&nbsp;in&nbsp;genus.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                194&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;given&nbsp;expression&nbsp;is&nbsp;evaluated&nbsp;a&nbsp;maximum&nbsp;of&nbsp;once,&nbsp;but&nbsp;in&nbsp;some
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                195&nbsp;&nbsp;&nbsp;&nbsp;optimized&nbsp;cases&nbsp;it&nbsp;may&nbsp;not&nbsp;be&nbsp;evaluated&nbsp;at&nbsp;all.&nbsp;&nbsp;If&nbsp;none&nbsp;of&nbsp;the&nbsp;type
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                196&nbsp;&nbsp;&nbsp;&nbsp;designators&nbsp;designate&nbsp;a&nbsp;type&nbsp;for&nbsp;which&nbsp;the&nbsp;given&nbsp;value&nbsp;is&nbsp;a&nbsp;member,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                197&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;either&nbsp;the&nbsp;default&nbsp;value&nbsp;is&nbsp;returned,&nbsp;or&nbsp;nil&nbsp;if&nbsp;no&nbsp;default&nbsp;is
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                198&nbsp;&nbsp;&nbsp;&nbsp;given.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                199&nbsp;&nbsp;&nbsp;&nbsp;Otherwise&nbsp;the&nbsp;consequent&nbsp;is&nbsp;evaluated&nbsp;and&nbsp;returned&nbsp;corresponding
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                200&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;the&nbsp;first&nbsp;(top&nbsp;most)&nbsp;type&nbsp;designator&nbsp;which&nbsp;matches&nbsp;the&nbsp;value.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                201&nbsp;&nbsp;&nbsp;&nbsp;These&nbsp;type&nbsp;checks&nbsp;are&nbsp;highly&nbsp;optimized&nbsp;so&nbsp;that&nbsp;no&nbsp;type&nbsp;explicitly
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                202&nbsp;&nbsp;&nbsp;&nbsp;mentioned&nbsp;is&nbsp;checked&nbsp;more&nbsp;than&nbsp;once,&nbsp;including&nbsp;(and&nbsp;especially)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                203&nbsp;&nbsp;&nbsp;&nbsp;(satisfies&nbsp;...).&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                204&nbsp;&nbsp;&nbsp;&nbsp;[value&nbsp;&amp;&nbsp;pairs]
+                </span><br/>
+<span class="covered" title="21 out of 21 forms covered">
+                205&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(odd?&nbsp;(count&nbsp;pairs))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(typecase&nbsp;~value&nbsp;~@(butlast&nbsp;pairs)&nbsp;:sigma&nbsp;~(last&nbsp;pairs))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                207&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[canonicalized-pairs&nbsp;(prune-pairs&nbsp;(canonicalize-pairs&nbsp;pairs))]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                209&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;canonicalized-pairs)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[most-freq&nbsp;influence&nbsp;disjoints&nbsp;proper-supers&nbsp;proper-subs]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(maximize-influence&nbsp;canonicalized-pairs)]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(=&nbsp;1&nbsp;(count&nbsp;canonicalized-pairs))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:sigma&nbsp;(first&nbsp;(first&nbsp;canonicalized-pairs))))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(second&nbsp;(first&nbsp;canonicalized-pairs))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;1&nbsp;influence)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                219&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[[type&nbsp;consequent]&nbsp;&amp;&nbsp;others]&nbsp;canonicalized-pairs]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;canonicalized-pairs&nbsp;([type&nbsp;consequent]&nbsp;[type&nbsp;consequent]&nbsp;...)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(gns&#x2F;not?&nbsp;type)
+                </span><br/>
+<span class="not-covered" title="0 out of 110 forms covered">
+                222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(symbol?&nbsp;value)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;the&nbsp;type&nbsp;is&nbsp;(not&nbsp;x),&nbsp;then&nbsp;strip&nbsp;off&nbsp;the&nbsp;not,&nbsp;and&nbsp;swap&nbsp;the&nbsp;then&#x2F;else
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(if&nbsp;(optimized-typep&nbsp;~value&nbsp;~(second&nbsp;type))
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;~value&nbsp;~@(mapcat&nbsp;identity&nbsp;others))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                226&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~consequent)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                227&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(optimized-let&nbsp;[value#&nbsp;~value]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                228&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;the&nbsp;type&nbsp;is&nbsp;(not&nbsp;x),&nbsp;then&nbsp;strip&nbsp;off&nbsp;the&nbsp;not,&nbsp;and&nbsp;swap&nbsp;the&nbsp;then&#x2F;else
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(optimized-typep&nbsp;value#&nbsp;~(second&nbsp;type))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;value#&nbsp;~@(mapcat&nbsp;identity&nbsp;others))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                231&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~consequent)))
+                </span><br/>
+<span class="partial" title="43 out of 110 forms covered">
+                232&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(symbol?&nbsp;value)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(if&nbsp;(optimized-typep&nbsp;~value&nbsp;~type)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                234&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~consequent
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                235&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;~value&nbsp;~@(mapcat&nbsp;identity&nbsp;others)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                236&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(optimized-let&nbsp;[value#&nbsp;~value]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                238&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(optimized-typep&nbsp;value#&nbsp;~type)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                239&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~consequent
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;value#&nbsp;~@(mapcat&nbsp;identity&nbsp;others)))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                241&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;most-freq&nbsp;is&nbsp;a&nbsp;leaf-level&nbsp;type&nbsp;which&nbsp;appears&nbsp;multiple&nbsp;times,&nbsp;either
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                244&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;appearing&nbsp;explicitly,&nbsp;or&nbsp;disjoint,&nbsp;sub&#x2F;super&nbsp;types&nbsp;also&nbsp;appear.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;we&nbsp;expand&nbsp;to&nbsp;two&nbsp;cases,&nbsp;one&nbsp;where&nbsp;the&nbsp;type&nbsp;is&nbsp;matched,&nbsp;and&nbsp;one&nbsp;where
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                246&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;the&nbsp;complement&nbsp;of&nbsp;the&nbsp;type&nbsp;is&nbsp;not&nbsp;matched.
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                247&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[if-true&nbsp;&nbsp;(substitute-types&nbsp;disjoints&nbsp;:empty-set
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                248&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(substitute-types&nbsp;(cons&nbsp;most-freq&nbsp;proper-supers)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                249&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;canonicalized-pairs))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                250&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if-false&nbsp;(substitute-types&nbsp;(cons&nbsp;most-freq&nbsp;proper-subs)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                251&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:empty-set&nbsp;canonicalized-pairs)]
+                </span><br/>
+<span class="covered" title="133 out of 133 forms covered">
+                252&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(symbol?&nbsp;value)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                253&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(if&nbsp;(optimized-typep&nbsp;~value&nbsp;~most-freq)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                254&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;~value&nbsp;~@(mapcat&nbsp;identity&nbsp;if-true))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                255&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;~value&nbsp;~@(mapcat&nbsp;identity&nbsp;if-false)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                256&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`(optimized-let&nbsp;[value#&nbsp;~value]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                257&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(optimized-typep&nbsp;value#&nbsp;~most-freq)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                258&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;value#&nbsp;~@(mapcat&nbsp;identity&nbsp;if-true))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                259&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(typecase&nbsp;value#&nbsp;~@(mapcat&nbsp;identity&nbsp;if-false))))))))))))
+                </span><br/>
+ </body>
+</html>

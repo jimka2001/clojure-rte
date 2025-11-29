@@ -1,0 +1,134 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../../coverage.css"/>  <title> demos/vmcai_2026/rte_tree_totally_balanced.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;demos.vmcai-2026.rte-tree-totally-balanced
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[util.lock&nbsp;:as&nbsp;lock]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[util.util&nbsp;:refer&nbsp;[rand-tree-012]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[genus.genus-tester&nbsp;:refer&nbsp;[*test-types*]])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                009&nbsp;&nbsp;(defn&nbsp;tree-012-to-rte&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;&quot;Take&nbsp;a&nbsp;tree&nbsp;as&nbsp;created&nbsp;by&nbsp;`rand-tree-012`,&nbsp;insert&nbsp;a&nbsp;type&nbsp;designator&nbsp;at&nbsp;each
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;&nbsp;&nbsp;leaf&nbsp;node,&nbsp;and&nbsp;insert&nbsp;a&nbsp;randomly&nbsp;selected&nbsp;operator&nbsp;at&nbsp;each&nbsp;internal&nbsp;node.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;operator&nbsp;is&nbsp;unary,&nbsp;then&nbsp;the&nbsp;right&nbsp;child&nbsp;is&nbsp;simply&nbsp;discarded.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;&nbsp;&nbsp;([tree]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;tree&nbsp;*test-types*))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;&nbsp;&nbsp;([tree&nbsp;types]
+                </span><br/>
+<span class="not-covered" title="0 out of 10 forms covered">
+                016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;(count&nbsp;tree)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0)&nbsp;(rand-nth&nbsp;types)
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;(let&nbsp;[[parent&nbsp;child]&nbsp;tree]
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(rand-nth&nbsp;[:?&nbsp;:*&nbsp;:not])
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;child&nbsp;types)))
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;(let&nbsp;[[parent&nbsp;left&nbsp;right]&nbsp;tree]
+                </span><br/>
+<span class="not-covered" title="0 out of 8 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(rand-nth&nbsp;[:and&nbsp;:or&nbsp;:cat])
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;left&nbsp;types)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;right&nbsp;types))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                026&nbsp;&nbsp;(defn&nbsp;gen-totally-balanced-rte
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;&nbsp;&nbsp;&quot;Generate&nbsp;an&nbsp;RTE&nbsp;which&nbsp;corresponds&nbsp;(on&nbsp;average)&nbsp;in&nbsp;shape&nbsp;closely&nbsp;to&nbsp;a&nbsp;balanced
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;&nbsp;&nbsp;binary&nbsp;tree.&nbsp;&nbsp;The&nbsp;goal&nbsp;is&nbsp;to&nbsp;sample&nbsp;languages&nbsp;uniformly&nbsp;rather&nbsp;than&nbsp;sampling
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;&nbsp;&nbsp;syntactic&nbsp;structure&nbsp;of&nbsp;the&nbsp;RTE&nbsp;uniformly.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;&nbsp;&nbsp;([probability-binary&nbsp;depth]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                031&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gen-totally-balanced-rte&nbsp;probability-binary&nbsp;depth&nbsp;
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;:epsilon&nbsp;*test-types*)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;([probability-binary&nbsp;depth&nbsp;types]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;(printf&nbsp;&quot;generating&nbsp;tree&nbsp;of&nbsp;depth&nbsp;%d:&nbsp;&nbsp;%s&nbsp;&lt;=&nbsp;count&nbsp;&lt;&nbsp;%s\n&quot;&nbsp;depth&nbsp;(pow&nbsp;2&nbsp;depth)&nbsp;(pow&nbsp;2&nbsp;(inc&nbsp;depth)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;a&nbsp;binary&nbsp;tree&nbsp;of&nbsp;depth=n&nbsp;has&nbsp;2^n&nbsp;&lt;=&nbsp;m&nbsp;&lt;&nbsp;2^(n+1)&nbsp;leaves
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;so&nbsp;generate&nbsp;a&nbsp;random&nbsp;number&nbsp;2^n&nbsp;&lt;=&nbsp;rand&nbsp;&lt;&nbsp;2^(n+1)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;i.e&nbsp;2^n&nbsp;+&nbsp;(rand-int&nbsp;2^(n+1)&nbsp;-&nbsp;2^n)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;2^n&nbsp;+&nbsp;(rand-int&nbsp;2^n)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[tree&nbsp;(rand-tree-012&nbsp;probability-binary&nbsp;depth)
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte&nbsp;(tree-012-to-rte&nbsp;tree&nbsp;types)]
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte)))
+                </span><br/>
+ </body>
+</html>

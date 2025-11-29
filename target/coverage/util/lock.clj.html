@@ -1,0 +1,242 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> util/lock.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;util.lock
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[clojure.java.io&nbsp;:as&nbsp;io]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.java.shell&nbsp;:refer&nbsp;[sh]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.edn&nbsp;:as&nbsp;edn]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.data.csv&nbsp;:as&nbsp;csv]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.pprint&nbsp;:refer&nbsp;[pprint]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[graph.vega-plot&nbsp;:as&nbsp;vega]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[util.util&nbsp;:refer&nbsp;[call-in-block&nbsp;with-timeout&nbsp;read-csv-data&nbsp;rename-columns]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                014&nbsp;&nbsp;(def&nbsp;statistics-resource&nbsp;(str&nbsp;(.getPath&nbsp;(io&#x2F;resource&nbsp;&quot;statistics&quot;))&nbsp;&quot;&#x2F;&quot;))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                015&nbsp;&nbsp;(def&nbsp;lock-file&nbsp;(str&nbsp;statistics-resource&nbsp;&quot;..&#x2F;..&#x2F;&quot;&nbsp;&quot;statistics.lockfile&quot;))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="40 out of 42 forms covered">
+                018&nbsp;&nbsp;(defmacro&nbsp;with-lock
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;&nbsp;&nbsp;&quot;macro&nbsp;version&nbsp;of&nbsp;call-in-block.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;&nbsp;&nbsp;Evaluate&nbsp;the&nbsp;given&nbsp;code&nbsp;body&nbsp;in&nbsp;a&nbsp;way&nbsp;which&nbsp;blocks&nbsp;access&nbsp;to
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;resource&nbsp;files&nbsp;in&nbsp;statistics&#x2F;resources&#x2F;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;&nbsp;&nbsp;[&amp;&nbsp;body]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;`(call-in-block&nbsp;lock-file
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[]&nbsp;~@body)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                026&nbsp;&nbsp;(defn&nbsp;merge-file
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;&nbsp;&nbsp;&quot;`csv-file-name`&nbsp;is&nbsp;a&nbsp;csv&nbsp;file&nbsp;in&nbsp;the&nbsp;resource&#x2F;statistics&nbsp;directory
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;&nbsp;&nbsp;`write-record`&nbsp;is&nbsp;a&nbsp;unary&nbsp;function,&nbsp;callable&nbsp;with&nbsp;a&nbsp;file&nbsp;writer&nbsp;(from&nbsp;java.io.FileWriter)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;`merge-file`,&nbsp;calls&nbsp;`write-record`&nbsp;which&nbsp;is&nbsp;expected&nbsp;to&nbsp;write&nbsp;a&nbsp;line&nbsp;into
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;writer&nbsp;of&nbsp;its&nbsp;argument.&nbsp;&nbsp;Thereafter,&nbsp;that&nbsp;resulting&nbsp;file&nbsp;is&nbsp;merged&nbsp;(via&nbsp;sort&nbsp;-m)&nbsp;into
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;csv-file&nbsp;in&nbsp;the&nbsp;resource&nbsp;directory.&nbsp;Recall,&nbsp;sort&nbsp;-m,&nbsp;expect&nbsp;the&nbsp;file(s)&nbsp;to&nbsp;already
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;in&nbsp;sorted&nbsp;order.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                033&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;is&nbsp;safe&nbsp;to&nbsp;call&nbsp;this&nbsp;function&nbsp;simultaneously&nbsp;from&nbsp;two&nbsp;different&nbsp;threads&nbsp;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;two&nbsp;different&nbsp;processes&nbsp;because&nbsp;the&nbsp;manipulation&nbsp;of&nbsp;the&nbsp;resource&nbsp;file&nbsp;is&nbsp;managed
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;`util&#x2F;call-in-block`&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;&nbsp;&nbsp;[csv-file-name&nbsp;write-record]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[tmp-1&nbsp;(str&nbsp;statistics-resource&nbsp;&quot;lock-1-&quot;&nbsp;(random-uuid)&nbsp;&quot;~&quot;)
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmp-2&nbsp;(str&nbsp;statistics-resource&nbsp;&quot;lock-2-&quot;&nbsp;(random-uuid)&nbsp;&quot;~&quot;)]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[out-file&nbsp;(java.io.FileWriter.&nbsp;tmp-1&nbsp;true)]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-record&nbsp;out-file))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-lock
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;open&nbsp;the&nbsp;csv&nbsp;file&nbsp;in&nbsp;append&nbsp;mode,&nbsp;i.e.,&nbsp;write&nbsp;to&nbsp;the&nbsp;end
+                </span><br/>
+<span class="partial" title="30 out of 42 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[cmd&nbsp;[[&quot;touch&quot;&nbsp;csv-file-name]
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;sort&quot;&nbsp;&quot;-t,&quot;&nbsp;&quot;-k1,3n&quot;&nbsp;&quot;-m&quot;&nbsp;tmp-1&nbsp;csv-file-name&nbsp;&quot;-o&quot;&nbsp;tmp-2]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                045&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;mv&quot;&nbsp;tmp-2&nbsp;csv-file-name]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#_[&quot;trash&quot;&nbsp;tmp-1]]
+                </span><br/>
+<span class="partial" title="4 out of 8 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[s&nbsp;(apply&nbsp;sh&nbsp;cmd)]
+                </span><br/>
+<span class="partial" title="6 out of 12 forms covered">
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(not=&nbsp;0&nbsp;(:exit&nbsp;s))]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;cmd)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint&nbsp;s))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                054&nbsp;&nbsp;(defn&nbsp;slurp-csv-data
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&quot;Read&nbsp;the&nbsp;named&nbsp;.csv&nbsp;file&nbsp;`csv-file-name`&nbsp;returning&nbsp;a&nbsp;list&nbsp;of&nbsp;maps,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;map&nbsp;has&nbsp;the&nbsp;keys&nbsp;specified&nbsp;in&nbsp;`fields`.&nbsp;&nbsp;The&nbsp;fields
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;the&nbsp;columns&nbsp;in&nbsp;order&nbsp;from&nbsp;left&nbsp;to&nbsp;right&nbsp;in&nbsp;the&nbsp;csv&nbsp;file,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;skipping&nbsp;all&nbsp;lines&nbsp;which&nbsp;start&nbsp;with&nbsp;#.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;[csv-file-name&nbsp;fields]
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;(with-lock
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[csv-file&nbsp;(clojure.java.io&#x2F;reader&nbsp;csv-file-name)]
+                </span><br/>
+<span class="not-covered" title="0 out of 35 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doall&nbsp;(for&nbsp;[line&nbsp;(csv&#x2F;read-csv&nbsp;csv-file)
+                </span><br/>
+<span class="not-covered" title="0 out of 9 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(not&nbsp;(=&nbsp;\#&nbsp;(get&nbsp;(get&nbsp;line&nbsp;0)&nbsp;0)))]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(zipmap&nbsp;fields
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(map&nbsp;edn&#x2F;read-string&nbsp;line)))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                066&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                068&nbsp;&nbsp;(defn&nbsp;read-resource-csv&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&quot;Read&nbsp;a&nbsp;csv&nbsp;file&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;maps.&nbsp;&nbsp;They&nbsp;keys&nbsp;depend&nbsp;on&nbsp;the&nbsp;column&nbsp;titles
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;given&nbsp;on&nbsp;the&nbsp;first&nbsp;line&nbsp;of&nbsp;the&nbsp;csv&nbsp;file.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;[csv-file]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[csv-file&nbsp;(clojure.java.io&#x2F;reader&nbsp;csv-file)]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[headers&nbsp;lines]&nbsp;(read-csv-data&nbsp;csv-file
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:comment?&nbsp;(constantly&nbsp;false)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:parsers&nbsp;{:default&nbsp;edn&#x2F;read-string}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)]
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rename-columns&nbsp;headers&nbsp;lines&nbsp;{&quot;#num-states&quot;&nbsp;&quot;num-states&quot;}))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;
+                </span><br/>
+ </body>
+</html>

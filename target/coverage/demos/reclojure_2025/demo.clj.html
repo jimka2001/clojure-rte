@@ -1,0 +1,1703 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../../coverage.css"/>  <title> demos/reclojure_2025/demo.clj </title>
+ </head>
+ <body>
+<span class="covered" title="1 out of 1 forms covered">
+                001&nbsp;&nbsp;(ns&nbsp;demos.reclojure-2025.demo
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[rte-case&nbsp;:refer&nbsp;[rte-case&nbsp;dscase&nbsp;rte-case-fn&nbsp;dsdefn]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[genus.genus&nbsp;:as&nbsp;gns]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[rte-construct&nbsp;:as&nbsp;rte]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[xym.xymbolyco&nbsp;:as&nbsp;xym]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[genus.typecase&nbsp;:refer&nbsp;[typecase]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[graph.dot&nbsp;:as&nbsp;dot])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;_&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;_&nbsp;__&nbsp;___&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;_|&nbsp;|&nbsp;|_(_)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__&nbsp;_&nbsp;_&nbsp;__(_)&nbsp;|_&nbsp;_&nbsp;&nbsp;&nbsp;_&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;&#x27;_&nbsp;`&nbsp;_&nbsp;\|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;__|&nbsp;|_____&nbsp;&#x2F;&nbsp;_`&nbsp;|&nbsp;&#x27;__|&nbsp;|&nbsp;__|&nbsp;|&nbsp;|&nbsp;|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|_|&nbsp;|&nbsp;|&nbsp;|_|&nbsp;|_____|&nbsp;(_|&nbsp;|&nbsp;|&nbsp;&nbsp;|&nbsp;|&nbsp;|_|&nbsp;|_|&nbsp;|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;&nbsp;&nbsp;|_|&nbsp;|_|&nbsp;|_|\__,_|_|\__|_|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\__,_|_|&nbsp;&nbsp;|_|\__|\__,&nbsp;|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|___&#x2F;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                022&nbsp;&nbsp;;;&nbsp;Definition&nbsp;of&nbsp;multiple-arity&nbsp;function
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                023&nbsp;&nbsp;(defn&nbsp;f
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;([a]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                026&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;#_(f&nbsp;0&nbsp;0)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                030&nbsp;&nbsp;#_(f&nbsp;0&nbsp;0&nbsp;0)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                031&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;
+                </span><br/>
+<span class="not-covered" title="0 out of 2 forms covered">
+                033&nbsp;&nbsp;;;&nbsp;Vain&nbsp;attempt&nbsp;to&nbsp;define&nbsp;destructuring&nbsp;function
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;#_(defn&nbsp;f
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                038&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                039&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                040&nbsp;&nbsp;(defn&nbsp;f
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                041&nbsp;&nbsp;&nbsp;&nbsp;([a]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;([^Boolean&nbsp;a&nbsp;b]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                044&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                045&nbsp;&nbsp;(f&nbsp;true&nbsp;2)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                046&nbsp;&nbsp;(f&nbsp;1&nbsp;2)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                047&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;#_(defn&nbsp;f
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                049&nbsp;&nbsp;&nbsp;&nbsp;([a]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;([^Ratio&nbsp;a&nbsp;b]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                052&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                053&nbsp;&nbsp;(defn&nbsp;f
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;([a]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;([^clojure.lang.Ratio&nbsp;a&nbsp;b]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                057&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                058&nbsp;&nbsp;#_(defn&nbsp;f
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;([a]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;([^int?&nbsp;a&nbsp;b]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                062&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                063&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                064&nbsp;&nbsp;(defn&nbsp;f
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;([a]&nbsp;&nbsp;&nbsp;12)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b]&nbsp;&nbsp;&nbsp;13)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^int?&nbsp;c&nbsp;^Ratio&nbsp;d]]&nbsp;&nbsp;&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                068&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                069&nbsp;&nbsp;(f&nbsp;0&nbsp;1&nbsp;[3&nbsp;52&#x2F;17])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;--&gt;&nbsp;14
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                070&nbsp;&nbsp;(f&nbsp;0&nbsp;1&nbsp;[&quot;hello&quot;&nbsp;false])&nbsp;;;&nbsp;--&gt;&nbsp;14
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                071&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                072&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                073&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                074&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                075&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                076&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                077&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                078&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                079&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                080&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                081&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                082&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                083&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                084&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                085&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                086&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                087&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                088&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                089&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                090&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                091&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                093&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                094&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                095&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                096&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                097&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                098&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                100&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                101&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                102&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                103&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                104&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                105&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                107&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                108&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;__|&nbsp;|___&nbsp;&nbsp;__|&nbsp;|&nbsp;___&nbsp;&#x2F;&nbsp;_|_&nbsp;__&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                109&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&#x2F;&nbsp;_`&nbsp;&#x2F;&nbsp;__|&#x2F;&nbsp;_`&nbsp;|&#x2F;&nbsp;_&nbsp;\&nbsp;|_|&nbsp;&#x27;_&nbsp;\&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                110&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;(_|&nbsp;\__&nbsp;\&nbsp;(_|&nbsp;|&nbsp;&nbsp;__&#x2F;&nbsp;&nbsp;_|&nbsp;|&nbsp;|&nbsp;|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                111&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;\__,_|___&#x2F;\__,_|\___|_|&nbsp;|_|&nbsp;|_|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                112&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                113&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                114&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                115&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                116&nbsp;&nbsp;;;&nbsp;&nbsp;Functions&nbsp;defined&nbsp;by&nbsp;dsdefn
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                117&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                118&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                119&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                120&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="12 out of 17 forms covered">
+                121&nbsp;&nbsp;(dsdefn&nbsp;f&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;14))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                125&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                126&nbsp;&nbsp;(f&nbsp;[0&nbsp;1]&nbsp;2&nbsp;3)&nbsp;&nbsp;;;&nbsp;--&gt;&nbsp;12
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                127&nbsp;&nbsp;(f&nbsp;0&nbsp;[1&nbsp;2]&nbsp;3)&nbsp;&nbsp;;;&nbsp;--&gt;&nbsp;13
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                128&nbsp;&nbsp;(f&nbsp;0&nbsp;1&nbsp;[2&nbsp;3])&nbsp;&nbsp;;;&nbsp;--&gt;&nbsp;14
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                129&nbsp;&nbsp;#_(f&nbsp;0)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                130&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                131&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="12 out of 17 forms covered">
+                132&nbsp;&nbsp;(dsdefn&nbsp;f&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;11)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                134&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;14)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;(println&nbsp;&quot;fourth&nbsp;clause&quot;)&nbsp;15))&nbsp;;;&nbsp;SEE&nbsp;*out*
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                137&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                139&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10.0&nbsp;20])
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                140&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="12 out of 17 forms covered">
+                141&nbsp;&nbsp;(dsdefn&nbsp;f&nbsp;
+                </span><br/>
+<span class="partial" title="6 out of 8 forms covered">
+                142&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                143&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                144&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Ratio&nbsp;c&nbsp;d]]&nbsp;14)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Integer&nbsp;c&nbsp;d]]&nbsp;15)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                146&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Number&nbsp;c&nbsp;d]]&nbsp;16)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                147&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Double&nbsp;c&nbsp;d]]&nbsp;:this-is-unreachable&nbsp;17))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                148&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                149&nbsp;&nbsp;(gns&#x2F;subtype?&nbsp;&#x27;Double&nbsp;&#x27;Number)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                150&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                151&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                152&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10.0&nbsp;20])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                153&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[2&#x2F;3&nbsp;3])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                154&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10&nbsp;20])
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                155&nbsp;&nbsp;(instance?&nbsp;Integer&nbsp;10)
+                </span><br/>
+<span class="partial" title="6 out of 11 forms covered">
+                156&nbsp;&nbsp;(instance?&nbsp;Long&nbsp;10)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                157&nbsp;&nbsp;(gns&#x2F;subtype?&nbsp;&#x27;Long&nbsp;&#x27;Integer)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                158&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                159&nbsp;&nbsp;;;&nbsp;Vain&nbsp;attempt&nbsp;to&nbsp;define&nbsp;with&nbsp;int?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                160&nbsp;&nbsp;#_(dsdefn&nbsp;f
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                163&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Ratio&nbsp;c&nbsp;d]]&nbsp;14)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                164&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^int?&nbsp;c&nbsp;d]]&nbsp;15)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                165&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Number&nbsp;c&nbsp;d]]&nbsp;16)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                166&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Double&nbsp;c&nbsp;d]]&nbsp;17))
+                </span><br/>
+<span class="blank" title="11 out of 13 forms covered">
+                167&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                168&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                169&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10&nbsp;20])
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                170&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                171&nbsp;&nbsp;#_(dsdefn&nbsp;f&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                172&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;12)q
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                173&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                174&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Ratio&nbsp;c&nbsp;d]]&nbsp;14)q
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^(satisfies&nbsp;int?)&nbsp;c&nbsp;d]]&nbsp;15)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                176&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Number&nbsp;c&nbsp;d]]&nbsp;16)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                177&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Double&nbsp;c&nbsp;d]]&nbsp;17))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                178&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="12 out of 17 forms covered">
+                179&nbsp;&nbsp;(dsdefn&nbsp;f
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                180&nbsp;&nbsp;&nbsp;&nbsp;([[a&nbsp;b]&nbsp;c&nbsp;d]&nbsp;12)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;[b&nbsp;c]&nbsp;d]&nbsp;13)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                182&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Ratio&nbsp;c&nbsp;d]]&nbsp;14)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                183&nbsp;&nbsp;&nbsp;&nbsp;(^{c&nbsp;(satisfies&nbsp;int?)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;(or&nbsp;(satisfies&nbsp;int?)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;String&nbsp;(not&nbsp;(=&nbsp;&quot;&quot;))))}
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a&nbsp;b&nbsp;[c&nbsp;d]]&nbsp;15)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                187&nbsp;&nbsp;&nbsp;&nbsp;([a&nbsp;b&nbsp;[^Double&nbsp;c&nbsp;d]]&nbsp;16))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                188&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                189&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10&nbsp;20])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                190&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10&nbsp;&quot;twelve&quot;])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                191&nbsp;&nbsp;#_(f&nbsp;1&nbsp;2&nbsp;[10&nbsp;&quot;&quot;])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                192&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10.0&nbsp;20])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                193&nbsp;&nbsp;(f&nbsp;1&nbsp;2&nbsp;[10&#x2F;3&nbsp;20])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                194&nbsp;&nbsp;#_(f&nbsp;1&nbsp;2&nbsp;[false&nbsp;20])
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                195&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                196&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                197&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                198&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                199&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                200&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                201&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                202&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                203&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                204&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                205&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                206&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                207&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                208&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                209&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                210&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                211&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                212&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                213&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                214&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                215&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                216&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                217&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                218&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                219&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                220&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                221&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                222&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                223&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                224&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                225&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                226&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                227&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                228&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                229&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                230&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                231&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                232&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;_&nbsp;__|&nbsp;|_&nbsp;___&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___&nbsp;__&nbsp;_&nbsp;___&nbsp;&nbsp;___&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                233&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;&#x27;__|&nbsp;__&#x2F;&nbsp;_&nbsp;\_____&nbsp;&#x2F;&nbsp;__&#x2F;&nbsp;_`&nbsp;&#x2F;&nbsp;__|&#x2F;&nbsp;_&nbsp;\
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                234&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;|&nbsp;&nbsp;|&nbsp;||&nbsp;&nbsp;__&#x2F;_____|&nbsp;(_|&nbsp;(_|&nbsp;\__&nbsp;\&nbsp;&nbsp;__&#x2F;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                235&nbsp;&nbsp;;;&nbsp;&nbsp;|_|&nbsp;&nbsp;&nbsp;\__\___|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\___\__,_|___&#x2F;\___|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                236&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                237&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                238&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                239&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="16 out of 21 forms covered">
+                240&nbsp;&nbsp;(rte-case&nbsp;[nil&nbsp;nil&nbsp;nil&nbsp;1&nbsp;nil&nbsp;nil&nbsp;nil]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                241&nbsp;&nbsp;&nbsp;&nbsp;(:and&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Number&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;String&nbsp;(:*&nbsp;:sigma)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                243&nbsp;&nbsp;&nbsp;&nbsp;0
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                244&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                245&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;(:contains-any&nbsp;Number)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                246&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Number&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                247&nbsp;&nbsp;&nbsp;&nbsp;1
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                248&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                249&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;(:contains-any&nbsp;String)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                250&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;String&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                251&nbsp;&nbsp;&nbsp;&nbsp;2
+                </span><br/>
+<span class="partial" title="3 out of 10 forms covered">
+                252&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                253&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                254&nbsp;&nbsp;#_(rte-case&nbsp;[1&nbsp;2&nbsp;true&nbsp;2&nbsp;3&nbsp;false&nbsp;&#x27;a-symbol&nbsp;&#x27;b-symbol]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                255&nbsp;&nbsp;&nbsp;&nbsp;(:*&nbsp;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Boolean))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                256&nbsp;&nbsp;&nbsp;&nbsp;1
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                257&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                258&nbsp;&nbsp;&nbsp;&nbsp;(:*&nbsp;(:cat&nbsp;(:*&nbsp;Number)&nbsp;(:or&nbsp;Boolean&nbsp;String)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                259&nbsp;&nbsp;&nbsp;&nbsp;2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                260&nbsp;&nbsp;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                261&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                262&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                263&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                264&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                265&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                266&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                267&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                268&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                269&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                270&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                271&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                272&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                273&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                274&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                275&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                276&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                277&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                278&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                279&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                280&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                281&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                282&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                283&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                284&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                285&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                286&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                287&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                288&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                289&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                290&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                291&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                292&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                293&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                294&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                295&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                296&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                297&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                298&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                299&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;_&nbsp;__|&nbsp;|_&nbsp;___&nbsp;&nbsp;&nbsp;&#x2F;&nbsp;&#x2F;&nbsp;__&nbsp;___&nbsp;&nbsp;&nbsp;__&nbsp;_|&nbsp;|_&nbsp;___|&nbsp;|__&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                300&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;&#x27;__|&nbsp;__&#x2F;&nbsp;_&nbsp;\&nbsp;&#x2F;&nbsp;&#x2F;&nbsp;&#x27;_&nbsp;`&nbsp;_&nbsp;\&nbsp;&#x2F;&nbsp;_`&nbsp;|&nbsp;__&#x2F;&nbsp;__|&nbsp;&#x27;_&nbsp;\&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                301&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;|&nbsp;&nbsp;|&nbsp;||&nbsp;&nbsp;__&#x2F;&#x2F;&nbsp;&#x2F;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;(_|&nbsp;|&nbsp;||&nbsp;(__|&nbsp;|&nbsp;|&nbsp;|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                302&nbsp;&nbsp;;;&nbsp;&nbsp;|_|&nbsp;&nbsp;&nbsp;\__\___&#x2F;_&#x2F;&nbsp;|_|&nbsp;|_|&nbsp;|_|\__,_|\__\___|_|&nbsp;|_|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                303&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                304&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                305&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                306&nbsp;&nbsp;;;&nbsp;we&nbsp;want&nbsp;to&nbsp;match&nbsp;a&nbsp;sequence&nbsp;of&nbsp;numbers.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                307&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                308&nbsp;&nbsp;(def&nbsp;demo-seq-0&nbsp;[])
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                309&nbsp;&nbsp;(def&nbsp;demo-seq-1&nbsp;[1&nbsp;2&nbsp;4&#x2F;3&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;6.5&nbsp;3&nbsp;2])
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                310&nbsp;&nbsp;(def&nbsp;demo-seq-2&nbsp;[1&nbsp;2&nbsp;4&#x2F;3&nbsp;&quot;four&quot;&nbsp;5&nbsp;6.5&nbsp;3&nbsp;2])
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                311&nbsp;&nbsp;(def&nbsp;demo-seq-3&nbsp;[&quot;one&quot;&nbsp;&quot;two&quot;&nbsp;4&#x2F;3&nbsp;&quot;four&quot;])
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                312&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                313&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="4 out of 8 forms covered">
+                314&nbsp;&nbsp;(every?&nbsp;#(instance?&nbsp;Number&nbsp;%)&nbsp;demo-seq-0)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                315&nbsp;&nbsp;(every?&nbsp;#(instance?&nbsp;Number&nbsp;%)&nbsp;demo-seq-1)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                316&nbsp;&nbsp;(every?&nbsp;#(instance?&nbsp;Number&nbsp;%)&nbsp;demo-seq-2)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                317&nbsp;&nbsp;(every?&nbsp;#(instance?&nbsp;Number&nbsp;%)&nbsp;demo-seq-3)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                318&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                319&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:*&nbsp;Number)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                320&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-0)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                321&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                322&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:*&nbsp;Number)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                323&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                324&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                325&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:*&nbsp;Number)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                326&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-2)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                327&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                328&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:*&nbsp;String)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                329&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                330&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                331&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:*&nbsp;Ratio)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                332&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                333&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                334&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                335&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                336&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                337&nbsp;&nbsp;;;&nbsp;Does&nbsp;the&nbsp;sequence&nbsp;contain&nbsp;a&nbsp;Ratio
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                338&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                339&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                340&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                341&nbsp;&nbsp;#_(some&nbsp;#(instance?&nbsp;Ratio&nbsp;%)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                342&nbsp;&nbsp;(some&nbsp;#(instance?&nbsp;clojure.lang.Ratio&nbsp;%)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                343&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                344&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                345&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-2)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                346&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                347&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                348&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-3)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                349&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                350&nbsp;&nbsp;;;&nbsp;What&nbsp;about&nbsp;a&nbsp;seqence&nbsp;of&nbsp;numbers&nbsp;which&nbsp;contains&nbsp;a&nbsp;Ratio
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                351&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                352&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:and&nbsp;(:*&nbsp;Number)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                353&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                354&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                355&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                356&nbsp;&nbsp;;;&nbsp;traverse&nbsp;sequence&nbsp;twice
+                </span><br/>
+<span class="partial" title="12 out of 13 forms covered">
+                357&nbsp;&nbsp;(and&nbsp;(every?&nbsp;#(instance?&nbsp;Number&nbsp;%)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                358&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(some&nbsp;#(instance?&nbsp;clojure.lang.Ratio&nbsp;%)&nbsp;demo-seq-1))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                359&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                360&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                361&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:and&nbsp;(:*&nbsp;Number)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                362&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                363&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-3)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                364&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                365&nbsp;&nbsp;;;&nbsp;different&nbsp;RTE&nbsp;for&nbsp;same&nbsp;thing?
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                366&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                367&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-1)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                368&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                369&nbsp;&nbsp;(rte&#x2F;match&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                370&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;demo-seq-3)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                371&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                372&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                373&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                374&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;__&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                375&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;__|&nbsp;|&#x2F;&nbsp;_|&nbsp;__&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__&nbsp;&nbsp;&nbsp;_(_)&nbsp;_____&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                376&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&#x2F;&nbsp;_`&nbsp;|&nbsp;|_&nbsp;&#x2F;&nbsp;_`&nbsp;|____\&nbsp;\&nbsp;&#x2F;&nbsp;&#x2F;&nbsp;|&#x2F;&nbsp;_&nbsp;\&nbsp;\&nbsp;&#x2F;\&nbsp;&#x2F;&nbsp;&#x2F;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                377&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;(_|&nbsp;|&nbsp;&nbsp;_|&nbsp;(_|&nbsp;|_____\&nbsp;V&nbsp;&#x2F;|&nbsp;|&nbsp;&nbsp;__&#x2F;\&nbsp;V&nbsp;&nbsp;V&nbsp;&#x2F;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                378&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;\__,_|_|&nbsp;&nbsp;\__,_|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\_&#x2F;&nbsp;|_|\___|&nbsp;\_&#x2F;\_&#x2F;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                379&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                380&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                381&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                382&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                383&nbsp;&nbsp;;;&nbsp;Existential&nbsp;question:&nbsp;does&nbsp;there&nbsp;exist&nbsp;a&nbsp;sequence&nbsp;which&nbsp;will
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                384&nbsp;&nbsp;;;&nbsp;&nbsp;match&nbsp;one&nbsp;pattern&nbsp;but&nbsp;not&nbsp;the&nbsp;other?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                385&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                386&nbsp;&nbsp;;;&nbsp;I.e.,&nbsp;are&nbsp;the&nbsp;patterns&nbsp;exactly&nbsp;equivalent&nbsp;or&nbsp;does&nbsp;one&nbsp;match
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                387&nbsp;&nbsp;;;&nbsp;&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;other?
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                388&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                389&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                390&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;numbers&nbsp;with&nbsp;ratio&quot;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                391&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                392&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;(rte&#x2F;Xor&nbsp;&#x27;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                393&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x27;(:and&nbsp;(:*&nbsp;Number)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                394&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                395&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;xor&nbsp;example&quot;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                396&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                397&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                398&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                399&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                400&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                401&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                402&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                403&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                404&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                405&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                406&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                407&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                408&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                409&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                410&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                411&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                412&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                413&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                414&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                415&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                416&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                417&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                418&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                419&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                420&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                421&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                422&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                423&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                424&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                425&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                426&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                427&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                428&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                429&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                430&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                431&nbsp;&nbsp;;;&nbsp;express&nbsp;seq&nbsp;of&nbsp;Number&nbsp;which&nbsp;contains&nbsp;both&nbsp;a&nbsp;Ratio&nbsp;and&nbsp;a&nbsp;Double
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                432&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                433&nbsp;&nbsp;;;&nbsp;which&nbsp;one&nbsp;is&nbsp;wrong?
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                434&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                435&nbsp;&nbsp;(def&nbsp;rte-1&nbsp;&#x27;(:and&nbsp;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Double&nbsp;(:*&nbsp;Number))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                436&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number))))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                437&nbsp;&nbsp;(def&nbsp;rte-2&nbsp;&#x27;(:or&nbsp;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Double&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                438&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;Number)&nbsp;Ratio&nbsp;(:*&nbsp;Number)&nbsp;Double&nbsp;(:*&nbsp;Number))))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                439&nbsp;&nbsp;(def&nbsp;rte-3&nbsp;&#x27;(:and&nbsp;(:*&nbsp;Number)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                440&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;(or&nbsp;Ratio&nbsp;Double)&nbsp;(:*&nbsp;:sigma))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                441&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                442&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                443&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;(rte&#x2F;Xor&nbsp;rte-1&nbsp;rte-2)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;xor&nbsp;1-2&nbsp;dfa&quot;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                445&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;(rte&#x2F;rte-to-dfa&nbsp;(rte&#x2F;Xor&nbsp;rte-1&nbsp;rte-3))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                446&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;xor&nbsp;1-3&nbsp;dfa&quot;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                447&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                448&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                449&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                450&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                451&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                452&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                453&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                454&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                455&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                456&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                457&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                458&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                459&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                460&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                461&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                462&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                463&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                464&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                465&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                466&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                467&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                468&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                469&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                470&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                471&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                472&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                473&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                474&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;__&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                475&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&#x2F;&nbsp;_(_)_&nbsp;__&nbsp;&nbsp;&nbsp;__|&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;|_&nbsp;_&nbsp;__&nbsp;__&nbsp;_&nbsp;&nbsp;___&nbsp;___&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;__&nbsp;___&nbsp;&nbsp;&nbsp;__&nbsp;_&nbsp;_&nbsp;__&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                476&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;|_|&nbsp;|&nbsp;&#x27;_&nbsp;\&nbsp;&#x2F;&nbsp;_`&nbsp;|_____|&nbsp;__|&nbsp;&#x27;__&#x2F;&nbsp;_`&nbsp;|&#x2F;&nbsp;__&#x2F;&nbsp;_&nbsp;\_____|&nbsp;&#x27;_&nbsp;`&nbsp;_&nbsp;\&nbsp;&#x2F;&nbsp;_`&nbsp;|&nbsp;&#x27;_&nbsp;\&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                477&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;&nbsp;_|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;(_|&nbsp;|_____|&nbsp;|_|&nbsp;|&nbsp;|&nbsp;(_|&nbsp;|&nbsp;(_|&nbsp;&nbsp;__&#x2F;_____|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;(_|&nbsp;|&nbsp;|_)&nbsp;|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                478&nbsp;&nbsp;;;&nbsp;&nbsp;|_|&nbsp;|_|_|&nbsp;|_|\__,_|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\__|_|&nbsp;&nbsp;\__,_|\___\___|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|_|&nbsp;|_|&nbsp;|_|\__,_|&nbsp;.__&#x2F;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                479&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|_|&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                480&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                481&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                482&nbsp;&nbsp;;;&nbsp;describe&nbsp;a&nbsp;sequence&nbsp;which&nbsp;matches&nbsp;exactly&nbsp;one&nbsp;of&nbsp;the&nbsp;two&nbsp;RTEs
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                483&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                484&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                485&nbsp;&nbsp;(xym&#x2F;find-trace-map&nbsp;(rte&#x2F;rte-to-dfa&nbsp;(rte&#x2F;Xor&nbsp;rte-1&nbsp;rte-3)))
+                </span><br/>
+<span class="partial" title="44 out of 52 forms covered">
+                486&nbsp;&nbsp;(xym&#x2F;find-trace-map&nbsp;(rte&#x2F;rte-to-dfa&nbsp;(rte&#x2F;And-not&nbsp;rte-1&nbsp;rte-3)))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                487&nbsp;&nbsp;(xym&#x2F;find-trace-map&nbsp;(rte&#x2F;rte-to-dfa&nbsp;(rte&#x2F;And-not&nbsp;rte-3&nbsp;rte-1)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                488&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                489&nbsp;&nbsp;;;&nbsp;a&nbsp;sequence&nbsp;of&nbsp;numbers&nbsp;which&nbsp;contains&nbsp;an&nbsp;odd&nbsp;and&nbsp;a&nbsp;Ratio
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                490&nbsp;&nbsp;(def&nbsp;rte-4&nbsp;&#x27;(:and&nbsp;(:*&nbsp;Number)
+                </span><br/>
+<span class="partial" title="31 out of 41 forms covered">
+                491&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="partial" title="1 out of 3 forms covered">
+                492&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:+&nbsp;:sigma)&nbsp;(satisfies&nbsp;odd?)&nbsp;(:*&nbsp;:sigma))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                493&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                494&nbsp;&nbsp;;;&nbsp;A&nbsp;&lt;&nbsp;B&nbsp;if&nbsp;A&nbsp;&amp;!&nbsp;B&nbsp;=&nbsp;0
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                495&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;(rte&#x2F;And-not&nbsp;rte-1&nbsp;rte-4)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                496&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;rte&nbsp;and-not&quot;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                497&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                498&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                499&nbsp;&nbsp;(xym&#x2F;find-trace-map&nbsp;(rte&#x2F;rte-to-dfa&nbsp;(rte&#x2F;And-not&nbsp;rte-1&nbsp;rte-4)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                500&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                501&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                502&nbsp;&nbsp;;;&nbsp;A&nbsp;sequence&nbsp;of&nbsp;numbers&nbsp;which&nbsp;contains&nbsp;an&nbsp;integer&nbsp;and&nbsp;a&nbsp;Ratio
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                503&nbsp;&nbsp;;;&nbsp;In&nbsp;this&nbsp;case&nbsp;the&nbsp;int?&nbsp;predicate&nbsp;disappears&nbsp;because
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                504&nbsp;&nbsp;;;&nbsp;the&nbsp;code&nbsp;is&nbsp;known&nbsp;and&nbsp;can&nbsp;be&nbsp;inlined.
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                505&nbsp;&nbsp;(def&nbsp;rte-5&nbsp;&#x27;(:and&nbsp;(:*&nbsp;Number)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                506&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;Ratio&nbsp;(:*&nbsp;:sigma))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                507&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:cat&nbsp;(:+&nbsp;:sigma)&nbsp;(satisfies&nbsp;int?)&nbsp;(:*&nbsp;:sigma))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                508&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                509&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;(rte&#x2F;And-not&nbsp;rte-1&nbsp;rte-5)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                510&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;1&nbsp;and&nbsp;not&nbsp;5&quot;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                511&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                512&nbsp;&nbsp;(xym&#x2F;find-trace-map&nbsp;(rte&#x2F;rte-to-dfa&nbsp;rte-5))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                513&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                514&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                515&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                516&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                517&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                518&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                519&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                520&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                521&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                522&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                523&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                524&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                525&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                526&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                527&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                528&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                529&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                530&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                531&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                532&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                533&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                534&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                535&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                536&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                537&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                538&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;|_&nbsp;_&nbsp;&nbsp;&nbsp;_&nbsp;_&nbsp;__&nbsp;&nbsp;&nbsp;___&nbsp;&nbsp;___&nbsp;__&nbsp;_&nbsp;___&nbsp;&nbsp;___&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                539&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;__|&nbsp;|&nbsp;|&nbsp;|&nbsp;&#x27;_&nbsp;\&nbsp;&#x2F;&nbsp;_&nbsp;\&#x2F;&nbsp;__&#x2F;&nbsp;_`&nbsp;&#x2F;&nbsp;__|&#x2F;&nbsp;_&nbsp;\
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                540&nbsp;&nbsp;;;&nbsp;&nbsp;|&nbsp;|_|&nbsp;|_|&nbsp;|&nbsp;|_)&nbsp;|&nbsp;&nbsp;__&#x2F;&nbsp;(_|&nbsp;(_|&nbsp;\__&nbsp;\&nbsp;&nbsp;__&#x2F;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                541&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;\__|\__,&nbsp;|&nbsp;.__&#x2F;&nbsp;\___|\___\__,_|___&#x2F;\___|
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                542&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|___&#x2F;|_|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                543&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                544&nbsp;&nbsp;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                545&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                546&nbsp;&nbsp;;;&nbsp;A&nbsp;multi-branch&nbsp;type&nbsp;can&nbsp;can&nbsp;be&nbsp;compiled&nbsp;in&nbsp;an&nbsp;efficient&nbsp;way
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                547&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;so&nbsp;as&nbsp;to&nbsp;avoid&nbsp;checking&nbsp;the&nbsp;same&nbsp;type&nbsp;multiple&nbsp;times.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                548&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                549&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                550&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                551&nbsp;&nbsp;;;&nbsp;Example&nbsp;of&nbsp;expansion&nbsp;of&nbsp;(satisfies&nbsp;int?)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                552&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="12 out of 41 forms covered">
+                553&nbsp;&nbsp;(typecase&nbsp;12
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                554&nbsp;&nbsp;&nbsp;&nbsp;Short&nbsp;&quot;it&nbsp;is&nbsp;a&nbsp;short&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                555&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(satisfies&nbsp;int?)&nbsp;(satisfies&nbsp;odd?))&nbsp;&quot;it&nbsp;is&nbsp;an&nbsp;fixed-width&nbsp;even&nbsp;integer&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                556&nbsp;&nbsp;&nbsp;&nbsp;Boolean&nbsp;&quot;it&nbsp;is&nbsp;a&nbsp;boolean&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                557&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;Ratio&nbsp;Boolean)&nbsp;&quot;it&nbsp;is&nbsp;a&nbsp;ratio&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                558&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;&quot;it&nbsp;is&nbsp;a&nbsp;string&quot;)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                559&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                560&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                561&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                562&nbsp;&nbsp;;;&nbsp;Local&nbsp;Variables:
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                563&nbsp;&nbsp;;;&nbsp;eval:&nbsp;(setopt&nbsp;show-paren-style&nbsp;&#x27;expression)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                564&nbsp;&nbsp;;;&nbsp;End:
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                565&nbsp;&nbsp;
+                </span><br/>
+ </body>
+</html>

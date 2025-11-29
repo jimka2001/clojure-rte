@@ -1,0 +1,1643 @@
+<html>
+ <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="../coverage.css"/>  <title> genus/bdd.clj </title>
+ </head>
+ <body>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                001&nbsp;&nbsp;;;&nbsp;Copyright&nbsp;(c)&nbsp;2020,21&nbsp;EPITA&nbsp;Research&nbsp;and&nbsp;Development&nbsp;Laboratory
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                002&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                003&nbsp;&nbsp;;;&nbsp;Permission&nbsp;is&nbsp;hereby&nbsp;granted,&nbsp;free&nbsp;of&nbsp;charge,&nbsp;to&nbsp;any&nbsp;person&nbsp;obtaining
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                004&nbsp;&nbsp;;;&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;software&nbsp;and&nbsp;associated&nbsp;documentation
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                005&nbsp;&nbsp;;;&nbsp;files&nbsp;(the&nbsp;&quot;Software&quot;),&nbsp;to&nbsp;deal&nbsp;in&nbsp;the&nbsp;Software&nbsp;without&nbsp;restriction,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                006&nbsp;&nbsp;;;&nbsp;including&nbsp;without&nbsp;limitation&nbsp;the&nbsp;rights&nbsp;to&nbsp;use,&nbsp;copy,&nbsp;modify,&nbsp;merge,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                007&nbsp;&nbsp;;;&nbsp;publish,&nbsp;distribute,&nbsp;sublicense,&nbsp;and&#x2F;or&nbsp;sell&nbsp;copies&nbsp;of&nbsp;the&nbsp;Software,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                008&nbsp;&nbsp;;;&nbsp;and&nbsp;to&nbsp;permit&nbsp;persons&nbsp;to&nbsp;whom&nbsp;the&nbsp;Software&nbsp;is&nbsp;furnished&nbsp;to&nbsp;do&nbsp;so,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                009&nbsp;&nbsp;;;&nbsp;subject&nbsp;to&nbsp;the&nbsp;following&nbsp;conditions:
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                010&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                011&nbsp;&nbsp;;;&nbsp;The&nbsp;above&nbsp;copyright&nbsp;notice&nbsp;and&nbsp;this&nbsp;permission&nbsp;notice&nbsp;shall&nbsp;be
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                012&nbsp;&nbsp;;;&nbsp;included&nbsp;in&nbsp;all&nbsp;copies&nbsp;or&nbsp;substantial&nbsp;portions&nbsp;of&nbsp;the&nbsp;Software.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                013&nbsp;&nbsp;;;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                014&nbsp;&nbsp;;;&nbsp;THE&nbsp;SOFTWARE&nbsp;IS&nbsp;PROVIDED&nbsp;&quot;AS&nbsp;IS&quot;,&nbsp;WITHOUT&nbsp;WARRANTY&nbsp;OF&nbsp;ANY&nbsp;KIND,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                015&nbsp;&nbsp;;;&nbsp;EXPRESS&nbsp;OR&nbsp;IMPLIED,&nbsp;INCLUDING&nbsp;BUT&nbsp;NOT&nbsp;LIMITED&nbsp;TO&nbsp;THE&nbsp;WARRANTIES&nbsp;OF
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                016&nbsp;&nbsp;;;&nbsp;MERCHANTABILITY,&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE&nbsp;AND
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                017&nbsp;&nbsp;;;&nbsp;NONINFRINGEMENT.&nbsp;IN&nbsp;NO&nbsp;EVENT&nbsp;SHALL&nbsp;THE&nbsp;AUTHORS&nbsp;OR&nbsp;COPYRIGHT&nbsp;HOLDERS&nbsp;BE
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                018&nbsp;&nbsp;;;&nbsp;LIABLE&nbsp;FOR&nbsp;ANY&nbsp;CLAIM,&nbsp;DAMAGES&nbsp;OR&nbsp;OTHER&nbsp;LIABILITY,&nbsp;WHETHER&nbsp;IN&nbsp;AN&nbsp;ACTION
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                019&nbsp;&nbsp;;;&nbsp;OF&nbsp;CONTRACT,&nbsp;TORT&nbsp;OR&nbsp;OTHERWISE,&nbsp;ARISING&nbsp;FROM,&nbsp;OUT&nbsp;OF&nbsp;OR&nbsp;IN&nbsp;CONNECTION
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                020&nbsp;&nbsp;;;&nbsp;WITH&nbsp;THE&nbsp;SOFTWARE&nbsp;OR&nbsp;THE&nbsp;USE&nbsp;OR&nbsp;OTHER&nbsp;DEALINGS&nbsp;IN&nbsp;THE&nbsp;SOFTWARE.
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                021&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                022&nbsp;&nbsp;(ns&nbsp;genus.bdd
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                023&nbsp;&nbsp;&nbsp;&nbsp;&quot;Definition&nbsp;of&nbsp;Bdd.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                024&nbsp;&nbsp;&nbsp;&nbsp;(:refer-clojure&nbsp;:exclude&nbsp;[and&nbsp;or&nbsp;not])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                025&nbsp;&nbsp;&nbsp;&nbsp;(:require&nbsp;[util.util&nbsp;:refer&nbsp;[call-with-collector&nbsp;non-empty?&nbsp;forall&nbsp;exists]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[genus.genus&nbsp;:as&nbsp;gns]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                027&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.pprint&nbsp;:refer&nbsp;[cl-format]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                028&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                029&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                030&nbsp;&nbsp;(alias&nbsp;&#x27;c&nbsp;&#x27;clojure.core)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                031&nbsp;&nbsp;(alias&nbsp;&#x27;bdd&nbsp;&#x27;genus.bdd)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                032&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                033&nbsp;&nbsp;(defrecord&nbsp;Bdd
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;positive&nbsp;negative])
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                035&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                036&nbsp;&nbsp;(defmethod&nbsp;print-method&nbsp;Bdd&nbsp;[bdd&nbsp;w]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                037&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;w&nbsp;(cond
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(c&#x2F;and&nbsp;(=&nbsp;true&nbsp;(:positive&nbsp;bdd))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;(:negative&nbsp;bdd)))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;#&lt;Bdd&nbsp;~A&gt;&quot;&nbsp;(:label&nbsp;bdd))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                041&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(c&#x2F;and&nbsp;(=&nbsp;false&nbsp;(:positive&nbsp;bdd))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;(:negative&nbsp;bdd)))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;#&lt;Bdd&nbsp;not&nbsp;~A&gt;&quot;&nbsp;(:label&nbsp;bdd))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                045&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="13 out of 13 forms covered">
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;#&lt;Bdd&nbsp;~A&nbsp;~A&nbsp;~A&gt;&quot;&nbsp;(:label&nbsp;bdd)&nbsp;(:positive&nbsp;bdd)&nbsp;(:negative&nbsp;bdd)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                048&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                049&nbsp;&nbsp;(defn&nbsp;itenf
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                050&nbsp;&nbsp;&nbsp;&nbsp;&quot;Serialize&nbsp;a&nbsp;Bdd&nbsp;to&nbsp;if-then-else-normal-form&nbsp;(itenf)&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;[bdd]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;bdd
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true)&nbsp;:sigma
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(false)&nbsp;:empty-set
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[l&nbsp;(:label&nbsp;bdd)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;(itenf&nbsp;(:positive&nbsp;bdd))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;(itenf&nbsp;(:negative&nbsp;bdd))]
+                </span><br/>
+<span class="partial" title="6 out of 15 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not=&nbsp;nil&nbsp;p))
+                </span><br/>
+<span class="partial" title="6 out of 15 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not=&nbsp;nil&nbsp;n))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-or&nbsp;[(gns&#x2F;create-and&nbsp;[l&nbsp;p])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-and&nbsp;[(gns&#x2F;create-not&nbsp;l)&nbsp;n])]))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                063&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                064&nbsp;&nbsp;(defn&nbsp;dnf
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&quot;Serialize&nbsp;a&nbsp;Bdd&nbsp;to&nbsp;dnf&nbsp;disjunctive&nbsp;normal&nbsp;form.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;dnf&nbsp;form&nbsp;is&nbsp;cleaned&nbsp;up&nbsp;so&nbsp;that&nbsp;an&nbsp;(and&nbsp;...)&nbsp;or&nbsp;(or&nbsp;...)&nbsp;clause&nbsp;contains
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;no&nbsp;subtype&#x2F;supertype&nbsp;pairs.&nbsp;&nbsp;This&nbsp;subtype&nbsp;relation&nbsp;is&nbsp;determined&nbsp;by
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;subtype?&nbsp;a&nbsp;b&nbsp;false).&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                070&nbsp;&nbsp;&nbsp;&nbsp;[bdd]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(exists-supertype&nbsp;[sub&nbsp;types]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists&nbsp;[super&nbsp;types]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(c&#x2F;and&nbsp;(not=&nbsp;sub&nbsp;super)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;subtype?&nbsp;sub&nbsp;super&nbsp;false))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(check-supers&nbsp;[args]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[args&nbsp;(distinct&nbsp;args)
+                </span><br/>
+<span class="covered" title="65 out of 65 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;complements&nbsp;(for&nbsp;[a&nbsp;args
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;args
+                </span><br/>
+<span class="covered" title="11 out of 11 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(c&#x2F;or&nbsp;(=&nbsp;a&nbsp;(list&nbsp;&#x27;not&nbsp;b))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;b&nbsp;(list&nbsp;&#x27;not&nbsp;a)))]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a&nbsp;b])]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;does&nbsp;the&nbsp;list&nbsp;contain&nbsp;A&nbsp;and&nbsp;(not&nbsp;A)&nbsp;?
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(non-empty?&nbsp;complements)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x27;(:sigma)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                086&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;does&nbsp;the&nbsp;list&nbsp;contain&nbsp;A&nbsp;and&nbsp;B&nbsp;where&nbsp;A&nbsp;is&nbsp;subtype&nbsp;B
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(remove&nbsp;(fn&nbsp;[sub]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists-supertype&nbsp;sub&nbsp;args))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args))))]
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                092&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-or
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(check-supers
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(call-with-collector
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[collect]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(walk&nbsp;[node&nbsp;parents]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[my-label&nbsp;(:label&nbsp;node)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;two&nbsp;lazy&nbsp;sequences&nbsp;created&nbsp;by&nbsp;filter.&nbsp;&nbsp;the&nbsp;filter&nbsp;loops&nbsp;are
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;never&nbsp;called&nbsp;unless&nbsp;node&nbsp;is&nbsp;differrent&nbsp;from&nbsp;true&nbsp;or&nbsp;false,&nbsp;i.e.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;the&nbsp;3rd&nbsp;case&nbsp;of&nbsp;the&nbsp;cond.
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists-disjoint&nbsp;(delay&nbsp;(exists&nbsp;[x&nbsp;parents]&nbsp;(gns&#x2F;disjoint?&nbsp;x&nbsp;my-label&nbsp;false)))
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists-subtype&nbsp;(delay&nbsp;(exists&nbsp;[x&nbsp;parents]&nbsp;(gns&#x2F;subtype?&nbsp;&nbsp;x&nbsp;my-label&nbsp;false)))]
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;node)&nbsp;;&nbsp;case&nbsp;#1
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;we&nbsp;know&nbsp;parents&nbsp;(&nbsp;...&nbsp;A&nbsp;...&nbsp;B&nbsp;...)&nbsp;that&nbsp;B&nbsp;is&nbsp;not&nbsp;subtype&nbsp;of&nbsp;A,&nbsp;but&nbsp;maybe&nbsp;A&nbsp;subtype&nbsp;B
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;we&nbsp;need&nbsp;to&nbsp;remove&nbsp;the&nbsp;supertypes
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;E.g.,&nbsp;(Long&nbsp;java.io.Comparable&nbsp;java.io.Serializable)&nbsp;-&gt;&nbsp;(Long)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;E.g.&nbsp;&nbsp;(Long&nbsp;Number)&nbsp;-&gt;&nbsp;Long
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[term&nbsp;(loop&nbsp;[tail&nbsp;parents
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;done&nbsp;&#x27;()]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;tail)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;done
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[keeping&nbsp;(remove&nbsp;(fn&nbsp;[b]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;we&nbsp;don&#x27;t&nbsp;know,&nbsp;then&nbsp;keep&nbsp;it.&nbsp;&nbsp;it&nbsp;might
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;be&nbsp;redunant,&nbsp;but&nbsp;it&nbsp;won&#x27;t&nbsp;be&nbsp;wrong.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;Is&nbsp;(first&nbsp;tail)&nbsp;&lt;:&nbsp;b&nbsp;?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;if&nbsp;yes,&nbsp;then&nbsp;omit&nbsp;b&nbsp;in&nbsp;recur&nbsp;call
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;if&nbsp;:dont-know&nbsp;then&nbsp;keep&nbsp;it.
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                120&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;subtype?&nbsp;(first&nbsp;tail)&nbsp;b&nbsp;false))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rest&nbsp;tail))]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;keeping
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(first&nbsp;tail)&nbsp;done)))))]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(collect&nbsp;(gns&#x2F;create-and&nbsp;term)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;node)&nbsp;;&nbsp;case&nbsp;#2
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil&nbsp;;;&nbsp;do&nbsp;not&nbsp;collect,&nbsp;and&nbsp;prune&nbsp;recursion
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                128&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                129&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@exists-disjoint&nbsp;;&nbsp;case&nbsp;#3
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;this&nbsp;means&nbsp;that&nbsp;the&nbsp;type-designators&nbsp;returned&nbsp;by&nbsp;(:label&nbsp;node)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;disjoint&nbsp;with&nbsp;something&nbsp;in&nbsp;the&nbsp;parents&nbsp;list.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;E.g.,&nbsp;(:label&nbsp;node)=String,&nbsp;and&nbsp;parents=&nbsp;(&nbsp;...&nbsp;Number&nbsp;...).
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;So&nbsp;we&nbsp;can&nbsp;&nbsp;prune&nbsp;the&nbsp;positive&nbsp;branch,&nbsp;and&nbsp;omit&nbsp;this&nbsp;node&nbsp;from&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                134&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;parents&nbsp;list&nbsp;in&nbsp;the&nbsp;recursive&nbsp;call.&nbsp;&nbsp;Why,&nbsp;because&nbsp;any&nbsp;object
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;has&nbsp;type&nbsp;of&nbsp;everything&nbsp;in&nbsp;the&nbsp;parents&nbsp;list&nbsp;is
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;guaranteed&nbsp;to&nbsp;NOT&nbsp;have&nbsp;the&nbsp;type&nbsp;of&nbsp;node.&nbsp;&nbsp;&nbsp;We&nbsp;could
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;add&nbsp;`(not&nbsp;~(label&nbsp;:node))&nbsp;to&nbsp;the&nbsp;parents&nbsp;list,&nbsp;but&nbsp;it
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;would&nbsp;be&nbsp;redundant---we&nbsp;would&nbsp;have&nbsp;(and&nbsp;(not&nbsp;String)&nbsp;...&nbsp;Number&nbsp;...),
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;so&nbsp;we&#x27;ll&nbsp;keep&nbsp;just&nbsp;(and&nbsp;...&nbsp;Number&nbsp;...).
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(walk&nbsp;(:negative&nbsp;node)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parents)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@exists-subtype&nbsp;;&nbsp;case&nbsp;#4
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;this&nbsp;means&nbsp;that&nbsp;the&nbsp;type-designators&nbsp;returned&nbsp;by&nbsp;(:label&nbsp;node)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;a&nbsp;supertype&nbsp;of&nbsp;something&nbsp;in&nbsp;the&nbsp;parents&nbsp;list.&nbsp;&nbsp;E.g.,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;(:label&nbsp;node)&nbsp;=&nbsp;Number&nbsp;and&nbsp;parents=&nbsp;(...&nbsp;Long&nbsp;...).
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;Wo&nbsp;we&nbsp;can&nbsp;prune&nbsp;the&nbsp;negative&nbsp;branch,&nbsp;and&nbsp;omit&nbsp;this&nbsp;node&nbsp;from&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                148&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;parents&nbsp;list&nbsp;in&nbsp;the&nbsp;recursive&nbsp;call.&nbsp;&nbsp;Why,&nbsp;because&nbsp;any&nbsp;object
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;has&nbsp;type&nbsp;of&nbsp;everything&nbsp;in&nbsp;the&nbsp;parents&nbsp;list&nbsp;is
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;guaranteed&nbsp;to&nbsp;have&nbsp;the&nbsp;type&nbsp;of&nbsp;node.&nbsp;&nbsp;&nbsp;We&nbsp;could
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;add&nbsp;(label&nbsp;:node)&nbsp;to&nbsp;the&nbsp;parents&nbsp;list,&nbsp;but&nbsp;it
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;would&nbsp;be&nbsp;redundant---we&nbsp;would&nbsp;have&nbsp;(and&nbsp;Number&nbsp;...&nbsp;Long&nbsp;...)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;so&nbsp;we&#x27;ll&nbsp;keep&nbsp;just&nbsp;(and&nbsp;...&nbsp;Long&nbsp;...).
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                154&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(walk&nbsp;(:positive&nbsp;node)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parents)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                156&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;;&nbsp;case&nbsp;#5
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(walk&nbsp;(:positive&nbsp;node)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(:label&nbsp;node)&nbsp;parents))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(walk&nbsp;(:negative&nbsp;node)
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(list&nbsp;&#x27;not&nbsp;(:label&nbsp;node))&nbsp;parents))))))]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(walk&nbsp;bdd&nbsp;&#x27;()))))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                163&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                164&nbsp;&nbsp;(defn&nbsp;satisfying-type-designators-old
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                165&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;a&nbsp;lazy&nbsp;list&nbsp;of&nbsp;type&nbsp;designators&nbsp;which&nbsp;satisfy&nbsp;the&nbsp;Bdd.&nbsp;&nbsp;I.e.,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                166&nbsp;&nbsp;&nbsp;&nbsp;one&nbsp;element&nbsp;of&nbsp;the&nbsp;list&nbsp;for&nbsp;each&nbsp;type&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;nodes
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                167&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;top&nbsp;of&nbsp;the&nbsp;Bdd&nbsp;to&nbsp;the&nbsp;true&nbsp;leaf.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                168&nbsp;&nbsp;&nbsp;&nbsp;[bdd]
+                </span><br/>
+<span class="not-covered" title="0 out of 20 forms covered">
+                169&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(clojure.core&#x2F;or&nbsp;(instance?&nbsp;Boolean&nbsp;bdd)
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(instance?&nbsp;Bdd&nbsp;bdd)))
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                171&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(satisfying&nbsp;[node&nbsp;lineage]
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[td&nbsp;(delay&nbsp;(gns&#x2F;canonicalize-type&nbsp;lineage&nbsp;:dnf))]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;:empty-set&nbsp;td)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;the&nbsp;lineage&nbsp;has&nbsp;an&nbsp;empty&nbsp;intersection,&nbsp;then&nbsp;we&nbsp;prune&nbsp;this&nbsp;recursion
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;node
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true)&nbsp;[@td]
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                178&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(false)&nbsp;[]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;otherwise,&nbsp;we&nbsp;generate&nbsp;a&nbsp;lazy&nbsp;conatenation&nbsp;of&nbsp;the&nbsp;left&nbsp;and&nbsp;right&nbsp;traversals
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                180&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;(satisfying&nbsp;(:positive&nbsp;node)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-and&nbsp;[@td
+                </span><br/>
+<span class="not-covered" title="0 out of 3 forms covered">
+                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:label&nbsp;node)]))
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(satisfying&nbsp;(:negative&nbsp;node)
+                </span><br/>
+<span class="not-covered" title="0 out of 6 forms covered">
+                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-and&nbsp;[@td
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-not&nbsp;(:label&nbsp;node))])))))))]
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(satisfying&nbsp;bdd&nbsp;:sigma)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                187&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                188&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                189&nbsp;&nbsp;(defn&nbsp;satisfying-type-designators
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                190&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;a&nbsp;lazy&nbsp;list&nbsp;of&nbsp;type&nbsp;designators&nbsp;which&nbsp;satisfy&nbsp;the&nbsp;Bdd.&nbsp;&nbsp;I.e.,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                191&nbsp;&nbsp;&nbsp;&nbsp;one&nbsp;element&nbsp;of&nbsp;the&nbsp;list&nbsp;for&nbsp;each&nbsp;type&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;nodes
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                192&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;top&nbsp;of&nbsp;the&nbsp;Bdd&nbsp;to&nbsp;the&nbsp;true&nbsp;leaf.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                193&nbsp;&nbsp;&nbsp;&nbsp;[bdd]
+                </span><br/>
+<span class="partial" title="11 out of 20 forms covered">
+                194&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(clojure.core&#x2F;or&nbsp;(instance?&nbsp;Boolean&nbsp;bdd)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(instance?&nbsp;Bdd&nbsp;bdd)))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                196&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(satisfying&nbsp;[node&nbsp;lineage]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;false&nbsp;node)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;;;&nbsp;if&nbsp;reached&nbsp;a&nbsp;false&nbsp;leaf-node
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                199&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[td&nbsp;(gns&#x2F;canonicalize-type&nbsp;lineage&nbsp;:dnf)]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(=&nbsp;:empty-set&nbsp;td)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                201&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;the&nbsp;lineage&nbsp;canonicalizes&nbsp;to&nbsp;an&nbsp;empty&nbsp;intersection,&nbsp;then&nbsp;we&nbsp;prune&nbsp;this&nbsp;recursion
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                203&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;node)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                205&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;reached&nbsp;a&nbsp;true&nbsp;leaf-node
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[td]&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                207&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                209&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;otherwise,&nbsp;we&nbsp;generate&nbsp;a&nbsp;lazy&nbsp;conatenation&nbsp;of&nbsp;the&nbsp;left&nbsp;and&nbsp;right&nbsp;traversals
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;(satisfying&nbsp;(:positive&nbsp;node)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-and&nbsp;[td
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:label&nbsp;node)]))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(satisfying&nbsp;(:negative&nbsp;node)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-and&nbsp;[td
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;create-not&nbsp;(:label&nbsp;node))])))))))]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(satisfying&nbsp;bdd&nbsp;:sigma)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                217&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                218&nbsp;&nbsp;(def&nbsp;^:dynamic&nbsp;*hash*
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                219&nbsp;&nbsp;&nbsp;&nbsp;&quot;Hash&nbsp;table&nbsp;storing&nbsp;Bdd&nbsp;instances&nbsp;which&nbsp;have&nbsp;been&nbsp;allocated.&nbsp;&nbsp;&nbsp;The&nbsp;idea
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                220&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;that&nbsp;if&nbsp;a&nbsp;new&nbsp;Bdd&nbsp;is&nbsp;allocated&nbsp;via&nbsp;a&nbsp;call&nbsp;to&nbsp;Bdd.,&nbsp;the&nbsp;funciton,&nbsp;bdd,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                221&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;recognize&nbsp;this&nbsp;redundant&nbsp;instance,&nbsp;and&nbsp;return&nbsp;the&nbsp;previously&nbsp;allocated
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                222&nbsp;&nbsp;&nbsp;&nbsp;instance.&quot;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                223&nbsp;&nbsp;&nbsp;&nbsp;(atom&nbsp;false))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                224&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                225&nbsp;&nbsp;(def&nbsp;^:dynamic&nbsp;*label-to-index*
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                226&nbsp;&nbsp;&nbsp;&nbsp;&quot;Hash&nbsp;table&nbsp;mapping&nbsp;type-designators&nbsp;to&nbsp;integers.&nbsp;&nbsp;Each&nbsp;type&nbsp;designator
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                227&nbsp;&nbsp;&nbsp;&nbsp;serves&nbsp;as&nbsp;a&nbsp;label&nbsp;for&nbsp;a&nbsp;Bdd&nbsp;object,&nbsp;but&nbsp;to&nbsp;enforce&nbsp;the&nbsp;ordering&nbsp;of&nbsp;the&nbsp;ROBDD
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                228&nbsp;&nbsp;&nbsp;&nbsp;we&nbsp;have&nbsp;to&nbsp;have&nbsp;a&nbsp;way&nbsp;to&nbsp;order&nbsp;any&nbsp;two&nbsp;type&nbsp;designators.&nbsp;&nbsp;They&nbsp;are&nbsp;ordered
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                229&nbsp;&nbsp;&nbsp;&nbsp;according&nbsp;to&nbsp;the&nbsp;integers&nbsp;stored&nbsp;in&nbsp;this&nbsp;hash&nbsp;table.&quot;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                230&nbsp;&nbsp;&nbsp;&nbsp;(atom&nbsp;false))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                231&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                232&nbsp;&nbsp;(defn&nbsp;call-with-hash
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                233&nbsp;&nbsp;&nbsp;&nbsp;&quot;Allocations&nbsp;two&nbsp;dynamic&nbsp;variables&nbsp;for&nbsp;the&nbsp;dynamic&nbsp;extent&nbsp;of&nbsp;evaluating
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                234&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;given&nbsp;0-ary&nbsp;function.&nbsp;&nbsp;The&nbsp;variables&nbsp;are&nbsp;*label-to-index*&nbsp;and&nbsp;*hash*.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                235&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;part&nbsp;of&nbsp;the&nbsp;implementation&nbsp;of&nbsp;the&nbsp;with-hash&nbsp;macro.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                236&nbsp;&nbsp;&nbsp;&nbsp;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                237&nbsp;&nbsp;&nbsp;&nbsp;[thunk]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                238&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;false&nbsp;@*hash*)
+                </span><br/>
+<span class="covered" title="13 out of 13 forms covered">
+                239&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(binding&nbsp;[*label-to-index*&nbsp;(atom&nbsp;{})
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*hash*&nbsp;(atom&nbsp;{})]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(thunk))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;call-with-hash&nbsp;is&nbsp;called&nbsp;recursively,&nbsp;don&#x27;t&nbsp;rebind&nbsp;anything.
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(thunk)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                244&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="38 out of 38 forms covered">
+                245&nbsp;&nbsp;(defmacro&nbsp;with-hash
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                246&nbsp;&nbsp;&nbsp;&nbsp;&quot;This&nbsp;macro&nbsp;wraps&nbsp;a&nbsp;piece&nbsp;of&nbsp;code&nbsp;which&nbsp;needs&nbsp;to&nbsp;allocate&nbsp;Bdds.&nbsp;The&nbsp;macro
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                247&nbsp;&nbsp;&nbsp;&nbsp;wraps&nbsp;a&nbsp;call&nbsp;to&nbsp;the&nbsp;function&nbsp;call-with-hash,&nbsp;which&nbsp;provides&nbsp;an&nbsp;environment,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                248&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;sorts,&nbsp;which&nbsp;makes&nbsp;it&nbsp;possible&nbsp;to&nbsp;allocate&nbsp;and&nbsp;manipulate&nbsp;Bdd&nbsp;instances.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                249&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;with-hash&nbsp;is&nbsp;called&nbsp;recursively&nbsp;(intentially&nbsp;or&nbsp;accidentally),&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                250&nbsp;&nbsp;&nbsp;&nbsp;inner-most&nbsp;call&nbsp;recognizes&nbsp;this&nbsp;and&nbsp;does&nbsp;not&nbsp;re-bind&nbsp;any&nbsp;dynamic&nbsp;variables,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                251&nbsp;&nbsp;&nbsp;&nbsp;thus&nbsp;the&nbsp;innter-most&nbsp;call&nbsp;is&nbsp;innocuous&nbsp;and&nbsp;harmless.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                252&nbsp;&nbsp;&nbsp;&nbsp;[[]&nbsp;&amp;&nbsp;body]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                253&nbsp;&nbsp;&nbsp;&nbsp;`(call-with-hash&nbsp;(fn&nbsp;[]&nbsp;~@body)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                254&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                255&nbsp;&nbsp;(defn&nbsp;type-index&nbsp;[type-designator]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                256&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;TODO&nbsp;make&nbsp;sure&nbsp;two&nbsp;differnet&nbsp;symbols&nbsp;representing&nbsp;the&nbsp;same&nbsp;class
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                257&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;result&nbsp;in&nbsp;the&nbsp;same&nbsp;index.&nbsp;&nbsp;eg.&nbsp;Double&nbsp;vs&nbsp;java.lang.Double
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                258&nbsp;&nbsp;&nbsp;&nbsp;(c&#x2F;or&nbsp;(@*label-to-index*&nbsp;type-designator)
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                259&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(swap!&nbsp;*label-to-index*&nbsp;assoc&nbsp;type-designator&nbsp;(count&nbsp;@*label-to-index*))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                260&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(@*label-to-index*&nbsp;type-designator))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                261&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                262&nbsp;&nbsp;(declare&nbsp;genus.bdd&#x2F;and)&nbsp;;;&nbsp;bdd&#x2F;and
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                263&nbsp;&nbsp;(declare&nbsp;genus.bdd&#x2F;or)&nbsp;&nbsp;;;&nbsp;bdd&#x2F;or
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                264&nbsp;&nbsp;(declare&nbsp;genus.bdd&#x2F;not)&nbsp;;;&nbsp;bdd&#x2F;not
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                265&nbsp;&nbsp;(declare&nbsp;node)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                266&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                267&nbsp;&nbsp;(defn&nbsp;bdd
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                268&nbsp;&nbsp;&nbsp;&nbsp;&quot;Public&nbsp;interface&nbsp;to&nbsp;programmatic&nbsp;Bdd&nbsp;constructor.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                269&nbsp;&nbsp;&nbsp;&nbsp;[type-designator]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                270&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sequential?&nbsp;type-designator)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                272&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;(first&nbsp;type-designator)
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                273&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and)&nbsp;(reduce&nbsp;bdd&#x2F;and&nbsp;(map&nbsp;bdd&nbsp;(rest&nbsp;type-designator)))
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                274&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or)&nbsp;&nbsp;(reduce&nbsp;bdd&#x2F;or&nbsp;(map&nbsp;bdd&nbsp;(rest&nbsp;type-designator)))
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                275&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not)&nbsp;(apply&nbsp;bdd&#x2F;not&nbsp;(map&nbsp;bdd&nbsp;(rest&nbsp;type-designator)))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                276&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node&nbsp;type-designator&nbsp;true&nbsp;false))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                277&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:sigma&nbsp;type-designator)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                279&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                280&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                281&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:empty-set&nbsp;type-designator)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                282&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                283&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                285&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node&nbsp;type-designator&nbsp;true&nbsp;false)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                286&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                287&nbsp;&nbsp;(defn&nbsp;label-&lt;-by-index
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                288&nbsp;&nbsp;&nbsp;&nbsp;&quot;A&nbsp;strict&nbsp;ordering&nbsp;function&nbsp;on&nbsp;potential&nbsp;labels&nbsp;in&nbsp;a&nbsp;Bdd.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                289&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;enforces&nbsp;that&nbsp;a&nbsp;&lt;&nbsp;(satifies&nbsp;f)&nbsp;whenever
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                290&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;is&nbsp;not&nbsp;a&nbsp;(satisfies&nbsp;g)&nbsp;type,&nbsp;but&nbsp;otherwise,&nbsp;a&nbsp;&lt;&nbsp;b&nbsp;whenever
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                291&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;was&nbsp;encountered&nbsp;first&nbsp;in&nbsp;the&nbsp;computation.&nbsp;&nbsp;Whenever&nbsp;a&nbsp;new
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                292&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;is&nbsp;discovered&nbsp;in&nbsp;generating&nbsp;a&nbsp;Bdd,&nbsp;it&nbsp;is&nbsp;given&nbsp;an&nbsp;index
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                293&nbsp;&nbsp;&nbsp;&nbsp;higher&nbsp;than&nbsp;any&nbsp;other&nbsp;existing&nbsp;index.&nbsp;&nbsp;The&nbsp;ordering&nbsp;of&nbsp;the&nbsp;labels
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                294&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;ordering&nbsp;of&nbsp;the&nbsp;index&nbsp;&nbsp;index-of(a)&nbsp;&lt;&nbsp;index-of(b).&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                295&nbsp;&nbsp;&nbsp;&nbsp;[t1&nbsp;t2]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                296&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[label-index-1&nbsp;(type-index&nbsp;t1)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                297&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label-index-2&nbsp;(type-index&nbsp;t2)]
+                </span><br/>
+<span class="partial" title="5 out of 21 forms covered">
+                298&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(integer?&nbsp;label-index-1)&nbsp;(format&nbsp;&quot;expecting&nbsp;integer&nbsp;got&nbsp;%s&quot;&nbsp;(type&nbsp;label-index-1)))
+                </span><br/>
+<span class="partial" title="5 out of 21 forms covered">
+                299&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(integer?&nbsp;label-index-2)&nbsp;(format&nbsp;&quot;expecting&nbsp;integer&nbsp;got&nbsp;%s&quot;&nbsp;(type&nbsp;label-index-2)))
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                300&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(c&#x2F;and&nbsp;(gns&#x2F;satisfies?&nbsp;t1)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                301&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;satisfies?&nbsp;t2))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;label-index-1&nbsp;label-index-2)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                303&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                304&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;satisfies?&nbsp;t1)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                305&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                306&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                307&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gns&#x2F;satisfies?&nbsp;t2)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                308&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                309&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                310&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                311&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;&nbsp;label-index-1&nbsp;label-index-2))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                312&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                313&nbsp;&nbsp;(def&nbsp;^:dynamic&nbsp;*label-&lt;*
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                314&nbsp;&nbsp;&nbsp;&nbsp;&quot;Dynamic&nbsp;variable&nbsp;stocking&nbsp;the&nbsp;function&nbsp;used&nbsp;to&nbsp;order&nbsp;labels&nbsp;in&nbsp;a&nbsp;Bdd.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                315&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;variable&nbsp;must&nbsp;be&nbsp;bound&nbsp;do&nbsp;a&nbsp;binary&nbsp;function&nbsp;such&nbsp;as&nbsp;label-&lt;-by-index
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                316&nbsp;&nbsp;&nbsp;&nbsp;(which&nbsp;is&nbsp;the&nbsp;default)&nbsp;which&nbsp;implements&nbsp;a&nbsp;total&nbsp;order&nbsp;relation&nbsp;on
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                317&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;set&nbsp;of&nbsp;potential&nbsp;Bdd&nbsp;labels.&nbsp;&nbsp;I.e.,&nbsp;the&nbsp;function&nbsp;must&nbsp;be&nbsp;behave
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                318&nbsp;&nbsp;&nbsp;&nbsp;analgous&nbsp;to&nbsp;&lt;&nbsp;rather&nbsp;than&nbsp;analgous&nbsp;to&nbsp;&lt;=&nbsp;.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                319&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transitive:&nbsp;&nbsp;a&lt;b&nbsp;and&nbsp;b&lt;c&nbsp;=&gt;&nbsp;a&lt;c
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                320&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;asymmetric:&nbsp;&nbsp;a&lt;a&nbsp;is&nbsp;false
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                321&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;irreflexive:&nbsp;if&nbsp;a&lt;b&nbsp;then&nbsp;b&lt;a&nbsp;is&nbsp;false&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                322&nbsp;&nbsp;&nbsp;&nbsp;label-&lt;-by-index)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                323&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                324&nbsp;&nbsp;(defn&nbsp;node
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                325&nbsp;&nbsp;&nbsp;&nbsp;&quot;Internal&nbsp;function&nbsp;to&nbsp;function&nbsp;`bdd`.&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;used&nbsp;during&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                326&nbsp;&nbsp;&nbsp;&nbsp;recursive&nbsp;descent&nbsp;of&nbsp;the&nbsp;Bdd&nbsp;construction&nbsp;algorithm.&nbsp;&nbsp;&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                327&nbsp;&nbsp;&nbsp;&nbsp;[type-designator&nbsp;positive&nbsp;negative]&nbsp;
+                </span><br/>
+<span class="partial" title="7 out of 18 forms covered">
+                328&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(map?&nbsp;@*hash*)&nbsp;&quot;attempt&nbsp;to&nbsp;allocate&nbsp;a&nbsp;Bdd&nbsp;outside&nbsp;dynamically&nbsp;extend&nbsp;of&nbsp;call-with-hash&quot;)
+                </span><br/>
+<span class="partial" title="7 out of 18 forms covered">
+                329&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(map?&nbsp;@*label-to-index*)&nbsp;&quot;attempt&nbsp;to&nbsp;allocate&nbsp;a&nbsp;Bdd&nbsp;outside&nbsp;dynamically&nbsp;extend&nbsp;of&nbsp;call-with-hash&quot;)
+                </span><br/>
+<span class="partial" title="11 out of 21 forms covered">
+                330&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(c&#x2F;or&nbsp;(instance?&nbsp;Boolean&nbsp;positive)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                331&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(instance?&nbsp;Bdd&nbsp;positive))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                332&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;wrong&nbsp;type&nbsp;of&nbsp;positive=~A&nbsp;type=~A&quot;
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                333&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;positive&nbsp;(type&nbsp;positive)))
+                </span><br/>
+<span class="partial" title="11 out of 21 forms covered">
+                334&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(c&#x2F;or&nbsp;(instance?&nbsp;Boolean&nbsp;negative)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                335&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(instance?&nbsp;Bdd&nbsp;negative))
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                336&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;wrong&nbsp;type&nbsp;of&nbsp;negative=~A&nbsp;type=~A&quot;
+                </span><br/>
+<span class="not-covered" title="0 out of 4 forms covered">
+                337&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;negative&nbsp;(type&nbsp;negative)))
+                </span><br/>
+<span class="partial" title="5 out of 15 forms covered">
+                338&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(gns&#x2F;valid-type?&nbsp;type-designator)
+                </span><br/>
+<span class="not-covered" title="0 out of 5 forms covered">
+                339&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;[257]&nbsp;invalid&nbsp;type-designator&nbsp;~A&quot;&nbsp;type-designator))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                340&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                341&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                342&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(identical?&nbsp;positive&nbsp;negative)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                343&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;positive
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                344&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                345&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[try-bdd&nbsp;(Bdd.&nbsp;type-designator&nbsp;positive&nbsp;negative)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                346&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cached-bdd&nbsp;(@*hash*&nbsp;try-bdd)]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                347&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(c&#x2F;or&nbsp;cached-bdd
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                348&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(swap!&nbsp;*hash*&nbsp;assoc&nbsp;try-bdd&nbsp;try-bdd)
+                </span><br/>
+<span class="partial" title="11 out of 21 forms covered">
+                349&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(c&#x2F;or&nbsp;(instance?&nbsp;Boolean&nbsp;positive)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                350&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*label-&lt;*&nbsp;type-designator&nbsp;(:label&nbsp;positive)))
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                351&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;parent&nbsp;%s&nbsp;must&nbsp;be&nbsp;&lt;&nbsp;positive&nbsp;%s&quot;&nbsp;type-designator&nbsp;(:label&nbsp;positive)))
+                </span><br/>
+<span class="partial" title="11 out of 21 forms covered">
+                352&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(c&#x2F;or&nbsp;(instance?&nbsp;Boolean&nbsp;negative)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                353&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*label-&lt;*&nbsp;type-designator&nbsp;(:label&nbsp;negative)))
+                </span><br/>
+<span class="not-covered" title="0 out of 7 forms covered">
+                354&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;parent&nbsp;%s&nbsp;must&nbsp;be&nbsp;&lt;&nbsp;negative&nbsp;%s&quot;&nbsp;type-designator&nbsp;(:label&nbsp;negative)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                355&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                356&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try-bdd)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                357&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                358&nbsp;&nbsp;(defn&nbsp;binary-op
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                359&nbsp;&nbsp;&nbsp;&nbsp;&quot;Bdd&nbsp;abstract&nbsp;binary&nbsp;operation.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                360&nbsp;&nbsp;&nbsp;&nbsp;[op&nbsp;bdd1&nbsp;bdd2]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                361&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;(:label&nbsp;bdd1)&nbsp;(:label&nbsp;bdd2))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                362&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node&nbsp;(:label&nbsp;bdd1)
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                363&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(op&nbsp;(:positive&nbsp;bdd1)&nbsp;(:positive&nbsp;bdd2))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                364&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(op&nbsp;(:negative&nbsp;bdd1)&nbsp;(:negative&nbsp;bdd2)))
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                365&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(*label-&lt;*&nbsp;(:label&nbsp;bdd1)&nbsp;(:label&nbsp;bdd2))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                366&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node&nbsp;(:label&nbsp;bdd1)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                367&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(op&nbsp;(:positive&nbsp;bdd1)&nbsp;bdd2)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                368&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(op&nbsp;(:negative&nbsp;bdd1)&nbsp;bdd2))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                369&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node&nbsp;(:label&nbsp;bdd2)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                370&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(op&nbsp;bdd1&nbsp;(:positive&nbsp;bdd2))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                371&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(op&nbsp;bdd1&nbsp;(:negative&nbsp;bdd2))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                372&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                373&nbsp;&nbsp;(def&nbsp;bdd&#x2F;and
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                374&nbsp;&nbsp;&nbsp;&nbsp;&quot;Perform&nbsp;a&nbsp;Boolean&nbsp;AND&nbsp;on&nbsp;0&nbsp;or&nbsp;more&nbsp;Bdds.&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                375&nbsp;&nbsp;&nbsp;&nbsp;(fn
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                376&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([]&nbsp;true)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                377&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd]&nbsp;bdd)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                378&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd1&nbsp;bdd2]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                379&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                380&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;bdd1)&nbsp;false
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                381&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;bdd2)&nbsp;false
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                382&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;bdd1)&nbsp;bdd2
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                383&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;bdd2)&nbsp;bdd1
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                384&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(identical?&nbsp;bdd1&nbsp;bdd2)&nbsp;bdd1
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                385&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(binary-op&nbsp;bdd&#x2F;and&nbsp;bdd1&nbsp;bdd2)))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                386&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd1&nbsp;bdd2&nbsp;&amp;&nbsp;bdds]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                387&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;bdd&#x2F;and&nbsp;(bdd&#x2F;and&nbsp;bdd1&nbsp;bdd2)&nbsp;bdds))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                388&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                389&nbsp;&nbsp;(def&nbsp;bdd&#x2F;or
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                390&nbsp;&nbsp;&nbsp;&nbsp;&quot;Perform&nbsp;a&nbsp;Boolean&nbsp;OR&nbsp;on&nbsp;0&nbsp;or&nbsp;more&nbsp;Bdds.&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                391&nbsp;&nbsp;&nbsp;&nbsp;(fn
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                392&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([]&nbsp;false)
+                </span><br/>
+<span class="not-covered" title="0 out of 1 forms covered">
+                393&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd]&nbsp;bdd)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                394&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd1&nbsp;bdd2]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                395&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                396&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;bdd1)&nbsp;bdd2
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                397&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;bdd2)&nbsp;bdd1
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                398&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;bdd1)&nbsp;true
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                399&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;bdd2)&nbsp;true
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(identical?&nbsp;bdd1&nbsp;bdd2)&nbsp;bdd1
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                401&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(binary-op&nbsp;bdd&#x2F;or&nbsp;bdd1&nbsp;bdd2)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                402&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd1&nbsp;bdd2&nbsp;&amp;&nbsp;bdds]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;bdd&#x2F;or&nbsp;(bdd&#x2F;or&nbsp;bdd1&nbsp;bdd2)&nbsp;bdds))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                404&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                405&nbsp;&nbsp;(def&nbsp;bdd&#x2F;and-not
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                406&nbsp;&nbsp;&nbsp;&nbsp;&quot;Perform&nbsp;a&nbsp;relative&nbsp;complement&nbsp;operation&nbsp;on&nbsp;two&nbsp;(or&nbsp;more)&nbsp;Bdds.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                407&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;not&nbsp;implemented&nbsp;for&nbsp;the&nbsp;0-ary&nbsp;nor&nbsp;1-ary&nbsp;case.&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                408&nbsp;&nbsp;&nbsp;&nbsp;(fn
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                409&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd1&nbsp;bdd2]
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                410&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                411&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(identical?&nbsp;bdd1&nbsp;bdd2)&nbsp;false
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                412&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;bdd1&nbsp;false)&nbsp;false
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                413&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;bdd2&nbsp;true)&nbsp;false
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                414&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;bdd2&nbsp;false)&nbsp;bdd1
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                415&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;bdd1&nbsp;true)&nbsp;(node&nbsp;(:label&nbsp;bdd2)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                416&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;and-not&nbsp;true&nbsp;(:positive&nbsp;bdd2))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                417&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;and-not&nbsp;true&nbsp;(:negative&nbsp;bdd2)))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                418&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(binary-op&nbsp;bdd&#x2F;and-not&nbsp;bdd1&nbsp;bdd2)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                419&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                420&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([bdd1&nbsp;bdd2&nbsp;&amp;&nbsp;bdds]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                421&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;bdd&#x2F;and-not&nbsp;(bdd&#x2F;and-not&nbsp;bdd1&nbsp;bdd2)&nbsp;bdds))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                422&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                423&nbsp;&nbsp;(def&nbsp;bdd&#x2F;not
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                424&nbsp;&nbsp;&nbsp;&nbsp;&quot;Perform&nbsp;a&nbsp;Boolean&nbsp;not&nbsp;of&nbsp;a&nbsp;given&nbsp;Bdd&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                425&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[bdd1]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                426&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;and-not&nbsp;true&nbsp;bdd1)))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                427&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                428&nbsp;&nbsp;(def&nbsp;sample-types&nbsp;&#x27;(Long&nbsp;Double&nbsp;String
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                429&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;&quot;&quot;)&nbsp;(member&nbsp;&quot;hello&quot;&nbsp;&quot;world&quot;)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                430&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Boolean&nbsp;Character&nbsp;Short
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                431&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Object&nbsp;Number&nbsp;(=&nbsp;0)&nbsp;(member&nbsp;-1&nbsp;0&nbsp;1)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                432&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(member&nbsp;1&nbsp;2)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                433&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(member&nbsp;0&nbsp;2&nbsp;4&nbsp;6)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                434&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;java.lang.CharSequence
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                435&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;java.io.Serializable
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                436&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;java.lang.Comparable))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                437&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                438&nbsp;&nbsp;(defn&nbsp;gen-random
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                439&nbsp;&nbsp;&nbsp;&nbsp;&quot;Generate&nbsp;a&nbsp;random&nbsp;Bdd&quot;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                440&nbsp;&nbsp;&nbsp;&nbsp;([]&nbsp;(gen-random&nbsp;15))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                441&nbsp;&nbsp;&nbsp;&nbsp;([max-depth]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                442&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(&lt;=&nbsp;max-depth&nbsp;0)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                443&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rand-nth&nbsp;&#x27;(true&nbsp;false))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[r&nbsp;(rand-int&nbsp;5)]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                445&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                446&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;r&nbsp;0)&nbsp;;;&nbsp;20%&nbsp;chance
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                447&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rand-nth&nbsp;&#x27;(true&nbsp;false))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                448&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                449&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;r&nbsp;1)&nbsp;;;&nbsp;20%&nbsp;chance
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                450&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&nbsp;(rand-nth&nbsp;sample-types))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                451&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                452&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;r&nbsp;2)&nbsp;;;&nbsp;20%&nbsp;chance
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                453&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;not&nbsp;(bdd&nbsp;(rand-nth&nbsp;sample-types)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                454&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                455&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;;;&nbsp;40%&nbsp;chance
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                456&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[bdd-1&nbsp;(gen-random&nbsp;(dec&nbsp;max-depth))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                457&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd-2&nbsp;(gen-random&nbsp;(dec&nbsp;max-depth))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                458&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;(rand-int&nbsp;4)]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                459&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                460&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;r&nbsp;0)&nbsp;;;&nbsp;40%&nbsp;*&nbsp;25%&nbsp;chance
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                461&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;and&nbsp;bdd-1&nbsp;bdd-2)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                462&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;r&nbsp;1)&nbsp;;;&nbsp;40%&nbsp;*&nbsp;25%&nbsp;chance
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                463&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;and-not&nbsp;bdd-1&nbsp;bdd-2)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                464&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;&nbsp;&nbsp;;;&nbsp;40%&nbsp;*&nbsp;50%&nbsp;chance
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                465&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;or&nbsp;bdd-1&nbsp;bdd-2))))))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                466&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                467&nbsp;&nbsp;(defn&nbsp;typep
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                468&nbsp;&nbsp;&nbsp;&nbsp;&quot;Given&nbsp;a&nbsp;value&nbsp;in&nbsp;question,&nbsp;and&nbsp;a&nbsp;Bdd&nbsp;representing&nbsp;a&nbsp;type&nbsp;designator,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                469&nbsp;&nbsp;&nbsp;&nbsp;determine&nbsp;whether&nbsp;the&nbsp;value&nbsp;is&nbsp;an&nbsp;alement&nbsp;of&nbsp;the&nbsp;designated&nbsp;type.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                470&nbsp;&nbsp;&nbsp;&nbsp;[value&nbsp;bdd]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                471&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                472&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;bdd)&nbsp;true
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                473&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;bdd)&nbsp;false
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                474&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;(typep&nbsp;value
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                475&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(gns&#x2F;typep&nbsp;value&nbsp;(:label&nbsp;bdd))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                476&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:positive&nbsp;bdd)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                477&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:negative&nbsp;bdd)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                478&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                479&nbsp;&nbsp;(defn&nbsp;disjoint?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                480&nbsp;&nbsp;&nbsp;&nbsp;&quot;Given&nbsp;two&nbsp;Bdds,&nbsp;determine&nbsp;whether&nbsp;it&nbsp;can&nbsp;be&nbsp;proven&nbsp;that&nbsp;the&nbsp;intersection&nbsp;of&nbsp;the
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                481&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;types&nbsp;they&nbsp;represent&nbsp;is&nbsp;empty.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                482&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;it&nbsp;cannot&nbsp;be&nbsp;proven&nbsp;that&nbsp;they&nbsp;are&nbsp;disjoint,&nbsp;false&nbsp;is&nbsp;returned.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                483&nbsp;&nbsp;&nbsp;&nbsp;[bdd1&nbsp;bdd2]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                484&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:empty-set
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                485&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dnf&nbsp;(and&nbsp;bdd1&nbsp;bdd2))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                486&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                487&nbsp;&nbsp;(def&nbsp;bdd&#x2F;canonicalize-type
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                488&nbsp;&nbsp;&nbsp;&nbsp;&quot;Compute&nbsp;a&nbsp;canonicalized&nbsp;form&nbsp;of&nbsp;a&nbsp;given&nbsp;type&nbsp;designator.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                489&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;intent&nbsp;is&nbsp;that&nbsp;given&nbsp;two&nbsp;type&nbsp;designators&nbsp;(as&nbsp;possibly&nbsp;different
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                490&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s-expressions),&nbsp;if&nbsp;they&nbsp;represent&nbsp;the&nbsp;same&nbsp;type,&nbsp;then&nbsp;they&nbsp;should
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                491&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;canonicalized&nbsp;to&nbsp;equal&nbsp;(=)&nbsp;s-expressions.&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                492&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[type-designator]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                493&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-hash&nbsp;[]
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                494&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dnf&nbsp;(bdd&nbsp;type-designator)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                495&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                496&nbsp;&nbsp;(defn&nbsp;type-disjoint?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                497&nbsp;&nbsp;&nbsp;&nbsp;&quot;Given&nbsp;two&nbsp;type&nbsp;designators,&nbsp;use&nbsp;Bdds&nbsp;to&nbsp;determine&nbsp;whether&nbsp;they&nbsp;are&nbsp;disjoint.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                498&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;it&nbsp;cannot&nbsp;be&nbsp;proven&nbsp;that&nbsp;they&nbsp;are&nbsp;disjoint,&nbsp;false&nbsp;is&nbsp;returned.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                499&nbsp;&nbsp;&nbsp;&nbsp;[type-designator-1&nbsp;type-designator-2]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                500&nbsp;&nbsp;&nbsp;&nbsp;(with-hash&nbsp;[]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                501&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:empty-set
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                502&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(bdd&#x2F;canonicalize-type&nbsp;(list&nbsp;&#x27;and&nbsp;type-designator-1&nbsp;type-designator-2)))))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                503&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                504&nbsp;&nbsp;(defn&nbsp;type-subtype?
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                505&nbsp;&nbsp;&nbsp;&nbsp;&quot;Given&nbsp;two&nbsp;type&nbsp;designators,&nbsp;use&nbsp;bdds&nbsp;to&nbsp;determine&nbsp;whether&nbsp;one&nbsp;is&nbsp;a&nbsp;subtype&nbsp;of&nbsp;the&nbsp;other.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                506&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;it&nbsp;cannot&nbsp;be&nbsp;proven,&nbsp;false&nbsp;is&nbsp;returned.&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                507&nbsp;&nbsp;&nbsp;&nbsp;[subtype-designator&nbsp;supertype-designator]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                508&nbsp;&nbsp;&nbsp;&nbsp;(with-hash&nbsp;[]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                509&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[bdd-sub&nbsp;(bdd&nbsp;subtype-designator)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                510&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd-sup&nbsp;(bdd&nbsp;supertype-designator)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                511&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd-diff&nbsp;(bdd&#x2F;and-not&nbsp;bdd-sub&nbsp;bdd-sup)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                512&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satisfying&nbsp;(satisfying-type-designators&nbsp;bdd-diff)]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                513&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;There&nbsp;are&nbsp;four&nbsp;conditions&nbsp;to&nbsp;detect:
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                514&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;1.&nbsp;if&nbsp;the&nbsp;bdd&nbsp;is&nbsp;identically&nbsp;false
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                515&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;subtype&nbsp;-&gt;&nbsp;true
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                516&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;2.&nbsp;if&nbsp;every&nbsp;branch&nbsp;in&nbsp;the&nbsp;bdd&nbsp;is&nbsp;unihabited&nbsp;i.e.,&nbsp;inhabited&nbsp;-&gt;&nbsp;false
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                517&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;subtype&nbsp;-&gt;&nbsp;true.&nbsp;&nbsp;&nbsp;Note&nbsp;that&nbsp;2&nbsp;implies&nbsp;1,&nbsp;so&nbsp;potentially
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                518&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;there&nbsp;may&nbsp;really&nbsp;be&nbsp;no&nbsp;need&nbsp;to&nbsp;check&nbsp;1??&nbsp;not&nbsp;sure
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                519&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;3.&nbsp;if&nbsp;some&nbsp;branch&nbsp;x&nbsp;exists&nbsp;for&nbsp;which&nbsp;inhabited(x&nbsp;:dont-know)&nbsp;=&nbsp;true
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                520&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;subtype&nbsp;-&gt;&nbsp;false
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                521&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;4.&nbsp;thus&nbsp;there&nbsp;necessarily&nbsp;exists&nbsp;some&nbsp;branch&nbsp;x&nbsp;for&nbsp;which&nbsp;inhibited(x&nbsp;:dont-know)&nbsp;=&nbsp;:dont-know,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                522&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;no&nbsp;branch&nbsp;y&nbsp;for&nbsp;which&nbsp;inhabited(y&nbsp;:dont-know)&nbsp;=&nbsp;true
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                523&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;subtype&nbsp;-&gt;&nbsp;:dont-know.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                524&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note&nbsp;that&nbsp;!2&nbsp;and&nbsp;!3&nbsp;=&gt;&nbsp;4,&nbsp;so&nbsp;there&#x27;s&nbsp;no&nbsp;need&nbsp;to&nbsp;check&nbsp;anything&nbsp;on&nbsp;4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="10 out of 10 forms covered">
+                525&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(=&nbsp;false&nbsp;bdd-diff)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                526&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                527&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(forall&nbsp;[td&nbsp;satisfying]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                528&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;(=&nbsp;false&nbsp;(gns&#x2F;inhabited?&nbsp;td&nbsp;:dont-know))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                529&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;(gns&#x2F;inhabited?&nbsp;(gns&#x2F;canonicalize-type&nbsp;td)&nbsp;:dont-know))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                530&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                531&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                532&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists&nbsp;[td&nbsp;satisfying]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                533&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;(=&nbsp;true&nbsp;(gns&#x2F;inhabited?&nbsp;td&nbsp;:dont-know))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                534&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;(gns&#x2F;inhabited?&nbsp;(gns&#x2F;canonicalize-type&nbsp;td)&nbsp;:dont-know))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                535&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                536&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                537&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                </span><br/>
+<span class="partial" title="7 out of 16 forms covered">
+                538&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(assert&nbsp;(exists&nbsp;[td&nbsp;satisfying]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                539&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:dont-know&nbsp;(gns&#x2F;inhabited?&nbsp;td&nbsp;:dont-know))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                540&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;in&nbsp;the&nbsp;case&nbsp;the&nbsp;bdd&nbsp;is&nbsp;not&nbsp;explicitly&nbsp;false,&nbsp;some&nbsp;branch(s)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                541&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;root&nbsp;to&nbsp;the&nbsp;true-leaf&nbsp;might&nbsp;designate&nbsp;a&nbsp;list&nbsp;of
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                542&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;types&nbsp;whose&nbsp;intersection&nbsp;is&nbsp;empty.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                543&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;The&nbsp;two&nbsp;given&nbsp;types&nbsp;are&nbsp;in&nbsp;a&nbsp;sub&#x2F;super&nbsp;relation&nbsp;ONLY
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                544&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;if&nbsp;all&nbsp;such&nbsp;intersections&nbsp;are&nbsp;empty.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                545&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dont-know)))))
+                </span><br/>
+ </body>
+</html>
