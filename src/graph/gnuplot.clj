@@ -18,12 +18,6 @@
               gnu-name :in-enc "en_US.UTF-8" :out "en_US.UTF-8")]
     (:exit s)))
 
-;; (gnuplot [["plot-1" [ 1.1 2.3 6.5] [10.2 12.3 6.1]]
-;;           ["plot-2" [ 2.1 3.3 4.5] [10.2 2.3 5.1]]
-;;           ["plot-3" [ 1.1 4.3 9.5 10.2] [6.2 2.3 7.1 7.5]]]
-;;          :view true
-;;          :title "sample plots"
-;; )
 
 (defn gnuplot [data-to-plot
                ;; either Seq[[String Seq[Number] Seq[Number]]]
