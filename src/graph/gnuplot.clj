@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as str]
-            [clojure.pprint :refer [cl-format]]
-            [util.util :refer [member with-outstring]]
+            [clojure.pprint :refer [cl-format pprint]]
+            [util.util :refer [member with-outstring ensure-directory]]
             [graph.view :refer [view-image]]
             ))
 
@@ -41,7 +41,7 @@
                        y-log false
                        grid false
                        output-file-base-name "curves"
-                       dir "/tmp"
+                       dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
                        plot-with "linespoints"
                        point-size 0.8
                        key "horizontal bmargin"
@@ -120,29 +120,31 @@
     
                      
     (doseq [terminal terminals
-            :let [output-file-name (str output-file-base-name "." terminal)]]
+            :let [output-file-name (str dir "/" output-file-base-name "." terminal)]]
       (run-gnu-plot terminal gnu-name output-file-name)
       (if view
-        (view-image output-file-name)))))
+        (view-image output-file-name)))
+    gnu-name))
 
-(defn histogram [buckets
-                 & {:keys [base-name
-                           dir
-                           x-label
-                           y-label
-                           title
-                           gnu-file-CB
-                           keep-if
-                           other-label
-                           view]
-                    :or {base-name "histogram"
-                         dir "/tmp"
-                         x-label "x"
-                         y-label "y"
-                         title ""
-                         gnu-file-CB (fn [_str])
-                         other-label "other"
-                         view false}}]
+(defn histogram
+  [buckets & {:keys [base-name
+                     dir
+                     x-label
+                     y-label
+                     title
+                     gnu-file-CB
+                     keep-if
+                     other-label
+                     view]
+              :or {base-name "histogram"
+                   dir "/tmp"
+                   x-label "x"
+                   y-label "y"
+                   title ""
+                   gnu-file-CB (fn [_str])
+                   other-label "other"
+                   view false}}]
+
   (assert (not (str/index-of x-label "\"")))
   (assert (not (str/index-of y-label "\"")))
   (assert (not (str/index-of x-label "\\")))
@@ -173,14 +175,14 @@
         write (fn [msg]
                 (.write gnu msg))
         data (for [[label counts] buckets
-                   :let [_ (println [:counts counts])
+                   :let [
                          fqs (sort-by first (into [] (frequencies counts)))
-                         _ (println [:fqs fqs])
+                         
                          xys (for [[state-count num-samples] fqs
                                    :when (keep-if state-count)
                                    :let [percentage (/ (* 100.0 num-samples) (count counts))]]
                                [[state-count] percentage])
-                         _ (println [:xys xys])
+                         
                          left-over-percent (- 100.0 (reduce + (map second xys)))]]
                [label (concat (sort-by first xys)
                               [[[] left-over-percent]])])
@@ -220,4 +222,5 @@
     (run-gnu-plot "png" gnu-file-name png-file-name)
 
     (if view
-      (view-image png-file-name))))
+      (view-image png-file-name))
+    png-file-name))
