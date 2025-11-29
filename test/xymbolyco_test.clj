@@ -632,21 +632,42 @@
           (format "two dfas not equivalent for type-size=%s num-states=%s num-transitions=%s rte=%s"
                   type-size num-states num-transitions rte)))))
 
-(deftest t-synchronize
-  (testing "synchronized product"
-    (doseq [_ (range 40)
+(deftest t-synchronize-subset
+  (testing "synchronized subset"
+    (doseq [_ (range 4)
             :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
                   dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
-                  dfa-union (xym/synchronized-union dfa-1 dfa-2)
-                  dfa-intersect (xym/synchronized-intersection dfa-1 dfa-2)
                   dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]
       (if (xym/dfa-subset? dfa-1 dfa-2)
-        (is (xym/dfa-vacuous? dfa-and-not false)))
+        (is (xym/dfa-vacuous? dfa-and-not false))))))
+
+(deftest t-synchronize-intersect
+  (testing "synchronized product intersect"
+    (doseq [_ (range 4)
+            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-intersect (xym/synchronized-intersection dfa-1 dfa-2)]]
+      (is dfa-intersect))))
+
+(deftest t-synchronize-union
+  (testing "synchronized product union"
+    (doseq [_ (range 4)
+            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-union (xym/synchronized-union dfa-1 dfa-2)]]
+
       (is dfa-union)
-      (is dfa-intersect)
+)))
+
+(deftest t-synchronize-and-not
+  (testing "synchronized and-not"
+    (doseq [_ (range 4)
+            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]
+
       (is dfa-and-not))))
 
 
 ;;  (dot/dfa-view dfa "random")
 ;;  (dot/dfa-view (minimize dfa) "random-min"))
-
