@@ -25,6 +25,7 @@
             [rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
             [rte-tester :refer [test-rte-not-1]]
             [rte-extract :refer [dfa-to-rte]]
+            [rte-randomize-syntax :as rrte]
             [xym.xymbolyco :as xym]
             [xym.xym-tester :refer [gen-dfa build-state-map]]
             [genus.bdd :as bdd]
@@ -130,7 +131,16 @@
                                 (rte (:* Double)))]]
       (rte-to-dfa rte)
       (xym/trim (rte-to-dfa rte))
-      (xym/trim       (xym/minimize (rte-to-dfa rte))))))
+      (xym/trim (xym/minimize (rte-to-dfa rte))))))
+
+
+(deftest t-complete
+  (testing "dfa complete"
+    (doseq [_ (range 100)
+            :let [rte (rrte/gen-rte 6)
+                  dfa (rte-to-dfa rte)]]
+      (xym/check-dfa (xym/complete (xym/trim dfa)))
+      (xym/check-dfa (xym/complete (xym/trim (xym/minimize dfa)))))))
 
 (deftest t-rte-match-min
   (testing "same results from matching minimized"
@@ -284,12 +294,12 @@
   (testing "discovered test case 261"
     ;;   actual: java.lang.AssertionError: Assert failed: 187: dfa not equivalent with self rte=(:contains-every :epsilon (= (1 2 3)) (satisfies seq?) (:and java.io.Serializable java.lang.CharSequence (:contains-every (:? (:contains-any)) (:and (:? :epsilon)))))
     (doseq [r1 ['(:contains-every :epsilon
-                               (= (1 2 3))
-                               (satisfies seq?)
-                               (:and java.io.Serializable
-                                     java.lang.CharSequence
-                                     (:contains-every (:? (:contains-any))
-                                                      (:and (:? :epsilon)))))]]
+                                  (= (1 2 3))
+                                  (satisfies seq?)
+                                  (:and java.io.Serializable
+                                        java.lang.CharSequence
+                                        (:contains-every (:? (:contains-any))
+                                                         (:and (:? :epsilon)))))]]
 
       (with-compile-env []
         (let [dfa (rte-to-dfa r1)
@@ -622,7 +632,19 @@
           (format "two dfas not equivalent for type-size=%s num-states=%s num-transitions=%s rte=%s"
                   type-size num-states num-transitions rte)))))
 
-
+(deftest t-synchronize
+  (testing "synchronized product"
+    (doseq [_ (range 40)
+            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+                  dfa-union (xym/synchronized-union dfa-1 dfa-2)
+                  dfa-intersect (xym/synchronized-intersection dfa-1 dfa-2)
+                  dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]
+      (if (xym/dfa-subset? dfa-1 dfa-2)
+        (is (xym/dfa-vacuous? dfa-and-not false)))
+      (is dfa-union)
+      (is dfa-intersect)
+      (is dfa-and-not))))
 
 
 ;;  (dot/dfa-view dfa "random")

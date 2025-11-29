@@ -36,6 +36,7 @@
             [genus.genus-tester :refer [*test-types* gen-type]]
             [rte-randomize-syntax :refer [gen-rte]]
             [graph.dot :as dot]
+            [rte-graphviz :refer [rte-to-dot rte-view]]
             [backtick :refer [template]]
             [xym.xymbolyco :as xym]))
 
@@ -709,6 +710,12 @@
       (check-extraction-cycle (gen-rte depth *test-types*) (fn [expr message]
                                                              (is expr message))))))
             
+(deftest t-graphviz
+  (testing "rte graphviz"
+    (doseq [_ (range 2)
+            :let [rte (gen-rte 5)]]
+      (rte-view rte))))
+
 (deftest t-valid-rte
   (testing "valid-rte?"
     (is (rte/valid-rte? :sigma))
