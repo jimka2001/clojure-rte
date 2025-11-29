@@ -3,7 +3,7 @@
   :url "git@gitlab.lre.epita.fr:jnewton/clojure-rte.git"
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
-  :plugins [[lein-cloverage "1.1.2"]
+  :plugins [[lein-cloverage "1.2.4"]
             [lein-ns-dep-graph "0.2.0-SNAPSHOT"]
             [cider/cider-nrepl "0.55.0"]
             ]
