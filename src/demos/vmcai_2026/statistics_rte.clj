@@ -21,7 +21,6 @@
             [xym.xymbolyco :as xym]
             [util.lock :as lock]
             [demos.vmcai-2026.statistics-inhabited]
-            [demos.vmcai-2026.statistics-rte]
             ))
 
 
