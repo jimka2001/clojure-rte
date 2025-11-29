@@ -23,6 +23,7 @@
      (:sigma :empty-set :epsilon) key
      ;;(:permute) (gen-rte :cat depth types)
      (:and :or :cat :contains-any
+           :missing-any
            :contains-every :contains-none) (cons key (map (fn [_k] (gen-rte (dec depth) types))
                                                           (range depth)))
      (:? :+ :* :not) (list key (gen-rte (dec depth) types)))))
