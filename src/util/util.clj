@@ -21,6 +21,7 @@
 
 (ns util.util
   (:require [clojure.pprint :refer [cl-format]]
+            [clojure.java.io :as io]
             [clojure.math :refer [round pow]]
             [clojure.data.csv :as csv]
             [clojure.java.shell :refer [sh]]
@@ -1141,3 +1142,11 @@
 
 (defn wrap [v _unused_key]
   v)
+
+(defn ensure-directory
+  "Ensure the given path name string corresponds to an actual directory,
+  returning the given string."
+  [dir]
+  (assert (string? dir))
+  (.mkdirs (io/file dir))
+  dir)

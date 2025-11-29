@@ -29,7 +29,8 @@
             [util.cl-compat :as cl]
             [graph.view :as view]
             [xym.xymbolyco :as xym]
-            [util.util :refer [member pprint-indent jdefn wrap]]
+            [util.util :refer [member pprint-indent jdefn wrap
+                               ensure-directory]]
             [clojure.java.shell :refer [sh]]))
 
 (def ^:dynamic *dot-path*
@@ -66,8 +67,9 @@
     [dot-string & {:keys [verbose view title dot-file-cb png-file-cb prefix dir]
                    :defaults {:prefix ""
                               :title "no-title"
-                              :dir (str "/tmp/" (System/getProperty "user.name"))
-                              :verbose false}
+                              :dir (ensure-directory
+                                    (str "/tmp/" (System/getProperty "user.name")))
+                              :verbose true}
                    :as arguments}]
   (let [uuid (random-uuid)
         png-file-name (str dir "/" prefix title "-" uuid ".png")
@@ -123,7 +125,8 @@
                 state-legend type-legend report-labels dot-file-cb png-file-cb abbrevs]
           :defaults {:title "no-title"
                      :prefix "dfa"
-                     :dir (str "/tmp/" (System/getProperty "user.name"))
+                     :dir (ensure-directory
+                           (str "/tmp/" (System/getProperty "user.name")))
                      :draw-sink false
                      :abbrev true
                      :abbrevs {}
@@ -140,10 +143,11 @@
    :post [((wrap vector? 141) %)]}
 
   (cond
-    view (let [[dot-string new-abbrevs] (dfa-to-dot dfa (assoc all-optionals :view false))]
-           (dot-view dot-string all-optionals)
-           (assert (map? new-abbrevs) "line 148")
-           [dot-string new-abbrevs])
+    view
+    (let [[dot-string new-abbrevs] (dfa-to-dot dfa (assoc all-optionals :view false))]
+      (dot-view dot-string all-optionals)
+      (assert (map? new-abbrevs) "line 148")
+      [dot-string new-abbrevs])
     
     (seq? dfa)
     (dfa-to-dot (rte-to-dfa dfa) all-optionals)
@@ -298,12 +302,13 @@
      This map is an extension of the given abbrevs map."
   [dfa title & {:keys [abbrevs draw-sink report-labels dir]
                 :defaults {:abbrevs {}
-                           :dir (str "/tmp/" (System/getProperty "user.name"))
+                           :dir (ensure-directory
+                                 (str "/tmp/" (System/getProperty "user.name")))
                            :report-labels true
                            :draw-sink false}
                 :as opts}]
   {:post [((wrap vector? 303) %)]}
-  (dfa-to-dot dfa opts))
+  (dfa-to-dot dfa (assoc opts :view true)))
 
 (jdefn bdd-to-dot 
   "Create (and possibly display) a graphical image rendering the given Bdd
