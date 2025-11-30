@@ -26,6 +26,7 @@
             [rte-tester :refer [test-rte-not-1]]
             [rte-extract :refer [dfa-to-rte]]
             [rte-randomize-syntax :as rrte]
+            [demos.conj-2025.random :refer [tbnl-rte-by-size]]
             [xym.xymbolyco :as xym]
             [xym.xym-tester :refer [gen-dfa build-state-map]]
             [genus.bdd :as bdd]
@@ -635,8 +636,10 @@
 (deftest t-synchronize-subset
   (testing "synchronized subset"
     (doseq [_ (range 4)
-            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
-                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+            :let [rte-1 (tbnl-rte-by-size 10)
+                  rte-2 (tbnl-rte-by-size 10)
+                  dfa-1 (rte-to-dfa rte-1)
+                  dfa-2 (rte-to-dfa rte-2)
                   dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]
       (if (xym/dfa-subset? dfa-1 dfa-2)
         (is (xym/dfa-vacuous? dfa-and-not false))))))
@@ -644,16 +647,20 @@
 (deftest t-synchronize-intersect
   (testing "synchronized product intersect"
     (doseq [_ (range 4)
-            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
-                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+            :let [rte-1 (tbnl-rte-by-size 10)
+                  rte-2 (tbnl-rte-by-size 10)
+                  dfa-1 (rte-to-dfa rte-1)
+                  dfa-2 (rte-to-dfa rte-2)
                   dfa-intersect (xym/synchronized-intersection dfa-1 dfa-2)]]
       (is dfa-intersect))))
 
 (deftest t-synchronize-union
   (testing "synchronized product union"
     (doseq [_ (range 4)
-            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
-                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+            :let [rte-1 (tbnl-rte-by-size 10)
+                  rte-2 (tbnl-rte-by-size 10)
+                  dfa-1 (rte-to-dfa rte-1)
+                  dfa-2 (rte-to-dfa rte-2)
                   dfa-union (xym/synchronized-union dfa-1 dfa-2)]]
 
       (is dfa-union)
@@ -662,8 +669,10 @@
 (deftest t-synchronize-and-not
   (testing "synchronized and-not"
     (doseq [_ (range 4)
-            :let [dfa-1 (gen-dfa :num-states 10 :num-transitions 20 )
-                  dfa-2 (gen-dfa :num-states 10 :num-transitions 20 )
+            :let [rte-1 (tbnl-rte-by-size 10)
+                  rte-2 (tbnl-rte-by-size 10)
+                  dfa-1 (rte-to-dfa rte-1)
+                  dfa-2 (rte-to-dfa rte-2)
                   dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]
 
       (is dfa-and-not))))
