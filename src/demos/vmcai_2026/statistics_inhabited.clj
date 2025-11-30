@@ -381,8 +381,6 @@
         sid (summarize-inhabited-data)
         round-2 (fn [val] (format "%3.2f" (float val)))
         ]
-    (pprint [:ssd ssd])
-    (pprint [:sid sid])
     (printf "---------------\n")
     (lock/with-lock
       (with-open [out-file (java.io.FileWriter. statistics-tex-path)]
