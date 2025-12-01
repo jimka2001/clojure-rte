@@ -432,7 +432,7 @@
   (let [labels (map first (:transitions state))]
     (and (not-empty labels)
          (or (member :sigma labels)
-             (bdd/type-subtype? :sigma (cons 'or labels))))))
+             (gns/subtype? :sigma (cons 'or labels) false)))))
 
 (defn find-incomplete-states
   "Return a sequence containing all the State's of the given Dfa which are not complete,
