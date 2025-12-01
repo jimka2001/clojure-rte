@@ -202,7 +202,7 @@
         (printf "+---------------------------------\n")
         (printf "|Transitions labels for %s %s\n" prefix title)
         (printf "+---------------------------------\n")
-        (doseq [[td idx] (sort (into [] abbrevs))]
+        (doseq [[td idx] (sort-by second (into [] abbrevs))]
           (printf "|       t%d= "idx)
           (pprint-indent td :indent "|     "))
         (printf "+---------------------------------\n"))
