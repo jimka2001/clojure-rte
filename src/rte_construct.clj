@@ -2184,8 +2184,8 @@
          [triples derivatives] (find-all-derivatives pattern)
          derivatives (cons pattern (remove #{pattern} derivatives))
          index-map (zipmap derivatives (range (count derivatives)))
-         triples (map (fn [[primative wrt deriv]]
-                        [(index-map primative) wrt (index-map deriv)]
+         triples (map (fn [[primitive wrt deriv]]
+                        [(index-map primitive) wrt (index-map deriv)]
                         ) triples)
          grouped-by-src (group-by first triples)
          exit-value-function (constantly exit-value)
