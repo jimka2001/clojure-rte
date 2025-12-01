@@ -56,7 +56,13 @@
 (defmethod print-method State [v w]
   (.write w (format "#<State %s>" (:index v))))
 
-(defrecord Dfa [pattern canonicalized states exit-map combine-labels])
+(defrecord Dfa
+    ;; :pattern
+    ;; :canonicalized
+    ;; :states map index -> State
+    ;; :exit-map
+    ;; :combine-labels
+    [pattern canonicalized states exit-map combine-labels])
 
 (defn record-name
   []
@@ -147,14 +153,39 @@
                                           ids)))
     dfa))
 
+(defn check-dfa-map [& {:keys [pattern canonicalized states exit-map combine-labels]
+                        :as dfa-map}]
+  ;; don't know how to call rte/valid-rte? because rte-construct already depends on xymbolyco,
+  ;;    cannot make xymbolyco depend on rte-construct.
+  ;;(if (contains? dfa-map :pattern)
+  ;;    (assert (rte/valid-rte? pattern)))
+  ;;  (if (contains? dfa-map :canonicalized)
+  ;;    (assert (rte/valid-rte? canonicalized)))
+  (if (contains? dfa-map :states)
+    (assert (map? states))
+    (assert (every? int? (keys states))))
+  (if (contains? dfa-map :exit-map )
+    (assert (every? (fn [k]
+                      (or (= :default k)
+                          (int? k))) (keys exit-map))))
+  (if (contains? dfa-map :combine-labels)
+    (assert (fn? combine-labels)))
+  nil)
+                     
+
 (defn make-dfa
   "Dfa factory function, which checks consistency"
   ([map]
+   (check-dfa-map map)
    (make-dfa {} map))
   ([old-dfa new-attribute-map]
-   (let [new-dfa (map->Dfa (merge old-dfa new-attribute-map))]
+   (check-dfa-map old-dfa)
+   (check-dfa-map new-attribute-map)
+   (let [merged (merge old-dfa new-attribute-map)
+         new-dfa (map->Dfa merged)]
      (check-dfa new-dfa)
      new-dfa)))
+
 
 (defn serialize-state
   "Serialize a State for debugging"

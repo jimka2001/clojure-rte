@@ -684,3 +684,24 @@
 
 ;;  (dot/dfa-view dfa "random")
 ;;  (dot/dfa-view (minimize dfa) "random-min"))
+
+(deftest t-complete-2
+  (testing "complete t"
+    (let [dfa (xym/make-dfa {:exit-map {:default true}
+                             :combine-labels gns/combine-labels
+                             :states {0 (xym/map->State {:index 0
+                                                       :initial true
+                                                       :accepting false
+                                                       :transitions (list #_[td id]
+                                                                          ['(satisfies odd?) 2]
+                                                                          ['(satisfies even?) 2])})
+                                      1 (xym/map->State {:index 2
+                                                       :accepting true
+                                                       :transitions (list [:sigma 2])})}})]
+      (println [:states (xym/states-as-seq dfa)])
+      (println [:complete (map xym/complete-state? (xym/states-as-seq dfa))])
+      (println [:serialized (xym/serialize-dfa dfa)])
+      (println (xym/find-incomplete-states dfa))
+      
+      (is (not-empty (xym/find-incomplete-states dfa)))
+      (xym/complete dfa))))

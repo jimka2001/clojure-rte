@@ -2218,7 +2218,7 @@
          states (map mapper
                      derivatives
                      (range (count derivatives)))
-         dfa (xym/map->Dfa
+         dfa (xym/make-dfa
               {:pattern given-pattern
                :canonicalized pattern
                :exit-map exit-value-function
