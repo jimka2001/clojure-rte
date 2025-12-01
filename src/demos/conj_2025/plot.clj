@@ -122,7 +122,6 @@
         state-count-to-dfa-count (map (fn [[state-count lines-per-count]]
                                         [state-count (count lines-per-count)])
                                       (group-by :state-count csv-lines))
-        _ (println [:state-count-to-dfa-count state-count-to-dfa-count])
         xys (for [[this-state-count _list] state-count-to-dfa-count
                   :let [n (reduce + (for [[state-count num-lines] state-count-to-dfa-count
                                           :when (>= state-count this-state-count)]
