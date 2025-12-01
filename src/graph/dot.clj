@@ -156,21 +156,21 @@
     (let [sink-states (xym/find-sink-states dfa)
           visible-states (if draw-sink
                            (xym/states-as-seq dfa)
-                           (remove (fn [q] (member q sink-states)) (xym/states-as-seq dfa)))
+                           (remove (fn dot-159 [q] (member q sink-states)) (xym/states-as-seq dfa)))
           visible-state-ids (map :index visible-states)
           transition-labels (distinct (for [q visible-states
                                             [label dst-id] (:transitions q)
                                             :when (member dst-id visible-state-ids)]
                                         label))          
           ;; find smallest non-negative integer not in the used list
-          new-index (fn [used]
+          new-index (fn dot-166 [used]
                       (loop [guess 0]
                         (if (member guess used)
                           (recur (inc guess))
                           guess)))
 
           ;; we already have some abbrevs, we need to merge some new ones in
-          abbrevs (merge abbrevs (reduce (fn [acc-map td]
+          abbrevs (merge abbrevs (reduce (fn dot-173 [acc-map td]
                                            (if (get acc-map td)
                                              acc-map
                                              (assoc acc-map td (new-index (vals acc-map)))))
@@ -178,13 +178,13 @@
           _ (assert (map? abbrevs) "failed map? line 178")
           labels (clojure.set/map-invert abbrevs)
           accepting-states (filter :accepting (xym/states-as-seq dfa))
-          all-final-function (every? (fn [q] (fn? (xym/exit-value dfa q)))
+          all-final-function (every? (fn dot-181 [q] (fn? (xym/exit-value dfa q)))
                                      accepting-states)
           function-table (if all-final-function
                            (into {}
                                  (for [q accepting-states]
                                    [(xym/exit-value dfa q) (format "fn-%d" (:index q))])))
-          state-text (fn [q] 
+          state-text (fn dot-187 [q] 
                        (with-out-str
                          (printf "[")
                          (when (:accepting q)
@@ -194,7 +194,7 @@
                            (printf "%s" (:description q)))
                          (printf "\"")
                          (printf "]")))
-          all-final-true (every? (fn [q] (= true (xym/exit-value dfa q)))
+          all-final-true (every? (fn dot-197 [q] (= true (xym/exit-value dfa q)))
                                  accepting-states)]
       :report-labels false
 
@@ -226,7 +226,7 @@
                       (str/replace
                        (str/join
                         "" (concat (if type-legend
-                                     (mapcat (fn [index]
+                                     (mapcat (fn dot-229 [index]
                                                ;; only if the label actually exists in dfa
                                                (if (member (labels index) transition-labels)
                                                  [(cl-format false "\\lt~a= ~a"
@@ -281,7 +281,7 @@
                                     type-desigs)
                            label (str/join "," labels)
                            ;; draw indeterminate transitions as dashed lines
-                           inh-text (if (some (fn [td] (gns/inhabited? td false)) type-desigs)
+                           inh-text (if (some (fn dot-284 [td] (gns/inhabited? td false)) type-desigs)
                                       ""
                                       ",style=dashed")
                            ]]
