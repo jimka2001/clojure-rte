@@ -24,7 +24,7 @@
         dfa (rte/rte-to-dfa rte)
         ]
     (rte-view rte :title "rte")
-    (dot/dfa-view dfa :title "dfa")))
+    (dot/dfa-view dfa "dfa")))
 
 ;; (demo-1)
 

@@ -16,6 +16,9 @@
 
 (deftest statistics-inhabited
   (testing "statistics-inhabited"
+    (di/slurp-inhabited-data)
+    (di/slurp-subset-data)
+    (di/summarize-inhabited-data)
     (di/summarize-inhabited-subset-data )
     (di/plot-inhabited-subset-summary)
     (di/update-inhabited-subset-csv 2 5 2)

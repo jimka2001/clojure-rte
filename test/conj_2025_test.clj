@@ -4,6 +4,7 @@
             [rte-construct            :as rte]
             [util.util :refer [human-readable-current-time]]
             [demos.conj-2025.gen            :as gen]
+            [demos.conj-2025.demo :as demo]
             [demos.conj-2025.plot :as sut]))
 
 (def test-verbose true)
@@ -42,3 +43,14 @@
   (testing "gen-by-size"
     (doseq [algo gen/algos]
       (cli/test-main algo 1))))
+
+(deftest demo
+  (testing "demo"
+    (demo/demo-1)
+    (demo/missile-demo '(true true))
+    (demo/missile-demo '(false "hello" 3 true true true))
+    (demo/missile-demo '(true "hello"))
+    (demo/missile-demo '(true 3))
+    (demo/missile-demo '(true "3" 3))
+    (demo/missile-demo '(true "3" 3 true))))
+    

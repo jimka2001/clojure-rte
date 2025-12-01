@@ -140,6 +140,10 @@
     (doseq [_ (range 100)
             :let [rte (rrte/gen-rte 6)
                   dfa (rte-to-dfa rte)]]
+      (xym/check-dfa dfa)
+      (xym/check-dfa (xym/trim dfa))
+      (xym/check-dfa (xym/minimize dfa))
+      (xym/check-dfa (xym/trim (xym/minimize dfa)))      
       (xym/check-dfa (xym/complete (xym/trim dfa)))
       (xym/check-dfa (xym/complete (xym/trim (xym/minimize dfa)))))))
 

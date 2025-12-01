@@ -1133,6 +1133,8 @@
     `(defn ~name ~doc-string
        #_{:arglists '([~@prefix & ~the-map])}
        [~@prefix & {:as ~the-var}]
+       (assert (map? ~defaults) (format "defaults must be a map: not %s" ~defaults))
+       (assert (or (nil? ~the-var) (map? ~the-var)) (format "%s must be a map: not %s" '~the-var ~the-var))
          (let [~stripped-map (merge ~defaults
                                     ~the-var)
                f# (fn [] ~@condition-map ~@body)
