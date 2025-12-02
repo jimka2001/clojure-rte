@@ -122,10 +122,10 @@
   (assert (:combine-labels dfa) (format "missing :combine-labels in Dfa %s" dfa))
   (assert (map? (:states dfa))  (cl-format false "states must be a map, not a ~A: ~A" (type (:states dfa)) (:states dfa)))
   (let [ids (set (ids-as-seq dfa))]
-    (doseq [id (keys (states-as-map dfa))
-            q (get (states-as-seq dfa) id)]
+    (doseq [[id q] (states-as-map dfa)]
+      (assert q (cl-format nil "no state ~A in dfa ~A: states are ~A" id dfa (states-as-map dfa)))
       (assert (instance? State q) (cl-format false "expecting a State, got a ~A, ~A" (type q) q))
-      (assert (:index q) (format "state %s has emtpy :index" q))
+      (assert (:index q) (format "state %s has empty :index" q))
       (assert (= q (state-by-index dfa (:index q)))
               (format "state %s disagrees with its index %s" q (:index q)))
 
