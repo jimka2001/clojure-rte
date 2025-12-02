@@ -165,13 +165,16 @@
     (assert (map? states))
     (assert (every? int? (keys states))))
   (if (contains? dfa-map :exit-map )
-    (assert (every? (fn [k]
-                      (or (= :default k)
-                          (int? k))) (keys exit-map))))
+    (do (assert (map? exit-map)
+                (format "expecting exit-map to be a map: not %s" exit-map))
+        (assert (every? (fn [k]
+                          (or (= :default k)
+                              (int? k)))
+                        (keys exit-map)) (format "expecting exit map to have :default or integer keys: not %s" (keys exit-map)))))
   (if (contains? dfa-map :combine-labels)
     (assert (fn? combine-labels)))
   nil)
-                     
+
 
 (defn make-dfa
   "Dfa factory function, which checks consistency"

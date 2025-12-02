@@ -22,7 +22,7 @@
 (ns rte-case-test
   (:require [rte-core]
             [genus.genus :as gns]
-            [util.util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time parse-prefixed-keyword-args]]
             [rte-construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
             [rte-case :refer [rte-case destructuring-case
@@ -175,6 +175,60 @@
             `(fn ~'conv-1-7 ~'[[a b] c d]
                12)]))))
 
+
+(deftest t-destructuring-case-expand
+  (testing "destructuring-case 177"
+    (let [[o1 o2 o3 :as os] (macroexpand '(rte-case/destructuring-case '(true ["hello" 3] true)
+                                    [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
+                                    100
+                                    
+                                    [[_a _b]          {_a Boolean _b (or String Boolean)}]
+                                    200))]
+      (println [:os os])
+      #_(apply
+          (-destructuring-fn-many
+            :line
+            1
+            :column
+            30
+            :file
+            "*cider-repl rte/clojure-rte:localhost:52743(clj)*"
+            nil
+            ([[_a [_b _c] & _d] {_a Boolean, _b String, _d Boolean}] 100)
+            ([[_a _b] {_a Boolean, _b (or String Boolean)}] 200))
+          '(true ["hello" 3] true))
+
+      (is (= o1 'clojure.core/apply))
+      (is (= o3 ''(true ["hello" 3] true)))
+      (let [[o21 o22 o23 o24 o25 o26 o27 & o28] o2]
+        (is (= o21 'rte-case/-destructuring-fn-many))
+        (is (= o22 :line))
+        (is (int? o23))
+        (is (= o24 :column))
+        (is (int? o25))
+        (is (= o26 :file))
+        (is (string? o27))
+        (is (= o28 '(nil
+                     ([[_a [_b _c] & _d] {_a Boolean, _b String, _d Boolean}] 100)
+                     ([[_a _b] {_a Boolean, _b (or String Boolean)}] 200)))))
+      
+      (let [[r1 r2] (parse-prefixed-keyword-args (rest o2))]
+        (is (map? r1))
+        (is (contains? r1 :column))
+        (is (int? (:column r1)))
+        (is (contains? r1 :file))
+        (is (string? (:file r1)))
+        (is (contains? r1 :line))
+        (is (int? (:line r1)))
+        (is (= r2 '(nil
+                    ([[_a [_b _c] & _d] {_a Boolean, _b String, _d Boolean}] 100)
+                    ([[_a _b] {_a Boolean, _b (or String Boolean)}] 200))
+               )))
+      (let [m (macroexpand o2)]
+        (is m)
+        )
+      )
+))
 
 (deftest t-destructuring-case-failure-177
   (testing "destructuring-case 177"

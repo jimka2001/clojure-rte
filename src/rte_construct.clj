@@ -2188,7 +2188,7 @@
                         [(index-map primitive) wrt (index-map deriv)]
                         ) triples)
          grouped-by-src (group-by first triples)
-         exit-value-function (constantly exit-value)
+         exit-map {:default exit-value}
          mapper (fn [deriv index]
                   (let [from-src (map rest (grouped-by-src index))
                         grouped-by-dst (group-by second from-src)
@@ -2221,7 +2221,7 @@
          dfa (xym/make-dfa
               {:pattern given-pattern
                :canonicalized pattern
-               :exit-map exit-value-function
+               :exit-map exit-map
                :combine-labels gns/combine-labels
                :states (into {} states)})
          ]
