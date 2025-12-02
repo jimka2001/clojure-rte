@@ -464,7 +464,7 @@
   "Internal macro used in the expansion of destructuring-fn
    E.g.
   (-destructuring-fn-many
-    meta-data
+    meta-data...
     nil
     ([[[a b] c d] {}] (list :first a b c d))
     ([[a [b c] d] {}] (list :second a b c d)))
@@ -473,8 +473,10 @@
   (let [[keywords args] (parse-prefixed-keyword-args args)
         call-site-meta-data (merge (assoc (meta &form) :file *file*)
                                    keywords)]
+
     (cond (empty? args)
-          nil
+          nil ;; TODO, i think this is an error,
+          ;;     the macro should expand to code which evaluates to a function
           
           (and (not (symbol? (first args)))
                (not (= nil (first args))))
