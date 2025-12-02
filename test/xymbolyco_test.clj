@@ -298,14 +298,13 @@
 (deftest t-discovered-261
   (testing "discovered test case 261"
     ;;   actual: java.lang.AssertionError: Assert failed: 187: dfa not equivalent with self rte=(:contains-every :epsilon (= (1 2 3)) (satisfies seq?) (:and java.io.Serializable java.lang.CharSequence (:contains-every (:? (:contains-any)) (:and (:? :epsilon)))))
-    (doseq [r1 ['(:contains-every :epsilon
+    (let [r1 '(:contains-every :epsilon
                                   (= (1 2 3))
                                   (satisfies seq?)
                                   (:and java.io.Serializable
                                         java.lang.CharSequence
                                         (:contains-every (:? (:contains-any))
-                                                         (:and (:? :epsilon)))))]]
-
+                                                         (:and (:? :epsilon)))))]
       (with-compile-env []
         (let [dfa (rte-to-dfa r1)
               dfa-complement (xym/complement dfa)
@@ -313,9 +312,9 @@
               eq1 (xym/dfa-equivalent? dfa
                                        dfa)
               eq2 (xym/dfa-equivalent? dfa-not-rte
-                                           dfa-not-rte)
+                                       dfa-not-rte)
               eq3 (xym/dfa-equivalent? dfa-complement
-                                           dfa-not-rte)
+                                       dfa-not-rte)
               xor1 (xym/synchronized-xor dfa dfa)
               xor1-min (xym/minimize xor1)
               ]
@@ -325,24 +324,24 @@
                          "z1: dfa not equivalent (returned ~A) with self r1=~A" eq1 r1))
 
           (if (not eq2)
-              (do (dot/dfa-view dfa-not-rte "eq2")
-                  (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-not-rte)
-                                "eq2-xor")))
+            (do (dot/dfa-view dfa-not-rte "eq2")
+                (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-not-rte)
+                              "eq2-xor")))
           
           (is eq2
-                (cl-format false
-                           "z2: dfa of :not, not equivalent (returned ~A) with self r1=~A" eq2 (list :not r1)))
+              (cl-format false
+                         "z2: dfa of :not, not equivalent (returned ~A) with self r1=~A" eq2 (list :not r1)))
 
           (if (not eq3)
-              (let [abbrevs-1 (dot/dfa-view dfa-not-rte "eq3-not")
-                    abbrevs-2 (dot/dfa-view dfa-complement "eq3-complement")
-                    abbrevs-3 (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-complement)
-                                            "eq3-xor")]
-                ))
+            (let [abbrevs-1 (dot/dfa-view dfa-not-rte "eq3-not")
+                  abbrevs-2 (dot/dfa-view dfa-complement "eq3-complement")
+                  abbrevs-3 (dot/dfa-view (xym/synchronized-xor dfa-not-rte dfa-complement)
+                                          "eq3-xor")]
+              ))
           
           (is eq3
-                (cl-format false
-                           "z3: !dfa != (dfa (not r1)), (returned ~A) when r1=~A" eq3 r1))
+              (cl-format false
+                         "z3: !dfa != (dfa (not r1)), (returned ~A) when r1=~A" eq3 r1))
           ))
       (test-rte-not-1 r1)
 
@@ -695,7 +694,7 @@
                                                        :transitions (list #_[td id]
                                                                           ['(satisfies odd?) 2]
                                                                           ['(satisfies even?) 2])})
-                                      1 (xym/map->State {:index 2
+                                      2 (xym/map->State {:index 2
                                                        :accepting true
                                                        :transitions (list [:sigma 2])})}})]
       (println [:states (xym/states-as-seq dfa)])
