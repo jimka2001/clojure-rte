@@ -184,7 +184,6 @@
                                     
                                     [[_a _b]          {_a Boolean _b (or String Boolean)}]
                                     200))]
-      (println [:os os])
       #_(apply
           (-destructuring-fn-many
             :line
