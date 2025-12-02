@@ -137,7 +137,7 @@
               [label-2 dst-2] (:transitions q)
               :when (not (= [label-1 dst-1]
                             [label-2 dst-2]))]
-        (assert (bdd/type-disjoint? label-1 label-2)
+        (assert (gns/disjoint? label-1 label-2 true)
                 (cl-format false "overlapping types ~A vs ~A in ~A transitions ~A"
                            label-1 label-2 q (:transitions q))))
       (doseq [:let [trans-labels (map first (:transitions q))]
