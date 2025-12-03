@@ -72,8 +72,8 @@ type.
 
 If your application requires genus-spec e.g.,
 ```clojure
-(require '[clojure-rte.genus :as gns])
-(require '[clojure-rte.genus-spec :as gs])
+(require '[genus.genus :as gns])
+(require '[genus.genus-spec :as gs])
 ```
 
 A type designator such as `(spec X)` designates the set of all Clojure
@@ -82,8 +82,8 @@ objects which validate the spec X; i.e., validates in the sense of the
 
 ```clojure
 (require '[clojure.spec.alpha :as s])
-(require '[clojure-rte.genus :as gns])
-(require '[clojure-rte.rte-construct :as rte])
+(require '[genus.genus :as gns])
+(require '[rte.construct :as rte])
 (require '[backtick :refer [template]])
 
 (s/def ::test-spec-1 (s/* (s/alt :1  (s/cat :3 neg? :4 even?)  
