@@ -19,16 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns rte-tester
+(ns rte.tester
   (:require [util.tester :as tester]
             [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format]]
             [clojure.math :refer [pow round]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [*test-types*]]
-            [rte-randomize-syntax :refer [gen-rte]]
-            [rte-extract :refer [dfa-to-rte]]
-            [rte-construct :refer [with-compile-env rte-to-dfa  nullable?
+            [rte.randomize-syntax :refer [gen-rte]]
+            [rte.extract :refer [dfa-to-rte]]
+            [rte.construct :refer [with-compile-env rte-to-dfa  nullable?
                                    canonicalize-pattern canonicalize-pattern-once
                                    canonicalize-pattern-once]]
             ))

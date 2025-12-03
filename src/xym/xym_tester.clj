@@ -2,8 +2,8 @@
   (:require [genus.genus :as gns]
             [graph.dot :as dot]
             [clojure.pprint :refer [pprint]]
-            [rte-construct :refer [rte-to-dfa]]
-            [rte-extract :refer [dfa-to-rte]]
+            [rte.construct :refer [rte-to-dfa]]
+            [rte.extract :refer [dfa-to-rte]]
             [genus.genus-tester :refer [gen-inhabited-type
                                   gen-indeterminate-type]]
             [xym.xymbolyco :as xym]

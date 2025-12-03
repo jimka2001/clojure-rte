@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns util-test
-  (:require [rte-core]
+  (:require [rte.core]
             [clojure.pprint :refer [cl-format]]
             [util.util :as sut]
             [clojure.string :as str]

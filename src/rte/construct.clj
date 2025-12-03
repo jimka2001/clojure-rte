@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns rte-construct
+(ns rte.construct
   (:refer-clojure :exclude [compile])
   (:require [genus.genus :as gns]
             [util.util :refer [member exists setof forall
@@ -44,7 +44,7 @@
 )
 
 ;; allow rte/ prefix even in this file.
-(alias 'rte 'rte-construct)
+(alias 'rte 'rte.construct)
 
 (declare canonicalize-pattern)
 (declare rte/compile rte-to-dfa)

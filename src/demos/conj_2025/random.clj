@@ -1,5 +1,5 @@
 (ns demos.conj-2025.random
-  (:require [rte-construct :as rte]
+  (:require [rte.construct :as rte]
             [genus.genus :as gns]
             [clojure.math :refer [random pow]]
             [genus.genus-tester :refer [*test-types*]]

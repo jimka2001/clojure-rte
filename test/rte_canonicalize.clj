@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-canonicalize
-  (:require [rte-core]
-            [rte-construct :as rte
+  (:require [rte.core]
+            [rte.construct :as rte
              :refer [canonicalize-pattern with-compile-env ]]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]

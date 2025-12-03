@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns genus-spec-test
-  (:require [rte-core]
-            [rte-construct :as rte]
+  (:require [rte.core]
+            [rte.construct :as rte]
             [clojure.pprint :refer [cl-format pprint]]
             [util.util :refer [forall human-readable-current-time]]
             [genus.genus :as gns]

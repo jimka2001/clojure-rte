@@ -1,4 +1,4 @@
-(ns rte-randomize-syntax
+(ns rte.randomize-syntax
   (:require [genus.genus-tester :refer [*test-types*]])
 )
 

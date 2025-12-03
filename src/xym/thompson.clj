@@ -28,7 +28,7 @@
                                       find-first
                                       partition-by-pred
                                       non-empty? exists setof trace-graph group-map]]
-            [rte-construct :as rte]
+            [rte.construct :as rte]
             [genus.genus :as gns]
             [clojure.pprint :refer [cl-format]]
             [genus.bdd]

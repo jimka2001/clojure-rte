@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns genus-conversion-test
-  (:require [rte-core]
+  (:require [rte.core]
             [util.util :refer [human-readable-current-time]]
             [genus.genus :as gns]
             [backtick :refer [template]]

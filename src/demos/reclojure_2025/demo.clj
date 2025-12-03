@@ -1,7 +1,7 @@
 (ns demos.reclojure-2025.demo
-  (:require [rte-case :refer [rte-case dscase rte-case-fn dsdefn]]
+  (:require [rte.case :refer [rte-case dscase rte-case-fn dsdefn]]
             [genus.genus :as gns]
-            [rte-construct :as rte]
+            [rte.construct :as rte]
             [xym.xymbolyco :as xym]
             [genus.typecase :refer [typecase]]
             [graph.dot :as dot])

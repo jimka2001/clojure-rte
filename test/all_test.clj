@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns all-test
-  (:require  [rte-core]
+  (:require  [rte.core]
              clojure.test
              api-test
              bdd-test

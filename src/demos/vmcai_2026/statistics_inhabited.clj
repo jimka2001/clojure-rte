@@ -7,7 +7,7 @@
             [genus.genus :as gns]
             [xym.xymbolyco :as xym]
             [xym.xym-tester :refer [gen-dfa]]
-            [rte-construct :refer [rte-to-dfa]]
+            [rte.construct :refer [rte-to-dfa]]
             [graph.view :as view]
 ))
 

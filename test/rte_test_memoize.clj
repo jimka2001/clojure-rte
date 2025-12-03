@@ -20,9 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-test-memoize
-  (:require [rte-core]
+  (:require [rte.core]
             [util.util :refer [human-readable-current-time]]
-            [rte-construct :as rte]
+            [rte.construct :as rte]
             [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 

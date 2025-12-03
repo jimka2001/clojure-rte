@@ -6,8 +6,8 @@
    [util.lock :as lock]
    [util.util :refer [ensure-directory]]
    [genus.genus :as gns]
-   [rte-construct :as rte]
-   [rte-graphviz :refer [rte-view]]
+   [rte.construct :as rte]
+   [rte.graphviz :refer [rte-view]]
    [demos.conj-2025.csv :refer [statistics-resource write-csv-statistic csv-file-name]]
    [demos.conj-2025.random :refer [tree-split-rte-linear
                                    tree-split-rte-gaussian

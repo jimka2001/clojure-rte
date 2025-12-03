@@ -19,12 +19,12 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns rte-case
+(ns rte.case
   (:require [xym.xymbolyco :as xym]
             [graph.dot :as dot]
             [genus.genus :as gns]
             [util.util :refer [member non-empty? with-outstring parse-prefixed-keyword-args flatten-1]]
-            [rte-construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
+            [rte.construct :as rte :refer [rte-to-dfa canonicalize-pattern sigma-*
                                                ]]
             [clojure.pprint :refer [cl-format pprint]]
             [backtick :refer [template]]

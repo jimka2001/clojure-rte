@@ -391,7 +391,7 @@
    (let [[_satisfies pred] type-designator]
      (cl/cl-cond
       ((fn? pred)
-       ;; If we are looking at (satisfies #function[clojure-rte.rte-core/eval16169/fn--16170])
+       ;; If we are looking at (satisfies #function[clojure-rte.rte.core/eval16169/fn--16170])
        ;;   then just leave it as it is.
        type-designator)
       ((type-predicate-to-type-designator (second type-designator)))

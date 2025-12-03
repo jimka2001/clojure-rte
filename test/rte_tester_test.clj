@@ -20,18 +20,18 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-tester-test
-  (:require [rte-core]
+  (:require [rte.core]
             [util.util :refer [human-readable-current-time]]
             [clojure.pprint :refer [cl-format]]
-            [rte-construct :as rte :refer [canonicalize-pattern]]
+            [rte.construct :as rte :refer [canonicalize-pattern]]
             [xym.xymbolyco :as xym]
-            [rte-tester :refer [test-rte-to-dfa test-rte-not-nullable
+            [rte.tester :refer [test-rte-to-dfa test-rte-not-nullable
                                 test-canonicalize-pattern
                                 test-rte-canonicalize-nullable
                                 test-rte-not
                                 rte-components
                                 ]]
-            [rte-randomize-syntax :refer [gen-rte *rte-keywords*]]
+            [rte.randomize-syntax :refer [gen-rte *rte-keywords*]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [*test-types* gen-inhabited-type]]
             [clojure.test :refer [deftest is] :exclude [testing]]))
@@ -92,7 +92,7 @@
 
       (rte/nullable? rte)
       
-      (rte-tester/test-rte-canonicalize-nullable-1
+      (rte.tester/test-rte-canonicalize-nullable-1
         rte
         (fn [expr msg] (is expr msg)))
 )))
@@ -205,7 +205,7 @@
                              (:or (:+ (:and)) (:and (:+ (:or))))))
                   (:or (:? (:not (:cat (:contains-none)))))
                   )]
-      (rte-tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
+      (rte.tester/test-rte-not-1 rte (fn [expr message] (is expr message))))))
 
 (deftest t-rte-not-random
   (testing ":not random"

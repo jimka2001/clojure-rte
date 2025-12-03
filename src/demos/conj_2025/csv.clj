@@ -5,7 +5,7 @@
             [clojure.java.io :as io]
             [util.lock :as lock]
             [xym.xymbolyco :as xym]
-            [rte-construct :as rte]
+            [rte.construct :as rte]
             [util.util :refer [with-timeout]]            
 ))
 

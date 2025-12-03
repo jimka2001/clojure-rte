@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns api-test
-  (:require [rte-core]
-            [rte-construct :as rte :refer [with-compile-env]]
+  (:require [rte.core]
+            [rte.construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is testing]]))
 
 (defn -main []

@@ -21,7 +21,7 @@
 
 
 (ns bdd-test
-  (:require [rte-core]
+  (:require [rte.core]
             [genus.bdd :as bdd]
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type]]

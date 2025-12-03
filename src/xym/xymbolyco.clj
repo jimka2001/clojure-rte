@@ -155,8 +155,8 @@
 
 (defn check-dfa-map [& {:keys [pattern canonicalized states exit-map combine-labels]
                         :as dfa-map}]
-  ;; don't know how to call rte/valid-rte? because rte-construct already depends on xymbolyco,
-  ;;    cannot make xymbolyco depend on rte-construct.
+  ;; don't know how to call rte/valid-rte? because rte.construct already depends on xymbolyco,
+  ;;    cannot make xymbolyco depend on rte.construct.
   ;;(if (contains? dfa-map :pattern)
   ;;    (assert (rte/valid-rte? pattern)))
   ;;  (if (contains? dfa-map :canonicalized)

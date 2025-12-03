@@ -21,8 +21,8 @@
 
 
 (ns dot-test
-  (:require [rte-core]
-            [rte-construct :as rte :refer [with-compile-env]]
+  (:require [rte.core]
+            [rte.construct :as rte :refer [with-compile-env]]
             [graph.dot :as sut]
             [clojure.test :refer [deftest testing is]]))
 

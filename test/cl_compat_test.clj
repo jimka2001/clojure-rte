@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns cl-compat-test
-  (:require [rte-core]
+  (:require [rte.core]
             [util.cl-compat :as cl]
             [util.util :refer [call-with-collector human-readable-current-time]]
             [clojure.test :refer [deftest is]]))

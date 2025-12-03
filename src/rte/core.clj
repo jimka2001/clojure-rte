@@ -19,10 +19,10 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(ns rte-core
-  (:require [rte-construct]
-            [rte-case]
-            [rte-extract]
+(ns rte.core
+  (:require [rte.construct]
+            [rte.case]
+            [rte.extract]
             [genus.genus-spec]
             [genus.typecase]
             ))

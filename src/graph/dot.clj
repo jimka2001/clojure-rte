@@ -25,7 +25,7 @@
             [clojure.string :as str]
             [clojure.set]
             [genus.genus :as gns]
-            [rte-construct :refer [rte-to-dfa]]
+            [rte.construct :refer [rte-to-dfa]]
             [util.cl-compat :as cl]
             [graph.view :as view]
             [xym.xymbolyco :as xym]

@@ -1,7 +1,7 @@
 (ns conj-2025-test
   (:require [clojure.test :refer [deftest is]]
             [demos.conj-2025.cli :as cli]
-            [rte-construct            :as rte]
+            [rte.construct            :as rte]
             [util.util :refer [human-readable-current-time]]
             [demos.conj-2025.gen            :as gen]
             [demos.conj-2025.demo :as demo]

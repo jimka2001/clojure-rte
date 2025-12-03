@@ -21,11 +21,11 @@
 
 (ns xymbolyco-test
   (:refer-clojure :exclude [complement])
-  (:require [rte-core ]
-            [rte-construct :as rte :refer [rte-to-dfa with-compile-env]]
-            [rte-tester :refer [test-rte-not-1]]
-            [rte-extract :refer [dfa-to-rte]]
-            [rte-randomize-syntax :as rrte]
+  (:require [rte.core ]
+            [rte.construct :as rte :refer [rte-to-dfa with-compile-env]]
+            [rte.tester :refer [test-rte-not-1]]
+            [rte.extract :refer [dfa-to-rte]]
+            [rte.randomize-syntax :as rrte]
             [demos.conj-2025.random :refer [tbnl-rte-by-size]]
             [xym.xymbolyco :as xym]
             [xym.xym-tester :refer [gen-dfa build-state-map]]

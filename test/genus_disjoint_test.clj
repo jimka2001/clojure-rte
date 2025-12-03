@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns genus-disjoint-test
-  (:require [rte-core]
+  (:require [rte.core]
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type]]
             [backtick :refer [template]]

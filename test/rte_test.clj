@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-test
-  (:require [rte-core]
-            [rte-construct :as rte
+  (:require [rte.core]
+            [rte.construct :as rte
              :refer [nullable? first-types
                      canonicalize-pattern
                      derivative derivative-1
@@ -29,14 +29,14 @@
                      rte-inhabited? rte-vacuous? rte-to-dfa
                      with-rte]]
             [clojure.pprint :refer [cl-format]]
-            [rte-extract :refer [dfa-to-rte rte-equivalent?]]
+            [rte.extract :refer [dfa-to-rte rte-equivalent?]]
             [clojure.test :refer [deftest is] :exclude [testing]]
             [util.util :refer [member human-readable-current-time]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [*test-types* gen-type]]
-            [rte-randomize-syntax :refer [gen-rte]]
+            [rte.randomize-syntax :refer [gen-rte]]
             [graph.dot :as dot]
-            [rte-graphviz :refer [rte-to-dot rte-view]]
+            [rte.graphviz :refer [rte-to-dot rte-view]]
             [backtick :refer [template]]
             [xym.xymbolyco :as xym]))
 

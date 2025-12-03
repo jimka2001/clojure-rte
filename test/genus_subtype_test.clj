@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns genus-subtype-test
-  (:require [rte-core]
+  (:require [rte.core]
             [genus.genus :as gns]
             [util.util :refer [human-readable-current-time]]
             [genus.genus-tester :refer [gen-type]]

@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns genus-test
-  (:require [rte-core]
-            [rte-construct :refer [with-compile-env]]
+  (:require [rte.core]
+            [rte.construct :refer [with-compile-env]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type *test-values* *test-types*]]
             [util.util :refer [member human-readable-current-time]]

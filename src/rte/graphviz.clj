@@ -1,10 +1,10 @@
-(ns rte-graphviz
+(ns rte.graphviz
   (:import [java.io File FileOutputStream])
   (:require [util.util :refer [member run-dot ensure-directory]]
             [genus.genus :as gns]
             [graph.view :refer [view-image]]
             [xym.xymbolyco :as xym]
-            [rte-construct :as rte])
+            [rte.construct :as rte])
 )
 
 ;;import adjuvant.Adjuvant.openGraphicalFile

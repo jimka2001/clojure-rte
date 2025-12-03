@@ -20,12 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns rte-case-test
-  (:require [rte-core]
+  (:require [rte.core]
             [genus.genus :as gns]
             [util.util :refer [human-readable-current-time parse-prefixed-keyword-args]]
-            [rte-construct :as rte :refer [with-compile-env]]
+            [rte.construct :as rte :refer [with-compile-env]]
             [clojure.test :refer [deftest is]]
-            [rte-case :refer [rte-case destructuring-case
+            [rte.case :refer [rte-case destructuring-case
                               clauses-to-dfa ;;clauses-to-dfa-impl
                               dsfn dscase
                               conv-1-case-clause lambda-list-to-rte
@@ -71,10 +71,10 @@
 (deftest t-clauses-to-dfa
   (testing "clauses-to-dfa"
     (is (= 0 (rte/match
-              ;; I don't know why it is necessary to prefix rte-core/clauses-to-dfa
+              ;; I don't know why it is necessary to prefix rte.core/clauses-to-dfa
               ;; otherwise the loader complains:
               ;; java.lang.RuntimeException: Unable to resolve symbol: clauses-to-dfa in this context
-              (#'rte-case/clauses-to-dfa
+              (#'rte.case/clauses-to-dfa
 
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
@@ -87,7 +87,7 @@
         "case-0")
 
     (is (= 1 (rte/match
-              (#'rte-case/clauses-to-dfa
+              (#'rte.case/clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -99,7 +99,7 @@
         "case-1")
 
     (is (= 2 (rte/match
-              (#'rte-case/clauses-to-dfa
+              (#'rte.case/clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -111,7 +111,7 @@
         "case-2")
 
     (is (= 3 (rte/match
-              (#'rte-case/clauses-to-dfa
+              (#'rte.case/clauses-to-dfa
                '[[0 (:and (:* Long) (:not (:or)))]
                  [1 (:and (:* Boolean) (:not (:or (:* Long))))]
                  [2 (:and (:* String) (:not (:or (:* Boolean) (:* Long))))]
@@ -178,7 +178,7 @@
 
 (deftest t-destructuring-case-expand
   (testing "destructuring-case 177"
-    (let [[o1 o2 o3 :as os] (macroexpand '(rte-case/destructuring-case '(true ["hello" 3] true)
+    (let [[o1 o2 o3 :as os] (macroexpand '(rte.case/destructuring-case '(true ["hello" 3] true)
                                     [[_a [_b _c] & _d]  {_a Boolean _b String _d Boolean}]
                                     100
                                     
@@ -200,7 +200,7 @@
       (is (= o1 'clojure.core/apply))
       (is (= o3 ''(true ["hello" 3] true)))
       (let [[o21 o22 o23 o24 o25 o26 o27 & o28] o2]
-        (is (= o21 'rte-case/-destructuring-fn-many))
+        (is (= o21 'rte.case/-destructuring-fn-many))
         (is (= o22 :line))
         (is (int? o23))
         (is (= o24 :column))

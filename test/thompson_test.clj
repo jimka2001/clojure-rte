@@ -23,11 +23,11 @@
   (:require [xym.thompson :as tom]
             [genus.genus :as gns]
             [util.util :refer [human-readable-current-time]]
-            [rte-core]
-            [rte-construct :as rte]
+            [rte.core]
+            [rte.construct :as rte]
             [xym.xymbolyco :as xym]
-            [rte-tester :as test]
-            [rte-randomize-syntax :refer [gen-rte]]
+            [rte.tester :as test]
+            [rte.randomize-syntax :refer [gen-rte]]
             [clojure.test :refer [deftest is]]))
 
 
