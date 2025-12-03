@@ -1,6 +1,6 @@
 (ns rte-graphviz
   (:import [java.io File FileOutputStream])
-  (:require [util.util :refer [member run-dot]]
+  (:require [util.util :refer [member run-dot ensure-directory]]
             [genus.genus :as gns]
             [graph.view :refer [view-image]]
             [xym.xymbolyco :as xym]
@@ -146,6 +146,7 @@
 (defn rte-to-png [rte ;; : Rte,
                   & {:keys [
                             title
+                            dir
                             given-types
                             dot-file-CB
                             habitation
@@ -155,6 +156,7 @@
                             type-legend
                             ]
                      :or {title ""
+                          dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
                           given-types default-type-vector
                           dot-file-CB f-dummy
                           habitation true
@@ -177,11 +179,12 @@
               (dot-file-CB dot-path-name)
               merged-types
               ))]
-    (run-dot title "rte" to-png)
+    (run-dot title "rte" to-png :dir dir)
   ))
 
 (defn rte-view [rte  ;;n: Rte,
                 & {:keys [title
+                          dir
                           given-types
                           dot-file-CB
                           habitation
@@ -191,6 +194,7 @@
                           type-legend
                           ]
                    :or {title ""
+                        dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
                         given-types default-type-vector
                         dot-file-CB f-dummy
                         habitation true
@@ -198,6 +202,7 @@
   (assert rte)
   (let [[labels png] (rte-to-png rte
                                  :title title
+                                 :dir dir
                                  :given-types given-types
                                  :dot-file-CB dot-file-CB
                                  :habitation habitation

@@ -1014,18 +1014,27 @@
             (format "does not sum to 100: %s" (pr-str (map first pairs))))
     `(weighted-case-impl ~@args)))
 
+(defn ensure-directory
+  "Ensure the given path name string corresponds to an actual directory,
+  returning the given string."
+  [dir]
+  (assert (string? dir))
+  (.mkdirs (io/file dir))
+  dir)
+
 (defn run-dot
   "to-png is a function (String, String, String)=>A
   run-dot returns the pair [`a` `png-file-name`]
      where `a` is the return value of `to-png`
      and `png-file-name` is the name of the .png file which has been created by dot.
   "
-  [title prefix to-png]
+  [title prefix to-png & {:keys [dir]
+                          :or {dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))}}]
   (let [uuid (random-uuid)
-        png (str prefix "-" title "-" uuid ".png")
-        dot (str prefix "-" title "-" uuid ".dot")
-        latex (str prefix "-" title "-" uuid ".tex")
-        alt (str prefix "-" title "-" uuid ".plain")
+        png (str dir prefix "-" title "-" uuid ".png")
+        dot (str dir prefix "-" title "-" uuid ".dot")
+        latex (str dir prefix "-" title "-" uuid ".tex")
+        alt (str dir prefix "-" title "-" uuid ".plain")
         a (to-png dot latex title)]
     (sh "dot" "-Tplain" dot "-o" alt)
     (sh "dot" "-Tpng" dot "-o" png)
@@ -1145,10 +1154,3 @@
 (defn wrap [v _unused_key]
   v)
 
-(defn ensure-directory
-  "Ensure the given path name string corresponds to an actual directory,
-  returning the given string."
-  [dir]
-  (assert (string? dir))
-  (.mkdirs (io/file dir))
-  dir)

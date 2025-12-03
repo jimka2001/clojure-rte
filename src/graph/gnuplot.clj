@@ -137,7 +137,7 @@
                      other-label
                      view]
               :or {base-name "histogram"
-                   dir "/tmp"
+                   dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
                    x-label "x"
                    y-label "y"
                    title ""
@@ -170,7 +170,7 @@
         lines (for [[i _ign] (rest (map-indexed vector buckets))]
                 (format "   $MyData using %d ti col," (+ 2 i)))
         gnu-footer (str/join " \\\n" (cons line-1 lines))
-        gnu-file-name (str base-name ".gnu")
+        gnu-file-name (str dir "/" base-name ".gnu")
         gnu (io/writer gnu-file-name)
         write (fn [msg]
                 (.write gnu msg))

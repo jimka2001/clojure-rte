@@ -4,6 +4,7 @@
             [clojure.math :refer [log]]
             [demos.conj-2025.gen :refer [algos]]
             [demos.conj-2025.csv :refer [read-csv-lines]]
+            [util.util :refer [ensure-directory]]
             [graph.gnuplot :refer [run-gnu-plot histogram gnuplot]]
             [clojure.java.io :as io]))
 
@@ -59,6 +60,7 @@
                    (shuffle xys)])]
      (gnuplot descrs
               :title (format "retention: ratio node count per state count %s" prefix)
+              :dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
               :x-axis-label "aspect ratio"
               :y-axis-label "retention"
               :y-log true
@@ -69,6 +71,7 @@
               :view view)
      (gnuplot descrs
               :title (format "retention: ratio node count per state count %s" prefix)
+              :dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
               :x-axis-label "aspect ratio"
               :y-axis-label "retention"
               :y-log true
@@ -94,6 +97,7 @@
                    (shuffle xys)])]
      (gnuplot descrs
               :title (format "dfa state count %s vs aspect ratio" prefix)
+              :dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
               :x-axis "aspect ratio"
               :y-axis "dfa state count"
               :plot-with "points"
@@ -104,6 +108,7 @@
               :view view)
      (gnuplot descrs
               :title (format "dfa state count %s vs aspect ratio" prefix)
+              :dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
               :x-axis "aspect ratio"
               :y-axis "dfa state count"
               :plot-with "lines"
@@ -139,6 +144,7 @@
                    xys])]
      (gnuplot descrs
               :title (format "fraction of dfas larger than given state count %s" prefix)
+              :dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
               :x-axis "dfa state count"
               :x-log true
               :y-axis "percentage"

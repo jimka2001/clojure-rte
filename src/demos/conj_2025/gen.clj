@@ -4,6 +4,7 @@
    [clojure.pprint :refer [pprint]]
    [graph.dot :as dot]
    [util.lock :as lock]
+   [util.util :refer [ensure-directory]]
    [genus.genus :as gns]
    [rte-construct :as rte]
    [rte-graphviz :refer [rte-view]]
