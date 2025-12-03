@@ -29,13 +29,14 @@
   :dependencies [[org.clojure/clojure "1.12.0"]
                  [org.clojure/data.csv "1.1.0"]
                  [metasoarous/oz "2.0.0-alpha5"]
-                 [lein-cloverage "1.1.2"]
+                 [lein-cloverage "1.2.4"]
                  [org.clojure/data.json "1.0.0"]
-                 [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
+                 ;; [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
                  [backtick "0.3.4"]
                  [org.clojure/core.memoize "1.0.236"]
-                 [org.clojure/math.combinatorics "0.1.6"]]
-  :main ^:skip-aot clojure-rte.rte-core
+                 ;; [org.clojure/math.combinatorics "0.1.6"]
+                 ]
+  :main ^:skip-aot clojure-rte.rte.core
   :target-path "target/%s"
   :profiles {:test {:plugins [[lein-test-report-junit-xml "0.2.0"]]}
              :uberjar {:aot :all}})
