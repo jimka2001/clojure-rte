@@ -2062,55 +2062,55 @@
 <span class="covered" title="1 out of 1 forms covered">
                 686&nbsp;&nbsp;(defn&nbsp;count-leaves&nbsp;[expr]
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 687&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(multi&nbsp;[operands&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 688&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;+&nbsp;0&nbsp;(map&nbsp;count-leaves&nbsp;operands)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 689&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(single&nbsp;[operand&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 690&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1&nbsp;(count-leaves&nbsp;operand)))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 691&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(leaf&nbsp;[_operand&nbsp;_functions]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 692&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 693&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(traverse-pattern&nbsp;expr
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 694&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;*traversal-functions*
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 695&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:epsilon&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 696&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:empty-set&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 697&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 698&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type&nbsp;&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 699&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 700&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:cat&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 701&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:and&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 702&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:not&nbsp;single
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 703&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:*&nbsp;single))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -2119,58 +2119,58 @@
 <span class="covered" title="1 out of 1 forms covered">
                 705&nbsp;&nbsp;(defn&nbsp;count-internal-nodes&nbsp;[expr]
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 706&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(multi&nbsp;[operands&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 707&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 708&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;+&nbsp;0&nbsp;(map&nbsp;count-internal-nodes&nbsp;operands))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 709&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(single&nbsp;[operand&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 710&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1&nbsp;(count-internal-nodes&nbsp;operand)))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 711&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(leaf&nbsp;[_operand&nbsp;_functions]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 712&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 713&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(traverse-pattern&nbsp;expr
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 714&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;*traversal-functions*
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 715&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:epsilon&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 716&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:empty-set&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 717&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 718&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type&nbsp;&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 719&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 720&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:cat&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 721&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:and&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 722&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:not&nbsp;single
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 723&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:*&nbsp;single))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -2179,58 +2179,58 @@
 <span class="covered" title="1 out of 1 forms covered">
                 725&nbsp;&nbsp;(defn&nbsp;measure-longest-branch&nbsp;[expr]
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 726&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(multi&nbsp;[operands&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 727&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 728&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;max&nbsp;(map&nbsp;measure-longest-branch&nbsp;operands))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 729&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(single&nbsp;[operand&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 730&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1&nbsp;(measure-longest-branch&nbsp;operand)))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 731&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(leaf&nbsp;[_operand&nbsp;_functions]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 732&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 733&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(traverse-pattern&nbsp;expr
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 734&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;*traversal-functions*
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 735&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:epsilon&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 736&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:empty-set&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 737&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 738&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type&nbsp;&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 739&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 740&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:cat&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 741&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:and&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 742&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:not&nbsp;single
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 743&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:*&nbsp;single))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -2239,58 +2239,58 @@
 <span class="covered" title="1 out of 1 forms covered">
                 745&nbsp;&nbsp;(defn&nbsp;measure-shortest-branch&nbsp;[expr]
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 746&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(multi&nbsp;[operands&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 747&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 748&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;min&nbsp;(map&nbsp;measure-shortest-branch&nbsp;operands))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 749&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(single&nbsp;[operand&nbsp;_functions]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 750&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(+&nbsp;1&nbsp;(measure-shortest-branch&nbsp;operand)))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 751&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(leaf&nbsp;[_operand&nbsp;_functions]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 752&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 753&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(traverse-pattern&nbsp;expr
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 754&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;*traversal-functions*
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 755&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:epsilon&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 756&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:empty-set&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 757&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 758&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type&nbsp;&nbsp;leaf
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 759&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 760&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:cat&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 761&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:and&nbsp;multi
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 762&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:not&nbsp;single
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 763&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:*&nbsp;single))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -4291,7 +4291,7 @@
 <span class="covered" title="8 out of 8 forms covered">
                 1429&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(create&nbsp;self&nbsp;(uniquify&nbsp;(map&nbsp;(fn&nbsp;[op]
                 </span><br/>
-<span class="partial" title="6 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 1430&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(member&nbsp;op&nbsp;members)
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
@@ -4312,7 +4312,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 1436&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 1437&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;op))
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
@@ -6563,10 +6563,10 @@
                 2186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index-map&nbsp;(zipmap&nbsp;derivatives&nbsp;(range&nbsp;(count&nbsp;derivatives)))
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                2187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;triples&nbsp;(map&nbsp;(fn&nbsp;[[primative&nbsp;wrt&nbsp;deriv]]
+                2187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;triples&nbsp;(map&nbsp;(fn&nbsp;[[primitive&nbsp;wrt&nbsp;deriv]]
                 </span><br/>
 <span class="covered" title="8 out of 8 forms covered">
-                2188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(index-map&nbsp;primative)&nbsp;wrt&nbsp;(index-map&nbsp;deriv)]
+                2188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(index-map&nbsp;primitive)&nbsp;wrt&nbsp;(index-map&nbsp;deriv)]
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
                 2189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;triples)
@@ -6575,7 +6575,7 @@
                 2190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grouped-by-src&nbsp;(group-by&nbsp;first&nbsp;triples)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                2191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exit-value-function&nbsp;(constantly&nbsp;exit-value)
+                2191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exit-map&nbsp;{:default&nbsp;exit-value}
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
                 2192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mapper&nbsp;(fn&nbsp;[deriv&nbsp;index]
@@ -6665,7 +6665,7 @@
                 2220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;(count&nbsp;derivatives)))
                 </span><br/>
 <span class="covered" title="2 out of 2 forms covered">
-                2221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;(xym&#x2F;map-&gt;Dfa
+                2221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;(xym&#x2F;make-dfa
                 </span><br/>
 <span class="covered" title="7 out of 7 forms covered">
                 2222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:pattern&nbsp;given-pattern
@@ -6674,7 +6674,7 @@
                 2223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:canonicalized&nbsp;pattern
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                2224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:exit-map&nbsp;exit-value-function
+                2224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:exit-map&nbsp;exit-map
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
                 2225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:combine-labels&nbsp;gns&#x2F;combine-labels

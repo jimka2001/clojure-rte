@@ -17,10 +17,10 @@
                 004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.string&nbsp;:as&nbsp;str]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.pprint&nbsp;:refer&nbsp;[cl-format]]
+                005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[clojure.pprint&nbsp;:refer&nbsp;[cl-format&nbsp;pprint]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[util.util&nbsp;:refer&nbsp;[member&nbsp;with-outstring]]
+                006&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[util.util&nbsp;:refer&nbsp;[member&nbsp;with-outstring&nbsp;ensure-directory]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[graph.view&nbsp;:refer&nbsp;[view-image]]
@@ -34,662 +34,653 @@
 <span class="covered" title="1 out of 1 forms covered">
                 010&nbsp;&nbsp;(defn&nbsp;run-gnu-plot&nbsp;[terminal&nbsp;gnu-name&nbsp;output-file-name]
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
+<span class="partial" title="5 out of 14 forms covered">
                 011&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(string?&nbsp;output-file-name))
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
+<span class="partial" title="5 out of 14 forms covered">
                 012&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(string?&nbsp;gnu-name))
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
+<span class="partial" title="5 out of 14 forms covered">
                 013&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(string?&nbsp;terminal))
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 014&nbsp;&nbsp;&nbsp;&nbsp;(sh&nbsp;&quot;rm&quot;&nbsp;&quot;-f&quot;&nbsp;output-file-name)
                 </span><br/>
-<span class="not-covered" title="0 out of 16 forms covered">
+<span class="covered" title="16 out of 16 forms covered">
                 015&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[s&nbsp;(sh&nbsp;&quot;gnuplot&quot;&nbsp;&quot;-e&quot;&nbsp;(str&nbsp;&quot;set&nbsp;terminal&nbsp;&quot;&nbsp;terminal&nbsp;&quot;;&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;set&nbsp;output&nbsp;&#x27;&quot;&nbsp;output-file-name&nbsp;&quot;&#x27;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-name&nbsp;:in-enc&nbsp;&quot;en_US.UTF-8&quot;&nbsp;:out&nbsp;&quot;en_US.UTF-8&quot;)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:exit&nbsp;s)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 020&nbsp;&nbsp;
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                021&nbsp;&nbsp;;;&nbsp;(gnuplot&nbsp;[[&quot;plot-1&quot;&nbsp;[&nbsp;1.1&nbsp;2.3&nbsp;6.5]&nbsp;[10.2&nbsp;12.3&nbsp;6.1]]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                022&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;plot-2&quot;&nbsp;[&nbsp;2.1&nbsp;3.3&nbsp;4.5]&nbsp;[10.2&nbsp;2.3&nbsp;5.1]]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                023&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;plot-3&quot;&nbsp;[&nbsp;1.1&nbsp;4.3&nbsp;9.5&nbsp;10.2]&nbsp;[6.2&nbsp;2.3&nbsp;7.1&nbsp;7.5]]]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                024&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;true
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                025&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:title&nbsp;&quot;sample&nbsp;plots&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                026&nbsp;&nbsp;;;&nbsp;)
-                </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                027&nbsp;&nbsp;
+                021&nbsp;&nbsp;
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                028&nbsp;&nbsp;(defn&nbsp;gnuplot&nbsp;[data-to-plot
+                022&nbsp;&nbsp;(defn&nbsp;gnuplot&nbsp;[data-to-plot
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                029&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;either&nbsp;Seq[[String&nbsp;Seq[Number]&nbsp;Seq[Number]]]
+                023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;either&nbsp;Seq[[String&nbsp;Seq[Number]&nbsp;Seq[Number]]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                030&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Seq[[String&nbsp;Seq[[Number&nbsp;Number]]]
+                024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Seq[[String&nbsp;Seq[[Number&nbsp;Number]]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                031&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&nbsp;{:keys&nbsp;[terminals&nbsp;title&nbsp;comment&nbsp;x-axis-label&nbsp;x-log&nbsp;y-axis-label&nbsp;y-log&nbsp;grid
+                025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&nbsp;{:keys&nbsp;[terminals&nbsp;title&nbsp;comment&nbsp;x-axis-label&nbsp;x-log&nbsp;y-axis-label&nbsp;y-log&nbsp;grid
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output-file-base-name
+                026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output-file-base-name
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                033&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir
+                027&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot-with
+                028&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot-with
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point-size
+                029&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point-size
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key
+                030&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB
+                031&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verbose
+                032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verbose
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view]
+                033&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;gdp
+                034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;gdp
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;{terminals&nbsp;#{&quot;png&quot;}
+                035&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;{terminals&nbsp;#{&quot;png&quot;}
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;&quot;&quot;
+                036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;&quot;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comment&nbsp;&quot;&quot;
+                037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comment&nbsp;&quot;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-axis-label&nbsp;&quot;&quot;
+                038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-axis-label&nbsp;&quot;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                045&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-log&nbsp;false
+                039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-log&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-axis-label&nbsp;&quot;&quot;
+                040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-axis-label&nbsp;&quot;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-log&nbsp;false
+                041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-log&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;false
+                042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output-file-base-name&nbsp;&quot;curves&quot;
+                043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output-file-base-name&nbsp;&quot;curves&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir&nbsp;&quot;&#x2F;tmp&quot;
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir&nbsp;(ensure-directory&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot-with&nbsp;&quot;linespoints&quot;
+                045&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot-with&nbsp;&quot;linespoints&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point-size&nbsp;0.8
+                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point-size&nbsp;0.8
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;&quot;horizontal&nbsp;bmargin&quot;
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;&quot;horizontal&nbsp;bmargin&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB&nbsp;(fn&nbsp;[_str])
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB&nbsp;(fn&nbsp;[_str])
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verbose&nbsp;false
+                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verbose&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view&nbsp;false}}]
+                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view&nbsp;false}}]
                 </span><br/>
-<span class="not-covered" title="0 out of 30 forms covered">
-                057&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[curves&nbsp;(for&nbsp;[data&nbsp;data-to-plot]&nbsp;;;&nbsp;&nbsp;convert&nbsp;data-t-plot&nbsp;to&nbsp;the&nbsp;form&nbsp;Seq[(String,Seq[Double],Seq[Double])]
+<span class="covered" title="30 out of 30 forms covered">
+                051&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[curves&nbsp;(for&nbsp;[data&nbsp;data-to-plot]&nbsp;;;&nbsp;&nbsp;convert&nbsp;data-t-plot&nbsp;to&nbsp;the&nbsp;form&nbsp;Seq[(String,Seq[Double],Seq[Double])]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;2&nbsp;(count&nbsp;data))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;[string&nbsp;[[x,y],[x,y],[x,y]...]]
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[label&nbsp;seq-of-pairs]&nbsp;data]
-                </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
-                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;(map&nbsp;first&nbsp;seq-of-pairs)&nbsp;(map&nbsp;second&nbsp;seq-of-pairs)])
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data))
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;output-file-base-name&nbsp;&quot;.gnu&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu&nbsp;(io&#x2F;writer&nbsp;gnu-name)
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;write&nbsp;(fn&nbsp;[msg]
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;msg)
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;&quot;\n&quot;))
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log-compatible&nbsp;(fn&nbsp;[projection]
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(every?&nbsp;(fn&nbsp;[data]&nbsp;
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[numbers&nbsp;(projection&nbsp;data)]
-                </span><br/>
-<span class="not-covered" title="0 out of 16 forms covered">
-                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(every?&nbsp;#(&gt;&nbsp;%&nbsp;0)&nbsp;numbers)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not-empty&nbsp;numbers)
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(reduce&nbsp;max&nbsp;numbers)
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;min&nbsp;numbers)))))
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curves))
+<span class="covered" title="5 out of 5 forms covered">
+                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;2&nbsp;(count&nbsp;data))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;[string&nbsp;[[x,y],[x,y],[x,y]...]]
                 </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
-                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(member&nbsp;plot-with&nbsp;[&quot;linespoints&quot;&nbsp;&quot;points&quot;&nbsp;&quot;lines&quot;]))
+<span class="covered" title="2 out of 2 forms covered">
+                054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[label&nbsp;seq-of-pairs]&nbsp;data]
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
-                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;gnu)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(str&nbsp;&quot;#&nbsp;&quot;&nbsp;comment))
-                </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
-                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(and&nbsp;x-log
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log-compatible&nbsp;#(nth&nbsp;%&nbsp;1)))
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;logscale&nbsp;x&quot;))
-                </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
-                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(and&nbsp;y-log
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log-compatible&nbsp;#(nth&nbsp;%&nbsp;2)))
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;logscale&nbsp;y&quot;))
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not=&nbsp;&quot;&quot;&nbsp;x-axis-label)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;xlabel&nbsp;&#x27;%s&#x27;&nbsp;font&nbsp;&#x27;,10&#x27;&quot;&nbsp;x-axis-label)))
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not=&nbsp;&quot;&quot;&nbsp;y-axis-label)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;ylabel&nbsp;&#x27;%s&#x27;&nbsp;font&nbsp;&#x27;,10&#x27;&quot;&nbsp;y-axis-label)))
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;grid
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;grid&quot;))
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;key&nbsp;font&nbsp;&#x27;,10&#x27;&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;xtics&nbsp;font&nbsp;&#x27;,10&#x27;&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;ytics&nbsp;font&nbsp;&#x27;,10&#x27;&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;&quot;points&quot;&nbsp;plot-with)
-                </span><br/>
-<span class="not-covered" title="0 out of 34 forms covered">
-                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[i&nbsp;(range&nbsp;(count&nbsp;curves))]
-                </span><br/>
-<span class="not-covered" title="0 out of 16 forms covered">
-                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;style&nbsp;line&nbsp;%d&nbsp;pt&nbsp;7&nbsp;ps&nbsp;%s&quot;&nbsp;(inc&nbsp;i)&nbsp;point-size))))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;key&nbsp;%s&quot;&nbsp;key))
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not=&nbsp;&quot;&quot;&nbsp;title)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;title&nbsp;&#x27;%s&#x27;&nbsp;font&nbsp;&#x27;,12&#x27;&quot;&nbsp;title)))
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;&quot;plot&nbsp;&quot;)&nbsp;;;&nbsp;no&nbsp;\n
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[footer&nbsp;(with-outstring&nbsp;pr-footer
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[header&nbsp;(with-outstring&nbsp;pr-header
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(write-curve&nbsp;[curve-title&nbsp;i&nbsp;xys]
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;&quot;&#x27;-&#x27;&nbsp;using&nbsp;1:2&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;(format&nbsp;&quot;&nbsp;with&nbsp;%s&quot;&nbsp;plot-with))
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;&quot;points&quot;&nbsp;plot-with)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;(format&nbsp;&quot;&nbsp;ls&nbsp;%d&quot;&nbsp;i)))
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;(format&nbsp;&quot;&nbsp;title&nbsp;&#x27;%s&#x27;&quot;&nbsp;curve-title))
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-footer&nbsp;(format&nbsp;&quot;#&nbsp;%s\n&quot;&nbsp;curve-title))
-                </span><br/>
-<span class="not-covered" title="0 out of 31 forms covered">
-                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[x&nbsp;y]&nbsp;xys]
-                </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
-                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-footer&nbsp;(format&nbsp;&quot;%.3f&nbsp;%.3f\n&quot;&nbsp;(float&nbsp;x)&nbsp;(float&nbsp;y))))
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-footer&nbsp;&quot;end\n&quot;))]
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not-empty&nbsp;curves)
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(let&nbsp;[[curve-title&nbsp;xs&nbsp;ys]&nbsp;(first&nbsp;curves)]
-                </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
-                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-curve&nbsp;curve-title&nbsp;1&nbsp;(map&nbsp;(fn&nbsp;[x&nbsp;y]&nbsp;[x&nbsp;y])&nbsp;xs&nbsp;ys)))
-                </span><br/>
-<span class="not-covered" title="0 out of 36 forms covered">
-                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[i&nbsp;[curve-title&nbsp;xs&nbsp;ys]]&nbsp;(map-indexed&nbsp;vector&nbsp;(rest&nbsp;curves))]
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                120&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;&quot;,\\\n&nbsp;&nbsp;&nbsp;&nbsp;&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 26 forms covered">
-                121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-curve&nbsp;curve-title&nbsp;(inc&nbsp;i)&nbsp;(map&nbsp;(fn&nbsp;[x&nbsp;y]&nbsp;[x&nbsp;y])&nbsp;xs&nbsp;ys)))))))]
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                122&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;header)))]
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;footer))
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.close&nbsp;gnu)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gnu-file-CB&nbsp;gnu-name)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
-                128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[terminal&nbsp;terminals
-                </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
-                129&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[output-file-name&nbsp;(str&nbsp;output-file-base-name&nbsp;&quot;.&quot;&nbsp;terminal)]]
-                </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
-                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(run-gnu-plot&nbsp;terminal&nbsp;gnu-name&nbsp;output-file-name)
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;view
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view-image&nbsp;output-file-name)))))
-                </span><br/>
-<span class="blank" title="0 out of 0 forms covered">
-                133&nbsp;&nbsp;
+<span class="covered" title="10 out of 10 forms covered">
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;(map&nbsp;first&nbsp;seq-of-pairs)&nbsp;(map&nbsp;second&nbsp;seq-of-pairs)])
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                134&nbsp;&nbsp;(defn&nbsp;histogram&nbsp;[buckets
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;output-file-base-name&nbsp;&quot;.gnu&quot;)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu&nbsp;(io&#x2F;writer&nbsp;gnu-name)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;write&nbsp;(fn&nbsp;[msg]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;msg)
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;&quot;\n&quot;))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log-compatible&nbsp;(fn&nbsp;[projection]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(every?&nbsp;(fn&nbsp;[data]&nbsp;
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[numbers&nbsp;(projection&nbsp;data)]
+                </span><br/>
+<span class="partial" title="14 out of 16 forms covered">
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(every?&nbsp;#(&gt;&nbsp;%&nbsp;0)&nbsp;numbers)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not-empty&nbsp;numbers)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;(reduce&nbsp;max&nbsp;numbers)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reduce&nbsp;min&nbsp;numbers)))))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curves))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                135&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;&nbsp;{:keys&nbsp;[base-name
+                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                </span><br/>
+<span class="partial" title="9 out of 18 forms covered">
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(member&nbsp;plot-with&nbsp;[&quot;linespoints&quot;&nbsp;&quot;points&quot;&nbsp;&quot;lines&quot;]))
+                </span><br/>
+<span class="partial" title="3 out of 12 forms covered">
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;gnu)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(str&nbsp;&quot;#&nbsp;&quot;&nbsp;comment))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(and&nbsp;x-log
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log-compatible&nbsp;#(nth&nbsp;%&nbsp;1)))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;logscale&nbsp;x&quot;))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(and&nbsp;y-log
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(log-compatible&nbsp;#(nth&nbsp;%&nbsp;2)))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;logscale&nbsp;y&quot;))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not=&nbsp;&quot;&quot;&nbsp;x-axis-label)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;xlabel&nbsp;&#x27;%s&#x27;&nbsp;font&nbsp;&#x27;,10&#x27;&quot;&nbsp;x-axis-label)))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not=&nbsp;&quot;&quot;&nbsp;y-axis-label)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;ylabel&nbsp;&#x27;%s&#x27;&nbsp;font&nbsp;&#x27;,10&#x27;&quot;&nbsp;y-axis-label)))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;grid
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;grid&quot;))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;key&nbsp;font&nbsp;&#x27;,10&#x27;&quot;)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;xtics&nbsp;font&nbsp;&#x27;,10&#x27;&quot;)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;set&nbsp;ytics&nbsp;font&nbsp;&#x27;,10&#x27;&quot;)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;&quot;points&quot;&nbsp;plot-with)
+                </span><br/>
+<span class="partial" title="29 out of 34 forms covered">
+                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[i&nbsp;(range&nbsp;(count&nbsp;curves))]
+                </span><br/>
+<span class="partial" title="8 out of 16 forms covered">
+                092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;style&nbsp;line&nbsp;%d&nbsp;pt&nbsp;7&nbsp;ps&nbsp;%s&quot;&nbsp;(inc&nbsp;i)&nbsp;point-size))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-label
+                093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;key&nbsp;%s&quot;&nbsp;key))
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not=&nbsp;&quot;&quot;&nbsp;title)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;set&nbsp;title&nbsp;&#x27;%s&#x27;&nbsp;font&nbsp;&#x27;,12&#x27;&quot;&nbsp;title)))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;&quot;plot&nbsp;&quot;)&nbsp;;;&nbsp;no&nbsp;\n
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[footer&nbsp;(with-outstring&nbsp;pr-footer
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[header&nbsp;(with-outstring&nbsp;pr-header
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(write-curve&nbsp;[curve-title&nbsp;i&nbsp;xys]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;&quot;&#x27;-&#x27;&nbsp;using&nbsp;1:2&quot;)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;(format&nbsp;&quot;&nbsp;with&nbsp;%s&quot;&nbsp;plot-with))
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(=&nbsp;&quot;points&quot;&nbsp;plot-with)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;(format&nbsp;&quot;&nbsp;ls&nbsp;%d&quot;&nbsp;i)))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;(format&nbsp;&quot;&nbsp;title&nbsp;&#x27;%s&#x27;&quot;&nbsp;curve-title))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-footer&nbsp;(format&nbsp;&quot;#&nbsp;%s\n&quot;&nbsp;curve-title))
+                </span><br/>
+<span class="partial" title="26 out of 31 forms covered">
+                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[x&nbsp;y]&nbsp;xys]
+                </span><br/>
+<span class="partial" title="9 out of 18 forms covered">
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-footer&nbsp;(format&nbsp;&quot;%.3f&nbsp;%.3f\n&quot;&nbsp;(float&nbsp;x)&nbsp;(float&nbsp;y))))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-footer&nbsp;&quot;end\n&quot;))]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not-empty&nbsp;curves)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(let&nbsp;[[curve-title&nbsp;xs&nbsp;ys]&nbsp;(first&nbsp;curves)]
+                </span><br/>
+<span class="covered" title="12 out of 12 forms covered">
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-curve&nbsp;curve-title&nbsp;1&nbsp;(map&nbsp;(fn&nbsp;[x&nbsp;y]&nbsp;[x&nbsp;y])&nbsp;xs&nbsp;ys)))
+                </span><br/>
+<span class="partial" title="31 out of 36 forms covered">
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[i&nbsp;[curve-title&nbsp;xs&nbsp;ys]]&nbsp;(map-indexed&nbsp;vector&nbsp;(rest&nbsp;curves))]
+                </span><br/>
+<span class="partial" title="3 out of 6 forms covered">
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pr-header&nbsp;&quot;,\\\n&nbsp;&nbsp;&nbsp;&nbsp;&quot;)
+                </span><br/>
+<span class="partial" title="13 out of 26 forms covered">
+                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-curve&nbsp;curve-title&nbsp;(inc&nbsp;i)&nbsp;(map&nbsp;(fn&nbsp;[x&nbsp;y]&nbsp;[x&nbsp;y])&nbsp;xs&nbsp;ys)))))))]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;header)))]
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;footer))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.close&nbsp;gnu)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gnu-file-CB&nbsp;gnu-name)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-label
+                120&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title
+                121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB
+<span class="partial" title="27 out of 33 forms covered">
+                122&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[terminal&nbsp;terminals
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keep-if
+<span class="partial" title="7 out of 14 forms covered">
+                123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[output-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;output-file-base-name&nbsp;&quot;.&quot;&nbsp;terminal)]]
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other-label
+<span class="partial" title="5 out of 10 forms covered">
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(run-gnu-plot&nbsp;terminal&nbsp;gnu-name&nbsp;output-file-name)
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view]
+<span class="partial" title="2 out of 4 forms covered">
+                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;view
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;{base-name&nbsp;&quot;histogram&quot;
+<span class="partial" title="3 out of 6 forms covered">
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view-image&nbsp;output-file-name)))
                 </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir&nbsp;&quot;&#x2F;tmp&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-label&nbsp;&quot;x&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-label&nbsp;&quot;y&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                148&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;&quot;&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB&nbsp;(fn&nbsp;[_str])
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other-label&nbsp;&quot;other&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view&nbsp;false}}]
-                </span><br/>
-<span class="not-covered" title="0 out of 17 forms covered">
-                152&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;x-label&nbsp;&quot;\&quot;&quot;)))
-                </span><br/>
-<span class="not-covered" title="0 out of 17 forms covered">
-                153&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;y-label&nbsp;&quot;\&quot;&quot;)))
-                </span><br/>
-<span class="not-covered" title="0 out of 17 forms covered">
-                154&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;x-label&nbsp;&quot;\\&quot;)))
-                </span><br/>
-<span class="not-covered" title="0 out of 17 forms covered">
-                155&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;y-label&nbsp;&quot;\\&quot;)))
-                </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                156&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[png-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;base-name&nbsp;&quot;.png&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-header&nbsp;(cl-format&nbsp;false
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;~&amp;~
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;boxwidth&nbsp;0.9&nbsp;absolute~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;style&nbsp;fill&nbsp;solid&nbsp;1.00&nbsp;border&nbsp;lt&nbsp;-1~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;style&nbsp;histogram&nbsp;clustered&nbsp;gap&nbsp;5&nbsp;title&nbsp;textcolor&nbsp;lt&nbsp;-1~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;style&nbsp;data&nbsp;histograms~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                163&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;key&nbsp;outside&nbsp;top&nbsp;center&nbsp;horizontal~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                164&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;xtics&nbsp;rotate&nbsp;by&nbsp;-45~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                165&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;grid~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;xlabel&nbsp;\&quot;~A\&quot;~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;ylabel&nbsp;\&quot;~A\&quot;~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;title&nbsp;\&quot;~A\&quot;&nbsp;font&nbsp;&#x27;,10&#x27;~@
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-label
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-label
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line-1&nbsp;&quot;plot&nbsp;$MyData&nbsp;using&nbsp;2:xtic(1)&nbsp;ti&nbsp;col,&quot;
-                </span><br/>
-<span class="not-covered" title="0 out of 34 forms covered">
-                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lines&nbsp;(for&nbsp;[[i&nbsp;_ign]&nbsp;(rest&nbsp;(map-indexed&nbsp;vector&nbsp;buckets))]
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;&nbsp;&nbsp;&nbsp;$MyData&nbsp;using&nbsp;%d&nbsp;ti&nbsp;col,&quot;&nbsp;(+&nbsp;2&nbsp;i)))
-                </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
-                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-footer&nbsp;(str&#x2F;join&nbsp;&quot;&nbsp;\\\n&quot;&nbsp;(cons&nbsp;line-1&nbsp;lines))
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-name&nbsp;(str&nbsp;base-name&nbsp;&quot;.gnu&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                178&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu&nbsp;(io&#x2F;writer&nbsp;gnu-file-name)
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;write&nbsp;(fn&nbsp;[msg]
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                180&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;msg))
-                </span><br/>
-<span class="not-covered" title="0 out of 30 forms covered">
-                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;(for&nbsp;[[label&nbsp;counts]&nbsp;buckets
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[_&nbsp;(println&nbsp;[:counts&nbsp;counts])
-                </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
-                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fqs&nbsp;(sort-by&nbsp;first&nbsp;(into&nbsp;[]&nbsp;(frequencies&nbsp;counts)))
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;(println&nbsp;[:fqs&nbsp;fqs])
-                </span><br/>
-<span class="not-covered" title="0 out of 32 forms covered">
-                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xys&nbsp;(for&nbsp;[[state-count&nbsp;num-samples]&nbsp;fqs
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(keep-if&nbsp;state-count)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[percentage&nbsp;(&#x2F;&nbsp;(*&nbsp;100.0&nbsp;num-samples)&nbsp;(count&nbsp;counts))]]
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[state-count]&nbsp;percentage])
-                </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;(println&nbsp;[:xys&nbsp;xys])
-                </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
-                190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left-over-percent&nbsp;(-&nbsp;100.0&nbsp;(reduce&nbsp;+&nbsp;(map&nbsp;second&nbsp;xys)))]]
-                </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;(concat&nbsp;(sort-by&nbsp;first&nbsp;xys)
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[[]&nbsp;left-over-percent]])])
-                </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
-                193&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;counts&nbsp;(concat&nbsp;(map&nbsp;(fn&nbsp;[c]&nbsp;[c])
-                </span><br/>
-<span class="not-covered" title="0 out of 101 forms covered">
-                194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort&nbsp;(distinct&nbsp;(for&nbsp;[[label&nbsp;xys]&nbsp;data
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[col&nbsp;percent]&nbsp;xys
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                196&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;col]
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c))))
-                </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[]])
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                199&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-                </span><br/>
-<span class="not-covered" title="0 out of 17 forms covered">
-                200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;gnu&nbsp;(format&nbsp;&quot;cannot&nbsp;open&nbsp;%s&quot;&nbsp;gnu-file-name))
+<span class="covered" title="1 out of 1 forms covered">
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-name))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                201&nbsp;&nbsp;
+                128&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;gnu-header)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                203&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;\n\n&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;$MyData&nbsp;&lt;&lt;&nbsp;EOD\n&quot;)
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                205&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;\&quot;%s\&quot;&quot;&nbsp;x-label))
-                </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
-                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[label&nbsp;counts]&nbsp;buckets
-                </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
-                207&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[num-samples&nbsp;(count&nbsp;counts)]]
-                </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;&nbsp;\&quot;%s&nbsp;samples=%d\&quot;&quot;&nbsp;label&nbsp;num-samples)))
-                </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                209&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;\n&quot;)
+<span class="covered" title="1 out of 1 forms covered">
+                129&nbsp;&nbsp;(defn&nbsp;histogram
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                130&nbsp;&nbsp;&nbsp;&nbsp;[buckets&nbsp;&amp;&nbsp;{:keys&nbsp;[base-name
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
-                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[sc1&nbsp;counts
+<span class="not-tracked" title="0 out of 0 forms covered">
+                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[label&nbsp;(if&nbsp;(empty?&nbsp;sc1)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-label
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other-label
+<span class="not-tracked" title="0 out of 0 forms covered">
+                133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-label
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
-                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;%s&quot;&nbsp;(first&nbsp;sc1)))
+<span class="not-tracked" title="0 out of 0 forms covered">
+                134&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title
                 </span><br/>
-<span class="not-covered" title="0 out of 130 forms covered">
-                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;percentages&nbsp;(for&nbsp;[[_bucket_label&nbsp;xys]&nbsp;data
+<span class="not-tracked" title="0 out of 0 forms covered">
+                135&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[sc2&nbsp;percent]&nbsp;xys
+<span class="not-tracked" title="0 out of 0 forms covered">
+                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keep-if
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(=&nbsp;sc2&nbsp;sc1)]
+<span class="not-tracked" title="0 out of 0 forms covered">
+                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other-label
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;%.3f&quot;&nbsp;percent))
+<span class="not-tracked" title="0 out of 0 forms covered">
+                138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                219&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text&nbsp;(str&#x2F;join&nbsp;&quot;&nbsp;&quot;&nbsp;percentages)]]
+<span class="not-tracked" title="0 out of 0 forms covered">
+                139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:or&nbsp;{base-name&nbsp;&quot;histogram&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;\&quot;%s\&quot;&nbsp;%s\n&quot;&nbsp;label&nbsp;text)))
+<span class="not-tracked" title="0 out of 0 forms covered">
+                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir&nbsp;(ensure-directory&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;EOD\n\n&quot;)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-label&nbsp;&quot;x&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;gnu-footer)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-label&nbsp;&quot;y&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;\n&quot;)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;&quot;&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.close&nbsp;gnu)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-CB&nbsp;(fn&nbsp;[_str])
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gnu-file-CB&nbsp;gnu-file-name)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other-label&nbsp;&quot;other&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                226&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(run-gnu-plot&nbsp;&quot;png&quot;&nbsp;gnu-file-name&nbsp;png-file-name)
+<span class="not-tracked" title="0 out of 0 forms covered">
+                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view&nbsp;false}}]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                227&nbsp;&nbsp;
+                147&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                228&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;view
+<span class="partial" title="8 out of 17 forms covered">
+                148&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;x-label&nbsp;&quot;\&quot;&quot;)))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view-image&nbsp;png-file-name))))
+<span class="partial" title="8 out of 17 forms covered">
+                149&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;y-label&nbsp;&quot;\&quot;&quot;)))
+                </span><br/>
+<span class="partial" title="8 out of 17 forms covered">
+                150&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;x-label&nbsp;&quot;\\&quot;)))
+                </span><br/>
+<span class="partial" title="8 out of 17 forms covered">
+                151&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not&nbsp;(str&#x2F;index-of&nbsp;y-label&nbsp;&quot;\\&quot;)))
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                152&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[png-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;base-name&nbsp;&quot;.png&quot;)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-header&nbsp;(cl-format&nbsp;false
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                154&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;~&amp;~
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;boxwidth&nbsp;0.9&nbsp;absolute~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                156&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;style&nbsp;fill&nbsp;solid&nbsp;1.00&nbsp;border&nbsp;lt&nbsp;-1~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;style&nbsp;histogram&nbsp;clustered&nbsp;gap&nbsp;5&nbsp;title&nbsp;textcolor&nbsp;lt&nbsp;-1~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;style&nbsp;data&nbsp;histograms~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;key&nbsp;outside&nbsp;top&nbsp;center&nbsp;horizontal~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;xtics&nbsp;rotate&nbsp;by&nbsp;-45~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;grid~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;xlabel&nbsp;\&quot;~A\&quot;~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                163&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;ylabel&nbsp;\&quot;~A\&quot;~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                164&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;title&nbsp;\&quot;~A\&quot;&nbsp;font&nbsp;&#x27;,10&#x27;~@
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                165&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x-label
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y-label
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line-1&nbsp;&quot;plot&nbsp;$MyData&nbsp;using&nbsp;2:xtic(1)&nbsp;ti&nbsp;col,&quot;
+                </span><br/>
+<span class="covered" title="34 out of 34 forms covered">
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lines&nbsp;(for&nbsp;[[i&nbsp;_ign]&nbsp;(rest&nbsp;(map-indexed&nbsp;vector&nbsp;buckets))]
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;&nbsp;&nbsp;&nbsp;$MyData&nbsp;using&nbsp;%d&nbsp;ti&nbsp;col,&quot;&nbsp;(+&nbsp;2&nbsp;i)))
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-footer&nbsp;(str&#x2F;join&nbsp;&quot;&nbsp;\\\n&quot;&nbsp;(cons&nbsp;line-1&nbsp;lines))
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;base-name&nbsp;&quot;.gnu&quot;)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gnu&nbsp;(io&#x2F;writer&nbsp;gnu-file-name)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;write&nbsp;(fn&nbsp;[msg]
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;gnu&nbsp;msg))
+                </span><br/>
+<span class="covered" title="30 out of 30 forms covered">
+                177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;(for&nbsp;[[label&nbsp;counts]&nbsp;buckets
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                178&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fqs&nbsp;(sort-by&nbsp;first&nbsp;(into&nbsp;[]&nbsp;(frequencies&nbsp;counts)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                180&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="32 out of 32 forms covered">
+                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xys&nbsp;(for&nbsp;[[state-count&nbsp;num-samples]&nbsp;fqs
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(keep-if&nbsp;state-count)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[percentage&nbsp;(&#x2F;&nbsp;(*&nbsp;100.0&nbsp;num-samples)&nbsp;(count&nbsp;counts))]]
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[state-count]&nbsp;percentage])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="9 out of 9 forms covered">
+                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left-over-percent&nbsp;(-&nbsp;100.0&nbsp;(reduce&nbsp;+&nbsp;(map&nbsp;second&nbsp;xys)))]]
+                </span><br/>
+<span class="covered" title="8 out of 8 forms covered">
+                187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;(concat&nbsp;(sort-by&nbsp;first&nbsp;xys)
+                </span><br/>
+<span class="covered" title="4 out of 4 forms covered">
+                188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[[]&nbsp;left-over-percent]])])
+                </span><br/>
+<span class="covered" title="7 out of 7 forms covered">
+                189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;counts&nbsp;(concat&nbsp;(map&nbsp;(fn&nbsp;[c]&nbsp;[c])
+                </span><br/>
+<span class="partial" title="100 out of 101 forms covered">
+                190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort&nbsp;(distinct&nbsp;(for&nbsp;[[label&nbsp;xys]&nbsp;data
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[col&nbsp;percent]&nbsp;xys
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;col]
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                193&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c))))
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[]])
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                </span><br/>
+<span class="partial" title="3 out of 17 forms covered">
+                196&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;gnu&nbsp;(format&nbsp;&quot;cannot&nbsp;open&nbsp;%s&quot;&nbsp;gnu-file-name))
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                197&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;gnu-header)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                199&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;\n\n&quot;)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;$MyData&nbsp;&lt;&lt;&nbsp;EOD\n&quot;)
+                </span><br/>
+<span class="covered" title="6 out of 6 forms covered">
+                201&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;\&quot;%s\&quot;&quot;&nbsp;x-label))
+                </span><br/>
+<span class="partial" title="27 out of 33 forms covered">
+                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[label&nbsp;counts]&nbsp;buckets
+                </span><br/>
+<span class="partial" title="2 out of 4 forms covered">
+                203&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[num-samples&nbsp;(count&nbsp;counts)]]
+                </span><br/>
+<span class="partial" title="7 out of 14 forms covered">
+                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;&nbsp;\&quot;%s&nbsp;samples=%d\&quot;&quot;&nbsp;label&nbsp;num-samples)))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                205&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;\n&quot;)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="partial" title="27 out of 33 forms covered">
+                207&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[sc1&nbsp;counts
+                </span><br/>
+<span class="partial" title="4 out of 8 forms covered">
+                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[label&nbsp;(if&nbsp;(empty?&nbsp;sc1)
+                </span><br/>
+<span class="partial" title="1 out of 2 forms covered">
+                209&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other-label
+                </span><br/>
+<span class="partial" title="6 out of 12 forms covered">
+                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;%s&quot;&nbsp;(first&nbsp;sc1)))
+                </span><br/>
+<span class="partial" title="65 out of 130 forms covered">
+                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;percentages&nbsp;(for&nbsp;[[_bucket_label&nbsp;xys]&nbsp;data
+                </span><br/>
+<span class="partial" title="1 out of 2 forms covered">
+                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[sc2&nbsp;percent]&nbsp;xys
+                </span><br/>
+<span class="partial" title="3 out of 6 forms covered">
+                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(=&nbsp;sc2&nbsp;sc1)]
+                </span><br/>
+<span class="partial" title="4 out of 8 forms covered">
+                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;%.3f&quot;&nbsp;percent))
+                </span><br/>
+<span class="partial" title="4 out of 8 forms covered">
+                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text&nbsp;(str&#x2F;join&nbsp;&quot;&nbsp;&quot;&nbsp;percentages)]]
+                </span><br/>
+<span class="partial" title="7 out of 14 forms covered">
+                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;(format&nbsp;&quot;\&quot;%s\&quot;&nbsp;%s\n&quot;&nbsp;label&nbsp;text)))
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;EOD\n\n&quot;)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;gnu-footer)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                219&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write&nbsp;&quot;\n&quot;)
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.close&nbsp;gnu)
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gnu-file-CB&nbsp;gnu-file-name)
+                </span><br/>
+<span class="covered" title="5 out of 5 forms covered">
+                222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(run-gnu-plot&nbsp;&quot;png&quot;&nbsp;gnu-file-name&nbsp;png-file-name)
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                223&nbsp;&nbsp;
+                </span><br/>
+<span class="covered" title="2 out of 2 forms covered">
+                224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;view
+                </span><br/>
+<span class="covered" title="3 out of 3 forms covered">
+                225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view-image&nbsp;png-file-name))
+                </span><br/>
+<span class="covered" title="1 out of 1 forms covered">
+                226&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;png-file-name))
                 </span><br/>
  </body>
 </html>

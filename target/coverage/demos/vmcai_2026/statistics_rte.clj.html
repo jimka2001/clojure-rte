@@ -157,46 +157,46 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 051&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;{:post&nbsp;[(or&nbsp;(println&nbsp;[:r&nbsp;r&nbsp;:returns&nbsp;%])&nbsp;true)]}
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 052&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(not&nbsp;(sequential?&nbsp;r))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0&nbsp;[]]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 054&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(keyword?&nbsp;(first&nbsp;r))
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[operator&nbsp;&amp;&nbsp;operands]&nbsp;r
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pairs&nbsp;(map&nbsp;compute-balance-factors&nbsp;operands)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heights&nbsp;(map&nbsp;first&nbsp;pairs)]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;heights)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0&nbsp;[]]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[max-height&nbsp;(reduce&nbsp;max&nbsp;heights)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min-height&nbsp;(reduce&nbsp;min&nbsp;heights)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;balance&nbsp;(-&nbsp;max-height&nbsp;min-height)&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(inc&nbsp;max-height)
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(conj&nbsp;(mapcat&nbsp;second&nbsp;pairs)&nbsp;balance)])))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -205,7 +205,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0&nbsp;[]]))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -214,7 +214,7 @@
 <span class="blank" title="0 out of 0 forms covered">
                 070&nbsp;&nbsp;
                 </span><br/>
-<span class="partial" title="1 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 071&nbsp;&nbsp;(defn&nbsp;tab&nbsp;[]&nbsp;(printf&nbsp;&quot;\t&quot;))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -247,7 +247,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}}]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 082&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[time-out-secs&nbsp;30
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -256,49 +256,49 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trivials&nbsp;&#x27;(:sigma&nbsp;(:*&nbsp;:sigma)&nbsp;(:cat&nbsp;:sigma&nbsp;(:*&nbsp;:sigma))&nbsp;(:cat&nbsp;(:*&nbsp;:sigma)&nbsp;:sigma)&nbsp;:epsilon&nbsp;:empty-set)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freqs&nbsp;(loop&nbsp;[repetitions&nbsp;repetitions
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rtes&nbsp;nil]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not&nbsp;(pos?&nbsp;repetitions))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(frequencies&nbsp;rtes)
                 </span><br/>
-<span class="not-covered" title="0 out of 40 forms covered">
+<span class="covered" title="40 out of 40 forms covered">
                 089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(truthy-let&nbsp;[rte-1&nbsp;(gen&nbsp;depth)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-rte-1-leaves&nbsp;(rte-count-leaves&nbsp;rte-1)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[_&nbsp;balance-factors]&nbsp;(compute-balance-factors&nbsp;rte-1)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mean-balance&nbsp;(float&nbsp;(mean&nbsp;balance-factors&nbsp;0))
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max-balance&nbsp;(reduce&nbsp;max&nbsp;(conj&nbsp;balance-factors&nbsp;0))
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma-balance&nbsp;(std-deviation&nbsp;balance-factors&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
+<span class="partial" title="10 out of 11 forms covered">
                 095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:do&nbsp;(when&nbsp;(println&nbsp;[:rep&nbsp;repetitions
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:time&nbsp;(human-readable-current-time)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rte-1-count&nbsp;count-rte-1-leaves
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:mean-balance&nbsp;mean-balance
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:max-balance&nbsp;max-balance
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -307,10 +307,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]))
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa-1&nbsp;(when&nbsp;(&gt;&nbsp;max-rte-leaf-count&nbsp;count-rte-1-leaves)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-timeout&nbsp;time-out-secs
                 </span><br/>
 <span class="not-covered" title="0 out of 6 forms covered">
@@ -319,16 +319,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;;;(println&nbsp;&quot;starting&nbsp;(rte-to-dfa&nbsp;rte-1)\n&quot;)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rte-to-dfa&nbsp;rte-1))))
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="covered" title="10 out of 10 forms covered">
                 108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:do&nbsp;(when&nbsp;verbose&nbsp;(tab)&nbsp;(println&nbsp;[:dfa-1&nbsp;dfa-1]))
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa-min&nbsp;(with-timeout&nbsp;time-out-secs
                 </span><br/>
 <span class="not-covered" title="0 out of 6 forms covered">
@@ -337,13 +337,13 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(xym&#x2F;minimize&nbsp;dfa-1))
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="covered" title="10 out of 10 forms covered">
                 113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:do&nbsp;(when&nbsp;verbose&nbsp;(tab)&nbsp;(println&nbsp;[:dfa-min&nbsp;dfa-min]))
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-map&nbsp;(with-timeout&nbsp;time-out-secs
                 </span><br/>
 <span class="not-covered" title="0 out of 6 forms covered">
@@ -352,16 +352,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dfa-to-rte&nbsp;dfa-min))
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-2&nbsp;(when&nbsp;rte-map&nbsp;(get&nbsp;rte-map&nbsp;true&nbsp;:empty-set))
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:do&nbsp;(if&nbsp;verbose
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="covered" title="10 out of 10 forms covered">
                 120&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(tab)&nbsp;(println&nbsp;[:rte-2-count&nbsp;(rte-count-leaves&nbsp;rte-2)]))
                 </span><br/>
 <span class="not-covered" title="0 out of 3 forms covered">
@@ -370,10 +370,10 @@
 <span class="blank" title="0 out of 0 forms covered">
                 122&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa-2&nbsp;(when&nbsp;(&gt;&nbsp;max-rte-leaf-count&nbsp;(rte-count-leaves&nbsp;rte-2))
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-timeout&nbsp;time-out-secs
                 </span><br/>
 <span class="not-covered" title="0 out of 6 forms covered">
@@ -382,7 +382,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rte-to-dfa&nbsp;rte-2)))]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -415,52 +415,52 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:date&nbsp;&nbsp;(human-readable-current-time)])
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;dfa-2
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(lock&#x2F;merge-file&nbsp;csv-file
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[out-file]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;(cl-format&nbsp;out-file&nbsp;&quot;#&nbsp;requested-depth,&nbsp;actual-depth,&nbsp;max-balance,&nbsp;mean-balance,&nbsp;sigma-balance,&nbsp;actual-leaf-count,&nbsp;minimized-depth,&nbsp;minimized-leaf-count,&nbsp;actual-state-count,&nbsp;minimized-state-count,&nbsp;minimized-rte~%&quot;)
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
+<span class="covered" title="11 out of 11 forms covered">
                 142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;~D,&nbsp;~D,&nbsp;~D&quot;&nbsp;depth&nbsp;(rte-depth&nbsp;rte-1)&nbsp;(rte-count-leaves&nbsp;rte-1))
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;,&nbsp;~A,&nbsp;~A,&nbsp;~A&quot;&nbsp;max-balance&nbsp;mean-balance&nbsp;sigma-balance)
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="covered" title="10 out of 10 forms covered">
                 144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;,&nbsp;~D,&nbsp;~D&quot;&nbsp;(rte-depth&nbsp;rte-2)&nbsp;(rte-count-leaves&nbsp;rte-2))
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;,&nbsp;~D,&nbsp;~D&quot;&nbsp;(count&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa-1))&nbsp;(count&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa-2)))
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="covered" title="10 out of 10 forms covered">
                 146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;,&nbsp;~A&quot;&nbsp;(if&nbsp;(member&nbsp;rte-2&nbsp;trivials)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-2
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 148&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:other))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;~%&quot;)))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;(dec&nbsp;repetitions)&nbsp;(cons&nbsp;rte-2&nbsp;rtes)))
                 </span><br/>
 <span class="not-covered" title="0 out of 1 forms covered">
                 151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;(dec&nbsp;repetitions)&nbsp;rtes)))))]
                 </span><br/>
-<span class="not-covered" title="0 out of 34 forms covered">
+<span class="partial" title="27 out of 34 forms covered">
                 152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;{}&nbsp;(for&nbsp;[[k&nbsp;v]&nbsp;freqs
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;v&nbsp;1)]
                 </span><br/>
 <span class="not-covered" title="0 out of 3 forms covered">
@@ -481,16 +481,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 159&nbsp;&nbsp;&nbsp;&nbsp;[depth&nbsp;repetitions]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 160&nbsp;&nbsp;&nbsp;&nbsp;(build-rtes&nbsp;depth&nbsp;repetitions
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:verbose&nbsp;true
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:gen&nbsp;gen-rte
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 163&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:csv-file&nbsp;gen-rte-classic-csv))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -505,16 +505,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 167&nbsp;&nbsp;&nbsp;&nbsp;[depth&nbsp;repetitions]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 168&nbsp;&nbsp;&nbsp;&nbsp;(build-rtes&nbsp;depth&nbsp;repetitions
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:verbose&nbsp;true
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:gen&nbsp;gen-partially-balanced-rte
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:csv-file&nbsp;gen-rte-partially-balanced-csv))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -529,16 +529,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 175&nbsp;&nbsp;&nbsp;&nbsp;[probability-binary&nbsp;depth&nbsp;repetitions]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 176&nbsp;&nbsp;&nbsp;&nbsp;(build-rtes&nbsp;depth&nbsp;repetitions
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:verbose&nbsp;true
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 178&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:gen&nbsp;(fn&nbsp;[depth]&nbsp;(gen-totally-balanced-rte&nbsp;probability-binary&nbsp;depth))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:csv-file&nbsp;gen-rte-totally-balanced-csv))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -553,10 +553,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 183&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;#&nbsp;requested-depth,&nbsp;actual-depth,&nbsp;actual-leaf-count,&nbsp;max-balance,&nbsp;mean-balance,&nbsp;sigma-balance,&nbsp;minimized-depth,&nbsp;minimized-leaf-count,&nbsp;actual-state-count,&nbsp;minimized-state-count,&nbsp;minimized-rte
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 184&nbsp;&nbsp;&nbsp;&nbsp;(lock&#x2F;slurp-csv-data&nbsp;csv-file-name
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:requested-depth
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -595,7 +595,7 @@
 <span class="covered" title="1 out of 1 forms covered">
                 197&nbsp;&nbsp;(defn&nbsp;slurp-partially-balanced-rte-data&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 198&nbsp;&nbsp;&nbsp;&nbsp;(slurp-rte-data&nbsp;gen-rte-partially-balanced-csv))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -604,7 +604,7 @@
 <span class="covered" title="1 out of 1 forms covered">
                 200&nbsp;&nbsp;(defn&nbsp;slurp-totally-balanced-rte-data&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 201&nbsp;&nbsp;&nbsp;&nbsp;(slurp-rte-data&nbsp;gen-rte-totally-balanced-csv))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -613,7 +613,7 @@
 <span class="covered" title="1 out of 1 forms covered">
                 203&nbsp;&nbsp;(defn&nbsp;slurp-classic-rte-data&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 204&nbsp;&nbsp;&nbsp;&nbsp;(slurp-rte-data&nbsp;gen-rte-classic-csv))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -628,103 +628,103 @@
 <span class="covered" title="1 out of 1 forms covered">
                 208&nbsp;&nbsp;(defn&nbsp;plot-rte-summary&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 209&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[partially-balanced-rte-data&nbsp;(slurp-partially-balanced-rte-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;totally-balanced-rte-data&nbsp;(slurp-totally-balanced-rte-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;classic-rte-data&nbsp;&nbsp;(slurp-classic-rte-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minimized-leaf-count&nbsp;(fn&nbsp;[data-map]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(min&nbsp;(:minimized-leaf-count&nbsp;data-map)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:actual-leaf-count&nbsp;data-map)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 32 forms covered">
+<span class="partial" title="26 out of 32 forms covered">
                 216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[csv-data&nbsp;title&nbsp;plot-path-1&nbsp;plot-path-2&nbsp;max-x]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[totally-balanced-rte-data&nbsp;&quot;Statistics&nbsp;for&nbsp;totally&nbsp;balanced&nbsp;generation&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gen-rte-totally-balanced-svg&nbsp;gen-dfa-totally-balanced-svg&nbsp;200]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 219&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[partially-balanced-rte-data&nbsp;&quot;Statistics&nbsp;for&nbsp;partially&nbsp;balanced&nbsp;generation&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gen-rte-partially-balanced-svg&nbsp;gen-dfa-partially-balanced-svg&nbsp;200]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[classic-rte-data&nbsp;&nbsp;&quot;Statistics&nbsp;for&nbsp;classic&nbsp;generation&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gen-rte-classic-svg&nbsp;gen-dfa-classic-svg&nbsp;200]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="partial" title="4 out of 8 forms covered">
                 224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[grouped&nbsp;(group-by&nbsp;:actual-leaf-count&nbsp;csv-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="partial" title="2 out of 4 forms covered">
                 225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-lines&nbsp;(count&nbsp;csv-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 62 forms covered">
+<span class="partial" title="31 out of 62 forms covered">
                 226&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;histogram&nbsp;(for&nbsp;[[actual-leaf-count&nbsp;lines]&nbsp;grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 227&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&lt;&nbsp;actual-leaf-count&nbsp;max-x)]
                 </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
+<span class="partial" title="9 out of 18 forms covered">
                 228&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[actual-leaf-count&nbsp;(*&nbsp;10&nbsp;(&#x2F;&nbsp;(float&nbsp;(count&nbsp;lines))&nbsp;count-lines))])
                 </span><br/>
-<span class="not-covered" title="0 out of 62 forms covered">
+<span class="partial" title="31 out of 62 forms covered">
                 229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;average-minimized-leaf-count&nbsp;(for&nbsp;[[actual-leaf-count&nbsp;lines]&nbsp;grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&lt;&nbsp;actual-leaf-count&nbsp;max-x)]
                 </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
+<span class="partial" title="9 out of 18 forms covered">
                 231&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[actual-leaf-count&nbsp;(float&nbsp;(mean&nbsp;(map&nbsp;minimized-leaf-count&nbsp;lines)))])
                 </span><br/>
-<span class="not-covered" title="0 out of 62 forms covered">
+<span class="partial" title="31 out of 62 forms covered">
                 232&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;average-minimized-state-count&nbsp;(for&nbsp;[[actual-leaf-count&nbsp;lines]&nbsp;grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&lt;&nbsp;actual-leaf-count&nbsp;max-x)]
                 </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
+<span class="partial" title="9 out of 18 forms covered">
                 234&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[actual-leaf-count&nbsp;(float&nbsp;(mean&nbsp;(map&nbsp;:minimized-state-count&nbsp;lines)))])
                 </span><br/>
-<span class="not-covered" title="0 out of 62 forms covered">
+<span class="partial" title="31 out of 62 forms covered">
                 235&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max-minimized-leaf-count&nbsp;(for&nbsp;[[actual-leaf-count&nbsp;lines]&nbsp;grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 236&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&lt;&nbsp;actual-leaf-count&nbsp;max-x)]
                 </span><br/>
-<span class="not-covered" title="0 out of 22 forms covered">
+<span class="partial" title="11 out of 22 forms covered">
                 237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[actual-leaf-count&nbsp;(float&nbsp;(reduce&nbsp;max&nbsp;0&nbsp;(map&nbsp;minimized-leaf-count&nbsp;lines)))])
                 </span><br/>
-<span class="not-covered" title="0 out of 62 forms covered">
+<span class="partial" title="31 out of 62 forms covered">
                 238&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max-minimized-state-count&nbsp;(for&nbsp;[[actual-leaf-count&nbsp;lines]&nbsp;grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 239&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&lt;&nbsp;actual-leaf-count&nbsp;max-x)]
                 </span><br/>
-<span class="not-covered" title="0 out of 22 forms covered">
+<span class="partial" title="11 out of 22 forms covered">
                 240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[actual-leaf-count&nbsp;(float&nbsp;(reduce&nbsp;max&nbsp;0&nbsp;(map&nbsp;:minimized-state-count&nbsp;lines)))])
                 </span><br/>
-<span class="not-covered" title="0 out of 24 forms covered">
+<span class="partial" title="12 out of 24 forms covered">
                 241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image-1&nbsp;(vega&#x2F;series-scatter-plot&nbsp;(str&nbsp;&quot;rte:&nbsp;&quot;&nbsp;title)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -733,16 +733,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Final&nbsp;LEAF&nbsp;count&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="partial" title="1 out of 2 forms covered">
                 244&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[;;&nbsp;[&quot;curve&nbsp;name&quot;&nbsp;[[x&nbsp;y]&nbsp;[x&nbsp;y]&nbsp;[x&nbsp;y]&nbsp;...]]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;average&quot;&nbsp;(sort&nbsp;average-minimized-leaf-count)]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 246&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;maximum&quot;&nbsp;(sort&nbsp;max-minimized-leaf-count)]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 247&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;histogram&quot;&nbsp;(sort&nbsp;histogram)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -766,7 +766,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 254&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
                 </span><br/>
-<span class="not-covered" title="0 out of 24 forms covered">
+<span class="partial" title="12 out of 24 forms covered">
                 255&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image-2&nbsp;(vega&#x2F;series-scatter-plot&nbsp;(str&nbsp;&quot;dfa:&nbsp;&quot;&nbsp;title)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -775,7 +775,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 257&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Final&nbsp;STATE&nbsp;count&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="partial" title="1 out of 2 forms covered">
                 258&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[;;&nbsp;[&quot;curve&nbsp;name&quot;&nbsp;[[x&nbsp;y]&nbsp;[x&nbsp;y]&nbsp;[x&nbsp;y]&nbsp;...]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -784,13 +784,13 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 260&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;[&quot;minimized&nbsp;(max)&nbsp;leaf&nbsp;count&quot;&nbsp;(sort&nbsp;max-minimized-leaf-count)]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 261&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;average&quot;&nbsp;(sort&nbsp;average-minimized-state-count)]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 262&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;maximum&quot;&nbsp;(sort&nbsp;max-minimized-state-count)]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 263&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;histogram&quot;&nbsp;(sort&nbsp;histogram)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -805,58 +805,58 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 267&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)]]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 268&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sh&nbsp;&quot;cp&quot;&nbsp;image-1&nbsp;plot-path-1)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 269&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view&#x2F;view-image&nbsp;image-1)
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="5 out of 10 forms covered">
                 270&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sh&nbsp;&quot;cp&quot;&nbsp;image-2&nbsp;plot-path-2)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="3 out of 6 forms covered">
                 271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view&#x2F;view-image&nbsp;image-2))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 272&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 273&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[average-rte-reduction
                 </span><br/>
-<span class="not-covered" title="0 out of 32 forms covered">
+<span class="covered" title="32 out of 32 forms covered">
                 274&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[[max-balance&nbsp;lines]&nbsp;(group-by&nbsp;:max-balance
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 275&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;totally-balanced-rte-data
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 276&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;partially-balanced-rte-data
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 277&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;classic-rte-data))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;we&nbsp;went&nbsp;from&nbsp;10&nbsp;leaves&nbsp;to&nbsp;2&nbsp;leaves&nbsp;we&nbsp;have&nbsp;80%&nbsp;reduction
                 </span><br/>
-<span class="not-covered" title="0 out of 29 forms covered">
+<span class="covered" title="29 out of 29 forms covered">
                 279&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[rte-reductions&nbsp;(for&nbsp;[line&nbsp;lines]
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="covered" title="9 out of 9 forms covered">
                 280&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*&nbsp;100.0&nbsp;(if&nbsp;(=&nbsp;0&nbsp;(:actual-leaf-count&nbsp;line))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 281&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 282&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&#x2F;&nbsp;(-&nbsp;(:actual-leaf-count&nbsp;line)&nbsp;(minimized-leaf-count&nbsp;line))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 283&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:actual-leaf-count&nbsp;line)))))]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;compute&nbsp;average&nbsp;reduction&nbsp;percentage
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 285&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[max-balance&nbsp;(mean&nbsp;rte-reductions)])
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -865,79 +865,79 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 287&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;average-dfa-reduction
                 </span><br/>
-<span class="not-covered" title="0 out of 32 forms covered">
+<span class="covered" title="32 out of 32 forms covered">
                 288&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[[max-balance&nbsp;lines]&nbsp;(group-by&nbsp;:max-balance
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;totally-balanced-rte-data
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 290&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;partially-balanced-rte-data
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 291&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;classic-rte-data))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 292&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;we&nbsp;went&nbsp;from&nbsp;10&nbsp;states&nbsp;to&nbsp;2&nbsp;states&nbsp;we&nbsp;have&nbsp;80%&nbsp;reduction
                 </span><br/>
-<span class="not-covered" title="0 out of 29 forms covered">
+<span class="covered" title="29 out of 29 forms covered">
                 293&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[dfa-reductions&nbsp;(for&nbsp;[line&nbsp;lines]
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="partial" title="8 out of 9 forms covered">
                 294&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*&nbsp;100.0&nbsp;(if&nbsp;(=&nbsp;0&nbsp;(:actual-state-count&nbsp;line))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 295&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 296&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&#x2F;&nbsp;(-&nbsp;(:actual-state-count&nbsp;line)&nbsp;(:minimized-state-count&nbsp;line))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 297&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:actual-state-count&nbsp;line)))))]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 298&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;compute&nbsp;average&nbsp;reduction&nbsp;percentage
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 299&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[max-balance&nbsp;(mean&nbsp;dfa-reductions)])
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 300&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 301&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;population-count&nbsp;(+&nbsp;(count&nbsp;totally-balanced-rte-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(count&nbsp;partially-balanced-rte-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 303&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(count&nbsp;classic-rte-data))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 304&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa-reduction-histogram
                 </span><br/>
-<span class="not-covered" title="0 out of 31 forms covered">
+<span class="covered" title="31 out of 31 forms covered">
                 305&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[[max-balance&nbsp;lines]&nbsp;(group-by&nbsp;:max-balance
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 306&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;totally-balanced-rte-data
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 307&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;partially-balanced-rte-data
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 308&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;classic-rte-data))]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 309&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;compute&nbsp;average&nbsp;reduction&nbsp;percentage
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="covered" title="9 out of 9 forms covered">
                 310&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[max-balance&nbsp;(*&nbsp;100&nbsp;(&#x2F;&nbsp;(float&nbsp;(count&nbsp;lines))&nbsp;population-count))])
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 311&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 312&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image&nbsp;(vega&#x2F;series-scatter-plot&nbsp;&quot;Reduction&nbsp;vs&nbsp;Imbalance&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -946,22 +946,22 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 314&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Percentage&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 315&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[&quot;rte&nbsp;reduction&quot;&nbsp;(sort&nbsp;average-rte-reduction)]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 316&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;dfa&nbsp;reduction&quot;&nbsp;(sort&nbsp;average-dfa-reduction)]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 317&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;histogram&quot;&nbsp;(sort&nbsp;dfa-reduction-histogram)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 318&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;])]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 319&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sh&nbsp;&quot;cp&quot;&nbsp;image&nbsp;reduction-svg)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 320&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view&#x2F;view-image&nbsp;image))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">

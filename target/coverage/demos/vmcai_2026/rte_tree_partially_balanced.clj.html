@@ -40,10 +40,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 012&nbsp;&nbsp;&nbsp;&nbsp;[value&nbsp;tree]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 013&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(empty?&nbsp;tree)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 014&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[value&nbsp;nil&nbsp;nil]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -52,34 +52,34 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[top&nbsp;left&nbsp;right]&nbsp;tree]
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="partial" title="5 out of 6 forms covered">
                 018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(&lt;&nbsp;value&nbsp;top)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(insert-tree&nbsp;value&nbsp;left)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 022&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&nbsp;value&nbsp;top)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(insert-tree&nbsp;value&nbsp;right)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -109,22 +109,22 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 035&nbsp;&nbsp;&nbsp;&nbsp;[population]
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 036&nbsp;&nbsp;&nbsp;&nbsp;(loop&nbsp;[tree&nbsp;nil
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;population&nbsp;population]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not-empty&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;(insert-tree&nbsp;(first&nbsp;population)&nbsp;tree)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rest&nbsp;population))
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tree)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -163,37 +163,37 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 053&nbsp;&nbsp;&nbsp;&nbsp;([tree&nbsp;types]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 054&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;(not-empty&nbsp;tree)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[key&nbsp;(rand-nth&nbsp;&#x27;[:?&nbsp;:*&nbsp;:not
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:and&nbsp;:or&nbsp;:cat])
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[value&nbsp;left&nbsp;right]&nbsp;tree]
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="partial" title="3 out of 9 forms covered">
                 058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;key
                 </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
+<span class="covered" title="18 out of 18 forms covered">
                 059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:?&nbsp;:*&nbsp;:not)&nbsp;(if&nbsp;(=&nbsp;0&nbsp;(rand-int&nbsp;2))&nbsp;;;&nbsp;50%&nbsp;choice
                 </span><br/>
-<span class="not-covered" title="0 out of 21 forms covered">
+<span class="covered" title="21 out of 21 forms covered">
                 060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;key&nbsp;(tree-to-rte&nbsp;left&nbsp;types))
                 </span><br/>
-<span class="not-covered" title="0 out of 21 forms covered">
+<span class="covered" title="21 out of 21 forms covered">
                 061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;key&nbsp;(tree-to-rte&nbsp;tree&nbsp;types)))
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="partial" title="6 out of 9 forms covered">
                 062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:and&nbsp;:or&nbsp;:cat)&nbsp;(list&nbsp;key
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="partial" title="8 out of 12 forms covered">
                 063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-to-rte&nbsp;left&nbsp;types)
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="partial" title="8 out of 12 forms covered">
                 064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-to-rte&nbsp;right&nbsp;types))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -202,7 +202,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rand-nth&nbsp;types))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -232,16 +232,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 076&nbsp;&nbsp;&nbsp;&nbsp;[depth]
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
+<span class="covered" title="11 out of 11 forms covered">
                 077&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[num-leaves&nbsp;(+&nbsp;(round&nbsp;(pow&nbsp;2&nbsp;depth))
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
+<span class="covered" title="11 out of 11 forms covered">
                 078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rand-int&nbsp;(round&nbsp;(pow&nbsp;2&nbsp;depth))))
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;population&nbsp;(into&nbsp;()&nbsp;(shuffle&nbsp;(range&nbsp;num-leaves)))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tree&nbsp;(build-binary-tree&nbsp;population)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -250,7 +250,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;(printf&nbsp;&quot;target&nbsp;num-leaves=%d&nbsp;%s\n&quot;&nbsp;num-leaves&nbsp;tree)
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tree
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -280,10 +280,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 092&nbsp;&nbsp;&nbsp;&nbsp;([depth]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gen-partially-balanced-rte&nbsp;depth&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;:epsilon&nbsp;*test-types*)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -304,16 +304,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;2^n&nbsp;+&nbsp;(rand-int&nbsp;2^n)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[tree&nbsp;(rand-tree&nbsp;depth)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte&nbsp;(tree-to-rte&nbsp;tree&nbsp;types)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 103&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">

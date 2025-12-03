@@ -49,31 +49,31 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 015&nbsp;&nbsp;&nbsp;&nbsp;([tree&nbsp;types]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="partial" title="4 out of 10 forms covered">
                 016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(case&nbsp;(count&nbsp;tree)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0)&nbsp;(rand-nth&nbsp;types)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;(let&nbsp;[[parent&nbsp;child]&nbsp;tree]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(rand-nth&nbsp;[:?&nbsp;:*&nbsp;:not])
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;child&nbsp;types)))
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;(let&nbsp;[[parent&nbsp;left&nbsp;right]&nbsp;tree]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(rand-nth&nbsp;[:and&nbsp;:or&nbsp;:cat])
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;left&nbsp;types)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(tree-012-to-rte&nbsp;right&nbsp;types))))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -94,10 +94,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 030&nbsp;&nbsp;&nbsp;&nbsp;([probability-binary&nbsp;depth]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 031&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(gen-totally-balanced-rte&nbsp;probability-binary&nbsp;depth&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;:epsilon&nbsp;*test-types*)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -118,16 +118,16 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 038&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;2^n&nbsp;+&nbsp;(rand-int&nbsp;2^n)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[tree&nbsp;(rand-tree-012&nbsp;probability-binary&nbsp;depth)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte&nbsp;(tree-012-to-rte&nbsp;tree&nbsp;types)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 041&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte)))
                 </span><br/>
  </body>

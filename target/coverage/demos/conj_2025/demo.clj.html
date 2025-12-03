@@ -37,7 +37,7 @@
 <span class="covered" title="1 out of 1 forms covered">
                 011&nbsp;&nbsp;(defn&nbsp;demo-1&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 012&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[all-int&nbsp;&#x27;(:*&nbsp;(satisfies&nbsp;int?))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -49,41 +49,41 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 015&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-even-parity&nbsp;&#x27;(:*&nbsp;(:cat&nbsp;:sigma&nbsp;:sigma))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-odd-parity&nbsp;(rte&#x2F;Cat&nbsp;:sigma&nbsp;rte-even-parity)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r1&nbsp;(rte&#x2F;And&nbsp;starts-0
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 018&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-odd-parity)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 019&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r2&nbsp;(rte&#x2F;And&nbsp;termine-0
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte-even-parity)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 021&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rte&nbsp;(rte&#x2F;And&nbsp;all-int
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 022&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rte&#x2F;Or&nbsp;r1
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 023&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r2))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 024&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;(rte&#x2F;rte-to-dfa&nbsp;rte)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 026&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rte-view&nbsp;rte&nbsp;:title&nbsp;&quot;rte&quot;)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                027&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;dfa&nbsp;:title&nbsp;&quot;dfa&quot;)))
+<span class="covered" title="4 out of 4 forms covered">
+                027&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot&#x2F;dfa-view&nbsp;dfa&nbsp;&quot;dfa&quot;)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 028&nbsp;&nbsp;
@@ -97,13 +97,13 @@
 <span class="covered" title="1 out of 1 forms covered">
                 031&nbsp;&nbsp;(defn&nbsp;missile-demo&nbsp;[input-seq]
                 </span><br/>
-<span class="not-covered" title="0 out of 18 forms covered">
+<span class="partial" title="13 out of 18 forms covered">
                 032&nbsp;&nbsp;&nbsp;&nbsp;(destructuring-case&nbsp;input-seq
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 033&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[a&nbsp;b]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{a&nbsp;Boolean&nbsp;b&nbsp;(or&nbsp;String&nbsp;Boolean)}]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 034&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:rename-file&nbsp;a&nbsp;b]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -112,7 +112,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 036&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[a&nbsp;b]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{a&nbsp;Boolean&nbsp;b&nbsp;(or&nbsp;String&nbsp;(satisfies&nbsp;int?))}]
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:delete-file&nbsp;a&nbsp;b]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -121,7 +121,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[a&nbsp;b&nbsp;c&nbsp;&amp;&nbsp;d]&nbsp;&nbsp;{[a&nbsp;d]&nbsp;Boolean&nbsp;b&nbsp;String&nbsp;c&nbsp;(satisfies&nbsp;int?)}]
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:copy-file&nbsp;a&nbsp;b&nbsp;c&nbsp;d]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">

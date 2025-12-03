@@ -55,7 +55,7 @@
 <span class="blank" title="0 out of 0 forms covered">
                 017&nbsp;&nbsp;
                 </span><br/>
-<span class="partial" title="5 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 018&nbsp;&nbsp;(def&nbsp;subset-csv&nbsp;(str&nbsp;lock&#x2F;statistics-resource&nbsp;&quot;dfa-subset.csv&quot;))
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
@@ -79,7 +79,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 025&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;#&nbsp;num-states,&nbsp;num-transitions,&nbsp;type-size,&nbsp;probability-indeterminate,&nbsp;min-dfa-state-count,&nbsp;min-dfa-transitions-count,&nbsp;count&nbsp;indeterminate&nbsp;transitions,&nbsp;inhabited&nbsp;dfa&nbsp;language
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 026&nbsp;&nbsp;&nbsp;&nbsp;(lock&#x2F;slurp-csv-data&nbsp;inhabited-csv&nbsp;[:num-states
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -115,25 +115,25 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 037&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;#&nbsp;num-states,&nbsp;num-transitions,&nbsp;type-size,&nbsp;probability-indeterminate,&nbsp;min-dfa-state-count,&nbsp;min-dfa-transitions-count,&nbsp;count&nbsp;indeterminate&nbsp;transitions,&nbsp;inhabited&nbsp;dfa&nbsp;language
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 038&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[lines&nbsp;(slurp-inhabited-data)]
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 039&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(numeric&nbsp;[key]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[population&nbsp;(map&nbsp;key&nbsp;lines)]
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="covered" title="9 out of 9 forms covered">
                 041&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:min&nbsp;(reduce&nbsp;min&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 042&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:max&nbsp;(reduce&nbsp;max&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 043&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:mean&nbsp;(float&nbsp;(mean&nbsp;population))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;(std-deviation&nbsp;population)}
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -142,25 +142,25 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(symbolic&nbsp;[key]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[population&nbsp;(map&nbsp;key&nbsp;lines)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;(count&nbsp;population)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:distinct&nbsp;(distinct&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:frequencies&nbsp;(frequencies&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 34 forms covered">
+<span class="covered" title="34 out of 34 forms covered">
                 052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:count&nbsp;(into&nbsp;{}&nbsp;(for&nbsp;[x&nbsp;(distinct&nbsp;population)]
                 </span><br/>
-<span class="not-covered" title="0 out of 13 forms covered">
+<span class="covered" title="13 out of 13 forms covered">
                 053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x&nbsp;(float&nbsp;(&#x2F;&nbsp;(count&nbsp;(filter&nbsp;#(=&nbsp;%&nbsp;x)&nbsp;population))&nbsp;n))]))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -169,31 +169,31 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
+<span class="covered" title="12 out of 12 forms covered">
                 056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:num-samples&nbsp;(count&nbsp;lines)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:num-states&nbsp;(numeric&nbsp;:num-states)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:num-transitions&nbsp;(numeric&nbsp;:num-transitions)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type-size&nbsp;(numeric&nbsp;:type-size)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:probability-indeterminate&nbsp;&nbsp;(numeric&nbsp;:probability-indeterminate&nbsp;)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:min-dfa-state-count&nbsp;(numeric&nbsp;:min-dfa-state-count)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:min-dfa-transitions-count&nbsp;(numeric&nbsp;:min-dfa-transitions-count)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:count-indeterminate-transitions&nbsp;(numeric&nbsp;:count-indeterminate-transitions&nbsp;)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:inhabited-dfa-language&nbsp;&nbsp;(symbolic&nbsp;:inhabited-dfa-language)}
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -223,10 +223,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 073&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;num-states,&nbsp;num-transitions,&nbsp;type-size,&nbsp;probability-indeterminate,&nbsp;subset,&nbsp;overlap,&nbsp;non-trivial-overlap
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 074&nbsp;&nbsp;&nbsp;&nbsp;(lock&#x2F;slurp-csv-data&nbsp;subset-csv
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[:num-states
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -265,25 +265,25 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 087&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;num-states,&nbsp;num-transitions,&nbsp;type-size,&nbsp;probability-indeterminate,&nbsp;subset,&nbsp;overlap,&nbsp;non-trivial-overlap
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 088&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[lines&nbsp;(slurp-subset-data)]
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(numeric&nbsp;[key]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[population&nbsp;(map&nbsp;key&nbsp;lines)]
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
+<span class="covered" title="9 out of 9 forms covered">
                 091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:min&nbsp;(reduce&nbsp;min&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:max&nbsp;(reduce&nbsp;max&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:mean&nbsp;(float&nbsp;(mean&nbsp;population))
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sigma&nbsp;(std-deviation&nbsp;population)}
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -292,25 +292,25 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(symbolic&nbsp;[key]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[population&nbsp;(map&nbsp;key&nbsp;lines)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;(count&nbsp;population)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 7 forms covered">
+<span class="covered" title="7 out of 7 forms covered">
                 100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:distinct&nbsp;(distinct&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:frequencies&nbsp;(frequencies&nbsp;population)
                 </span><br/>
-<span class="not-covered" title="0 out of 34 forms covered">
+<span class="covered" title="34 out of 34 forms covered">
                 102&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:count&nbsp;(into&nbsp;{}&nbsp;(for&nbsp;[x&nbsp;(distinct&nbsp;population)]
                 </span><br/>
-<span class="not-covered" title="0 out of 13 forms covered">
+<span class="covered" title="13 out of 13 forms covered">
                 103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x&nbsp;(float&nbsp;(&#x2F;&nbsp;(count&nbsp;(filter&nbsp;#(=&nbsp;%&nbsp;x)&nbsp;population))&nbsp;n))]))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -319,28 +319,28 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
+<span class="covered" title="11 out of 11 forms covered">
                 106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{:num-samples&nbsp;(count&nbsp;lines)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:num-states&nbsp;(numeric&nbsp;:num-states)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:num-transitions&nbsp;(numeric&nbsp;:num-transitions)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type-size&nbsp;(numeric&nbsp;:type-size)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:probability-indeterminate&nbsp;&nbsp;(numeric&nbsp;:probability-indeterminate&nbsp;)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:subset&nbsp;(symbolic&nbsp;:subset)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:overlap&nbsp;(symbolic&nbsp;:overlap)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:non-trivial-overlap&nbsp;(symbolic&nbsp;:non-trivila-overlap)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -721,28 +721,28 @@
 <span class="covered" title="1 out of 1 forms covered">
                 239&nbsp;&nbsp;(defn&nbsp;plot-inhabited-subset-summary&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 240&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[inhabited-grouped&nbsp;(group-by&nbsp;:num-states&nbsp;(slurp-inhabited-data))
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="covered" title="33 out of 33 forms covered">
                 241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inhabited-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;inhabited-grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[m&nbsp;(frequencies&nbsp;(map&nbsp;:inhabited-dfa-language&nbsp;lines))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;indeterminate&nbsp;(get&nbsp;m&nbsp;:indeterminate&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 244&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satisfiable&nbsp;(get&nbsp;m&nbsp;:satisfiable&nbsp;0)]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;(+&nbsp;satisfiable&nbsp;indeterminate)&nbsp;0)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 246&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 247&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satisfiable-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;satisfiable&nbsp;(+&nbsp;satisfiable&nbsp;indeterminate))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -751,31 +751,31 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 249&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 250&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;satisfiable-percent])
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 251&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="covered" title="33 out of 33 forms covered">
                 252&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inhabited-dont-know-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;inhabited-grouped
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 253&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[m&nbsp;(frequencies&nbsp;(map&nbsp;:inhabited-dfa-language&nbsp;lines))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 254&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;indeterminate&nbsp;(get&nbsp;m&nbsp;:indeterminate&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 255&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satisfiable&nbsp;(get&nbsp;m&nbsp;:satisfiable&nbsp;0)]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 256&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;(+&nbsp;satisfiable&nbsp;indeterminate)&nbsp;0)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 257&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
+<span class="covered" title="8 out of 8 forms covered">
                 258&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satisfiable-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;indeterminate&nbsp;(+&nbsp;satisfiable&nbsp;indeterminate))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -784,43 +784,43 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 260&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 261&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;satisfiable-percent])
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 262&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 263&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sample-lines&nbsp;(slurp-subset-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 264&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grouped-subset&nbsp;(group-by&nbsp;:num-states&nbsp;sample-lines)
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="32 out of 33 forms covered">
                 265&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;subset-true-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 266&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[m&nbsp;(frequencies&nbsp;(map&nbsp;:subset&nbsp;lines))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 267&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-true&nbsp;(get&nbsp;m&nbsp;true&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 268&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-false&nbsp;(get&nbsp;m&nbsp;false&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 269&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-dont-know&nbsp;(get&nbsp;m&nbsp;:dont-know&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 270&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count&nbsp;(+&nbsp;count-true&nbsp;count-false&nbsp;count-dont-know)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;count&nbsp;0)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 272&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 273&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;count-true&nbsp;count)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -829,34 +829,34 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 275&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 276&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;true-percent])
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="32 out of 33 forms covered">
                 277&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;subset-dont-know-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[m&nbsp;(frequencies&nbsp;(map&nbsp;:subset&nbsp;lines))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 279&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-true&nbsp;(get&nbsp;m&nbsp;true&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 280&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-false&nbsp;(get&nbsp;m&nbsp;false&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 281&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-dont-know&nbsp;(get&nbsp;m&nbsp;:dont-know&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 282&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count&nbsp;(+&nbsp;count-true&nbsp;count-false&nbsp;count-dont-know)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 283&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;count&nbsp;0)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 285&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dont-know-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;count-dont-know&nbsp;count)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -865,31 +865,31 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 287&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 288&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;dont-know-percent])
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="32 out of 33 forms covered">
                 289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overlap-dont-know-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 290&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[m&nbsp;(frequencies&nbsp;(map&nbsp;:overlap&nbsp;lines))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 291&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-true&nbsp;(get&nbsp;m&nbsp;true&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 292&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-false&nbsp;(get&nbsp;m&nbsp;false&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 293&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-dont-know&nbsp;(get&nbsp;m&nbsp;:dont-know&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 294&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count&nbsp;(+&nbsp;count-true&nbsp;count-false&nbsp;count-dont-know)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 295&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;count&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 296&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[dont-know-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;count-dont-know&nbsp;count)))]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -898,31 +898,31 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 298&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 299&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;dont-know-percent])
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="32 out of 33 forms covered">
                 300&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;overlap-true-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 301&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[m&nbsp;(frequencies&nbsp;(map&nbsp;:overlap&nbsp;lines))
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-true&nbsp;(get&nbsp;m&nbsp;true&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 303&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-false&nbsp;(get&nbsp;m&nbsp;false&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 304&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count-dont-know&nbsp;(get&nbsp;m&nbsp;:dont-know&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 305&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count&nbsp;(+&nbsp;count-true&nbsp;count-false&nbsp;count-dont-know)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 306&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;count&nbsp;0)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 307&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[true-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;count-true&nbsp;count)))]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -931,13 +931,13 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 309&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 310&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;true-percent])
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 311&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="7 out of 33 forms covered">
                 312&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;non-trivial-overlap-true-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
 <span class="not-covered" title="0 out of 6 forms covered">
@@ -976,7 +976,7 @@
 <span class="blank" title="0 out of 0 forms covered">
                 324&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="7 out of 33 forms covered">
                 325&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;non-trivial-overlap-dont-know-xys&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
 <span class="not-covered" title="0 out of 6 forms covered">
@@ -1015,22 +1015,22 @@
 <span class="blank" title="0 out of 0 forms covered">
                 337&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 338&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;population&nbsp;(count&nbsp;sample-lines)
                 </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
+<span class="partial" title="32 out of 33 forms covered">
                 339&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;histogram-vmcai&nbsp;(for&nbsp;[[num-states&nbsp;lines]&nbsp;grouped-subset
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 340&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[count-local&nbsp;(count&nbsp;lines)]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 341&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(&gt;&nbsp;population&nbsp;0)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 342&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 343&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true-percent&nbsp;(*&nbsp;100&nbsp;(float&nbsp;(&#x2F;&nbsp;count-local&nbsp;population)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -1039,46 +1039,46 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 345&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 346&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[num-states&nbsp;true-percent])
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 347&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot-data&nbsp;[
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 348&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 349&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;inhabited=true&quot;&nbsp;(sort&nbsp;inhabited-xys)]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 350&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;inhabited=dont-know&quot;&nbsp;(sort&nbsp;inhabited-dont-know-xys)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 351&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 352&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;subset=true&quot;&nbsp;(sort&nbsp;subset-true-xys)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 353&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;[&quot;4:&nbsp;subset*2=true&quot;&nbsp;(sort&nbsp;(map&nbsp;(fn&nbsp;[[x&nbsp;y]]&nbsp;[x&nbsp;(*&nbsp;2&nbsp;y)])&nbsp;subset-true-xys))]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 354&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;subset=dont-know&quot;&nbsp;(sort&nbsp;subset-dont-know-xys)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 355&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 356&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;overlap=true&quot;&nbsp;(sort&nbsp;overlap-true-xys)]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 357&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;overlap=dont-know&quot;&nbsp;(sort&nbsp;overlap-dont-know-xys)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 358&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 359&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;state-count-histogram&quot;&nbsp;(sort&nbsp;histogram-vmcai)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -1093,7 +1093,7 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 363&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
+<span class="covered" title="10 out of 10 forms covered">
                 364&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image&nbsp;(vega&#x2F;series-scatter-plot&nbsp;(format&nbsp;&quot;Statistics&nbsp;for&nbsp;%d&nbsp;samples&quot;&nbsp;(count&nbsp;sample-lines))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -1102,10 +1102,10 @@
 <span class="not-tracked" title="0 out of 0 forms covered">
                 366&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;probability&quot;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 367&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot-data
                 </span><br/>
-<span class="not-covered" title="0 out of 4 forms covered">
+<span class="covered" title="4 out of 4 forms covered">
                 368&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:sort&nbsp;(map&nbsp;first&nbsp;plot-data)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
@@ -1114,16 +1114,16 @@
 <span class="blank" title="0 out of 0 forms covered">
                 370&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
+<span class="covered" title="5 out of 5 forms covered">
                 371&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sh&nbsp;&quot;cp&quot;&nbsp;image&nbsp;plot-path)
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 372&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view&#x2F;view-image&nbsp;image)
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
                 373&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
+<span class="covered" title="1 out of 1 forms covered">
                 374&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
@@ -1141,125 +1141,119 @@
 <span class="covered" title="1 out of 1 forms covered">
                 379&nbsp;&nbsp;(defn&nbsp;summarize-inhabited-subset-data&nbsp;[]
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
+<span class="covered" title="3 out of 3 forms covered">
                 380&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[ssd&nbsp;(summarize-subset-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
+<span class="covered" title="2 out of 2 forms covered">
                 381&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(summarize-inhabited-data)
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
+<span class="covered" title="6 out of 6 forms covered">
                 382&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;round-2&nbsp;(fn&nbsp;[val]&nbsp;(format&nbsp;&quot;%3.2f&quot;&nbsp;(float&nbsp;val)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 383&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                384&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint&nbsp;[:ssd&nbsp;ssd])
+<span class="covered" title="3 out of 3 forms covered">
+                384&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;---------------\n&quot;)
                 </span><br/>
-<span class="not-covered" title="0 out of 5 forms covered">
-                385&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint&nbsp;[:sid&nbsp;sid])
+<span class="covered" title="2 out of 2 forms covered">
+                385&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(lock&#x2F;with-lock
                 </span><br/>
-<span class="not-covered" title="0 out of 3 forms covered">
-                386&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;---------------\n&quot;)
+<span class="covered" title="6 out of 6 forms covered">
+                386&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[out-file&nbsp;(java.io.FileWriter.&nbsp;statistics-tex-path)]
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                387&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(lock&#x2F;with-lock
+<span class="partial" title="25 out of 30 forms covered">
+                387&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[sym&nbsp;value]
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                388&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[out-file&nbsp;(java.io.FileWriter.&nbsp;statistics-tex-path)]
+<span class="covered" title="6 out of 6 forms covered">
+                388&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[&#x27;vmcainumsamples&nbsp;(:num-samples&nbsp;ssd)]
                 </span><br/>
-<span class="not-covered" title="0 out of 30 forms covered">
-                389&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[sym&nbsp;value]
+<span class="covered" title="8 out of 8 forms covered">
+                389&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaiminsize&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:min])]
                 </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                390&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[&#x27;vmcainumsamples&nbsp;(:num-samples&nbsp;ssd)]
+<span class="covered" title="8 out of 8 forms covered">
+                390&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimaxsize&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:max])]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                391&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaiminsize&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:min])]
+<span class="covered" title="10 out of 10 forms covered">
+                391&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaisizemu&nbsp;&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:mean]))]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                392&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimaxsize&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:max])]
-                </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
-                393&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaisizemu&nbsp;&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:mean]))]
-                </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
-                394&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaisizesigma&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:sigma]))]
+<span class="covered" title="10 out of 10 forms covered">
+                392&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaisizesigma&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-states&nbsp;:sigma]))]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                395&nbsp;&nbsp;
+                393&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                396&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimintransitions&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:min])]
+<span class="covered" title="8 out of 8 forms covered">
+                394&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimintransitions&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:min])]
                 </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                397&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimaxtransitions&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:max])]
+<span class="covered" title="8 out of 8 forms covered">
+                395&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimaxtransitions&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:max])]
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
-                398&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaitransitionsmu&nbsp;&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:mean]&nbsp;0))]
+<span class="covered" title="11 out of 11 forms covered">
+                396&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaitransitionsmu&nbsp;&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:mean]&nbsp;0))]
                 </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
-                399&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaitransitionssigma&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:sigma]&nbsp;0))]
-                </span><br/>
-<span class="blank" title="0 out of 0 forms covered">
-                400&nbsp;&nbsp;
-                </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                401&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaiminindeterminatetransitions&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:min])]
-                </span><br/>
-<span class="not-covered" title="0 out of 8 forms covered">
-                402&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimaxindeterminatetransitions&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:max])]
-                </span><br/>
-<span class="not-covered" title="0 out of 11 forms covered">
-                403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimuindeterminatetransitions&nbsp;(round-2&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:mean]&nbsp;0))]
-                </span><br/>
-<span class="not-covered" title="0 out of 10 forms covered">
-                404&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaisigmaindeterminatetransitions&nbsp;(round-2&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:sigma]))]
+<span class="covered" title="11 out of 11 forms covered">
+                397&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaitransitionssigma&nbsp;(round-2&nbsp;(get-in&nbsp;ssd&nbsp;[:num-transitions&nbsp;:sigma]&nbsp;0))]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                405&nbsp;&nbsp;
+                398&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
-                406&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcainuminhabited&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:frequencies&nbsp;:satisfiable])]
+<span class="covered" title="8 out of 8 forms covered">
+                399&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaiminindeterminatetransitions&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:min])]
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                407&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentinhabited&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:count&nbsp;:satisfiable]&nbsp;0)))]
+<span class="covered" title="8 out of 8 forms covered">
+                400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimaxindeterminatetransitions&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:max])]
                 </span><br/>
-<span class="not-covered" title="0 out of 9 forms covered">
-                408&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcainumindeterminate&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:frequencies&nbsp;:indeterminate])]
+<span class="covered" title="11 out of 11 forms covered">
+                401&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaimuindeterminatetransitions&nbsp;(round-2&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:mean]&nbsp;0))]
                 </span><br/>
-<span class="not-covered" title="0 out of 2 forms covered">
-                409&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentindeterminate
+<span class="covered" title="10 out of 10 forms covered">
+                402&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaisigmaindeterminatetransitions&nbsp;(round-2&nbsp;(get-in&nbsp;sid&nbsp;[:count-indeterminate-transitions&nbsp;:sigma]))]
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
-                410&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:count&nbsp;:indeterminate]&nbsp;0)))]
+<span class="blank" title="0 out of 0 forms covered">
+                403&nbsp;&nbsp;
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                411&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentsubset&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:subset&nbsp;:count&nbsp;true]&nbsp;0)))]
+<span class="covered" title="9 out of 9 forms covered">
+                404&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcainuminhabited&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:frequencies&nbsp;:satisfiable])]
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                412&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentnotsubset&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:subset&nbsp;:count&nbsp;false]&nbsp;0)))]
+<span class="covered" title="14 out of 14 forms covered">
+                405&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentinhabited&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:count&nbsp;:satisfiable]&nbsp;0)))]
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                413&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentdontknowsubset&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:subset&nbsp;:count&nbsp;:dont-know]&nbsp;0)))]
+<span class="covered" title="9 out of 9 forms covered">
+                406&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcainumindeterminate&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:frequencies&nbsp;:indeterminate])]
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                414&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentdisjoint&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:overlap&nbsp;:count&nbsp;false]&nbsp;0)))]
+<span class="covered" title="2 out of 2 forms covered">
+                407&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentindeterminate
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                415&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentnotdisjoint&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:overlap&nbsp;:count&nbsp;true]&nbsp;0)))]
+<span class="covered" title="12 out of 12 forms covered">
+                408&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;sid&nbsp;[:inhabited-dfa-language&nbsp;:count&nbsp;:indeterminate]&nbsp;0)))]
                 </span><br/>
-<span class="not-covered" title="0 out of 14 forms covered">
-                416&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentdontknowdisjoint&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:overlap&nbsp;:count&nbsp;:dont-know]&nbsp;0)))]
+<span class="covered" title="14 out of 14 forms covered">
+                409&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentsubset&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:subset&nbsp;:count&nbsp;true]&nbsp;0)))]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                410&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentnotsubset&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:subset&nbsp;:count&nbsp;false]&nbsp;0)))]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                411&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentdontknowsubset&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:subset&nbsp;:count&nbsp;:dont-know]&nbsp;0)))]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                412&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentdisjoint&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:overlap&nbsp;:count&nbsp;false]&nbsp;0)))]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                413&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentnotdisjoint&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:overlap&nbsp;:count&nbsp;true]&nbsp;0)))]
+                </span><br/>
+<span class="covered" title="14 out of 14 forms covered">
+                414&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&#x27;vmcaipercentdontknowdisjoint&nbsp;(round-2&nbsp;(*&nbsp;100&nbsp;(get-in&nbsp;ssd&nbsp;[:overlap&nbsp;:count&nbsp;:dont-know]&nbsp;0)))]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                417&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]
+                415&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]
                 </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
-                418&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;\\newcommand\\~a{~a}~%&quot;&nbsp;sym&nbsp;value))))))
+<span class="partial" title="6 out of 12 forms covered">
+                416&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;out-file&nbsp;&quot;\\newcommand\\~a{~a}~%&quot;&nbsp;sym&nbsp;value))))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                419&nbsp;&nbsp;
+                417&nbsp;&nbsp;
                 </span><br/>
  </body>
 </html>
