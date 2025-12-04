@@ -28,6 +28,5 @@
                       )
                     :keep-if #(<= % 9)
                     :other-label ">= 10"
-                    :base-name ""
                     :view true))))
 
