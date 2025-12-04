@@ -1031,10 +1031,10 @@
   [title prefix to-png & {:keys [dir]
                           :or {dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))}}]
   (let [uuid (random-uuid)
-        png (str dir prefix "-" title "-" uuid ".png")
-        dot (str dir prefix "-" title "-" uuid ".dot")
-        latex (str dir prefix "-" title "-" uuid ".tex")
-        alt (str dir prefix "-" title "-" uuid ".plain")
+        png (str dir "/" prefix "-" title "-" uuid ".png")
+        dot (str dir "/" prefix "-" title "-" uuid ".dot")
+        latex (str dir "/" prefix "-" title "-" uuid ".tex")
+        alt (str dir "/" prefix "-" title "-" uuid ".plain")
         a (to-png dot latex title)]
     (sh "dot" "-Tplain" dot "-o" alt)
     (sh "dot" "-Tpng" dot "-o" png)

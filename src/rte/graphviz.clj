@@ -1,7 +1,8 @@
 (ns rte.graphviz
   (:import [java.io File FileOutputStream])
-  (:require [util.util :refer [member run-dot ensure-directory]]
+  (:require [util.util :refer [member run-dot ensure-directory jdefn]]
             [genus.genus :as gns]
+            [clojure.string :as str]
             [graph.view :refer [view-image]]
             [xym.xymbolyco :as xym]
             [rte.construct :as rte])
@@ -171,6 +172,7 @@
             (let [dot-stream (java.io.FileOutputStream. (java.io.File. dot-path-name))
                   merged-types (rte-to-dot rte
                                            :dot-stream dot-stream
+                                           :dir dir
                                            :title title
                                            :given-types given-types
                                            :habitation habitation
@@ -182,31 +184,29 @@
     (run-dot title "rte" to-png :dir dir)
   ))
 
-(defn rte-view [rte  ;;n: Rte,
-                & {:keys [title
-                          dir
-                          given-types
-                          dot-file-CB
-                          habitation
-                          ;;// typeLegend controls whether a legend of types
-                          ;;//   appears in the png file.  otherwise the legend will be
-                          ;; //   printed to stdout
-                          type-legend
-                          ]
-                   :or {title ""
-                        dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
-                        given-types default-type-vector
-                        dot-file-CB f-dummy
-                        habitation true
-                        type-legend false}}]
+(jdefn rte-view
+    "Graphically view an RTE as an AST"
+    [rte  ;;n: Rte,
+     & {:keys [title
+               dir
+               given-types
+               dot-file-CB
+               habitation
+               ;;// typeLegend controls whether a legend of types
+               ;;//   appears in the png file.  otherwise the legend will be
+               ;; //   printed to stdout
+               type-legend
+               ]
+        :defaults {:title ""
+                   :dir (ensure-directory (str "/tmp/" (System/getProperty "user.name")))
+                   :given-types default-type-vector
+                   :dot-file-CB f-dummy
+                   :habitation true
+                   :type-legend false}
+        :as optionals}]
   (assert rte)
-  (let [[labels png] (rte-to-png rte
-                                 :title title
-                                 :dir dir
-                                 :given-types given-types
-                                 :dot-file-CB dot-file-CB
-                                 :habitation habitation
-                                 :type-legend type-legend)]
+  (let [[labels png] (rte-to-png rte optionals)]
+    (assert (not (str/starts-with? png "/tmp/jnewtonrte")))
     (view-image png)
     [labels png]
     ))

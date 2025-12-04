@@ -47,18 +47,6 @@
     (sh "mkdir" "-p" tmp-dir)
     tmp-dir))
 
-(def tmp-files
-  "array of tmp files names created by dfa-to-dot and bdd-to-dot"
-  (atom []))
-
-(defn delete-tmp-files 
-  "Delete the temporary files created by dfa-to-dot and bdd-to-dot."
-  []  
-  (doseq [fn @tmp-files]
-    (when (.exists (io/file fn))
-      (io/delete-file fn)))
-  (swap! tmp-files (fn [files] (filter (fn [fn] (not (.exists (io/file fn))))
-                                       files))))
 
 (jdefn dot-view
     "View the image for the current OS (currently only for Mac OS X).
@@ -94,9 +82,7 @@
       (dot-file-cb dot-file-name))
     (when png-file-cb
       (png-file-cb png-file-name))
-    (when (= "Mac OS X" (System/getProperty "os.name"))
-      (swap! tmp-files conj png-file-name)
-      (view/view-image png-file-name))))
+    (view/view-image png-file-name)))
   
 (defn line-wrap [data right-margin]
   (binding [clojure.pprint/*print-right-margin* right-margin]
