@@ -1566,10 +1566,10 @@
     false
     
     (= :epsilon t1)
-    false
+    (throw (ex-info "invalid type t1=:epsilon" {:t1 t1 :t2 t2}))
     
     (= :epsilon t2)
-    false
+    (throw (ex-info "invalid type t2=:epsilon" {:t1 t1 :t2 t2}))
     
     (= :sigma t1)
     false
