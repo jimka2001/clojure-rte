@@ -215,28 +215,28 @@
 (def type-equivalent?
   "Test whether two type designators represent the same type."
   (gc-friendly-memoize
-    (fn [t1 t2 default]
-  {:pre [(member default '(true false :dont-know))]
-   :post [(member % '(true false :dont-know))]}
-  (let [can1 (delay (canonicalize-type t1 :dnf))
-        can2 (delay (canonicalize-type t2 :dnf))
-        sp1 (or-else (fn [] (subtype? t1 t2 :dont-know))
-                     (fn [] (subtype? @can1 @can2 :dont-know)))
-        sp2 (or-else (fn [] (subtype? t2 t1 :dont-know))
-                     (fn [] (subtype? @can2 @can1 :dont-know)))]
-    ;; two types are equivalent if each is a subtype of the other.
-    (cond
+   (fn [t1 t2 default]
+     {:pre [(member default '(true false :dont-know))]
+      :post [(member % '(true false :dont-know))]}
+     (let [can1 (delay (canonicalize-type t1 :dnf))
+           can2 (delay (canonicalize-type t2 :dnf))
+           sp1 (or-else (fn [] (subtype? t1 t2 :dont-know))
+                        (fn [] (subtype? @can1 @can2 :dont-know)))
+           sp2 (or-else (fn [] (subtype? t2 t1 :dont-know))
+                        (fn [] (subtype? @can2 @can1 :dont-know)))]
+       ;; two types are equivalent if each is a subtype of the other.
+       (cond
 
-      (or (= sp1 false)
-          (= sp2 false))
-      false
+         (or (= sp1 false)
+             (= sp2 false))
+         false
 
-      (and (= sp1 true)
-           (= sp2 true))
-      true
+         (and (= sp1 true)
+              (= sp2 true))
+         true
 
-      :else
-          default)))))
+         :else
+         default)))))
 
 (defn type-dispatch 
   "Dispatch function for several defmulti's.  If the type-designator is a sequence,
