@@ -2001,18 +2001,16 @@
           :dont-know)))
 
 (defmethod -subtype? 'member subtype-member [sub super]
-  (cond (and (gns/member? sub)
-             (some sequential? (rest sub)))
-        :dont-know
-
-        (and (gns/member? super)
-             (some sequential? (rest super)))
-        :dont-know
-
-        (gns/member? sub)
+  (cond (gns/member? sub)
         (every? (fn [e1]
                   (typep e1 super)) (rest sub))
 
+        ;; (subtype? '(member 1 2 3) string),
+        ;;  no element of the member is a string
+        (and (gns/member? sub)             
+             (every? (fn [e1]
+                       (not (typep e1 super))) (rest sub)))
+        false
 
         ;; (subtype? 'Long '(member 1 2 3))
         (and (gns/member? super)
