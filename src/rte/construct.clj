@@ -23,17 +23,18 @@
   (:refer-clojure :exclude [compile])
   (:require [genus.genus :as gns]
             [util.util :refer [member exists setof forall
-                          call-with-collector clear-memoize-cache! defmulti-memoized defmethod-memoized
-                          visit-permutations fixed-point
-                          sort-operands
-                          human-readable-current-time
-                          seq-matcher
-                          rte-identity rte-constantly
-                          gc-friendly-memoize call-with-found find-first
-                          search-replace remove-element
-                          count-if-not find-simplifier
-                          timeout-reached?
-                          ]]
+                               call-with-collector clear-memoize-cache! defmulti-memoized defmethod-memoized
+                               visit-permutations fixed-point
+                               sort-operands
+                               human-readable-current-time
+                               seq-matcher
+                               rte-identity rte-constantly
+                               gc-friendly-memoize call-with-found find-first
+                               search-replace remove-element
+                               count-if-not find-simplifier
+                               map-eagerly
+                               timeout-reached?
+                               ]]
             [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.set :refer [union]]
@@ -299,15 +300,15 @@
    :* (fn traverse-* [pattern functions]
         (cons :* ((:client functions) pattern functions)))
    :and (fn traverse-and [patterns functions]
-          (cons :and (map (fn [expr]
+          (cons :and (map-eagerly (fn [expr]
                             ((:client functions) expr functions)) patterns)))
    :or (fn traverse-or [patterns functions]
-         (cons :or (map (fn [expr]
+         (cons :or (map-eagerly (fn [expr]
                           ((:client functions) expr functions)) patterns)))
    :not (fn traverse-not [pattern functions]
           (cons :not ((:client functions) pattern functions)))
    :cat (fn traverse-cat [patterns functions]
-          (cons :cat (map (fn [expr]
+          (cons :cat (map-eagerly (fn [expr]
                             ((:client functions) expr functions)) patterns)))
    :sigma (fn traverse-sigma [pattern functions]
             ((:client functions) pattern functions))
@@ -406,7 +407,7 @@
   ;; (:and (:cat (:* :sigma) A (:* :sigma))
   ;;       (:cat (:* :sigma) B (:* :sigma))
   ;;       (:cat (:* :sigma) C (:* :sigma)))
-  (let [wrapped (map (fn map-wrapped [operand]
+  (let [wrapped (map-eagerly (fn map-wrapped [operand]
                        `(:cat ~sigma-* ~operand ~sigma-*)) 
                      (rest pattern))]
     `(:and ~@wrapped)))
@@ -685,7 +686,7 @@
 
 (defn count-leaves [expr]
   (letfn [(multi [operands _functions]
-            (reduce + 0 (map count-leaves operands)))
+            (reduce + 0 (map-eagerly count-leaves operands)))
           (single [operand _functions]
             (+ 1 (count-leaves operand)))
           (leaf [_operand _functions]
@@ -705,7 +706,7 @@
 (defn count-internal-nodes [expr]
   (letfn [(multi [operands _functions]
             (+ 1
-               (reduce + 0 (map count-internal-nodes operands))))
+               (reduce + 0 (map-eagerly count-internal-nodes operands))))
           (single [operand _functions]
             (+ 1 (count-internal-nodes operand)))
           (leaf [_operand _functions]
@@ -725,7 +726,7 @@
 (defn measure-longest-branch [expr]
   (letfn [(multi [operands _functions]
             (+ 1
-               (reduce max (map measure-longest-branch operands))))
+               (reduce max (map-eagerly measure-longest-branch operands))))
           (single [operand _functions]
             (+ 1 (measure-longest-branch operand)))
           (leaf [_operand _functions]
@@ -745,7 +746,7 @@
 (defn measure-shortest-branch [expr]
   (letfn [(multi [operands _functions]
             (+ 1
-               (reduce min (map measure-shortest-branch operands))))
+               (reduce min (map-eagerly measure-shortest-branch operands))))
           (single [operand _functions]
             (+ 1 (measure-shortest-branch operand)))
           (leaf [_operand _functions]
@@ -1016,7 +1017,7 @@
   [type-designator _nf]
   ;; TODO need to pass nf to canonicalize-pattern, because if it needs to call
   ;;    gns/canonicalize-type, we'll need nf again
-  (cons 'rte (map canonicalize-pattern
+  (cons 'rte (map-eagerly canonicalize-pattern
                   (rest type-designator))))
 
 (defn remove-first-duplicate
@@ -1183,10 +1184,10 @@
   [self]
   (let [op (operand self)]
     (cond (rte/and? op)
-          (rte/create-or (map rte/create-not (operands op)))
+          (rte/create-or (map-eagerly rte/create-not (operands op)))
 
           (rte/or? op)
-          (rte/create-and (map rte/create-not (operands op)))
+          (rte/create-and (map-eagerly rte/create-not (operands op)))
 
           :else
           self)))
@@ -1269,7 +1270,7 @@
 
 (defn conversion-cat-99
   [self]
-  (rte/create-cat (map canonicalize-pattern-once (operands self))))
+  (rte/create-cat (map-eagerly canonicalize-pattern-once (operands self))))
 
 (defn conversion-combo-1
   [self]
@@ -1415,7 +1416,7 @@
       self
       (let [new-member-arglist (reduce #(set-operation self %1 %2)
                                        (gns/operands (first members))
-                                       (map gns/operands members))
+                                       (map-eagerly gns/operands members))
             new-member (if (empty? new-member-arglist)
                          (one self)
                          (gns/create-member new-member-arglist))
@@ -1426,7 +1427,7 @@
             new-not-member (if (empty? new-not-member-arglist)
                              (one self)
                              (rte/create-not (gns/create-member new-not-member-arglist)))]
-        (create self (gns/strong-uniquify (map (fn [op]
+        (create self (gns/strong-uniquify (map-eagerly (fn [op]
                                       (cond (gns/strong-member? op members)
                                             new-member
 
@@ -1544,7 +1545,7 @@
 
 (defn conversion-combo-99
   [self]
-  (create self (map canonicalize-pattern-once (operands self))))
+  (create self (map-eagerly canonicalize-pattern-once (operands self))))
 
 (defn conversion-and-7
   [self]
@@ -1570,7 +1571,7 @@
   ;; if x matches only singleton then And(x,y*) -> And(x,y)
   (if (and (some gns/valid-type? (operands self))
            (some rte/*? (operands self)))
-    (create self (map (fn [rt]
+    (create self (map-eagerly (fn [rt]
                         (if (rte/*? rt)
                           (operand rt)
                           rt))
@@ -1688,7 +1689,7 @@
                          (for [c cats]
                            (nth c i)))
                 cat (rte/create-cat (for [r invert] (create self r)))]
-            (create self (gns/strong-uniquify (map (fn [r]
+            (create self (gns/strong-uniquify (map-eagerly (fn [r]
                                           (if (and (rte/cat? r)
                                                    (gns/strong-member? (operands r) cats))
                                             cat
@@ -1746,7 +1747,7 @@
       (if (= 0 num-non-nullables)
         self
         (create self
-                (map (fn [c]
+                (map-eagerly (fn [c]
                        (cond (not (rte/cat? c))
                              c
 
@@ -1798,7 +1799,7 @@
 
                     :else
                     op))]
-      (create self (map f (operands self))))
+      (create self (map-eagerly f (operands self))))
     self))
 
 (defn conversion-or-9
@@ -1809,7 +1810,7 @@
   ;;   --> (:or :epsilon (:* (:cat X Y Z)))
   (if (and (some nullable? (operands self))
            (some catxy? (operands self)))
-    (create self (map (fn [r]
+    (create self (map-eagerly (fn [r]
                         (if (rte/catxy? r)
                           (last r)
                           r))
@@ -1921,12 +1922,14 @@
                            :sigma rte-identity
                            :* (fn [operand _functions]
                                 (find-simplifier (list :* operand)
+                                                 gns/strong-equal?
                                                  [conversion-*-1
                                                   conversion-*-2
                                                   conversion-*-3
                                                   conversion-*-99]))
                            :cat (fn [operands _functions]
                                   (find-simplifier (cons :cat operands)
+                                                   gns/strong-equal?
                                                    [conversion-cat-1
                                                     conversion-cat-3
                                                     conversion-cat-4
@@ -1935,12 +1938,14 @@
                                                     conversion-cat-99]))
                            :not (fn [operand _functions]
                                   (find-simplifier (list :not operand)
+                                                   gns/strong-equal?
                                                    [conversion-not-1
                                                     conversion-not-2
                                                     conversion-not-3
                                                     conversion-not-99]))
                            :and (fn [operands _functions]
                                   (find-simplifier (cons :and operands)
+                                                   gns/strong-equal?
                                                    [conversion-combo-1
                                                     conversion-combo-3
                                                     conversion-combo-4
@@ -1971,6 +1976,7 @@
                                                     ]))
                            :or (fn [operands _functions]
                                  (find-simplifier (cons :or operands)
+                                                  gns/strong-equal?
                                                   [conversion-combo-1
                                                    conversion-combo-3
                                                    conversion-combo-4
@@ -2035,7 +2041,7 @@
   rte pattern with respect to the given type wrt."
   [expr wrt factors disjoints]
   (letfn [(walk [patterns]
-            (map (fn [p]
+            (map-eagerly  (fn [p]
                    (derivative (canonicalize-pattern p) wrt factors disjoints))
                  patterns))]
     ;; TODO need to test deriv x wrt :sigma, should be empty-word unless x is :empty-set and :empty-set if x is :empty-set
@@ -2162,10 +2168,10 @@
      Each key is a potential first-type of the rte,
      Each value is the derivative of the rte wrt that first-type."
   [pattern]
-  (into {} (map (fn [[k seq-of-triples]]
+  (into {} (map-eagerly (fn [[k seq-of-triples]]
                   [k 
-                   (into {} (map (fn [pair] [(first pair) (second pair)])
-                                 (map rest seq-of-triples)))])
+                   (into {} (map-eagerly (fn [pair] [(first pair) (second pair)])
+                                 (map-eagerly rest seq-of-triples)))])
                 (group-by first
                           (first (rte/find-all-derivatives pattern))))))
 
@@ -2184,13 +2190,13 @@
          [triples derivatives] (find-all-derivatives pattern)
          derivatives (cons pattern (remove #{pattern} derivatives))
          index-map (zipmap derivatives (range (count derivatives)))
-         triples (map (fn [[primitive wrt deriv]]
+         triples (map-eagerly (fn [[primitive wrt deriv]]
                         [(index-map primitive) wrt (index-map deriv)]
                         ) triples)
          grouped-by-src (group-by first triples)
          exit-map {:default exit-value}
          mapper (fn [deriv index]
-                  (let [from-src (map rest (grouped-by-src index))
+                  (let [from-src (map-eagerly rest (grouped-by-src index))
                         grouped-by-dst (group-by second from-src)
                         ;; grouped-by-dst is of the form
                         ;;  { dst-id-1 [(td-a dst-id-1)
@@ -2203,9 +2209,9 @@
                         ;; [[td-x dst-id-1] [td-y dst-id-2] ...]
                         ;; where td-x is (or td-a td-b td-c ...) canonicalized
                         ;;   and td-y is (or td-d td-e ...) canonicalized
-                        transitions (map (fn [[dst pairs]]
+                        transitions (map-eagerly (fn [[dst pairs]]
                                            [(gns/canonicalize-type
-                                             (gns/create-or (map first pairs)) :dnf) dst])
+                                             (gns/create-or (map-eagerly first pairs)) :dnf) dst])
                                          grouped-by-dst)
                         ]
                     [index
@@ -2215,7 +2221,7 @@
                                       :pattern deriv
                                       :transitions transitions})]))
 
-         states (map mapper
+         states (map-eagerly mapper
                      derivatives
                      (range (count derivatives)))
          dfa (xym/make-dfa
