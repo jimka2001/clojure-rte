@@ -714,6 +714,7 @@
 (defmethod -canonicalize-type 'not method-canonicalize-type-not
   [type-designator nf]
   (find-simplifier type-designator
+                   strong-equal?
                    [(fn [type-designator]
                       ;; (not (not x)) --> x
                       (if (gns/not? (second type-designator))
@@ -741,6 +742,7 @@
 (defmethod -canonicalize-type 'fn* method-canonicalize-type-fn
   [type-designator _nf]
   (find-simplifier type-designator
+                   =
                    [(fn [type-designator]
                       ;; convert (fn* [p1__19751#] (clojure.core/even? p1__19751#))}
                       ;;     to (satisfies clojure.core/even?)
@@ -1073,7 +1075,7 @@
    SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop"
   [td]
   (if (strong-member? (unit td) (operands td))
-    (create td (remove-element (unit td) (operands td)))
+    (create td (strong-remove-element (unit td) (operands td)))
     td))
 
 (defn conversion-C5
@@ -1118,25 +1120,33 @@
     self))
 
 (defn conversion-C9
-  "(A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
-   (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
-   (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)"
+  "(A + B + C)(A + !B + C)(X) -> (A + C)(X)
+   (A + B +!C)(A +!B + C)(A +!B+!C) -> (A +!C)(A + B +!C)
+   (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to (A + B +!C)(A +!B+C)(A)
+   but rather to (A + !C)(A +!B + C)"
   [self]
   (let [combos (setof [td (operands self)] (gns/combo? td))
-        duals (setof [td combos] (dual-combination? self td))]
-    (letfn [(f [td]
-              (if (not (strong-member? td duals))
-                td
-                (letfn [(pred [n]
-                          (and (gns/not? n)
-                               (exists [d duals]
-                                       (strong-equal? (operands d) (search-replace (operands td) n (operand n))))))]
-                  ;; find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
-                  (call-with-found pred (operands td)
-                                   :if-not-found td
-                                   :if-found (fn [to-remove]
-                                               (create td (remove-element to-remove (operands td))))))))]
-      (create self (map f (operands self))))))
+        duals (setof [td combos] (dual-combination? self td))
+        ;; e.g duals = (and (or A B C) (or A (not B) C) X...)
+        search-replace (for [dual duals  ;; eg. dual = (or A (not B) C)
+                             d dual      ;; eg. d = (not B)
+                             :when (gns/not? d)
+                             ;; if we replace (not n) with n, is the result in duals?
+                             ;; eg., d' = (or A B C)
+                             :let [constructed (strong-search-replace dual d (operand d))]
+                             d' duals
+                             :when (strong-equal? d' constructed)
+                             :let [d'' (strong-remove-element d dual)]
+                             ]
+                         [dual d' d''])]
+    (if (empty? search-replace)
+      self
+      (let [[remove-1 remove-2 insert] (first search-replace)]
+        (->> (operands self)
+             (strong-remove-element remove-1)
+             (strong-remove-element remove-2)
+             (cons insert)
+             (create self))))))
 
 (defn conversion-C10
   "(and A B C) --> (and A C) if A is subtype of B
@@ -1184,7 +1194,7 @@
                                      (strong-member? not-ao (operands td))
                                      ;; td is a dual, so td.create creates a dual
                                      ;;    (A + !ABX + Y) --> (A + BX + Y)
-                                     [(create td (remove-element not-ao (operands td)))]
+                                     [(create td (strong-remove-element not-ao (operands td)))]
 
                                      :else
                                      [td]))]
@@ -1210,7 +1220,7 @@
                                   td
 
                                   :else
-                                  (create td (remove-element (operand comp)
+                                  (create td (strong-remove-element (operand comp)
                                                              (operands td)))))]
                     (create self (map f (operands self))))))))
 
@@ -1252,7 +1262,10 @@
   "multiple member
    (or (member 1 2 3) (member 2 3 4 5)) --> (member 1 2 3 4 5)
    (or String (member 1 2 \"3\") (member 2 3 4 \"5\")) --> (or String (member 1 2 4))
-   (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)"
+   (and (member 1 2 3) (member 2 3 4 5)) --> (member 2 3)
+
+  In the result, there should be maximally one (member ...).
+  "
   [self]
   (let [members (filter gns/member-or-=? (operands self))]
     (if (< (bounded-count 2 members) 2)
@@ -1267,6 +1280,8 @@
                     new-member
                     td))]
           (create self (strong-uniquify (map f (operands self)))))))))
+
+
 
 (def secret-value (gensym "secret"))
 (defn conversion-C15
@@ -1321,7 +1336,7 @@
               (create self (mapcat f (operands self))))))))
 
 (defn conversion-C16
-  "Now(after conversions 13, 14, and 15, there is at most one SMember(...) and
+  "Now after conversions 13, 14, and 15, there is at most one SMember(...) and
    at most one SNot(SMember(...))
    (and Double (not (member 1.0 2.0 \"a\" \"b\"))) --> (and Double (not (member 1.0 2.0)))
    (or Double (member 1.0 2.0 \"a\" \"b\")) --> (and Double (member \"a\" \"b\"))"
@@ -1332,6 +1347,7 @@
                                     (gns/member-or-=? (operand td))))]
                 td)
         stricter (create self fewer)]
+    (assert stricter)
     (letfn [(stricter-typep [x]
               (gns/typep x stricter))
             (f [td]
@@ -1361,17 +1377,17 @@
                 (letfn [(except_for [c tds1 tds2]
                           (if (not= (count tds1) (count tds2))
                             false
-                            (let [shorter (remove-element c tds1)]
+                            (let [shorter (strong-remove-element c tds1)]
                               (if (gns/not? c)
-                                (strong-equal? shorter (remove-element (operand c) tds2))
-                                (strong-equal? shorter (remove-element (template (not ~c)) tds2))))))]
+                                (strong-equal? shorter (strong-remove-element (operand c) tds2))
+                                (strong-equal? shorter (strong-remove-element (template (not ~c)) tds2))))))]
 
                   (call-with-found (fn [c]
                                      (exists [x others]
                                              (except_for c (operands td) (operands x))))
                                    (operands td)
                                    :if-found (fn [negated]
-                                               (create-dual self (remove-element negated (operands td))))
+                                               (create-dual self (strong-remove-element negated (operands td))))
                                    :if-not-found td)
                   
                   ))))]
@@ -1474,11 +1490,13 @@
 (defmethod -canonicalize-type 'and method-canonicalize-type-and
   [type-designator nf]
   (find-simplifier type-designator
+                   strong-equal?
                    (combination-simplifiers nf)))
 
 (defmethod -canonicalize-type 'or method-canonicalize-type-or
   [type-designator nf]
   (find-simplifier type-designator
+                   strong-equal?
                    (combination-simplifiers nf)))
 
 (defmethod -canonicalize-type 'member method-canonicalize-type-member
@@ -1490,6 +1508,7 @@
   ;; if the old object has meta data, the meta data will be retained,
   ;; and presumably the new data is easier to GC.
   (find-simplifier type-designator
+                   strong-equal?
                    [(fn [type-designator]
                       (create-member (sort-operands (operands type-designator))))]))
                    

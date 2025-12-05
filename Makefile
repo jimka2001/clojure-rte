@@ -47,7 +47,14 @@ test-thompson:
 	lein test :only thompson-test
 
 test-genus:
-	lein test :only genus-test genus-conversion-test genus-disjoint-test genus-equiv-test genus-spec-test genus-statistics-test genus-subtype-test
+	lein test :only genus-test \
+			genus-conversion-test \
+			genus-disjoint-test \
+			genus-equiv-test \
+			genus-rte-test \
+			genus-spec-test \
+			genus-statistics-test \
+			genus-subtype-test
 
 loop:
 	for i in $$(seq 1 10); do \

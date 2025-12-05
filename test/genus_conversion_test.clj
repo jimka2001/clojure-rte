@@ -148,20 +148,36 @@
 (deftest t-combo-conversion-C9
   (testing "combo conversion-C9"
     ;; (A + B + C)(A + !B + C)(X) -> (A + B + C)(A + C)(X)
+    ;; (and (or A B C)
+    ;;      (or A (not B) C)
+    ;;      X)
+    ;; --> (and (or A B C)
+    ;;          (or A C)
+    ;;          X)
+    ;; TODO shouldn't this really be
+    ;; --> (and (or A C)
+    ;;          (or A C)
+    ;;          X)
+    ;;   perhaps not, because the latter will get reduced anyway elsewhere
+    
     (is (= (gns/conversion-C9 '(and (or a b c) (or a (not b) c) x))
-                             '(and (or a b c) (or a c) x))
+           '(and  (or a c) x))
         763)
     (is (= (gns/conversion-C9 '(or (and a b c) (and a (not b) c) x))
-           '(or (and a b c) (and a c) x))
+           '(or  (and a c) x))
         765)
 
     ;; (A + B +!C)(A +!B + C)(A +!B+!C) -> (A + B +!C)(A +!B + C)(A +!C)
     (is (= (gns/conversion-C9 '(and (or a b (not c)) (or a (not b) c) (or a (not b) (not c))))
-           '(and (or a b (not c)) (or a (not b) c) (or a (not c))))
+                              '(and (or a (not c)) (or a (not b) c))
+                              )
         769)
     (is (= (gns/conversion-C9 '(or (and a b (not c)) (and a (not b) c) (and a (not b) (not c))))
-           '(or (and a b (not c)) (and a (not b) c) (and a (not c))))
+                              '(or (and a (not c))   (and a (not b) c) ))
         774)
+    (is (= (gns/conversion-C9 '(and (or a b (not c)) (or a (not b) c) (or a (not b) (not c))))
+           '(and (or a (not c)) (or a (not b) c)))
+        775)
     
     ;; (A + B +!C)(A +!B + C)(A +!B+!C) -> does not reduce to(A + B +!C)(A +!B+C)(A)
     (is (not= (gns/conversion-C9 '(and (or a b (not c)) (or a (not b) c) (or a (not b) (not c))))

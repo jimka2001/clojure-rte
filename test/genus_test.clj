@@ -126,10 +126,7 @@
       (is (= true (gns/inhabited? 'Long :dont-know)))
       (is (= true (gns/inhabited? '(not Long) :dont-know)))
       (is (= true (gns/inhabited? 'Object :dont-know)))
-      (is (= false (gns/inhabited? '(not Object) :dont-know)))
-      (is (= true (gns/inhabited? '(rte (:+ Number)) :dont-know)))
-      (is (= false (gns/inhabited? '(rte (:and (:+ Number)
-                                               (:+ String))) :dont-know))))))
+      (is (= false (gns/inhabited? '(not Object) :dont-know))))))
 
 (deftest t-inhabited-bizarre
   (testing "inhabited?"
@@ -648,13 +645,9 @@
     (is (gns/valid-type? '(or Integer String)))
     (is (gns/valid-type? '(member 1 2 3)))
     (is (gns/valid-type? '(= 1)))
-    (is (gns/valid-type? '(rte (:cat String :sigma))))
     (is (gns/valid-type? '(satisfies even?)))
     (is (gns/valid-type? (gns/Satisfies even?)))
 ))
-
-
-
 
 
 (deftest t-extract-type-from-expression
@@ -718,6 +711,9 @@
                            '((((1))) (((([2])))))))
     (is (not (gns/strong-equal? '((((1))) (((([2])))))
                                 '((((1))) (((((2)))))))))
+
+    (is (not (gns/strong-equal? #{[1 2]}  #{'(1 2)} )))
+    (is (not (gns/strong-equal? {[1 2] 42}
+                                {'(1 2) 42} )))
+
     ))
-
-

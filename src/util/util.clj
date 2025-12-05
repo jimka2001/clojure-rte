@@ -213,6 +213,11 @@
   (try (throw (Exception. ""))
        (catch Exception e (count (.getStackTrace e)))))
 
+(defn sdoall [obj]
+  (if (seqable? obj)
+    (doall obj)
+    obj))
+
 (defn find-simplifier
   "Iterate through a sequence of so-called simplifiers.  Each simplifier
   is a unary function which accepts the given obj as arguments.  Each
@@ -227,17 +232,18 @@
   Once a simplifier has _simplified_ an object, find-simplifier returns
   the newly generated object, and the remaining simplifiers are silently
   ignored."
-  ([obj simplifiers]
-   (find-simplifier obj simplifiers false))
-  ([obj simplifiers verbose]
+  ([obj good-enough simplifiers]
+   (find-simplifier obj good-enough simplifiers false))
+  ([obj good-enough simplifiers verbose]
    ;;(cl-format true "~A ~A~%" (stacksize) obj)
    (if (empty? simplifiers)
      obj
      (loop [[f & fs] simplifiers
             i 0]
-       (let [new-obj (f obj)]
+       (let [obj (sdoall obj)
+             new-obj (sdoall (f obj))]
          (cond
-           (not= new-obj obj)
+           (not (good-enough new-obj obj))
            (do
              (when verbose
                (cl-format true "[~A] ~A~%   --> ~A~%" i obj new-obj))
