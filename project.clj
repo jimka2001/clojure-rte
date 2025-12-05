@@ -36,7 +36,7 @@
                  [org.clojure/core.memoize "1.0.236"]
                  ;; [org.clojure/math.combinatorics "0.1.6"]
                  ]
-  :main ^:skip-aot rte.core
+  :main ^:skip-aot clojure-rte.rte.core
   :target-path "target/%s"
   :profiles {:test {:plugins [[lein-test-report-junit-xml "0.2.0"]]}
              :uberjar {:aot :all}})
