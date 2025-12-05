@@ -25,9 +25,9 @@
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.repl :refer [source-fn]]
             [util.util :refer [exists-pair forall-pairs exists fixed-point
-                                      remove-element uniquify non-empty? forall
+                                      remove-element non-empty? forall
                                       search-replace setof sort-operands
-                                      seq-matcher member find-simplifier
+                                      seq-matcher find-simplifier
                                       call-with-found find-first
                                       gc-friendly-memoize clear-memoize-cache!
                                       unchunk or-else]]
@@ -63,6 +63,56 @@
 (declare unit)
 (declare valid-type?)
 (declare zero)
+
+(defn strong-equal?
+  "A stronger interpretation of equivalence than the built-in clojure =.
+  The idea is that sequences of different types are not equal.
+  I.e., (1 2 3) and [1 2 3] are not the same.
+  But more subtile is that this test is recursive.  I.e.,
+  (1 2 [3]) and (1 2 (3)) are also not equal.
+  The drawback of this predicate is that sometimes clojure creates
+  objects which the user might think are the same type, but are really
+  different.  For example: 
+    (= (type (zipmap (range 8) (range 8)))
+       (type (dissoc (zipmap (range 9) (range 9)) 8))) ;; false"
+  [a b]
+  (or (identical? a b)
+      (and (identical? (type a) (type b))
+           (if (seqable? a) ;; does a obey seq abstraction
+             (loop [as a
+                    bs b]
+               (cond (and (empty? as)
+                          (empty? bs))
+                     true
+
+                     (or (empty? as)
+                         (empty? bs))
+                     false
+
+                     :otherwise
+                     (and (strong-equal? (first as) (first bs))
+                          (recur (rest as) (rest bs)))))
+             (= a b)))))
+
+(defn strong-member? 
+  "membership predicate based on strong-equal? rather than on clojure.core/="
+  [target items]
+  (boolean (some #(strong-equal? target %) items)))
+                 
+(defn strong-uniquify
+  "returns a new sequence with duplicates remove.
+   If duplicates exist, left-most is removed, right-most remains.
+   Equivalent elements are judged by strong-equal?"
+  [items]
+  (cond (empty? items)
+        items
+
+        (strong-member? (first items) (rest items))
+        (rest items)
+
+        :otherwise
+        (cons (first items) (strong-uniquify (rest items)))))
+    
 
 (def gns/and?
   "Detect sequence starting with the simple symbol and"
