@@ -25,6 +25,7 @@
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type *test-values* *test-types*]]
             [util.util :refer [member human-readable-current-time]]
+            [util.strong :refer [strong-equal?]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.test :refer [deftest is]]))
@@ -112,7 +113,7 @@
             (format "(subtype? %s %s) returned %s" t2 t1 (gns/subtype? t2 t1))))
         
       (doseq [k (gns/sort-method-keys gns/-disjoint?)]
-        (is (not (gns/strong-equal? t1 t2)))
+        (is (not (strong-equal? t1 t2)))
         (is (member ((k dms) t1 t2) '(true :dont-know))
             (format "-disjoint? method %s returned %s on %s %s" k ((k dms) t1 t2) t1 t2))
         (is (member ((k dms) t2 t1) '(true :dont-know))
@@ -694,26 +695,26 @@
 
 (deftest t-strong-equal
   (testing "strong-equal?"
-    (is (gns/strong-equal? 1 1))
-    (is (gns/strong-equal? 1.0 1.0))
-    (is (not (gns/strong-equal? 1 1.0)))
+    (is (strong-equal? 1 1))
+    (is (strong-equal? 1.0 1.0))
+    (is (not (strong-equal? 1 1.0)))
 
-    (is (gns/strong-equal? "1" "1"))
-    (is (not (gns/strong-equal? "11" "1")))
+    (is (strong-equal? "1" "1"))
+    (is (not (strong-equal? "11" "1")))
 
-    (is (gns/strong-equal? [1 2 3] [1 2 3] ))
-    (is (not (gns/strong-equal? '(1 2 3) [1 2 3] )))
+    (is (strong-equal? [1 2 3] [1 2 3] ))
+    (is (not (strong-equal? '(1 2 3) [1 2 3] )))
 
-    (is (gns/strong-equal? [1 [2 3]] [1 [2 3]] ))
-    (is (not (gns/strong-equal? '[1 (2 3)] [1 [2 3]] )))
+    (is (strong-equal? [1 [2 3]] [1 [2 3]] ))
+    (is (not (strong-equal? '[1 (2 3)] [1 [2 3]] )))
 
-    (is (gns/strong-equal? '((((1))) (((([2])))))
+    (is (strong-equal? '((((1))) (((([2])))))
                            '((((1))) (((([2])))))))
-    (is (not (gns/strong-equal? '((((1))) (((([2])))))
+    (is (not (strong-equal? '((((1))) (((([2])))))
                                 '((((1))) (((((2)))))))))
 
-    (is (not (gns/strong-equal? #{[1 2]}  #{'(1 2)} )))
-    (is (not (gns/strong-equal? {[1 2] 42}
+    (is (not (strong-equal? #{[1 2]}  #{'(1 2)} )))
+    (is (not (strong-equal? {[1 2] 42}
                                 {'(1 2) 42} )))
 
     ))

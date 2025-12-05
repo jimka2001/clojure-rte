@@ -35,6 +35,7 @@
                                map-eagerly
                                timeout-reached?
                                ]]
+            [util.strong :refer [strong-equal? strong-member? strong-uniquify]]
             [xym.xymbolyco :as xym]
             [clojure.pprint :refer [cl-format pprint]]
             [clojure.set :refer [union]]
@@ -495,7 +496,7 @@
    (try (fixed-point given-pattern
                      (fn [p] (expand-1 p functions))
                      ;; TODO -- after debugging, replace this (fn ...) with simply =.
-                     gns/strong-equal?
+                     strong-equal?
                      ;; (fn [a b] 
                      ;;   (if (= a b)
                      ;;     (do (println [:fixed-point-found a]) true)
@@ -836,7 +837,7 @@
                 left  (butlast (operands r))]
             (and (rte/*? right)
                  (rte/cat? (operand right))
-                 (gns/strong-equal? left (operands (operand right))))))))
+                 (strong-equal? left (operands (operand right))))))))
 
 (def rte/plus?
   "there won't be a :+ in a pattern after expansion.
@@ -847,9 +848,9 @@
       (let [ops (operands r)]
         (and (= 2 (count ops))
              (or (and (rte/*? (nth ops 1))
-                      (gns/strong-equal? (operand (nth ops 1)) (nth ops 0)))
+                      (strong-equal? (operand (nth ops 1)) (nth ops 0)))
                  (and (rte/*? (nth ops 0))
-                      (gns/strong-equal? (operand (nth ops 0)) (nth ops 1)))))))))
+                      (strong-equal? (operand (nth ops 0)) (nth ops 1)))))))))
 
 (def rte/create-cat
   (fn [operands]
@@ -938,12 +939,12 @@
 (defmethod set-dual-operation :or
   ;; intersection
   [_self a b]
-  (setof [x a] (gns/strong-member? x b)))
+  (setof [x a] (strong-member? x b)))
 
 (defmethod set-dual-operation :and
   ;; union
   [_self a b]
-  (concat a (setof [x b] (not (gns/strong-member? x a)))))
+  (concat a (setof [x b] (not (strong-member? x a)))))
 
 (defmulti set-operation
   (fn [self _a _b]
@@ -952,12 +953,12 @@
 (defmethod set-operation :or
   ;; union
   [_self a b]
-  (concat a (setof [x b] (not (gns/strong-member? x a)))))
+  (concat a (setof [x b] (not (strong-member? x a)))))
 
 (defmethod set-operation :and
   ;; intersection
   [_self a b]
-  (setof [x a] (gns/strong-member? x b)))
+  (setof [x a] (strong-member? x b)))
 
 (defmulti annihilator
   (fn [self _a _b]
@@ -1092,22 +1093,22 @@
         ;; Star(Cat(x,Star(x))) -> Star(x)
         (and (= 2 (count cat-operands))
              (rte/*? (second cat-operands))
-             (gns/strong-equal? (first cat-operands)
+             (strong-equal? (first cat-operands)
                 (operand (second cat-operands))))
         (second cat-operands)
 
         ;; Star(Cat(Star(x),x)) -> Star(x)
         (and (= 2 (count cat-operands))
              (rte/*? (first cat-operands))
-             (gns/strong-equal? (second cat-operands)
+             (strong-equal? (second cat-operands)
                 (operand (first cat-operands))))
         (first cat-operands)
 
         ;; Star(Cat(Star(x),x,Star(x))) -> Star(x)
         (and (= 3 (count cat-operands))
              (rte/*? (first cat-operands))
-             (gns/strong-equal? (first cat-operands) (last cat-operands))
-             (gns/strong-equal? (operand (first cat-operands))
+             (strong-equal? (first cat-operands) (last cat-operands))
+             (strong-equal? (operand (first cat-operands))
                 (second cat-operands)))
         (first cat-operands)
 
@@ -1126,7 +1127,7 @@
         ;;    -->    Star(Cat(X, Y, Z))
         (and (rte/*? (last cat-operands))
              (rte/cat? (operand (last cat-operands)))
-             (gns/strong-equal? (operands (operand (last cat-operands)))
+             (strong-equal? (operands (operand (last cat-operands)))
                 (butlast cat-operands)))
         (last cat-operands)
 
@@ -1134,7 +1135,7 @@
         ;;   -->    Star(Cat(X, Y, Z))
         (and (rte/*? (first cat-operands))
              (rte/cat? (operand (first cat-operands)))
-             (gns/strong-equal? (operands (operand (first cat-operands)))
+             (strong-equal? (operands (operand (first cat-operands)))
                 (rest cat-operands)))
         (first cat-operands)
 
@@ -1143,8 +1144,8 @@
         (and (<= 3 (count cat-operands))
              (rte/*? (first cat-operands))
              (rte/cat? (operand (first cat-operands)))
-             (gns/strong-equal? (first cat-operands) (last cat-operands))
-             (gns/strong-equal? (operands (operand (first cat-operands)))
+             (strong-equal? (first cat-operands) (last cat-operands))
+             (strong-equal? (operands (operand (first cat-operands)))
                 (butlast (rest cat-operands))))
         (first cat-operands)
 
@@ -1161,7 +1162,7 @@
     (cond (= op :sigma)
           not-sigma
 
-          (gns/strong-equal? op sigma-*)
+          (strong-equal? op sigma-*)
           :empty-set
 
           (= op :epsilon)
@@ -1229,9 +1230,9 @@
             (cond (< (count tail) 3)
                   tail
 
-                  (and (gns/strong-equal? (first tail) (nth  tail 2))
+                  (and (strong-equal? (first tail) (nth  tail 2))
                        (rte/*? (first tail))
-                       (gns/strong-equal? (operand (first tail)) (second tail)))
+                       (strong-equal? (operand (first tail)) (second tail)))
                   (f (concat [(first tail) (second tail)]
                              (nthrest tail 3)))                          
 
@@ -1242,7 +1243,7 @@
             (cond (< (count tail) 2)
                   tail
 
-                  (and (gns/strong-equal? (first tail) (second tail))
+                  (and (strong-equal? (first tail) (second tail))
                        (rte/*? (first tail)))
                   (g (rest tail))
 
@@ -1260,7 +1261,7 @@
                   tail
 
                   (and (rte/*? (first tail))
-                       (gns/strong-equal? (operand (first tail)) (second tail)))
+                       (strong-equal? (operand (first tail)) (second tail)))
                   (cons (second tail) (f (cons (first tail)
                                                (rest (rest tail)))))
 
@@ -1280,13 +1281,13 @@
   [self]
   ;; Or(... Sigma * ....) -> Sigma *
   ;; And(... EmptySet....) -> EmptySet
-  (if (gns/strong-member? (zero self) (operands self))
+  (if (strong-member? (zero self) (operands self))
     (zero self)
     self))
 
 (defn conversion-combo-4
   [self]
-  (create self (gns/strong-uniquify (operands self))))
+  (create self (strong-uniquify (operands self))))
 
 (defn conversion-combo-5
   [self]
@@ -1298,7 +1299,7 @@
   ;; remove EmptySet and flatten Or(Or(...)...)
   (create self
           (mapcat (fn combo-6-mapcat [r]
-                    (cond (gns/strong-equal? r (one self))
+                    (cond (strong-equal? r (one self))
                           []
 
                           (same-combination? self r)
@@ -1321,12 +1322,12 @@
               (mapcat (fn [r]
                         (cond (and (rte/or? self)
                                    (exists [s stars]
-                                           (gns/strong-equal? r (operand s))))
+                                           (strong-equal? r (operand s))))
                               []
 
                               (and (rte/and? self)
                                    (rte/*? r)
-                                   (gns/strong-member? (operand r) (operands self)))
+                                   (strong-member? (operand r) (operands self)))
                               []
 
                               :else
@@ -1339,7 +1340,7 @@
   ;; Or(...x,Not(x)...) --> SigmaStar
   (if (exists [r1 (operands self)]
               (and (rte/not? r1)
-                   (gns/strong-member? (operand r1) (operands self))))
+                   (strong-member? (operand r1) (operands self))))
     (zero self)
     self))
 
@@ -1375,11 +1376,11 @@
 
           (rte/or? self)
           (create self (setof [op (operands self)]
-                              (not (gns/strong-member? op cats))))
+                              (not (strong-member? op cats))))
 
           :else ;; (rte/and? self)
           (create self (setof [op (operands self)]
-                              (not (gns/strong-member? op not-sing)))))))
+                              (not (strong-member? op not-sing)))))))
 
 (defn conversion-combo-14
   [self]
@@ -1427,11 +1428,11 @@
             new-not-member (if (empty? new-not-member-arglist)
                              (one self)
                              (rte/create-not (gns/create-member new-not-member-arglist)))]
-        (create self (gns/strong-uniquify (map-eagerly (fn [op]
-                                      (cond (gns/strong-member? op members)
+        (create self (strong-uniquify (map-eagerly (fn [op]
+                                      (cond (strong-member? op members)
                                             new-member
 
-                                            (gns/strong-member? op not-members)
+                                            (strong-member? op not-members)
                                             new-not-member
 
                                             :else
@@ -1465,7 +1466,7 @@
                 right)))
         redundant (mapcat f (range (dec (count ss))))
         g (fn [op]
-            (if (gns/strong-member? op redundant)
+            (if (strong-member? op redundant)
               []
               [op]))              
         filtered (mapcat g (operands self))]
@@ -1689,9 +1690,9 @@
                          (for [c cats]
                            (nth c i)))
                 cat (rte/create-cat (for [r invert] (create self r)))]
-            (create self (gns/strong-uniquify (map-eagerly (fn [r]
+            (create self (strong-uniquify (map-eagerly (fn [r]
                                           (if (and (rte/cat? r)
-                                                   (gns/strong-member? (operands r) cats))
+                                                   (strong-member? (operands r) cats))
                                             cat
                                             r))
                                         (operands self))))))))
@@ -1868,7 +1869,7 @@
 
           :else
           (create self (for [r (operands self)
-                             :when (not (gns/strong-member? r stars))]
+                             :when (not (strong-member? r stars))]
                          r)))))
 
 (defmulti conversion-dual-16b
@@ -1922,14 +1923,14 @@
                            :sigma rte-identity
                            :* (fn [operand _functions]
                                 (find-simplifier (list :* operand)
-                                                 gns/strong-equal?
+                                                 strong-equal?
                                                  [conversion-*-1
                                                   conversion-*-2
                                                   conversion-*-3
                                                   conversion-*-99]))
                            :cat (fn [operands _functions]
                                   (find-simplifier (cons :cat operands)
-                                                   gns/strong-equal?
+                                                   strong-equal?
                                                    [conversion-cat-1
                                                     conversion-cat-3
                                                     conversion-cat-4
@@ -1938,14 +1939,14 @@
                                                     conversion-cat-99]))
                            :not (fn [operand _functions]
                                   (find-simplifier (list :not operand)
-                                                   gns/strong-equal?
+                                                   strong-equal?
                                                    [conversion-not-1
                                                     conversion-not-2
                                                     conversion-not-3
                                                     conversion-not-99]))
                            :and (fn [operands _functions]
                                   (find-simplifier (cons :and operands)
-                                                   gns/strong-equal?
+                                                   strong-equal?
                                                    [conversion-combo-1
                                                     conversion-combo-3
                                                     conversion-combo-4
@@ -1976,7 +1977,7 @@
                                                     ]))
                            :or (fn [operands _functions]
                                  (find-simplifier (cons :or operands)
-                                                  gns/strong-equal?
+                                                  strong-equal?
                                                   [conversion-combo-1
                                                    conversion-combo-3
                                                    conversion-combo-4
@@ -2009,7 +2010,7 @@
      ;;(swap! count-canonicalize-pattern inc)
      ;;(when (zero? (mod @count-canonicalize-pattern 100))
      ;;  (prn [:count @count-canonicalize-pattern]))
-     (fixed-point pattern canonicalize-pattern-once gns/strong-equal?))))
+     (fixed-point pattern canonicalize-pattern-once strong-equal?))))
 
 (defn compute-compound-derivative
   "wrt may be a compound type designator such as (and A (not B)).
@@ -2022,10 +2023,10 @@
   (assert (= 'and (first wrt)))
   (let [[_ & and-args] wrt]
     (cond
-      (gns/strong-member? (rte/create-not expr) and-args)
+      (strong-member? (rte/create-not expr) and-args)
       :empty-set
 
-      (gns/strong-member? expr and-args)
+      (strong-member? expr and-args)
       :epsilon
 
       :else
@@ -2053,7 +2054,7 @@
        (= :epsilon wrt)
        expr ;; deriv of anything with respect to :epsilon is that thing.
 
-       (gns/strong-equal? wrt expr)
+       (strong-equal? wrt expr)
        :epsilon
 
        :else
@@ -2065,10 +2066,10 @@
                                          :epsilon)
                                 :type (fn [td _functions]
                                         (cond
-                                          (gns/strong-member? td factors)
+                                          (strong-member? td factors)
                                           :epsilon
 
-                                          (gns/strong-member? td disjoints)
+                                          (strong-member? td disjoints)
                                           :empty-set
 
                                           (disjoint?-false-warn wrt td)
