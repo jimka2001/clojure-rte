@@ -1577,6 +1577,14 @@
     (= :sigma t2)
     false
     
+    ;; dont call isa? if t1 and t2 are equal but not strong-equal?
+    ;; because isa? will return true if its arguments are =
+    ;; e.g., isa? will think (member [1]) is a subtype of (member (1))
+    ;; we must prevent this from happening.
+    (and (= t1 t2)
+         (not (strong-equal? t1 t2)))
+    :dont-know
+    
     (isa? t1 t2)
     false
     
