@@ -1490,20 +1490,30 @@
                 (check-disjoint t1-simple t2-simple default)))))))))
 
 (def check-disjoint
-  "Internal function used in top level disjoint? implementation."
+  "Internal function used in top level disjoint? implementation.
+  Runs all the methods returned by (methods -disjoint?)
+  until some method returns true or false.
+  Each method is called twice (assuming the first call fails to return true or false,
+  one with the arguments `t1` and `t2` in the given order, and second
+  with the arguments reversed.  I.e., checking whether `t1` is disjoint with `t2`,
+  thereafter checking whether `t2` is disjoint with `t1`.
+  This means individual methods -disjoint? do not need to explicitly
+  do the commuted check.
+  Note that the methods are called in order determined by `sort-method-keys`.
+  "
   (gc-friendly-memoize
-    (fn [t1' t2' default]
-  (loop [[k & ks] (sort-method-keys -disjoint?)]
-    (let [f (k (methods -disjoint?))]
-      (case (f t1' t2')
-        (true) true
-        (false) false
-        (case (f t2' t1')
-          (true) true
-          (false) false
-          (if ks
-            (recur ks)
-                default))))))))
+   (fn [t1' t2' default]
+     (loop [[k & ks] (sort-method-keys -disjoint?)]
+       (let [f (k (methods -disjoint?))]
+         (case (f t1' t2')
+           (true) true
+           (false) false
+           (case (f t2' t1')
+             (true) true
+             (false) false
+             (if ks
+               (recur ks)
+               default))))))))
 
 (defmulti -disjoint?
   "This function should never be called.
