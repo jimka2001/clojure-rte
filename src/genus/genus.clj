@@ -30,7 +30,7 @@
                                       seq-matcher find-simplifier
                                       call-with-found find-first
                                       gc-friendly-memoize clear-memoize-cache!
-                                      unchunk or-else]]
+                                      unchunk or-else member]]
             [util.cl-compat :as cl]
             [clojure.reflect :as refl]
             [backtick :refer [template]]
@@ -536,17 +536,13 @@
 ;; and also it has the same type.   Thus a lazy list is not equal to a list
 ;; and a vector is not equal to a list.
 (defmethod typep '= [a-value [_type value]]
-  (boolean (and (= value a-value)
-                (= (type a-value) (type value)))))
+  (boolean (strong-equal? a-value value)))
 
 ;; a given value, v, is an element of the type (member x y z)
 ;; if v == x or v == y or v == z (according to the clojure = function)
 ;; AND if they have the same type.
 (defmethod typep 'member [a-value [_type & alternatives]]
-  (let [a-type (type a-value)]
-    (boolean (some (fn [x]
-                     (and (= x a-value)
-                          (= (type x) a-type))) alternatives))))
+  (strong-member? a-value alternatives))
 
 (defmethod typep 'or [a-value [_a-type & others]]
   (boolean (some (fn [t1]
@@ -673,34 +669,42 @@
                                 type-designator))))]))
 
 (defmulti dual-combinator
+  "The dual-combinator for AND is the combinator for OR, i.e. union
+   while the dual-combinator for OR is the combinator for AND, i.e. intersection."
   (fn [self _a _b]
     (type-dispatch self)))
 
 (defmulti combinator
+  "The combinator for AND is intersection, and the combinator for OR is union"
   (fn [self _a _b]
     (type-dispatch self)))
 
 (defmethod combinator 'and method-combinator-and
   [_self a b]
+  ;; compute an intersection of a and b
   (setof [x a]
-         (member x b)))
+    (strong-member? x b)))
 
 (defmethod dual-combinator 'and method-dual-combinator-and
   [_self a b]
-  (uniquify (concat a b)))
+  ;; compute a union with duplcates removed on the left
+  (strong-uniquify (concat a b)))
 
 (defmethod combinator 'or method-combinator-or
   [_self a b]
-  (uniquify (concat a b)))
+  ;; compute a union with duplcates removed on the left
+  (strong-uniquify (concat a b)))
 
 (defmethod dual-combinator 'or method-dual-combinator-or
   [_self a b]
+  ;; compute an intersection of a and b
   (setof [x a]
-         (member x b)))
+    (strong-member? x b)))
   
 
 (defmulti combo-filter
-  ""
+  "The combo-filter for AND keeps only elements which match the predicate,
+  while the combo-filter for OR removes elements which match the predicate."
   (fn [self _pred _xs]
     (type-dispatch self)))
 
@@ -862,7 +866,7 @@
                    :if-found (fn [dual-td]
                                (create-dual this (map (fn [y]
                                                         (create this (map (fn [x]
-                                                                            (if (= x dual-td)
+                                                                            (if (strong-equal? x dual-td)
                                                                               y x))
                                                                           operands)))
                                                       (rest dual-td))))))
@@ -960,7 +964,7 @@
   "(and A B SEmpty C D)-> SEmpty, unit = STop, zero = SEmpty
    (or A B STop C D) -> STop, unit = SEmpty, zero = STop"
   [td]
-  (if (member (zero td) (operands td))
+  (if (strong-member? (zero td) (operands td))
     (zero td)
     td))
 
@@ -970,7 +974,7 @@
   [td]
   (if (exists [n (operands td)]
               (and (gns/not? n)
-                   (member (operand n) (operands td))))
+                   (strong-member? (operand n) (operands td))))
     (zero td)
     td))
 
@@ -978,7 +982,7 @@
   "SAnd(A, STop, B) == > SAnd(A, B), unit = STop, zero = SEmpty
    SOr(A, SEmpty, B) == > SOr(A, B), unit = SEmpty, zero = STop"
   [td]
-  (if (member (unit td) (operands td))
+  (if (strong-member? (unit td) (operands td))
     (create td (remove-element (unit td) (operands td)))
     td))
 
@@ -986,7 +990,7 @@
   "(and A B A C) -> (and A B C)
    (or A B A C) -> (or A B C)"
   [td]
-  (create td (uniquify (operands td))))
+  (create td (strong-uniquify (operands td))))
 
 (defn conversion-C6
   "(and A ( and B C) D) --> (and A B C D)
@@ -1031,12 +1035,12 @@
   (let [combos (setof [td (operands self)] (gns/combo? td))
         duals (setof [td combos] (dual-combination? self td))]
     (letfn [(f [td]
-              (if (not (member td duals))
+              (if (not (strong-member? td duals))
                 td
                 (letfn [(pred [n]
                           (and (gns/not? n)
                                (exists [d duals]
-                                       (= (operands d) (search-replace (operands td) n (operand n))))))]
+                                       (strong-equal? (operands d) (search-replace (operands td) n (operand n))))))]
                   ;; find to_remove=!B such that (A+!B+C) and also (A+B+C) are in the arglist
                   (call-with-found pred (operands td)
                                    :if-not-found td
@@ -1050,13 +1054,13 @@
   [self]
   (letfn [(pred [u]
             (exists [v (operands self)]
-                    (and (not= u v)
+                    (and (not (gns/strong-equal? u v))
                          (= (annihilator self u v) true))))]
     (call-with-found pred (operands self)
                      :if-not-found self
                      :if-found (fn [sub]
                                  (let [keep (setof [sup (operands self)]
-                                                   (or (= sup sub)
+                                                   (or (strong-equal? sup sub)
                                                        (not= (annihilator self sub sup) true)))]
                                    (create self keep))))))
 
@@ -1070,8 +1074,8 @@
     (letfn [(pred [a]
               (let [n (gns/create-not a)]
                 (exists [td duals]
-                        (or (member a (operands td))
-                            (member n (operands td))))))]
+                        (or (strong-member? a (operands td))
+                            (strong-member? n (operands td))))))]
       (call-with-found
        pred (operands self)
        :if-not-found self
@@ -1084,10 +1088,10 @@
                                      (same-combination? self td)
                                      [td]
 
-                                     (member ao (operands td))
+                                     (strong-member? ao (operands td))
                                      [] ;;  (A + ABX + Y) --> (A + Y)
 
-                                     (member not-ao (operands td))
+                                     (strong-member? not-ao (operands td))
                                      ;; td is a dual, so td.create creates a dual
                                      ;;    (A + !ABX + Y) --> (A + BX + Y)
                                      [(create td (remove-element not-ao (operands td)))]
@@ -1104,7 +1108,7 @@
     (call-with-found (fn [n]
                         (and (gns/not? n)
                              (exists [td duals]
-                                     (member (operand n) (operands td)))))
+                                     (strong-member? (operand n) (operands td)))))
       (operands self)
       :if-not-found self
       :if-found (fn [comp]
@@ -1145,13 +1149,13 @@
                              items)
             new-not-member (gns/create-not (create-member combined))]
         (letfn [(f [td]
-                  (if (member td not-members)
+                  (if (strong-member? td not-members)
                     new-not-member
                     td))]
           ;; we replace all SNot(SMember(...)) with the newly computed
           ;;  SNot(SMember(...)), then remove duplicates.  This effectively
           ;;  replaces the right-most one, and removes all others.
-          (create self (uniquify (map f (operands self)))))))))
+          (create self (strong-uniquify (map f (operands self)))))))))
 
 
 (defn conversion-C14
@@ -1172,7 +1176,7 @@
                   (if (member td members)
                     new-member
                     td))]
-          (create self (uniquify (map f (operands self)))))))))
+          (create self (strong-uniquify (map f (operands self)))))))))
 
 (def secret-value (gensym "secret"))
 (defn conversion-C15
@@ -1189,7 +1193,7 @@
   [self]
   (letfn [(diff [xs ys]
             (setof [x xs]
-                   (not (member x ys))))]
+                   (not (strong-member? x ys))))]
     (let [first-member (find-first gns/member-or-=? (operands self) secret-value)
           first-not-member (find-first (fn [x] (and (gns/not? x)
                                          (gns/member-or-=? (operand x)))) (operands self) secret-value)]
@@ -1204,21 +1208,21 @@
                       (cond
                         ;; in the SAnd case we remove the not_member and filter the member args
                         (and (gns/and? self)
-                             (= td first-not-member))
+                             (strong-equal? td first-not-member))
                         []
 
                         (and (gns/and? self)
-                             (= td first-member))
+                             (strong-equal? td first-member))
                         [(create-member (diff (operands first-member)
                                               (operands (operand first-not-member))))]
 
                         ;; in the SOr case we remove the member and filter the not-member args
                         (and (gns/or? self)
-                             (= td first-member))
+                             (strong-equal? td first-member))
                         []
 
                         (and (gns/or? self)
-                             (= td first-not-member))
+                             (strong-equal? td first-not-member))
                         [(gns/create-not (gns/create-member (diff (operands (operand first-not-member))
                                                               (operands first-member))))]
 
@@ -1261,7 +1265,7 @@
               td
               (let [others (filter (fn [c]
                                      (and (gns/combo? c)
-                                          (not= c td)
+                                          (not (gns/strong-equal? c td))
                                           (dual-combination? self c)))
                                    (operands self))]
                 (letfn [(except_for [c tds1 tds2]
@@ -1269,8 +1273,8 @@
                             false
                             (let [shorter (remove-element c tds1)]
                               (if (gns/not? c)
-                                (= shorter (remove-element (operand c) tds2))
-                                (= shorter (remove-element (template (not ~c)) tds2))))))]
+                                (strong-equal? shorter (remove-element (operand c) tds2))
+                                (strong-equal? shorter (remove-element (template (not ~c)) tds2))))))]
 
                   (call-with-found (fn [c]
                                      (exists [x others]
@@ -1434,7 +1438,7 @@
   (every? valid-type? others))
 
 (defmethod valid-type? 'satisfies [[_ f]]
-  (or (member f *pseudo-type-functions*)
+  (or (strong-member? f *pseudo-type-functions*)
       (callable-designator? f)))
 
 (defmethod valid-type? '? [[_ f]]
@@ -1480,8 +1484,8 @@
         try1
         (let [t1-simple (canonicalize-type t1 :dnf)
               t2-simple (canonicalize-type t2 :dnf)]
-          (if (and (= t1-simple t1)
-                   (= t2-simple t2))
+          (if (and (strong-equal? t1-simple t1)
+                   (strong-equal? t2-simple t2))
             default
                 (check-disjoint t1-simple t2-simple default)))))))))
 
@@ -1548,7 +1552,7 @@
     (= :empty-set t2)
     true
     
-    (= t1 t2)
+    (gns/strong-equal? t1 t2)
     false
     
     (= :epsilon t1)
@@ -1639,7 +1643,7 @@
           true
 
           ;; (disjoint? (and A B C) B)
-          (and (member t2 t1-operands)
+          (and (strong-member? t2 t1-operands)
                @inhabited-t2
                @inhabited-t1)
           false
@@ -1747,7 +1751,7 @@
         true        
         
         ;; (disjoint? (not X) X)
-        (= t2 t1-operand)
+        (strong-equal? t2 t1-operand)
         true
         
         ;; (disjoint? (not B) A) ;; when A and B are disjoint, provided that A is inhabited
@@ -1892,7 +1896,7 @@
                      :super super}))))
 
 (defmethod -subtype? :primary subtype-primary [sub-designator super-designator]
-  (cond (= sub-designator super-designator)
+  (cond (strong-equal? sub-designator super-designator)
         true ;; every type is a subtype of itself
 
         (and (class-designator? super-designator)
@@ -1925,7 +1929,7 @@
         :dont-know
 
         (gns/=? super)
-        (= (operand sub) (operand super))
+        (strong-equal? (operand sub) (operand super))
 
         :else
         (typep (operand sub) super)))
@@ -1956,13 +1960,13 @@
           ;; (subtype? (not A) A)
           (and (gns/not? sub)
                ;; don't call equivalent, just simple structural equivalence
-               (= (operand sub) super))
+               (strong-equal? (operand sub) super))
           false
 
           ;; (subtype? A (not A))
           (and (gns/not? super)
                ;; don't call equivalent, just simple structural equivalence
-               (= sub (operand super)))
+               (strong-equal? sub (operand super)))
           false
 
           (and (gns/not? sub)
@@ -2061,14 +2065,14 @@
               ;; (subtype? '(and A B) '(not A))
               (and (gns/not? t2)
                    (exists [t (rest t1)]
-                           (= t (second t2)))
+                           (strong-equal? t (second t2)))
                    (inhabited? t1 false)))
             (cond-c []
               ;; (subtype? (and A B C X Y) (and A B C) )
               (and (gns/and? t2)
                    (subset? (set (rest t2)) (set (rest t1)))))]
       (cond
-        (member t2 (rest t1))
+        (strong-member? t2 (rest t1))
         ;; (subtype? (and A B) A)
         true
 
@@ -2109,7 +2113,7 @@
         (cond (member i '(true false))
               i
 
-              (= @td-canon type-designator)
+              (strong-equal? @td-canon type-designator)
               default
               
               :else

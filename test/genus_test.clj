@@ -72,9 +72,53 @@
     (is (not (gns/typep nil '(member 1 false 3))) "test 10")))
 
 
+(deftest t-member-2
+  (testing "member type 2"
+    (is (gns/typep [1 2 3] '(member [1 2 3] [2 3 4])))
+    (is (not (gns/typep '(1 2 3) '(member [1 2 3] [2 3 4]))))
+    (is (not (gns/typep [1 2 3] '(member (1 2 3) [2 3 4]))))
 
+    (is (gns/typep [1 2 [3 4]] '(member [1 2 [3 4]])))
+    (is (not (gns/typep '[1 2 (3 4)] '(member [1 2 [3 4]]))))
+    (is (not (gns/typep '[1 2 [3 4]] '(member [1 2 (3 4)]))))
 
+    (is (gns/canonicalize-type '(member [1 2 (3 4)] [1 2 [3 4]])
+                               '(member [1 2 (3 4)] [1 2 [3 4]])))
+
+    (is (gns/subtype? '(member [1 2 (3 4)]) '(member [1 2 (3 4)] [1 2 [3 4]]) ))
+    (let [m (get-method gns/-disjoint? 'member)
+          d (m '(member [1 2 (3 4)]) '(member [1 2 [3 4]]))]
+      (is (= d true))
+      )
+    (is (gns/disjoint? '(member [1 2 (3 4)]) '(member [1 2 [3 4]]) false))
+    (is (not (gns/subtype? '(member [1 2 (3 4)] [1 2 [3 4]]) '(member [1 2 (3 4)]) :dont-know)))
+    ))
   
+(deftest t-member-disjoint
+  (testing "member disjoint"
+    (let [t1 '(member [1 2 (3 4)])
+          t2 '(member [1 2 [3 4]])
+          dms (methods gns/-disjoint?)
+          sms (methods gns/-subtype?)
+          ]
+      (doseq [k (gns/sort-method-keys gns/-subtype?)]
+        (is (member ((k sms) t1 t2) '(false :dont-know))
+            (format "-subtype? method %s returned %s on %s %s" k ((k sms) t1 t2) t1 t2))
+        (is (member ((k sms) t2 t1) '(false :dont-know))
+            (format "-subtype? method %s returned %s on %s %s" k ((k sms) t2 t1) t2 t1))
+        (is (not (gns/subtype? t1 t2 :dont-know))
+            (format "(subtype? %s %s) returned %s" t1 t2 (gns/subtype? t1 t2)))
+        (is (not (gns/subtype? t2 t1 :dont-know))
+            (format "(subtype? %s %s) returned %s" t2 t1 (gns/subtype? t2 t1))))
+        
+      (doseq [k (gns/sort-method-keys gns/-disjoint?)]
+        (is (not (gns/strong-equal? t1 t2)))
+        (is (member ((k dms) t1 t2) '(true :dont-know))
+            (format "-disjoint? method %s returned %s on %s %s" k ((k dms) t1 t2) t1 t2))
+        (is (member ((k dms) t2 t1) '(true :dont-know))
+            (format "-disjoint? method %s returned %s on %s %s" k ((k dms) t2 t1) t2 t1))))))
+
+
 (deftest t-inhabited
   (testing "inhabited?"
     (with-compile-env ()
