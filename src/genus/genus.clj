@@ -76,6 +76,8 @@
     (= (type (zipmap (range 8) (range 8)))
        (type (dissoc (zipmap (range 9) (range 9)) 8))) ;; false"
   [a b]
+  {:pre [(or (println [:strong-equal? :a a :b b])true)]
+   :post [(or (println [:strong-equal? :a a :b b :result %]) true)]}
   (or (identical? a b)
       (and (identical? (type a) (type b))
            (if (seqable? a) ;; does a obey seq abstraction
