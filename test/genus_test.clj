@@ -698,3 +698,26 @@
     (is (= (gns/type-predicate-to-type-designator 'libspec?)
            nil))
 ))
+
+(deftest t-strong-equal
+  (testing "strong-equal?"
+    (is (gns/strong-equal? 1 1))
+    (is (gns/strong-equal? 1.0 1.0))
+    (is (not (gns/strong-equal? 1 1.0)))
+
+    (is (gns/strong-equal? "1" "1"))
+    (is (not (gns/strong-equal? "11" "1")))
+
+    (is (gns/strong-equal? [1 2 3] [1 2 3] ))
+    (is (not (gns/strong-equal? '(1 2 3) [1 2 3] )))
+
+    (is (gns/strong-equal? [1 [2 3]] [1 [2 3]] ))
+    (is (not (gns/strong-equal? '[1 (2 3)] [1 [2 3]] )))
+
+    (is (gns/strong-equal? '((((1))) (((([2])))))
+                           '((((1))) (((([2])))))))
+    (is (not (gns/strong-equal? '((((1))) (((([2])))))
+                                '((((1))) (((((2)))))))))
+    ))
+
+
