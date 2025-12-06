@@ -202,7 +202,6 @@
     ;;   from local name space.
     (is (thrown? Exception (gns/typep 13 '(? test-predicate))))
     ))
-  
 
 (deftest t-canonicalize-and
   (testing "canonicalize-type and"
@@ -222,8 +221,6 @@
          (gns/canonicalize-type '(or Double (member 1.0 2.0 "a" "b")))
          '(or (member "a" "b") Double))
         "test 0")))
-
-
 
 (deftest t-inhabited-random
   (testing "checking some randomly generated types for inhabited?"
@@ -627,7 +624,7 @@
     (is (gns/Satisfies even?))
 
     (is (thrown? Exception (gns/Not 'Integer 'String)))
-))
+    ))
 
 (deftest t-valid-type
   (testing "valid-type?"
@@ -648,7 +645,7 @@
     (is (gns/valid-type? '(= 1)))
     (is (gns/valid-type? '(satisfies even?)))
     (is (gns/valid-type? (gns/Satisfies even?)))
-))
+    ))
 
 
 (deftest t-extract-type-from-expression
@@ -691,7 +688,7 @@
     ;; unable to expand 'libspec
     (is (= (gns/type-predicate-to-type-designator 'libspec?)
            nil))
-))
+    ))
 
 (deftest t-strong-equal
   (testing "strong-equal?"
@@ -709,12 +706,11 @@
     (is (not (strong-equal? '[1 (2 3)] [1 [2 3]] )))
 
     (is (strong-equal? '((((1))) (((([2])))))
-                           '((((1))) (((([2])))))))
+                       '((((1))) (((([2])))))))
     (is (not (strong-equal? '((((1))) (((([2])))))
-                                '((((1))) (((((2)))))))))
+                            '((((1))) (((((2)))))))))
 
     (is (not (strong-equal? #{[1 2]}  #{'(1 2)} )))
     (is (not (strong-equal? {[1 2] 42}
-                                {'(1 2) 42} )))
-
+                            {'(1 2) 42} )))
     ))
