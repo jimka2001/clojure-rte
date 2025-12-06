@@ -714,3 +714,14 @@
     (is (not (strong-equal? {[1 2] 42}
                             {'(1 2) 42} )))
     ))
+
+(deftest t-strong-equal-empty
+  (testing "strong-equal? empty"
+    (let [zeros '({} () nil false
+                  [] 0 0.0)]
+      (doseq [z1 zeros
+              z2 zeros
+              :when (not (identical? z1 z2))]
+
+        (is (not (strong-equal? z1 z2)))))))
+
