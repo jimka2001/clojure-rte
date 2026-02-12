@@ -421,13 +421,13 @@
 <span class="partial" title="3 out of 24 forms covered">
                 139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label-2&nbsp;dst-2]))]
                 </span><br/>
-<span class="partial" title="17 out of 136 forms covered">
+<span class="partial" title="7 out of 136 forms covered">
                 140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(gns&#x2F;disjoint?&nbsp;label-1&nbsp;label-2&nbsp;true)
                 </span><br/>
-<span class="partial" title="4 out of 32 forms covered">
+<span class="not-covered" title="0 out of 32 forms covered">
                 141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;overlapping&nbsp;types&nbsp;~A&nbsp;vs&nbsp;~A&nbsp;in&nbsp;~A&nbsp;transitions&nbsp;~A&quot;
                 </span><br/>
-<span class="partial" title="6 out of 48 forms covered">
+<span class="not-covered" title="0 out of 48 forms covered">
                 142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label-1&nbsp;label-2&nbsp;q&nbsp;(:transitions&nbsp;q))))
                 </span><br/>
 <span class="partial" title="32 out of 74 forms covered">
@@ -476,10 +476,10 @@
                 157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;dfa-map}]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                158&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;don&#x27;t&nbsp;know&nbsp;how&nbsp;to&nbsp;call&nbsp;rte&#x2F;valid-rte?&nbsp;because&nbsp;rte-construct&nbsp;already&nbsp;depends&nbsp;on&nbsp;xymbolyco,
+                158&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;don&#x27;t&nbsp;know&nbsp;how&nbsp;to&nbsp;call&nbsp;rte&#x2F;valid-rte?&nbsp;because&nbsp;rte.construct&nbsp;already&nbsp;depends&nbsp;on&nbsp;xymbolyco,
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                159&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;cannot&nbsp;make&nbsp;xymbolyco&nbsp;depend&nbsp;on&nbsp;rte-construct.
+                159&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;&nbsp;&nbsp;&nbsp;cannot&nbsp;make&nbsp;xymbolyco&nbsp;depend&nbsp;on&nbsp;rte.construct.
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 160&nbsp;&nbsp;&nbsp;&nbsp;;;(if&nbsp;(contains?&nbsp;dfa-map&nbsp;:pattern)
@@ -1663,10 +1663,10 @@
 <span class="covered" title="1 out of 1 forms covered">
                 553&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(merge-parallel&nbsp;[transitions]
                 </span><br/>
-<span class="covered" title="4 out of 4 forms covered">
+<span class="partial" title="3 out of 4 forms covered">
                 554&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(timeout-reached?)
                 </span><br/>
-<span class="covered" title="4 out of 4 forms covered">
+<span class="not-covered" title="0 out of 4 forms covered">
                 555&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(throw&nbsp;(ex-info&nbsp;&quot;Thread&nbsp;interrupted&nbsp;during&nbsp;minimize&quot;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">

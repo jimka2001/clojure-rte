@@ -86,7 +86,7 @@
                 027&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[genus.genus&nbsp;:as&nbsp;gns]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                028&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[rte-construct&nbsp;:refer&nbsp;[rte-to-dfa]]
+                028&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[rte.construct&nbsp;:refer&nbsp;[rte-to-dfa]]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
                 029&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[util.cl-compat&nbsp;:as&nbsp;cl]
@@ -130,1151 +130,1085 @@
 <span class="blank" title="0 out of 0 forms covered">
                 042&nbsp;&nbsp;
                 </span><br/>
-<span class="covered" title="1 out of 1 forms covered">
-                043&nbsp;&nbsp;(def&nbsp;^:dynamic&nbsp;*dot-tmp-dir*
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                044&nbsp;&nbsp;&nbsp;&nbsp;&quot;Directory&nbsp;to&nbsp;put&nbsp;temporary&nbsp;files&quot;
-                </span><br/>
-<span class="covered" title="5 out of 5 forms covered">
-                045&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[m&nbsp;(sh&nbsp;&quot;mktemp&quot;&nbsp;&quot;-d&quot;)
-                </span><br/>
-<span class="covered" title="8 out of 8 forms covered">
-                046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmp-dir&nbsp;(str&nbsp;(str&#x2F;trim&nbsp;(:out&nbsp;m))&nbsp;&quot;&#x2F;.&quot;)]
-                </span><br/>
-<span class="covered" title="5 out of 5 forms covered">
-                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sh&nbsp;&quot;mkdir&quot;&nbsp;&quot;-p&quot;&nbsp;tmp-dir)
-                </span><br/>
-<span class="covered" title="1 out of 1 forms covered">
-                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmp-dir))
-                </span><br/>
-<span class="blank" title="0 out of 0 forms covered">
-                049&nbsp;&nbsp;
-                </span><br/>
-<span class="covered" title="1 out of 1 forms covered">
-                050&nbsp;&nbsp;(def&nbsp;tmp-files
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                051&nbsp;&nbsp;&nbsp;&nbsp;&quot;array&nbsp;of&nbsp;tmp&nbsp;files&nbsp;names&nbsp;created&nbsp;by&nbsp;dfa-to-dot&nbsp;and&nbsp;bdd-to-dot&quot;
-                </span><br/>
-<span class="covered" title="3 out of 3 forms covered">
-                052&nbsp;&nbsp;&nbsp;&nbsp;(atom&nbsp;[]))
-                </span><br/>
-<span class="blank" title="0 out of 0 forms covered">
-                053&nbsp;&nbsp;
-                </span><br/>
-<span class="covered" title="1 out of 1 forms covered">
-                054&nbsp;&nbsp;(defn&nbsp;delete-tmp-files&nbsp;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                055&nbsp;&nbsp;&nbsp;&nbsp;&quot;Delete&nbsp;the&nbsp;temporary&nbsp;files&nbsp;created&nbsp;by&nbsp;dfa-to-dot&nbsp;and&nbsp;bdd-to-dot.&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                056&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;
-                </span><br/>
-<span class="not-covered" title="0 out of 33 forms covered">
-                057&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[fn&nbsp;@tmp-files]
-                </span><br/>
-<span class="not-covered" title="0 out of 12 forms covered">
-                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(.exists&nbsp;(io&#x2F;file&nbsp;fn))
-                </span><br/>
-<span class="not-covered" title="0 out of 6 forms covered">
-                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(io&#x2F;delete-file&nbsp;fn)))
-                </span><br/>
-<span class="not-covered" title="0 out of 13 forms covered">
-                060&nbsp;&nbsp;&nbsp;&nbsp;(swap!&nbsp;tmp-files&nbsp;(fn&nbsp;[files]&nbsp;(filter&nbsp;(fn&nbsp;[fn]&nbsp;(not&nbsp;(.exists&nbsp;(io&#x2F;file&nbsp;fn))))
-                </span><br/>
-<span class="not-covered" title="0 out of 1 forms covered">
-                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;files))))
-                </span><br/>
-<span class="blank" title="0 out of 0 forms covered">
-                062&nbsp;&nbsp;
-                </span><br/>
 <span class="partial" title="17 out of 43 forms covered">
-                063&nbsp;&nbsp;(jdefn&nbsp;dot-view
+                043&nbsp;&nbsp;(jdefn&nbsp;dot-view
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;View&nbsp;the&nbsp;image&nbsp;for&nbsp;the&nbsp;current&nbsp;OS&nbsp;(currently&nbsp;only&nbsp;for&nbsp;Mac&nbsp;OS&nbsp;X).
+                044&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;View&nbsp;the&nbsp;image&nbsp;for&nbsp;the&nbsp;current&nbsp;OS&nbsp;(currently&nbsp;only&nbsp;for&nbsp;Mac&nbsp;OS&nbsp;X).
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                065&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;image&nbsp;will&nbsp;be&nbsp;generated&nbsp;by&nbsp;treating&nbsp;the&nbsp;given&nbsp;dot-string
+                045&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;image&nbsp;will&nbsp;be&nbsp;generated&nbsp;by&nbsp;treating&nbsp;the&nbsp;given&nbsp;dot-string
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                066&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;the&nbsp;dot&nbsp;executable.&quot;
+                046&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;the&nbsp;dot&nbsp;executable.&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[dot-string&nbsp;&amp;&nbsp;{:keys&nbsp;[verbose&nbsp;view&nbsp;title&nbsp;dot-file-cb&nbsp;png-file-cb&nbsp;prefix&nbsp;dir]
+                047&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[dot-string&nbsp;&amp;&nbsp;{:keys&nbsp;[verbose&nbsp;view&nbsp;title&nbsp;dot-file-cb&nbsp;png-file-cb&nbsp;prefix&nbsp;dir]
                 </span><br/>
 <span class="partial" title="16 out of 24 forms covered">
-                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:prefix&nbsp;&quot;&quot;
+                048&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:prefix&nbsp;&quot;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:title&nbsp;&quot;no-title&quot;
+                049&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:title&nbsp;&quot;no-title&quot;
                 </span><br/>
 <span class="partial" title="4 out of 6 forms covered">
-                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dir&nbsp;(ensure-directory
+                050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dir&nbsp;(ensure-directory
                 </span><br/>
 <span class="partial" title="12 out of 18 forms covered">
-                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
+                051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:verbose&nbsp;true}
+                052&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:verbose&nbsp;true}
                 </span><br/>
 <span class="partial" title="3 out of 4 forms covered">
-                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;arguments}]
+                053&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;arguments}]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                074&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[uuid&nbsp;(random-uuid)
+                054&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[uuid&nbsp;(random-uuid)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;png-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;prefix&nbsp;title&nbsp;&quot;-&quot;&nbsp;uuid&nbsp;&quot;.png&quot;)
+                055&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;png-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;prefix&nbsp;title&nbsp;&quot;-&quot;&nbsp;uuid&nbsp;&quot;.png&quot;)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dot-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;prefix&nbsp;title&nbsp;&quot;-&quot;&nbsp;uuid&nbsp;&quot;.dot&quot;)
+                056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dot-file-name&nbsp;(str&nbsp;dir&nbsp;&quot;&#x2F;&quot;&nbsp;prefix&nbsp;title&nbsp;&quot;-&quot;&nbsp;uuid&nbsp;&quot;.dot&quot;)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                057&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                078&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not=&nbsp;\-&nbsp;(first&nbsp;png-file-name))
+                058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(not=&nbsp;\-&nbsp;(first&nbsp;png-file-name))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                079&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;invalid&nbsp;png&nbsp;file&nbsp;name:&nbsp;%s&quot;&nbsp;png-file-name))
+                059&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(format&nbsp;&quot;invalid&nbsp;png&nbsp;file&nbsp;name:&nbsp;%s&quot;&nbsp;png-file-name))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;verbose
+                060&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;verbose
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;[:title&nbsp;title&nbsp;:view&nbsp;view&nbsp;:verbose&nbsp;verbose
+                061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;[:title&nbsp;title&nbsp;:view&nbsp;view&nbsp;:verbose&nbsp;verbose
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:arguments&nbsp;arguments]))
+                062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:arguments&nbsp;arguments]))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[stat&nbsp;(sh&nbsp;*dot-path*&nbsp;&quot;-Tpng&quot;&nbsp;&quot;-o&quot;&nbsp;png-file-name
+                063&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[stat&nbsp;(sh&nbsp;*dot-path*&nbsp;&quot;-Tpng&quot;&nbsp;&quot;-o&quot;&nbsp;png-file-name
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:in&nbsp;dot-string)]
+                064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:in&nbsp;dot-string)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(not=&nbsp;0&nbsp;(:exit&nbsp;stat))
+                065&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(not=&nbsp;0&nbsp;(:exit&nbsp;stat))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;[:title&nbsp;title&nbsp;:view&nbsp;view&nbsp;:verbose&nbsp;verbose
+                066&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;[:title&nbsp;title&nbsp;:view&nbsp;view&nbsp;:verbose&nbsp;verbose
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                087&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:arguments&nbsp;arguments])
+                067&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:arguments&nbsp;arguments])
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                088&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;[:cmd&nbsp;*dot-path*&nbsp;&quot;-Tpng&quot;&nbsp;&quot;-o&quot;&nbsp;png-file-name
+                068&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;[:cmd&nbsp;*dot-path*&nbsp;&quot;-Tpng&quot;&nbsp;&quot;-o&quot;&nbsp;png-file-name
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                089&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;])
+                069&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;])
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                090&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;stat)))
+                070&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(println&nbsp;stat)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                091&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;dot-file-cb
+                071&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;dot-file-cb
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[wrtr&nbsp;(io&#x2F;writer&nbsp;dot-file-name)]
+                072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-open&nbsp;[wrtr&nbsp;(io&#x2F;writer&nbsp;dot-file-name)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                093&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;wrtr&nbsp;dot-string))
+                073&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(.write&nbsp;wrtr&nbsp;dot-string))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                094&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot-file-cb&nbsp;dot-file-name))
+                074&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot-file-cb&nbsp;dot-file-name))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                095&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;png-file-cb
+                075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;png-file-cb
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                096&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(png-file-cb&nbsp;png-file-name))
+                076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(png-file-cb&nbsp;png-file-name))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                097&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(=&nbsp;&quot;Mac&nbsp;OS&nbsp;X&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;os.name&quot;))
+                077&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view&#x2F;view-image&nbsp;png-file-name)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                098&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(swap!&nbsp;tmp-files&nbsp;conj&nbsp;png-file-name)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                099&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(view&#x2F;view-image&nbsp;png-file-name))))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                100&nbsp;&nbsp;&nbsp;&nbsp;
+                078&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                101&nbsp;&nbsp;(defn&nbsp;line-wrap&nbsp;[data&nbsp;right-margin]
+                079&nbsp;&nbsp;(defn&nbsp;line-wrap&nbsp;[data&nbsp;right-margin]
                 </span><br/>
 <span class="covered" title="10 out of 10 forms covered">
-                102&nbsp;&nbsp;&nbsp;&nbsp;(binding&nbsp;[clojure.pprint&#x2F;*print-right-margin*&nbsp;right-margin]
+                080&nbsp;&nbsp;&nbsp;&nbsp;(binding&nbsp;[clojure.pprint&#x2F;*print-right-margin*&nbsp;right-margin]
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(clojure.string&#x2F;replace
+                081&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(clojure.string&#x2F;replace
                 </span><br/>
 <span class="covered" title="17 out of 17 forms covered">
-                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(clojure.string&#x2F;trim-newline&nbsp;(with-out-str
+                082&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(clojure.string&#x2F;trim-newline&nbsp;(with-out-str
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint&nbsp;data&nbsp;*out*)))
+                083&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint&nbsp;data&nbsp;*out*)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;\n&quot;&nbsp;;&nbsp;search
+                084&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;\n&quot;&nbsp;;&nbsp;search
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;\\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&nbsp;;&nbsp;replace
+                085&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;\\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&nbsp;;&nbsp;replace
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)))
+                086&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                109&nbsp;&nbsp;
+                087&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="17 out of 43 forms covered">
-                110&nbsp;&nbsp;(jdefn&nbsp;dfa-to-dot
+                088&nbsp;&nbsp;(jdefn&nbsp;dfa-to-dot
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                111&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;(and&nbsp;possibly&nbsp;display)&nbsp;a&nbsp;graphical&nbsp;image&nbsp;rendering&nbsp;the&nbsp;automaton
+                089&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;(and&nbsp;possibly&nbsp;display)&nbsp;a&nbsp;graphical&nbsp;image&nbsp;rendering&nbsp;the&nbsp;automaton
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                112&nbsp;&nbsp;&nbsp;&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;dfa.&nbsp;&nbsp;dfa&nbsp;is&nbsp;a&nbsp;value&nbsp;as&nbsp;returned&nbsp;from&nbsp;function
+                090&nbsp;&nbsp;&nbsp;&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;dfa.&nbsp;&nbsp;dfa&nbsp;is&nbsp;a&nbsp;value&nbsp;as&nbsp;returned&nbsp;from&nbsp;function
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                113&nbsp;&nbsp;&nbsp;&nbsp;rte&#x2F;compile,&nbsp;or&nbsp;rte-to-dfa.
+                091&nbsp;&nbsp;&nbsp;&nbsp;rte&#x2F;compile,&nbsp;or&nbsp;rte-to-dfa.
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                114&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;Mac&nbsp;OS,&nbsp;the&nbsp;:view&nbsp;option&nbsp;may&nbsp;be&nbsp;used&nbsp;to&nbsp;display&nbsp;the&nbsp;image
+                092&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;Mac&nbsp;OS,&nbsp;the&nbsp;:view&nbsp;option&nbsp;may&nbsp;be&nbsp;used&nbsp;to&nbsp;display&nbsp;the&nbsp;image
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                115&nbsp;&nbsp;&nbsp;&nbsp;interactively.
+                093&nbsp;&nbsp;&nbsp;&nbsp;interactively.
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                116&nbsp;&nbsp;&nbsp;&nbsp;dfa-to-dot&nbsp;also&nbsp;accepts&nbsp;an&nbsp;rte&nbsp;(as&nbsp;dfa)&nbsp;in&nbsp;which&nbsp;case&nbsp;it&nbsp;will&nbsp;be&nbsp;converted
+                094&nbsp;&nbsp;&nbsp;&nbsp;dfa-to-dot&nbsp;also&nbsp;accepts&nbsp;an&nbsp;rte&nbsp;(as&nbsp;dfa)&nbsp;in&nbsp;which&nbsp;case&nbsp;it&nbsp;will&nbsp;be&nbsp;converted
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                117&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;a&nbsp;Dfa&nbsp;using&nbsp;rte-to-dfa.
+                095&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;a&nbsp;Dfa&nbsp;using&nbsp;rte-to-dfa.
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                118&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;pair&nbsp;[&nbsp;abbrevs]&nbsp;the&nbsp;new&nbsp;abbrevs&nbsp;map&nbsp;which&nbsp;is&nbsp;necessarily&nbsp;an&nbsp;extension&nbsp;of
+                096&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;pair&nbsp;[&nbsp;abbrevs]&nbsp;the&nbsp;new&nbsp;abbrevs&nbsp;map&nbsp;which&nbsp;is&nbsp;necessarily&nbsp;an&nbsp;extension&nbsp;of
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                119&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;given&nbsp;`abbrevs`&nbsp;map.&nbsp;&nbsp;This&nbsp;map&nbsp;can&nbsp;be&nbsp;used&nbsp;by&nbsp;the&nbsp;caller&nbsp;to
+                097&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;given&nbsp;`abbrevs`&nbsp;map.&nbsp;&nbsp;This&nbsp;map&nbsp;can&nbsp;be&nbsp;used&nbsp;by&nbsp;the&nbsp;caller&nbsp;to
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                120&nbsp;&nbsp;&nbsp;&nbsp;re-call&nbsp;dba-to-dot&nbsp;with&nbsp;a&nbsp;different&nbsp;dfa.&nbsp;&nbsp;If&nbsp;any&nbsp;transitions&nbsp;of&nbsp;the&nbsp;second
+                098&nbsp;&nbsp;&nbsp;&nbsp;re-call&nbsp;dba-to-dot&nbsp;with&nbsp;a&nbsp;different&nbsp;dfa.&nbsp;&nbsp;If&nbsp;any&nbsp;transitions&nbsp;of&nbsp;the&nbsp;second
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                121&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;have&nbsp;the&nbsp;same&nbsp;type&nbsp;label&nbsp;as&nbsp;the&nbsp;first&nbsp;dfa,&nbsp;then&nbsp;the&nbsp;same&nbsp;abbreviation&nbsp;will
+                099&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;have&nbsp;the&nbsp;same&nbsp;type&nbsp;label&nbsp;as&nbsp;the&nbsp;first&nbsp;dfa,&nbsp;then&nbsp;the&nbsp;same&nbsp;abbreviation&nbsp;will
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                122&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;used.&nbsp;&nbsp;This&nbsp;makes&nbsp;it&nbsp;much&nbsp;easier&nbsp;for&nbsp;the&nbsp;human&nbsp;to&nbsp;understand&nbsp;the
+                100&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;used.&nbsp;&nbsp;This&nbsp;makes&nbsp;it&nbsp;much&nbsp;easier&nbsp;for&nbsp;the&nbsp;human&nbsp;to&nbsp;understand&nbsp;the
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                123&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;drawings&nbsp;being&nbsp;viewed.&quot;
+                101&nbsp;&nbsp;&nbsp;&nbsp;dfa&nbsp;drawings&nbsp;being&nbsp;viewed.&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                124&nbsp;&nbsp;&nbsp;&nbsp;[dfa&nbsp;&amp;&nbsp;{:keys&nbsp;[title&nbsp;prefix&nbsp;view&nbsp;abbrev&nbsp;draw-sink&nbsp;right-margin&nbsp;dir
+                102&nbsp;&nbsp;&nbsp;&nbsp;[dfa&nbsp;&amp;&nbsp;{:keys&nbsp;[title&nbsp;prefix&nbsp;view&nbsp;abbrev&nbsp;draw-sink&nbsp;right-margin&nbsp;dir
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state-legend&nbsp;type-legend&nbsp;report-labels&nbsp;dot-file-cb&nbsp;png-file-cb&nbsp;abbrevs]
+                103&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state-legend&nbsp;type-legend&nbsp;report-labels&nbsp;dot-file-cb&nbsp;png-file-cb&nbsp;abbrevs]
                 </span><br/>
 <span class="partial" title="46 out of 69 forms covered">
-                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:title&nbsp;&quot;no-title&quot;
+                104&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:title&nbsp;&quot;no-title&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:prefix&nbsp;&quot;dfa&quot;
+                105&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:prefix&nbsp;&quot;dfa&quot;
                 </span><br/>
 <span class="partial" title="4 out of 6 forms covered">
-                128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dir&nbsp;(ensure-directory
+                106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dir&nbsp;(ensure-directory
                 </span><br/>
 <span class="partial" title="12 out of 18 forms covered">
-                129&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
+                107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-sink&nbsp;false
+                108&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-sink&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:abbrev&nbsp;true
+                109&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:abbrev&nbsp;true
                 </span><br/>
 <span class="partial" title="2 out of 3 forms covered">
-                132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:abbrevs&nbsp;{}
+                110&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:abbrevs&nbsp;{}
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;false
+                111&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                134&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:right-margin&nbsp;120
+                112&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:right-margin&nbsp;120
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                135&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:state-legend&nbsp;true
+                113&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:state-legend&nbsp;true
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type-legend&nbsp;true
+                114&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:type-legend&nbsp;true
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:report-labels&nbsp;false
+                115&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:report-labels&nbsp;false
                 </span><br/>
 <span class="partial" title="2 out of 6 forms covered">
-                138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dot-file-cb&nbsp;(fn&nbsp;[_file_name]&nbsp;nil)
+                116&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dot-file-cb&nbsp;(fn&nbsp;[_file_name]&nbsp;nil)
                 </span><br/>
 <span class="partial" title="2 out of 6 forms covered">
-                139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:png-file-cb&nbsp;(fn&nbsp;[_file_name]&nbsp;nil)
+                117&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:png-file-cb&nbsp;(fn&nbsp;[_file_name]&nbsp;nil)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+                118&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
                 </span><br/>
 <span class="partial" title="3 out of 4 forms covered">
-                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;all-optionals}]
+                119&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;all-optionals}]
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                142&nbsp;&nbsp;&nbsp;&nbsp;{:pre&nbsp;[((wrap&nbsp;map?&nbsp;140)&nbsp;abbrevs)]
+                120&nbsp;&nbsp;&nbsp;&nbsp;{:pre&nbsp;[((wrap&nbsp;map?&nbsp;140)&nbsp;abbrevs)]
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:post&nbsp;[((wrap&nbsp;vector?&nbsp;141)&nbsp;%)]}
+                121&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:post&nbsp;[((wrap&nbsp;vector?&nbsp;141)&nbsp;%)]}
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                144&nbsp;&nbsp;
+                122&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="4 out of 5 forms covered">
-                145&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                123&nbsp;&nbsp;&nbsp;&nbsp;(cond
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view
+                124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view
                 </span><br/>
 <span class="covered" title="9 out of 9 forms covered">
-                147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[dot-string&nbsp;new-abbrevs]&nbsp;(dfa-to-dot&nbsp;dfa&nbsp;(assoc&nbsp;all-optionals&nbsp;:view&nbsp;false))]
+                125&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[[dot-string&nbsp;new-abbrevs]&nbsp;(dfa-to-dot&nbsp;dfa&nbsp;(assoc&nbsp;all-optionals&nbsp;:view&nbsp;false))]
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                148&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot-view&nbsp;dot-string&nbsp;all-optionals)
+                126&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot-view&nbsp;dot-string&nbsp;all-optionals)
                 </span><br/>
 <span class="partial" title="5 out of 16 forms covered">
-                149&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(map?&nbsp;new-abbrevs)&nbsp;&quot;line&nbsp;148&quot;)
+                127&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(map?&nbsp;new-abbrevs)&nbsp;&quot;line&nbsp;148&quot;)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[dot-string&nbsp;new-abbrevs])
+                128&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[dot-string&nbsp;new-abbrevs])
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                129&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(seq?&nbsp;dfa)
+                130&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(seq?&nbsp;dfa)
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dfa-to-dot&nbsp;(rte-to-dfa&nbsp;dfa)&nbsp;all-optionals)
+                131&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dfa-to-dot&nbsp;(rte-to-dfa&nbsp;dfa)&nbsp;all-optionals)
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                154&nbsp;&nbsp;
+                132&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:otherwise&nbsp;;;&nbsp;if&nbsp;dfa&nbsp;is&nbsp;of&nbsp;type&nbsp;Dfa&nbsp;then&nbsp;return&nbsp;a&nbsp;string&nbsp;content&nbsp;of&nbsp;the&nbsp;impending&nbsp;.dot&nbsp;file
+                133&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:otherwise&nbsp;;;&nbsp;if&nbsp;dfa&nbsp;is&nbsp;of&nbsp;type&nbsp;Dfa&nbsp;then&nbsp;return&nbsp;a&nbsp;string&nbsp;content&nbsp;of&nbsp;the&nbsp;impending&nbsp;.dot&nbsp;file
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                156&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[sink-states&nbsp;(xym&#x2F;find-sink-states&nbsp;dfa)
+                134&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[sink-states&nbsp;(xym&#x2F;find-sink-states&nbsp;dfa)
                 </span><br/>
 <span class="covered" title="2 out of 2 forms covered">
-                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visible-states&nbsp;(if&nbsp;draw-sink
+                135&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visible-states&nbsp;(if&nbsp;draw-sink
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa)
+                136&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa)
                 </span><br/>
 <span class="covered" title="10 out of 10 forms covered">
-                159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(remove&nbsp;(fn&nbsp;dot-159&nbsp;[q]&nbsp;(member&nbsp;q&nbsp;sink-states))&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa)))
+                137&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(remove&nbsp;(fn&nbsp;dot-159&nbsp;[q]&nbsp;(member&nbsp;q&nbsp;sink-states))&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa)))
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visible-state-ids&nbsp;(map&nbsp;:index&nbsp;visible-states)
+                138&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visible-state-ids&nbsp;(map&nbsp;:index&nbsp;visible-states)
                 </span><br/>
 <span class="covered" title="67 out of 67 forms covered">
-                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition-labels&nbsp;(distinct&nbsp;(for&nbsp;[q&nbsp;visible-states
+                139&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transition-labels&nbsp;(distinct&nbsp;(for&nbsp;[q&nbsp;visible-states
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;dst-id]&nbsp;(:transitions&nbsp;q)
+                140&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[label&nbsp;dst-id]&nbsp;(:transitions&nbsp;q)
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                163&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(member&nbsp;dst-id&nbsp;visible-state-ids)]
+                141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(member&nbsp;dst-id&nbsp;visible-state-ids)]
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                164&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                142&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                165&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;find&nbsp;smallest&nbsp;non-negative&nbsp;integer&nbsp;not&nbsp;in&nbsp;the&nbsp;used&nbsp;list
+                143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;find&nbsp;smallest&nbsp;non-negative&nbsp;integer&nbsp;not&nbsp;in&nbsp;the&nbsp;used&nbsp;list
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new-index&nbsp;(fn&nbsp;dot-166&nbsp;[used]
+                144&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new-index&nbsp;(fn&nbsp;dot-166&nbsp;[used]
                 </span><br/>
 <span class="covered" title="2 out of 2 forms covered">
-                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(loop&nbsp;[guess&nbsp;0]
+                145&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(loop&nbsp;[guess&nbsp;0]
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
-                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(member&nbsp;guess&nbsp;used)
+                146&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(member&nbsp;guess&nbsp;used)
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;(inc&nbsp;guess))
+                147&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;(inc&nbsp;guess))
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;guess)))
+                148&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;guess)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                171&nbsp;&nbsp;
+                149&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;we&nbsp;already&nbsp;have&nbsp;some&nbsp;abbrevs,&nbsp;we&nbsp;need&nbsp;to&nbsp;merge&nbsp;some&nbsp;new&nbsp;ones&nbsp;in
+                150&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;we&nbsp;already&nbsp;have&nbsp;some&nbsp;abbrevs,&nbsp;we&nbsp;need&nbsp;to&nbsp;merge&nbsp;some&nbsp;new&nbsp;ones&nbsp;in
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs&nbsp;(merge&nbsp;abbrevs&nbsp;(reduce&nbsp;(fn&nbsp;dot-173&nbsp;[acc-map&nbsp;td]
+                151&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs&nbsp;(merge&nbsp;abbrevs&nbsp;(reduce&nbsp;(fn&nbsp;dot-173&nbsp;[acc-map&nbsp;td]
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(get&nbsp;acc-map&nbsp;td)
+                152&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(get&nbsp;acc-map&nbsp;td)
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acc-map
+                153&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acc-map
                 </span><br/>
 <span class="covered" title="9 out of 9 forms covered">
-                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;acc-map&nbsp;td&nbsp;(new-index&nbsp;(vals&nbsp;acc-map)))))
+                154&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assoc&nbsp;acc-map&nbsp;td&nbsp;(new-index&nbsp;(vals&nbsp;acc-map)))))
                 </span><br/>
 <span class="covered" title="2 out of 2 forms covered">
-                177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs&nbsp;transition-labels))
+                155&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs&nbsp;transition-labels))
                 </span><br/>
 <span class="partial" title="5 out of 16 forms covered">
-                178&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;(assert&nbsp;(map?&nbsp;abbrevs)&nbsp;&quot;failed&nbsp;map?&nbsp;line&nbsp;178&quot;)
+                156&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;(assert&nbsp;(map?&nbsp;abbrevs)&nbsp;&quot;failed&nbsp;map?&nbsp;line&nbsp;178&quot;)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;labels&nbsp;(clojure.set&#x2F;map-invert&nbsp;abbrevs)
+                157&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;labels&nbsp;(clojure.set&#x2F;map-invert&nbsp;abbrevs)
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                180&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepting-states&nbsp;(filter&nbsp;:accepting&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa))
+                158&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepting-states&nbsp;(filter&nbsp;:accepting&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa))
                 </span><br/>
 <span class="covered" title="9 out of 9 forms covered">
-                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-final-function&nbsp;(every?&nbsp;(fn&nbsp;dot-181&nbsp;[q]&nbsp;(fn?&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)))
+                159&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-final-function&nbsp;(every?&nbsp;(fn&nbsp;dot-181&nbsp;[q]&nbsp;(fn?&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)))
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepting-states)
+                160&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepting-states)
                 </span><br/>
 <span class="covered" title="2 out of 2 forms covered">
-                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function-table&nbsp;(if&nbsp;all-final-function
+                161&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function-table&nbsp;(if&nbsp;all-final-function
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;{}
+                162&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(into&nbsp;{}
                 </span><br/>
 <span class="partial" title="15 out of 29 forms covered">
-                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[q&nbsp;accepting-states]
+                163&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[q&nbsp;accepting-states]
                 </span><br/>
 <span class="not-covered" title="0 out of 11 forms covered">
-                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)&nbsp;(format&nbsp;&quot;fn-%d&quot;&nbsp;(:index&nbsp;q))])))
+                164&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)&nbsp;(format&nbsp;&quot;fn-%d&quot;&nbsp;(:index&nbsp;q))])))
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state-text&nbsp;(fn&nbsp;dot-187&nbsp;[q]&nbsp;
+                165&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state-text&nbsp;(fn&nbsp;dot-187&nbsp;[q]&nbsp;
                 </span><br/>
 <span class="covered" title="15 out of 15 forms covered">
-                188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-out-str
+                166&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-out-str
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;[&quot;)
+                167&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;[&quot;)
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
-                190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:accepting&nbsp;q)
+                168&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:accepting&nbsp;q)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;shape=doublecircle,&quot;))
+                169&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;shape=doublecircle,&quot;))
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;label=\&quot;q%d&quot;&nbsp;(:index&nbsp;q))
+                170&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;label=\&quot;q%d&quot;&nbsp;(:index&nbsp;q))
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
-                193&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:description&nbsp;q)
+                171&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:description&nbsp;q)
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;%s&quot;&nbsp;(:description&nbsp;q)))
+                172&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;%s&quot;&nbsp;(:description&nbsp;q)))
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;\&quot;&quot;)
+                173&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;\&quot;&quot;)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                196&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;]&quot;)))
+                174&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;]&quot;)))
                 </span><br/>
 <span class="covered" title="9 out of 9 forms covered">
-                197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-final-true&nbsp;(every?&nbsp;(fn&nbsp;dot-197&nbsp;[q]&nbsp;(=&nbsp;true&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)))
+                175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-final-true&nbsp;(every?&nbsp;(fn&nbsp;dot-197&nbsp;[q]&nbsp;(=&nbsp;true&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)))
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepting-states)]
+                176&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accepting-states)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                199&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:report-labels&nbsp;false
+                177&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:report-labels&nbsp;false
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                200&nbsp;&nbsp;
+                178&nbsp;&nbsp;
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                201&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;report-labels
+                179&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;report-labels
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;+---------------------------------\n&quot;)
+                180&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;+---------------------------------\n&quot;)
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
-                203&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;|Transitions&nbsp;labels&nbsp;for&nbsp;%s&nbsp;%s\n&quot;&nbsp;prefix&nbsp;title)
+                181&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;|Transitions&nbsp;labels&nbsp;for&nbsp;%s&nbsp;%s\n&quot;&nbsp;prefix&nbsp;title)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;+---------------------------------\n&quot;)
+                182&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;+---------------------------------\n&quot;)
                 </span><br/>
 <span class="partial" title="32 out of 37 forms covered">
-                205&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[td&nbsp;idx]&nbsp;(sort-by&nbsp;second&nbsp;(into&nbsp;[]&nbsp;abbrevs))]
+                183&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[td&nbsp;idx]&nbsp;(sort-by&nbsp;second&nbsp;(into&nbsp;[]&nbsp;abbrevs))]
                 </span><br/>
 <span class="partial" title="4 out of 8 forms covered">
-                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t%d=&nbsp;&quot;idx)
+                184&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t%d=&nbsp;&quot;idx)
                 </span><br/>
 <span class="partial" title="5 out of 10 forms covered">
-                207&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint-indent&nbsp;td&nbsp;:indent&nbsp;&quot;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;))
+                185&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pprint-indent&nbsp;td&nbsp;:indent&nbsp;&quot;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;))
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;+---------------------------------\n&quot;))
+                186&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;+---------------------------------\n&quot;))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                209&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                187&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;print&nbsp;here
+                188&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;print&nbsp;here
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not&nbsp;state-legend)
+                189&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(not&nbsp;state-legend)
                 </span><br/>
 <span class="not-covered" title="0 out of 31 forms covered">
-                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[q&nbsp;visible-states
+                190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[q&nbsp;visible-states
                 </span><br/>
 <span class="not-covered" title="0 out of 4 forms covered">
-                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(boolean&nbsp;(:pattern&nbsp;q))]
+                191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(boolean&nbsp;(:pattern&nbsp;q))]
                 </span><br/>
 <span class="not-covered" title="0 out of 4 forms covered">
-                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;true&nbsp;&quot;q~a=&nbsp;~a&quot;
+                192&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;true&nbsp;&quot;q~a=&nbsp;~a&quot;
                 </span><br/>
 <span class="not-covered" title="0 out of 9 forms covered">
-                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(line-wrap&nbsp;(:pattern&nbsp;q)&nbsp;right-margin))
+                193&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(line-wrap&nbsp;(:pattern&nbsp;q)&nbsp;right-margin))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))
+                194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))
                 </span><br/>
 <span class="partial" title="5 out of 16 forms covered">
-                217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(map?&nbsp;abbrevs)&nbsp;&quot;line&nbsp;212&quot;)
+                195&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(assert&nbsp;(map?&nbsp;abbrevs)&nbsp;&quot;line&nbsp;212&quot;)
                 </span><br/>
 <span class="covered" title="16 out of 16 forms covered">
-                218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(with-out-str
+                196&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(with-out-str
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                219&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;digraph&nbsp;G&nbsp;{~%&quot;)
+                197&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;digraph&nbsp;G&nbsp;{~%&quot;)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;title
+                198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;title
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
-                221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&#x2F;&#x2F;&nbsp;~a~%&quot;&nbsp;title))
+                199&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&#x2F;&#x2F;&nbsp;~a~%&quot;&nbsp;title))
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;rankdir=LR;~%&quot;)
+                200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;rankdir=LR;~%&quot;)
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;fontname=courier;~%&quot;)
+                201&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;fontname=courier;~%&quot;)
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;abbrev
+                202&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;abbrev
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;label=\&quot;~a\\l\&quot;~%&quot;
+                203&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;label=\&quot;~a\\l\&quot;~%&quot;
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                226&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&#x2F;replace
+                204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&#x2F;replace
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                227&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&#x2F;join
+                205&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&#x2F;join
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                228&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&quot;&nbsp;(concat&nbsp;(if&nbsp;type-legend
+                206&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&quot;&nbsp;(concat&nbsp;(if&nbsp;type-legend
                 </span><br/>
 <span class="covered" title="3 out of 3 forms covered">
-                229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(mapcat&nbsp;(fn&nbsp;dot-229&nbsp;[index]
+                207&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(mapcat&nbsp;(fn&nbsp;dot-229&nbsp;[index]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;only&nbsp;if&nbsp;the&nbsp;label&nbsp;actually&nbsp;exists&nbsp;in&nbsp;dfa
+                208&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;only&nbsp;if&nbsp;the&nbsp;label&nbsp;actually&nbsp;exists&nbsp;in&nbsp;dfa
                 </span><br/>
 <span class="covered" title="7 out of 7 forms covered">
-                231&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(member&nbsp;(labels&nbsp;index)&nbsp;transition-labels)
+                209&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(member&nbsp;(labels&nbsp;index)&nbsp;transition-labels)
                 </span><br/>
 <span class="covered" title="5 out of 5 forms covered">
-                232&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(cl-format&nbsp;false&nbsp;&quot;\\lt~a=&nbsp;~a&quot;
+                210&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(cl-format&nbsp;false&nbsp;&quot;\\lt~a=&nbsp;~a&quot;
                 </span><br/>
 <span class="covered" title="7 out of 7 forms covered">
-                233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;(line-wrap&nbsp;(labels&nbsp;index)&nbsp;right-margin))]
+                211&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;(line-wrap&nbsp;(labels&nbsp;index)&nbsp;right-margin))]
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                234&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]))
+                212&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]))
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                235&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;(count&nbsp;(keys&nbsp;labels))))
+                213&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(range&nbsp;(count&nbsp;(keys&nbsp;labels))))
                 </span><br/>
 <span class="not-covered" title="0 out of 2 forms covered">
-                236&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;&quot;])
+                214&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;&quot;])
                 </span><br/>
 <span class="covered" title="2 out of 2 forms covered">
-                237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;\\l&quot;]
+                215&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&quot;\\l&quot;]
                 </span><br/>
 <span class="covered" title="31 out of 31 forms covered">
-                238&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[q&nbsp;visible-states
+                216&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[q&nbsp;visible-states
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                239&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(boolean&nbsp;(:pattern&nbsp;q))]
+                217&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(boolean&nbsp;(:pattern&nbsp;q))]
                 </span><br/>
 <span class="partial" title="2 out of 3 forms covered">
-                240&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;state-legend
+                218&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;state-legend
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;\\lq~a=&nbsp;~a&quot;
+                219&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;\\lq~a=&nbsp;~a&quot;
                 </span><br/>
 <span class="covered" title="9 out of 9 forms covered">
-                242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(line-wrap&nbsp;(:pattern&nbsp;q)&nbsp;right-margin))
+                220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(line-wrap&nbsp;(:pattern&nbsp;q)&nbsp;right-margin))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&quot;))))
+                221&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&quot;))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                244&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;\&quot;&quot;&nbsp;&quot;\\\&quot;&quot;)))
+                222&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;\&quot;&quot;&nbsp;&quot;\\\&quot;&quot;)))
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;graph&nbsp;[labeljust=l,nojustify=true];~%&quot;)
+                223&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;graph&nbsp;[labeljust=l,nojustify=true];~%&quot;)
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                246&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;node&nbsp;[fontname=Arial,&nbsp;fontsize=25];~%&quot;)
+                224&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;node&nbsp;[fontname=Arial,&nbsp;fontsize=25];~%&quot;)
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                247&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;edge&nbsp;[fontname=Helvetica,&nbsp;fontsize=20];~%&quot;)
+                225&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;edge&nbsp;[fontname=Helvetica,&nbsp;fontsize=20];~%&quot;)
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                248&nbsp;&nbsp;
+                226&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                249&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                227&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="28 out of 33 forms covered">
-                250&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[q&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa)]
+                228&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[q&nbsp;(xym&#x2F;states-as-seq&nbsp;dfa)]
                 </span><br/>
 <span class="partial" title="5 out of 10 forms covered">
-                251&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl&#x2F;cl-cond
+                229&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl&#x2F;cl-cond
                 </span><br/>
 <span class="partial" title="9 out of 18 forms covered">
-                252&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((and&nbsp;(member&nbsp;q&nbsp;sink-states)
+                230&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((and&nbsp;(member&nbsp;q&nbsp;sink-states)
                 </span><br/>
 <span class="partial" title="2 out of 4 forms covered">
-                253&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;draw-sink)))
+                231&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;draw-sink)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                254&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:else
+                232&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:else
                 </span><br/>
 <span class="partial" title="9 out of 18 forms covered">
-                255&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;&nbsp;&nbsp;&nbsp;q%d&nbsp;%s&nbsp;;\n&quot;&nbsp;(:index&nbsp;q)&nbsp;(state-text&nbsp;q))
+                233&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(printf&nbsp;&quot;&nbsp;&nbsp;&nbsp;q%d&nbsp;%s&nbsp;;\n&quot;&nbsp;(:index&nbsp;q)&nbsp;(state-text&nbsp;q))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                256&nbsp;&nbsp;
+                234&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="5 out of 10 forms covered">
-                257&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:accepting&nbsp;q)
+                235&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:accepting&nbsp;q)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                258&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;all&nbsp;exit&nbsp;values&nbsp;are&nbsp;explicitly&nbsp;true,&nbsp;the&nbsp;don&#x27;t&nbsp;draw
+                236&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;all&nbsp;exit&nbsp;values&nbsp;are&nbsp;explicitly&nbsp;true,&nbsp;the&nbsp;don&#x27;t&nbsp;draw
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                259&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;any&nbsp;exit&nbsp;arrows.
+                237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;any&nbsp;exit&nbsp;arrows.
                 </span><br/>
 <span class="partial" title="6 out of 14 forms covered">
-                260&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;all-final-true
+                238&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond&nbsp;all-final-true
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                261&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil
+                239&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                262&nbsp;&nbsp;
+                240&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="1 out of 2 forms covered">
-                263&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-final-function
+                241&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all-final-function
                 </span><br/>
 <span class="not-covered" title="0 out of 22 forms covered">
-                264&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;q~D&nbsp;-&gt;&nbsp;X~D&nbsp;;~%&quot;&nbsp;(:index&nbsp;q)&nbsp;(:index&nbsp;q))
+                242&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;q~D&nbsp;-&gt;&nbsp;X~D&nbsp;;~%&quot;&nbsp;(:index&nbsp;q)&nbsp;(:index&nbsp;q))
                 </span><br/>
 <span class="not-covered" title="0 out of 8 forms covered">
-                265&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;X~D&nbsp;[label=\&quot;~A\&quot;,&nbsp;shape=rarrow]~%&quot;
+                243&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;X~D&nbsp;[label=\&quot;~A\&quot;,&nbsp;shape=rarrow]~%&quot;
                 </span><br/>
 <span class="not-covered" title="0 out of 18 forms covered">
-                266&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(function-table&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q))))
+                244&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(function-table&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q))))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                267&nbsp;&nbsp;
+                245&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                268&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:otherwise
+                246&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:otherwise
                 </span><br/>
 <span class="partial" title="11 out of 22 forms covered">
-                269&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;q~D&nbsp;-&gt;&nbsp;X~D&nbsp;;~%&quot;&nbsp;(:index&nbsp;q)&nbsp;(:index&nbsp;q))
+                247&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;q~D&nbsp;-&gt;&nbsp;X~D&nbsp;;~%&quot;&nbsp;(:index&nbsp;q)&nbsp;(:index&nbsp;q))
                 </span><br/>
 <span class="partial" title="4 out of 8 forms covered">
-                270&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;X~D&nbsp;[label=\&quot;~A\&quot;,&nbsp;shape=rarrow]~%&quot;&nbsp;;;&nbsp;or&nbsp;plaintext&nbsp;?
+                248&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;X~D&nbsp;[label=\&quot;~A\&quot;,&nbsp;shape=rarrow]~%&quot;&nbsp;;;&nbsp;or&nbsp;plaintext&nbsp;?
                 </span><br/>
 <span class="partial" title="7 out of 14 forms covered">
-                271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)))))
+                249&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;(xym&#x2F;exit-value&nbsp;dfa&nbsp;q)))))
                 </span><br/>
 <span class="partial" title="5 out of 10 forms covered">
-                272&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:initial&nbsp;q)
+                250&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;(:initial&nbsp;q)
                 </span><br/>
 <span class="partial" title="7 out of 14 forms covered">
-                273&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;H~D&nbsp;[label=\&quot;\&quot;,&nbsp;style=invis,&nbsp;width=0]~%&quot;&nbsp;(:index&nbsp;q))
+                251&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;H~D&nbsp;[label=\&quot;\&quot;,&nbsp;style=invis,&nbsp;width=0]~%&quot;&nbsp;(:index&nbsp;q))
                 </span><br/>
 <span class="partial" title="10 out of 20 forms covered">
-                274&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;H~D&nbsp;-&gt;&nbsp;q~D;~%&quot;&nbsp;(:index&nbsp;q)&nbsp;(:index&nbsp;q)))
+                252&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;H~D&nbsp;-&gt;&nbsp;q~D;~%&quot;&nbsp;(:index&nbsp;q)&nbsp;(:index&nbsp;q)))
                 </span><br/>
 <span class="partial" title="32 out of 76 forms covered">
-                275&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[next-state&nbsp;transitions]&nbsp;(group-by&nbsp;second&nbsp;(:transitions&nbsp;q))
+                253&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[[next-state&nbsp;transitions]&nbsp;(group-by&nbsp;second&nbsp;(:transitions&nbsp;q))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                276&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;there&nbsp;are&nbsp;parallel&nbsp;transitions,&nbsp;print&nbsp;them&nbsp;seperated&nbsp;by&nbsp;comma
+                254&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;if&nbsp;there&nbsp;are&nbsp;parallel&nbsp;transitions,&nbsp;print&nbsp;them&nbsp;seperated&nbsp;by&nbsp;comma
                 </span><br/>
 <span class="partial" title="4 out of 16 forms covered">
-                277&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[type-desigs&nbsp;(map&nbsp;first&nbsp;transitions)
+                255&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[type-desigs&nbsp;(map&nbsp;first&nbsp;transitions)
                 </span><br/>
 <span class="partial" title="2 out of 8 forms covered">
-                278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;labels&nbsp;(if&nbsp;abbrev
+                256&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;labels&nbsp;(if&nbsp;abbrev
                 </span><br/>
 <span class="partial" title="29 out of 116 forms covered">
-                279&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[td&nbsp;type-desigs]
+                257&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[td&nbsp;type-desigs]
                 </span><br/>
 <span class="partial" title="7 out of 28 forms covered">
-                280&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;t~a&quot;&nbsp;(abbrevs&nbsp;td)))
+                258&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;t~a&quot;&nbsp;(abbrevs&nbsp;td)))
                 </span><br/>
 <span class="not-covered" title="0 out of 4 forms covered">
-                281&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type-desigs)
+                259&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type-desigs)
                 </span><br/>
 <span class="partial" title="4 out of 16 forms covered">
-                282&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;(str&#x2F;join&nbsp;&quot;,&quot;&nbsp;labels)
+                260&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;(str&#x2F;join&nbsp;&quot;,&quot;&nbsp;labels)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                283&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;draw&nbsp;indeterminate&nbsp;transitions&nbsp;as&nbsp;dashed&nbsp;lines
+                261&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;draw&nbsp;indeterminate&nbsp;transitions&nbsp;as&nbsp;dashed&nbsp;lines
                 </span><br/>
 <span class="partial" title="11 out of 44 forms covered">
-                284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inh-text&nbsp;(if&nbsp;(some&nbsp;(fn&nbsp;dot-284&nbsp;[td]&nbsp;(gns&#x2F;inhabited?&nbsp;td&nbsp;false))&nbsp;type-desigs)
+                262&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inh-text&nbsp;(if&nbsp;(some&nbsp;(fn&nbsp;dot-284&nbsp;[td]&nbsp;(gns&#x2F;inhabited?&nbsp;td&nbsp;false))&nbsp;type-desigs)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                285&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&quot;
+                263&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                286&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;,style=dashed&quot;)
+                264&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;,style=dashed&quot;)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                287&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]
+                265&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]
                 </span><br/>
 <span class="partial" title="5 out of 20 forms covered">
-                288&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl&#x2F;cl-cond
+                266&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl&#x2F;cl-cond
                 </span><br/>
 <span class="partial" title="12 out of 48 forms covered">
-                289&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((and&nbsp;(member&nbsp;(xym&#x2F;state-by-index&nbsp;dfa&nbsp;next-state)&nbsp;sink-states)
+                267&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((and&nbsp;(member&nbsp;(xym&#x2F;state-by-index&nbsp;dfa&nbsp;next-state)&nbsp;sink-states)
                 </span><br/>
 <span class="partial" title="2 out of 8 forms covered">
-                290&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;draw-sink)))
+                268&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;draw-sink)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                291&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:else
+                269&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:else
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                292&nbsp;&nbsp;
+                270&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="4 out of 16 forms covered">
-                293&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;q~D&nbsp;-&gt;&nbsp;q~D&nbsp;[label=\&quot;~a\&quot;~a];~%&quot;
+                271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;&nbsp;q~D&nbsp;-&gt;&nbsp;q~D&nbsp;[label=\&quot;~a\&quot;~a];~%&quot;
                 </span><br/>
 <span class="partial" title="6 out of 24 forms covered">
-                294&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;next-state&nbsp;label&nbsp;inh-text)))))))
+                272&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:index&nbsp;q)&nbsp;next-state&nbsp;label&nbsp;inh-text)))))))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                295&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                273&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="covered" title="4 out of 4 forms covered">
-                296&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;}~%&quot;))
+                274&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;}~%&quot;))
                 </span><br/>
 <span class="covered" title="1 out of 1 forms covered">
-                297&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs])))
+                275&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs])))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                298&nbsp;&nbsp;
+                276&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="18 out of 43 forms covered">
-                299&nbsp;&nbsp;(jdefn&nbsp;dfa-view&nbsp;
+                277&nbsp;&nbsp;(jdefn&nbsp;dfa-view&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                300&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Draw&nbsp;a&nbsp;dfa&nbsp;graphically&nbsp;using&nbsp;`dfa-to-dot`&nbsp;returning&nbsp;a&nbsp;vector&nbsp;[&nbsp;...&nbsp;abbrevs]
+                278&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Draw&nbsp;a&nbsp;dfa&nbsp;graphically&nbsp;using&nbsp;`dfa-to-dot`&nbsp;returning&nbsp;a&nbsp;vector&nbsp;[&nbsp;...&nbsp;abbrevs]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                301&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs&nbsp;maps&nbsp;types&nbsp;to&nbsp;abbreviation.
+                279&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abbrevs&nbsp;maps&nbsp;types&nbsp;to&nbsp;abbreviation.
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;map&nbsp;is&nbsp;an&nbsp;extension&nbsp;of&nbsp;the&nbsp;given&nbsp;abbrevs&nbsp;map.&quot;
+                280&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;map&nbsp;is&nbsp;an&nbsp;extension&nbsp;of&nbsp;the&nbsp;given&nbsp;abbrevs&nbsp;map.&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                303&nbsp;&nbsp;&nbsp;&nbsp;[dfa&nbsp;title&nbsp;&amp;&nbsp;{:keys&nbsp;[abbrevs&nbsp;draw-sink&nbsp;report-labels&nbsp;dir]
+                281&nbsp;&nbsp;&nbsp;&nbsp;[dfa&nbsp;title&nbsp;&amp;&nbsp;{:keys&nbsp;[abbrevs&nbsp;draw-sink&nbsp;report-labels&nbsp;dir]
                 </span><br/>
 <span class="partial" title="16 out of 24 forms covered">
-                304&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:abbrevs&nbsp;{}
+                282&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:abbrevs&nbsp;{}
                 </span><br/>
 <span class="partial" title="4 out of 6 forms covered">
-                305&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dir&nbsp;(ensure-directory
+                283&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:dir&nbsp;(ensure-directory
                 </span><br/>
 <span class="partial" title="12 out of 18 forms covered">
-                306&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
+                284&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str&nbsp;&quot;&#x2F;tmp&#x2F;&quot;&nbsp;(System&#x2F;getProperty&nbsp;&quot;user.name&quot;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                307&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:report-labels&nbsp;true
+                285&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:report-labels&nbsp;true
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                308&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-sink&nbsp;false}
+                286&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-sink&nbsp;false}
                 </span><br/>
 <span class="partial" title="3 out of 4 forms covered">
-                309&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;opts}]
+                287&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;opts}]
                 </span><br/>
 <span class="covered" title="6 out of 6 forms covered">
-                310&nbsp;&nbsp;&nbsp;&nbsp;{:post&nbsp;[((wrap&nbsp;vector?&nbsp;303)&nbsp;%)]}
+                288&nbsp;&nbsp;&nbsp;&nbsp;{:post&nbsp;[((wrap&nbsp;vector?&nbsp;303)&nbsp;%)]}
                 </span><br/>
 <span class="covered" title="8 out of 8 forms covered">
-                311&nbsp;&nbsp;&nbsp;&nbsp;(dfa-to-dot&nbsp;dfa&nbsp;(assoc&nbsp;opts&nbsp;:view&nbsp;true)))
+                289&nbsp;&nbsp;&nbsp;&nbsp;(dfa-to-dot&nbsp;dfa&nbsp;(assoc&nbsp;opts&nbsp;:view&nbsp;true)))
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                312&nbsp;&nbsp;
+                290&nbsp;&nbsp;
                 </span><br/>
 <span class="partial" title="1 out of 43 forms covered">
-                313&nbsp;&nbsp;(jdefn&nbsp;bdd-to-dot&nbsp;
+                291&nbsp;&nbsp;(jdefn&nbsp;bdd-to-dot&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                314&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;(and&nbsp;possibly&nbsp;display)&nbsp;a&nbsp;graphical&nbsp;image&nbsp;rendering&nbsp;the&nbsp;given&nbsp;Bdd
+                292&nbsp;&nbsp;&nbsp;&nbsp;&quot;Create&nbsp;(and&nbsp;possibly&nbsp;display)&nbsp;a&nbsp;graphical&nbsp;image&nbsp;rendering&nbsp;the&nbsp;given&nbsp;Bdd
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                315&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;Mac&nbsp;OS,&nbsp;the&nbsp;:view&nbsp;option&nbsp;may&nbsp;be&nbsp;used&nbsp;to&nbsp;display&nbsp;the&nbsp;image
+                293&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;Mac&nbsp;OS,&nbsp;the&nbsp;:view&nbsp;option&nbsp;may&nbsp;be&nbsp;used&nbsp;to&nbsp;display&nbsp;the&nbsp;image
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                316&nbsp;&nbsp;&nbsp;&nbsp;interactively.&quot;
+                294&nbsp;&nbsp;&nbsp;&nbsp;interactively.&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                317&nbsp;&nbsp;&nbsp;&nbsp;[bdd&nbsp;&amp;&nbsp;{:keys&nbsp;[title&nbsp;view&nbsp;pen-width&nbsp;draw-false-leaf]
+                295&nbsp;&nbsp;&nbsp;&nbsp;[bdd&nbsp;&amp;&nbsp;{:keys&nbsp;[title&nbsp;view&nbsp;pen-width&nbsp;draw-false-leaf]
                 </span><br/>
 <span class="not-covered" title="0 out of 4 forms covered">
-                318&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;all-optionals
+                296&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:as&nbsp;all-optionals
                 </span><br/>
 <span class="not-covered" title="0 out of 27 forms covered">
-                319&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:title&nbsp;&quot;no-title&quot;
+                297&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:defaults&nbsp;{:title&nbsp;&quot;no-title&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                320&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;false
+                298&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                321&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:pen-width&nbsp;2
+                299&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:pen-width&nbsp;2
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                322&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-false-leaf&nbsp;true}}]
+                300&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-false-leaf&nbsp;true}}]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                323&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                301&nbsp;&nbsp;&nbsp;&nbsp;(cond
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                324&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view&nbsp;(let&nbsp;[dot-string&nbsp;(bdd-to-dot&nbsp;bdd
+                302&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view&nbsp;(let&nbsp;[dot-string&nbsp;(bdd-to-dot&nbsp;bdd
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                325&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:title&nbsp;title
+                303&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:title&nbsp;title
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                326&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;false
+                304&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:view&nbsp;false
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                327&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:pen-width&nbsp;pen-width
+                305&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:pen-width&nbsp;pen-width
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                328&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-false-leaf&nbsp;draw-false-leaf)]
+                306&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:draw-false-leaf&nbsp;draw-false-leaf)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                329&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot-view&nbsp;dot-string&nbsp;all-optionals))
+                307&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(dot-view&nbsp;dot-string&nbsp;all-optionals))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                330&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
+                308&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:else
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                331&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(draw-connection&nbsp;[direction&nbsp;bdd&nbsp;node-to-index]
+                309&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(letfn&nbsp;[(draw-connection&nbsp;[direction&nbsp;bdd&nbsp;node-to-index]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                332&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                310&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                333&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(not&nbsp;draw-false-leaf)
+                311&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;(not&nbsp;draw-false-leaf)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                334&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(direction&nbsp;bdd)&nbsp;false))
+                312&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;(direction&nbsp;bdd)&nbsp;false))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                335&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil
-                </span><br/>
-<span class="blank" title="0 out of 0 forms covered">
-                336&nbsp;&nbsp;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                337&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:positive&nbsp;direction)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                338&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;-&gt;&nbsp;~D&nbsp;[style=~A,color=~A,penwidth=~D]~%&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                339&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;bdd)&nbsp;(node-to-index&nbsp;(direction&nbsp;bdd))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                340&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;solid&quot;&nbsp;&quot;green&quot;&nbsp;pen-width)
+                313&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                341&nbsp;&nbsp;
+                314&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                342&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:negative&nbsp;direction)
+                315&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:positive&nbsp;direction)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                343&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;-&gt;&nbsp;~D&nbsp;[style=~A,color=~A,penwidth=~D,arrowhead=~s,arrowtail=~s,dir=~s]~%&quot;
+                316&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;-&gt;&nbsp;~D&nbsp;[style=~A,color=~A,penwidth=~D]~%&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                344&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;bdd)&nbsp;(node-to-index&nbsp;(direction&nbsp;bdd))
+                317&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;bdd)&nbsp;(node-to-index&nbsp;(direction&nbsp;bdd))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                345&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;dashed&quot;&nbsp;&quot;red&quot;&nbsp;pen-width&nbsp;&quot;normal&quot;&nbsp;&quot;odot&quot;&nbsp;&quot;both&quot;)))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                346&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                347&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;[leaf&nbsp;node-to-index]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                348&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                349&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;leaf)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                350&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;[shape=~A,label=~S,fontname=~S]~%&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                351&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;leaf)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                352&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;box&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                353&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;T&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                354&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;sans-serif&quot;)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                355&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;leaf)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                356&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;draw-false-leaf
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                357&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;[shape=~A,label=~S]~%&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                358&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;leaf)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                359&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;box&quot;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                360&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&amp;perp;&quot;))))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                361&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                362&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(top-sort&nbsp;[groups]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                363&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;find&nbsp;all&nbsp;the&nbsp;labels&nbsp;which&nbsp;no&nbsp;bdd&nbsp;references,
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                364&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;these&nbsp;are&nbsp;the&nbsp;independent&nbsp;nodes.
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                365&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(loop&nbsp;[labels&nbsp;(set&nbsp;(keys&nbsp;groups))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                366&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups&nbsp;groups
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                367&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acc&nbsp;[]]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                368&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;labels)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                369&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acc
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                370&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[referenced-labels&nbsp;(set&nbsp;(for&nbsp;[[_label&nbsp;seq]&nbsp;groups
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                371&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd&nbsp;seq
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                372&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;direction&nbsp;&#x27;(:positive&nbsp;:negative)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                373&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[child&nbsp;(direction&nbsp;bdd)]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                374&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(not&nbsp;(boolean?&nbsp;child))]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                375&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:label&nbsp;child)))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                376&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unreferenced-labels&nbsp;(clojure.set&#x2F;difference&nbsp;labels&nbsp;referenced-labels)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                377&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                378&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;referenced-labels
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                379&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply&nbsp;dissoc&nbsp;groups&nbsp;unreferenced-labels)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                380&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;acc&nbsp;unreferenced-labels))))))]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                381&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-out-str
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                382&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;digraph&nbsp;G&nbsp;{~%&quot;)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                383&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;title
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                384&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&#x2F;&#x2F;&nbsp;~a~%&quot;&nbsp;title))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                385&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;fontname=courier;~%&quot;)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                386&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[all-nodes&nbsp;(set&nbsp;(tree-seq&nbsp;(fn&nbsp;[node]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                387&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;(member&nbsp;node&nbsp;&#x27;(true&nbsp;false))))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                388&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[bdd]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                389&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[child&nbsp;&#x27;(:positive&nbsp;:negative)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                390&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(or&nbsp;draw-false-leaf
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                391&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(child&nbsp;bdd))]
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                392&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(child&nbsp;bdd)))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                393&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                394&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node-to-index&nbsp;(zipmap&nbsp;all-nodes&nbsp;(range))
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                395&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;apex-node&nbsp;(first&nbsp;all-nodes)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                396&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;leaf-nodes&nbsp;(clojure.set&#x2F;intersection&nbsp;#{true&nbsp;false}&nbsp;all-nodes)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                397&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;internal-nodes&nbsp;(clojure.set&#x2F;difference&nbsp;all-nodes&nbsp;leaf-nodes)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                398&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups&nbsp;(group-by&nbsp;:label&nbsp;internal-nodes)
-                </span><br/>
-<span class="not-tracked" title="0 out of 0 forms covered">
-                399&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sorted-labels&nbsp;(top-sort&nbsp;groups)]
+                318&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;solid&quot;&nbsp;&quot;green&quot;&nbsp;pen-width)
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                400&nbsp;&nbsp;
+                319&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                320&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;:negative&nbsp;direction)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                321&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;-&gt;&nbsp;~D&nbsp;[style=~A,color=~A,penwidth=~D,arrowhead=~s,arrowtail=~s,dir=~s]~%&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                322&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;bdd)&nbsp;(node-to-index&nbsp;(direction&nbsp;bdd))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                323&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;dashed&quot;&nbsp;&quot;red&quot;&nbsp;pen-width&nbsp;&quot;normal&quot;&nbsp;&quot;odot&quot;&nbsp;&quot;both&quot;)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                324&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                325&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;[leaf&nbsp;node-to-index]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                326&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cond
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                327&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;true&nbsp;leaf)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                328&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;[shape=~A,label=~S,fontname=~S]~%&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                329&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;leaf)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                330&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;box&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                331&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;T&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                332&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;sans-serif&quot;)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                333&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(=&nbsp;false&nbsp;leaf)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                334&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;draw-false-leaf
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                335&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;[shape=~A,label=~S]~%&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                336&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;leaf)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                337&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;box&quot;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                338&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;&amp;perp;&quot;))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                339&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                340&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(top-sort&nbsp;[groups]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                341&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;find&nbsp;all&nbsp;the&nbsp;labels&nbsp;which&nbsp;no&nbsp;bdd&nbsp;references,
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                342&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;;&nbsp;these&nbsp;are&nbsp;the&nbsp;independent&nbsp;nodes.
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                343&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(loop&nbsp;[labels&nbsp;(set&nbsp;(keys&nbsp;groups))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                344&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups&nbsp;groups
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                345&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acc&nbsp;[]]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                346&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(empty?&nbsp;labels)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                347&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acc
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                348&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[referenced-labels&nbsp;(set&nbsp;(for&nbsp;[[_label&nbsp;seq]&nbsp;groups
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                349&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd&nbsp;seq
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                350&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;direction&nbsp;&#x27;(:positive&nbsp;:negative)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                351&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:let&nbsp;[child&nbsp;(direction&nbsp;bdd)]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                352&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(not&nbsp;(boolean?&nbsp;child))]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                353&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(:label&nbsp;child)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                354&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unreferenced-labels&nbsp;(clojure.set&#x2F;difference&nbsp;labels&nbsp;referenced-labels)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                355&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                356&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(recur&nbsp;referenced-labels
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                357&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply&nbsp;dissoc&nbsp;groups&nbsp;unreferenced-labels)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                358&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(concat&nbsp;acc&nbsp;unreferenced-labels))))))]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                359&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with-out-str
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                360&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;digraph&nbsp;G&nbsp;{~%&quot;)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                361&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(when&nbsp;title
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                362&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&#x2F;&#x2F;&nbsp;~a~%&quot;&nbsp;title))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                363&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;&nbsp;fontname=courier;~%&quot;)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                364&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(let&nbsp;[all-nodes&nbsp;(set&nbsp;(tree-seq&nbsp;(fn&nbsp;[node]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                365&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;(member&nbsp;node&nbsp;&#x27;(true&nbsp;false))))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                366&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fn&nbsp;[bdd]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                367&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for&nbsp;[child&nbsp;&#x27;(:positive&nbsp;:negative)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                368&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:when&nbsp;(or&nbsp;draw-false-leaf
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                369&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(child&nbsp;bdd))]
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                370&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(child&nbsp;bdd)))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                371&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bdd))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                372&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node-to-index&nbsp;(zipmap&nbsp;all-nodes&nbsp;(range))
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                373&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;apex-node&nbsp;(first&nbsp;all-nodes)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                374&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;leaf-nodes&nbsp;(clojure.set&#x2F;intersection&nbsp;#{true&nbsp;false}&nbsp;all-nodes)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                375&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;internal-nodes&nbsp;(clojure.set&#x2F;difference&nbsp;all-nodes&nbsp;leaf-nodes)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                376&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups&nbsp;(group-by&nbsp;:label&nbsp;internal-nodes)
+                </span><br/>
+<span class="not-tracked" title="0 out of 0 forms covered">
+                377&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sorted-labels&nbsp;(top-sort&nbsp;groups)]
                 </span><br/>
 <span class="blank" title="0 out of 0 forms covered">
-                401&nbsp;&nbsp;
+                378&nbsp;&nbsp;
+                </span><br/>
+<span class="blank" title="0 out of 0 forms covered">
+                379&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                402&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(member&nbsp;apex-node&nbsp;&#x27;(true&nbsp;false))
+                380&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;(member&nbsp;apex-node&nbsp;&#x27;(true&nbsp;false))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;apex-node&nbsp;node-to-index)&nbsp;;;&nbsp;always&nbsp;draw&nbsp;the&nbsp;leaf&nbsp;if&nbsp;there&#x27;s&nbsp;only&nbsp;one,&nbsp;independent&nbsp;of&nbsp;draw-false-leaf
+                381&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;apex-node&nbsp;node-to-index)&nbsp;;;&nbsp;always&nbsp;draw&nbsp;the&nbsp;leaf&nbsp;if&nbsp;there&#x27;s&nbsp;only&nbsp;one,&nbsp;independent&nbsp;of&nbsp;draw-false-leaf
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                404&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do
+                382&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(do
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                405&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;draw-false-leaf
+                383&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;draw-false-leaf
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                406&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[leaf&nbsp;leaf-nodes]
+                384&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[leaf&nbsp;leaf-nodes]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                407&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;leaf&nbsp;node-to-index))
+                385&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;leaf&nbsp;node-to-index))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                408&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;true&nbsp;node-to-index))
+                386&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(write-leaf&nbsp;true&nbsp;node-to-index))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                409&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[label&nbsp;sorted-labels]
+                387&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[label&nbsp;sorted-labels]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                410&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;{rank=same&quot;)
+                388&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;{rank=same&quot;)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                411&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[bdd&nbsp;(groups&nbsp;label)]
+                389&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[bdd&nbsp;(groups&nbsp;label)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                412&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;~D&quot;&nbsp;(node-to-index&nbsp;bdd)))
+                390&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;&nbsp;~D&quot;&nbsp;(node-to-index&nbsp;bdd)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                413&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;}~%&quot;)
+                391&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;}~%&quot;)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                414&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[bdd&nbsp;(groups&nbsp;label)]
+                392&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(doseq&nbsp;[bdd&nbsp;(groups&nbsp;label)]
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                415&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;[shape=~A,label=~S,penwidth=~D]~%&quot;
+                393&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;~D&nbsp;[shape=~A,label=~S,penwidth=~D]~%&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                416&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;bdd)
+                394&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node-to-index&nbsp;bdd)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                417&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;ellipse&quot;
+                395&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;ellipse&quot;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                418&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;~A&quot;&nbsp;label)
+                396&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;false&nbsp;&quot;~A&quot;&nbsp;label)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                419&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pen-width)
+                397&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pen-width)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                420&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(draw-connection&nbsp;:positive&nbsp;bdd&nbsp;node-to-index&nbsp;)
+                398&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(draw-connection&nbsp;:positive&nbsp;bdd&nbsp;node-to-index&nbsp;)
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                421&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(draw-connection&nbsp;:negative&nbsp;bdd&nbsp;node-to-index&nbsp;)))
+                399&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(draw-connection&nbsp;:negative&nbsp;bdd&nbsp;node-to-index&nbsp;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                422&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                423&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)))
+                401&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)))
                 </span><br/>
 <span class="not-tracked" title="0 out of 0 forms covered">
-                424&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;}~%&quot;)))))
+                402&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cl-format&nbsp;*out*&nbsp;&quot;}~%&quot;)))))
                 </span><br/>
  </body>
 </html>
