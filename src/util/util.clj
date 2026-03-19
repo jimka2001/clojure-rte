@@ -718,6 +718,30 @@
   (into {} (for [[k vs] (group-by f seq)]
              [k (set (map g vs))])))
 
+;; code written by chatgpt
+;; https://chatgpt.com/share/69bbfe67-df4c-800d-967a-6d3ae17336fe
+(defn human-duration-detailed [^java.time.Duration d]
+  (let [s (.getSeconds d)
+        abs-s (Math/abs s)
+        hours (quot abs-s 3600)
+        minutes (quot (mod abs-s 3600) 60)
+        seconds (mod abs-s 60)]
+    (cond-> []
+      (> hours 0)   (conj (str hours "h"))
+      (> minutes 0) (conj (str minutes "m"))
+      (> seconds 0) (conj (str seconds "s"))
+      true          (#(clojure.string/join " " %)))))
+
+(defmacro human-readable-duration
+  "Macro to wrap around a body.  The body of the macro has access to a
+  function, named as first argument, which when called will return a string
+  containing a human readable duration."
+  [f & body]
+  `(let [start# (java.time.LocalDateTime/now)]
+     (letfn [(~f [] (human-duration-detailed
+                     (java.time.Duration/between (java.time.LocalDateTime/now)
+                                                 start#)))]
+     ~@body)))
 
 (defn human-readable-current-time
   "Generate (and return) a string corresponding to the current time in a human-readable form."

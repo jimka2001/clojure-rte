@@ -115,42 +115,51 @@
   [dfa]
   (find-first :initial (states-as-seq dfa) nil))
 
+
 (defn check-dfa
   "assert that no transition references an invalid state"
   [dfa]
   (assert (instance? Dfa dfa))
-  (assert (:combine-labels dfa) (format "missing :combine-labels in Dfa %s" dfa))
-  (assert (map? (:states dfa))  (cl-format false "states must be a map, not a ~A: ~A" (type (:states dfa)) (:states dfa)))
+  (assert (:combine-labels dfa)
+          (format "missing :combine-labels in Dfa %s" dfa))
+  (assert (map? (:states dfa))
+          (cl-format false "states must be a map, not a ~A: ~A" (type (:states dfa)) (:states dfa)))
+  ;;(println [:states (states-as-map dfa)])
+  (doseq [[id q] (states-as-map dfa)]
+    ;; (println :id id :q q)
+    (assert q
+            (cl-format nil "no state ~A in dfa ~A: states are ~A" id dfa (states-as-map dfa)))
+    (assert (instance? State q)
+            (cl-format false "expecting a State, got a ~A, ~A" (type q) q))
+    (assert (:index q)
+            (format "state %s has empty :index" q))
+    (assert (= q (state-by-index dfa (:index q)))
+            (format "state %s disagrees with its index %s" q (:index q)))
+
+    (assert (= (:transitions q)
+               (distinct (:transitions q)))
+            (cl-format false "~A transitions contains a duplicate: ~A"
+                       q (:transitions q)))
+    (doseq [[label-1 dst-1] (:transitions q)
+            [label-2 dst-2] (:transitions q)
+            :when (not (= [label-1 dst-1]
+                          [label-2 dst-2]))]
+      (assert (gns/disjoint? label-1 label-2 true)
+              (cl-format false "overlapping types ~A vs ~A in ~A transitions ~A"
+                         label-1 label-2 q (:transitions q))))
+    (doseq [:let [trans-labels (map first (:transitions q))]
+            [label freq] (frequencies trans-labels)]
+      (assert (= 1 freq)
+              (cl-format false "label ~A appears ~D times in transitions of ~A: transitions=~A"
+                         label freq q (:transitions q)))))
+
   (let [ids (set (ids-as-seq dfa))]
-    (doseq [[id q] (states-as-map dfa)]
-      (assert q (cl-format nil "no state ~A in dfa ~A: states are ~A" id dfa (states-as-map dfa)))
-      (assert (instance? State q) (cl-format false "expecting a State, got a ~A, ~A" (type q) q))
-      (assert (:index q) (format "state %s has empty :index" q))
-      (assert (= q (state-by-index dfa (:index q)))
-              (format "state %s disagrees with its index %s" q (:index q)))
-
-      (assert (= (:transitions q)
-                 (distinct (:transitions q)))
-              (cl-format false "~A transitions contains a duplicate: ~A"
-                         q (:transitions q)))
-      (doseq [[label-1 dst-1] (:transitions q)
-              [label-2 dst-2] (:transitions q)
-              :when (not (= [label-1 dst-1]
-                            [label-2 dst-2]))]
-        (assert (gns/disjoint? label-1 label-2 true)
-                (cl-format false "overlapping types ~A vs ~A in ~A transitions ~A"
-                           label-1 label-2 q (:transitions q))))
-      (doseq [:let [trans-labels (map first (:transitions q))]
-              [label freq] (frequencies trans-labels)]
-        (assert (= 1 freq)
-                (cl-format false "label ~A appears ~D times in transitions of ~A: transitions=~A"
-                           label freq q (:transitions q)))))
-
     (doseq [q (states-as-seq dfa)
             [label dst-id] (:transitions q)]
-      (assert (member dst-id ids) (format "transition %s leads to invalid state: states are %s"
-                                          [label dst-id]
-                                          ids)))
+      (assert (member dst-id ids)
+              (format "transition %s leads to invalid state: states are %s"
+                      [label dst-id]
+                      ids)))
     dfa))
 
 (defn check-dfa-map [& {:keys [pattern canonicalized states exit-map combine-labels]

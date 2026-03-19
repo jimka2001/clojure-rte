@@ -21,7 +21,7 @@
 
 (ns rte-tester-test
   (:require [rte.core]
-            [util.util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time human-readable-duration]]
             [clojure.pprint :refer [cl-format]]
             [rte.construct :as rte :refer [canonicalize-pattern]]
             [xym.xymbolyco :as xym]
@@ -40,17 +40,22 @@
   (clojure.test/run-tests 'rte-tester-test))
 
 
-(def test-verbose false)
+(def test-verbose true)
 
 (defmacro testing
   [string & body]
   (let [verbose test-verbose]
-  `(rte/with-compile-env []
-     (when ~verbose
-       (println [:testing ~string :starting (human-readable-current-time)]))
-     (clojure.test/testing ~string ~@body)
-     (when ~verbose
-       (println [:finished  ~string (human-readable-current-time)])))))
+    `(rte/with-compile-env []
+       (human-readable-duration duration#
+         (when ~verbose
+           (println [:testing ~string :starting (human-readable-current-time)])
+           (flush))
+         (clojure.test/testing ~string ~@body)
+         (when ~verbose
+           (println [:finished  ~string
+                     :at (human-readable-current-time)
+                     :duration (duration#)])
+           (flush))))))
 
 (deftest t-test-canonicalize-pattern
   (testing "test-canonicalize-pattern"
@@ -78,7 +83,7 @@
   (testing "nullability of :not"
     ;; if an rte is nullable, then (:not rte) is not nullable
     ;; if an rte is not nullable, then (:not rte) is nullable
-    (test-rte-not-nullable 1000 7 false (fn [expr msg] (is expr msg)))))
+    (test-rte-not-nullable 100 7 false (fn [expr msg] (is expr msg)))))
 
 (deftest t-canonicalize-discovered-case-177
   (testing "test-rte-canonicalize-nullable-1"

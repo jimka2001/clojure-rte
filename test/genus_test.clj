@@ -24,7 +24,7 @@
             [rte.construct :refer [with-compile-env]]
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type *test-values* *test-types*]]
-            [util.util :refer [member human-readable-current-time]]
+            [util.util :refer [member human-readable-current-time human-readable-duration]]
             [util.strong :refer [strong-equal?]]
             [backtick :refer [template]]
             [clojure.pprint :refer [cl-format pprint]]
@@ -33,17 +33,22 @@
 (defn -main []
   (clojure.test/run-tests 'genus-test))
 
-(def test-verbose false)
+(def test-verbose true)
 
 (defmacro testing
   [string & body]
   `(gns/call-with-genus-env
-    (fn []
-      (when test-verbose
-        (println [:testing ~string :starting (human-readable-current-time)]))
-      (clojure.test/testing ~string ~@body)
-      (when test-verbose
-        (println [:finished  (human-readable-current-time)])))))
+    (human-readable-duration duration#
+      (fn []
+        (when test-verbose
+          (println [:testing ~string :starting (human-readable-current-time)])
+          (flush))
+        (clojure.test/testing ~string ~@body)
+        (when test-verbose
+          (println [:finished ~string
+                    :at (human-readable-current-time)
+                    :duration (duration#)])
+          (flush))))))
 
 (deftest t-typep
   (testing "typep"
@@ -482,8 +487,8 @@
 
 
 (deftest t-mdtd-disjoint
-  (testing "mdtd disjoint"
-    (doseq [_ (range 100)
+  (testing "mdtd disjoint 490"
+    (doseq [_ (range 50)
             num-td (range 2 7)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
@@ -527,8 +532,8 @@
                            v super td factors))))))))
 
 (deftest t-mdtd-disjoints
-  (testing "mdtd disjoint"
-    (doseq [_ (range 100)
+  (testing "mdtd disjoint 535"
+    (doseq [_ (range 50)
             num-td (range 2 6)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))

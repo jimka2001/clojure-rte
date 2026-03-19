@@ -31,17 +31,19 @@
 (defn -main []
   (clojure.test/run-tests 'genus-subtype-test))
 
-(def test-verbose false)
+(def test-verbose true)
 
 (defmacro testing
   [string & body]
   `(gns/call-with-genus-env
     (fn []
       (when test-verbose
-        (println [:testing ~string :starting (human-readable-current-time)]))
+        (println [:testing ~string :starting (human-readable-current-time)])
+        (flush))
       (clojure.test/testing ~string ~@body)
       (when test-verbose
-        (println [:finished  (human-readable-current-time)])))))
+        (println [:finished  (human-readable-current-time)])
+        (flush)))))
 
 (deftest t-subtype?-and
   (testing "subtype? and"

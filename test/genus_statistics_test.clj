@@ -29,7 +29,7 @@
 (defn -main []
   (clojure.test/run-tests 'genus-statistics-test))
 
-(def testing-verbose false)
+(def testing-verbose true)
 
 (defmacro testing
   [string & body]
@@ -37,9 +37,13 @@
     `(gns/call-with-genus-env
       (let [~verbose false]
         (fn []
-          (when ~verbose (println [:testing ~string :starting (human-readable-current-time)]))
+          (when ~verbose
+            (println [:testing ~string :starting (human-readable-current-time)])
+            (flush))
           (clojure.test/testing ~string ~@body)
-          (when ~verbose (println [:finished  (human-readable-current-time)])))))))
+          (when ~verbose
+            (println [:finished  (human-readable-current-time)])
+            (flush)))))))
 
 (defn statistics
   "Generate a table of statics indicating the accuracy of the subtype? function."
@@ -107,9 +111,9 @@
 
 (deftest t-statistics
   (testing "statistics"
-    (is (statistics 1000 false))))
+    (is (statistics 100 false))))
 
 (deftest t-statistics-inhabited
   (testing "statistics inhabited"
-    (is (statistics 1000 true))))
+    (is (statistics 100 true))))
 

@@ -41,10 +41,12 @@
   `(gns/call-with-genus-env
     (fn []
       (when testing-verbose
-        (println [:testing ~string :starting (human-readable-current-time)]))
+        (println [:testing ~string :starting (human-readable-current-time)])
+        (flush))
       (clojure.test/testing ~string ~@body)
       (when testing-verbose
-        (println [:finished  (human-readable-current-time)])))))
+        (println [:finished  (human-readable-current-time)])
+        (flush)))))
 
 ;; default value of num_random_tests is 1000, but you can temporarily edit this file
 ;;   and set it to a smaller number for a quicker run of the tests.

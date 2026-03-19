@@ -38,10 +38,12 @@
   (let [verbose false]
     `(rte/with-compile-env []
        (when ~verbose
-         (println [:testing ~string :starting (human-readable-current-time)]))
+         (println [:testing ~string :starting (human-readable-current-time)])
+         (flush))
        (clojure.test/testing ~string ~@body)
        (when ~verbose
-         (println [:finished  (human-readable-current-time)]))
+         (println [:finished  (human-readable-current-time)])
+         (flush))
      )))
 
 ;;(pprint  (methods gns/valid-type?))

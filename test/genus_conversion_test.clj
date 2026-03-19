@@ -34,9 +34,13 @@
   (let [verbose false]
     `(gns/call-with-genus-env
       (fn []
-        (when ~verbose (println [:testing ~string :starting (human-readable-current-time)]))
+        (when ~verbose
+          (println [:testing ~string :starting (human-readable-current-time)])
+          (flush))
         (clojure.test/testing ~string ~@body)
-        (when ~verbose (println [:finished  (human-readable-current-time)]))))))
+        (when ~verbose
+          (println [:finished  (human-readable-current-time)])
+          (flush))))))
 
 (deftest t-combo-conversion-C1
   (testing "combo conversion-C1"

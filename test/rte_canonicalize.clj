@@ -34,10 +34,12 @@
   [string & body]
   `(with-compile-env []
      (when test-verbose
-       (println [:testing 'rte-canonicalize ~string :starting (human-readable-current-time)]))
+       (println [:testing 'rte-canonicalize ~string :starting (human-readable-current-time)])
+       (flush))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished 'rte-canonicalize ~string (human-readable-current-time)]))))
+       (println [:finished 'rte-canonicalize ~string (human-readable-current-time)])
+       (flush))))
 
 (deftest t-canonicalize-pattern-14
   (when (and (resolve 'java.lang.Comparable)

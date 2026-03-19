@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [demos.conj-2025.cli :as cli]
             [rte.construct            :refer [with-compile-env]]
-            [util.util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time human-readable-duration]]
             [demos.conj-2025.gen            :as gen]
             [demos.conj-2025.demo :as demo]
             [demos.conj-2025.plot :as sut]))
@@ -11,12 +11,16 @@
 
 (defmacro testing
   [string & body]
-  `(do (when test-verbose
-         (println [:testing ~string :starting (human-readable-current-time)]))
-       (with-compile-env []
-         (clojure.test/testing ~string ~@body))
-       (when test-verbose
-         (println [:finished  (human-readable-current-time)]))))
+  `(human-readable-duration duration#
+     (when test-verbose
+       (println [:testing ~string :starting (human-readable-current-time)])
+       (flush))
+     (with-compile-env []
+       (clojure.test/testing ~string ~@body))
+     (when test-verbose
+       (println [:finished  (human-readable-current-time)
+                 :duration (duration#)])
+       (flush))))
 
 (deftest histogram
   (testing "histogram"
@@ -53,4 +57,4 @@
     (demo/missile-demo '(true 3))
     (demo/missile-demo '(true "3" 3))
     (demo/missile-demo '(true "3" 3 true))))
-    
+

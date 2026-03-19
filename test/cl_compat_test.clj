@@ -22,7 +22,7 @@
 (ns cl-compat-test
   (:require [rte.core]
             [util.cl-compat :as cl]
-            [util.util :refer [call-with-collector human-readable-current-time]]
+            [util.util :refer [call-with-collector human-readable-current-time human-readable-duration]]
             [clojure.test :refer [deftest is]]))
 
 (defn -main []
@@ -32,11 +32,16 @@
 
 (defmacro testing
   [string & body]
-  `(do (when test-verbose
-         (println [:testing ~string :starting (human-readable-current-time)]))
-       (clojure.test/testing ~string ~@body)
-       (when test-verbose
-         (println [:finished  (human-readable-current-time)]))))
+  `(human-readable-duration duration#
+     (when test-verbose
+       (println [:testing ~string :starting (human-readable-current-time)])
+       (flush))
+     (clojure.test/testing ~string ~@body)
+     (when test-verbose
+       (println [:finished  ~string
+                 :at (human-readable-current-time)
+                 :duration (duration#)])
+       (flush))))
 
 
 (deftest t-cl-prog1

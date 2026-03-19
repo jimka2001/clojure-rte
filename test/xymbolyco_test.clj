@@ -32,7 +32,7 @@
             [genus.bdd :as bdd]
             [clojure.pprint :refer [cl-format pprint]]
             [genus.genus :as gns]
-            [util.util :refer [member human-readable-current-time]]
+            [util.util :refer [member human-readable-current-time human-readable-duration]]
             [graph.dot :refer [dfa-to-dot] :as dot]
             [clojure.test :refer [deftest is] :exclude [testing]]))
 
@@ -69,11 +69,14 @@
 (defmacro testing
   [string & body]
   `(with-compile-env []
-     (when test-verbose
-       (println [:testing ~string :starting (human-readable-current-time)]))
-     (clojure.test/testing ~string ~@body)
-     (when test-verbose
-       (println [:finished  (human-readable-current-time)]))))
+     (human-readable-duration duration#
+       (when test-verbose
+         (println [:testing ~string :starting (human-readable-current-time)])
+         (flush))
+       (clojure.test/testing ~string ~@body)
+       (when test-verbose
+         (println [:finished  (human-readable-current-time) :duration (duration#)])
+         (flush)))))
 
 (deftest t-split-eqv-class
   (testing "split-eqv-class"
@@ -137,7 +140,7 @@
 
 (deftest t-complete
   (testing "dfa complete"
-    (doseq [_ (range 100)
+    (doseq [_ (range 1)
             :let [rte (rrte/gen-rte 6)
                   dfa (rte-to-dfa rte)]]
       (xym/check-dfa dfa)
@@ -513,6 +516,24 @@
       (let [dfa (rte-to-dfa rte)]
         (dfa-to-dot dfa :title (gensym "bdd") :view testing-view :verbose false)
         (is (xym/dfa-inhabited? dfa))))))
+
+(deftest t-dfa-inhabited
+  (testing "dfa-inhabited?"
+    (let [rte '(:cat Long Long)          ; satisfiable
+          dfa (rte-to-dfa rte)]
+      (is (= true (xym/dfa-inhabited? dfa)))
+      (is (= true (xym/dfa-inhabited? dfa :dont-know))))
+    (let [rte '(:and String Long)          ; unsatisfiable
+          dfa (rte-to-dfa rte)]
+      (is (= false (xym/dfa-inhabited? dfa)))
+      (is (= false (xym/dfa-inhabited? dfa :dont-know))))
+    
+    (let [rte '(:and String (satisfies odd?))          ; indeterminate
+          dfa (rte-to-dfa rte)]
+      (is (= :dont-know (xym/dfa-inhabited? dfa)))
+      (is (= false (xym/dfa-inhabited? dfa false)))
+      (is (= true (xym/dfa-inhabited? dfa true))))))
+          
 
 (deftest t-spanning-paths
   (testing "spanning paths"

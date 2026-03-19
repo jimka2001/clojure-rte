@@ -32,10 +32,12 @@
   [string & body]
   `(rte/with-compile-env []
      (when test-verbose
-       (println [:testing 'rte-test ~string :starting (human-readable-current-time)]))
+       (println [:testing 'rte-test ~string :starting (human-readable-current-time)])
+       (flush))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished ' rte-test ~string (human-readable-current-time)]))))
+       (println [:finished ' rte-test ~string (human-readable-current-time)])
+       (flush))))
 
 (deftest t-with-rte-5
   (testing "with-rte 5"
