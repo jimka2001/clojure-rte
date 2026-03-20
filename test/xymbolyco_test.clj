@@ -484,6 +484,48 @@
       (is (not-empty (filter (comp boolean :accepting) (xym/states-as-seq dfa)))
           "missing final 2"))))
 
+(deftest t-transition-functions-contradictions
+  (testing "transition functions contradictions"
+    (letfn [(tf1 [transitions promise-disjoint]
+              (xym/optimized-transition-function-raw transitions promise-disjoint 99))]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"transitions .* has a duplication of types"
+                            (tf1 '[[(member 0 1) 1]
+                                   [(member 0 1) 2]]
+                                 true)))
+
+      ;; duplicate empty types, no harm done.
+      (let [f (tf1 '[[(and String (member 0 1)) 1]
+             [(and String (member 0 1)) 2]]
+                   true)]
+        (is (= 99 (f 0)))
+        (is (= 99 (f 1)))
+        (is (= 99 (f "hello"))))
+
+
+      (bdd/with-hash []
+        (let [f (xym/gen-function '[[(member 0 1) 100]
+                                    [(member 0 2) 200]]
+                                  false
+                                  3)]
+          (is (= 100 (f 1)))
+          (is (= 200( f 2)))
+          (is (= 3 (f 4)))
+          ;; 0 matches two types, so the first one takes priority
+          (is (= 100 (f 0)))
+          ))
+
+      (let [f (tf1 '[[(member 0 1) 100]
+                     [(member 0 2) 200]]
+                   false
+                   )]
+        (is (= 100 (f 0))) ;; first matching type has priority
+        (is (= 100 (f 1)))
+        (is (= 200 (f 2)))
+        (is (= 99 (f 3))))
+      )))
+    
+
 (deftest t-transition-functions
   (testing "transition functions"
     (letfn [(tf1 [transitions]
@@ -496,6 +538,9 @@
                             [[:sigma 0]]
                             [[(= 0) 1]
                              [(= 1) 0]]
+                            [[(member 0 1) 1]
+                             [(member 2 3) 1]
+                             [(member 4 5) 2]]
                             [[(member 0 1 2 3) 1]
                              [(member 4 5 6 7) 0]
                              [(member -1 -2) 2]]]

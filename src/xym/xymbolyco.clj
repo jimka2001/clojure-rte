@@ -270,7 +270,7 @@
                   [false '(:empty-set)] ;; initial bdd and empty-type
                   transitions)))]
                 ;;(clojure-rte.dot/bdd-to-dot bdd :title (gensym "bdd") :view true)
-      (fn [candidate]
+      (fn xymbolyco-273 [candidate]
         (loop [bdd' bdd
                lineage ()]
           (cl/cl-cond
@@ -285,12 +285,16 @@
             (recur (:negative bdd')
                    (cons (list 'not (:label bdd')) lineage)))))))))
 
-(def optimized-transition-function
+(declare optimized-transition-function)
+
+(defn optimized-transition-function-raw
   "Given a set of transitions each of the form [type-designator state-index],
   return a unary transfer function which can be called with an candidate element
-  of a sequence, and the function will return the id of the next state.  When called
-  with the candidate object, will not evaluate any type predicate more than
-  once. optimized-transition-function also accepts a sink-state-id which is
+  of a sequence, and the function will return the state-index, which indicates id of the next state.
+
+  When called with the candidate object, the optimized transition function will not evaluate
+  any type predicate more than once.
+  optimized-transition-function also accepts a sink-state-id which is
   what the transfer function will return if no transition label matches the
   candidate element."
   
@@ -299,8 +303,7 @@
   ;;  It is not necessary to know whether the transitions cover the
   ;;  universe because the indicator function has a second argument
   ;;  to return if there is no match.
-  (gc-friendly-memoize
-    (fn [transitions promise-disjoint sink-state-id]
+  [transitions promise-disjoint sink-state-id]
   (bdd/with-hash []
     (letfn [
             ;; local function find-duplicates
@@ -323,29 +326,44 @@
             duplicate-types (find-duplicates types)
             inhabited-types (delay (filter (fn [td] (gns/inhabited? td false))
                                            types))
+            inhabited-duplicates (delay (for [t1 duplicate-types
+                                              t2 @inhabited-types
+                                              :when (= t1 t2)]
+                                          t1))
             consequents (map second transitions)]
         
+        (println [:types types
+                  :duplicate-types duplicate-types
+                  :inhabited-types @inhabited-types
+                  :consequents consequents]
+                 :cond1           (not= (count consequents) (count (distinct consequents))))
         (cond
           (not= (count consequents) (count (distinct consequents)))
           ;; If there is a duplicate consequent, then the corresponding types can be unioned.
           (optimized-transition-function (for [[consequent transitions] (group-by second transitions)]
-                                            [(gns/create-or (map first transitions)) consequent])
-                                          promise-disjoint
-                                          sink-state-id)
+                                           [(gns/create-or (map first transitions)) consequent])
+                                         promise-disjoint
+                                         sink-state-id)
 
           (empty? duplicate-types)
           (gen-function transitions promise-disjoint sink-state-id)
           
-          (not-empty (intersection duplicate-types inhabited-types))
-          ;; if some duplicate types are inhbited
+          (not-empty @inhabited-duplicates)
+          ;; if some duplicate types are inhabited
           (throw (ex-info (cl-format false "transitions ~A has a duplication of types: ~A"
                                      transitions (find-duplicates types))
                           {:transitions transitions
+                           :code :xymbolyco-493
                            :duplicates (find-duplicates types)}))
 
           ;; if all duplicate types are empty types
+          ;; no harm done when duplicating empty types.
           :else
-                           (gen-function transitions promise-disjoint sink-state-id))))))))
+          (gen-function transitions promise-disjoint sink-state-id))))))
+
+(def optimized-transition-function
+  "memoized version of optimized-transition-function-raw"
+  (gc-friendly-memoize optimized-transition-function-raw))
 
 (defn delta
   "Given a state and target-label, find the destination state (object of type State)"
