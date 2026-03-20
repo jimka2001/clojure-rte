@@ -26,14 +26,30 @@
             [genus.genus :as gns]
             [genus.genus-tester :refer [gen-type]]
             [clojure.pprint :refer [cl-format *print-pretty*]]
-            [util.util :refer [member]]
-            [clojure.test :refer [deftest is testing]])
+            [util.util :refer [member human-readable-duration human-readable-current-time]]
+            [clojure.test :refer [deftest is]])
   ;; this imports the name of the Bdd record, which is otherwise not imported by :require
   ;;(:import [clojure_rte.bdd Bdd])
   )
 
 (defn -main []
   (clojure.test/run-tests 'bdd-test))
+
+(def test-verbose true)
+
+(defmacro testing
+  [string & body]
+  `(human-readable-duration duration#
+     (fn []
+       (when test-verbose
+         (println [:testing ~string :starting (human-readable-current-time)])
+         (flush))
+       (clojure.test/testing ~string ~@body)
+       (when test-verbose
+         (println [:finished ~string
+                   :at (human-readable-current-time)
+                   :duration (duration# ~string)])
+         (flush)))))
 
 (def num-random-samples 500)
 

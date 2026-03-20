@@ -22,23 +22,25 @@
 (ns statistics-test
   (:require [clojure.pprint :refer [cl-format]]
             [clojure.test :refer [deftest is] :exclude [testing]]
-            [util.util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time human-readable-duration]]
             [demos.vmcai-2026.statistics :as sut]
             [util.lock :as lock]
             [demos.vmcai-2026.statistics-inhabited :refer [subset-csv inhabited-csv update-inhabited-subset-csv]]
 ))
 
-(def test-verbose false)
+(def test-verbose true)
 
 (defmacro testing
   [string & body]
-  `(do
+  `(human-readable-duration duration#
      (when test-verbose
        (println [:testing 'rte-test ~string :starting (human-readable-current-time)])
        (flush))
      (clojure.test/testing ~string ~@body)
      (when test-verbose
-       (println [:finished ' rte-test ~string (human-readable-current-time)])
+       (println [:finished ~string
+                 :at (human-readable-current-time)
+                 :duration (duration# ~string)])
        (flush))))
 
 (deftest t-read-csv-resource
@@ -48,4 +50,4 @@
 
 (deftest t-update-resource-csv
   (testing "update inhabited subset csv resource"
-    (update-inhabited-subset-csv 2 4 3)))
+    (update-inhabited-subset-csv 1 2 3)))

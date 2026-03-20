@@ -18,8 +18,9 @@
      (with-compile-env []
        (clojure.test/testing ~string ~@body))
      (when test-verbose
-       (println [:finished  (human-readable-current-time)
-                 :duration (duration#)])
+       (println [:finished ~string
+                 :at (human-readable-current-time)
+                 :duration (duration#  ~string)])
        (flush))))
 
 (deftest histogram
@@ -46,7 +47,7 @@
 (deftest gen-by-size
   (testing "gen-by-size"
     (doseq [algo gen/algos]
-      (cli/test-main algo 1))))
+      (cli/test-main algo 1 3 4))))
 
 (deftest demo
   (testing "demo"

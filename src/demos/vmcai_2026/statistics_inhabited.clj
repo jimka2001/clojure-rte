@@ -209,32 +209,35 @@
                          (cl-format out-file "~%")
                          )))))
 
+
 (defn update-inhabited-subset-csv
   "Run a suite of simulations, appending to resources/statistics/dfa-subset.csv
   and dfa-inhabited.csv."
-  [num-samples center radius]
-  (doseq [nsample (range num-samples)
-          :let [num-states (max 2 (+ center (- radius) (rand-int (* 2 radius))))
-                delta (+ (rand-int num-states)
-                         (rand-int num-states))
-                num-transitions (+ num-states
-                                   delta)
-                type-size (+ 2 (rand-int 3))
-                probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
-                ]]
-    
-    (cl-format true "sample=~D/~D " nsample num-samples)
-    (println "++++++++++++++++++++++++++++++++++++++++")
-    (println [:num-states num-states
-              :num-transitions num-transitions
-              :type-size type-size
-              :probability-indeterminate probability-indeterminate])
+  ([num-samples center radius]
+   (update-inhabited-subset-csv num-samples center radius 4))
+  ([num-samples center radius max-type-size]
+   (doseq [nsample (range num-samples)
+           :let [num-states (max 2 (+ center (- radius) (rand-int (* 2 radius))))
+                 delta (+ (rand-int num-states)
+                          (rand-int num-states))
+                 num-transitions (+ num-states
+                                    delta)
+                 type-size (+ 2 (rand-int (- max-type-size 2)))
+                 probability-indeterminate (/ (+ (rand 1) (rand 1)) 3)
+                 ]]
+     
+     (cl-format true "sample=~D/~D " nsample (- num-samples 1))
+     (println "++++++++++++++++++++++++++++++++++++++++")
+     (println [:num-states num-states
+               :num-transitions num-transitions
+               :type-size type-size
+               :probability-indeterminate probability-indeterminate])
 
-    (write-inhabited-subset-stats-csv :num-states num-states
-                                      :num-transitions num-transitions
-                                      :type-size type-size
-                                      :probability-indeterminate probability-indeterminate)
-    ))
+     (write-inhabited-subset-stats-csv :num-states num-states
+                                       :num-transitions num-transitions
+                                       :type-size type-size
+                                       :probability-indeterminate probability-indeterminate)
+     )))
 
 (defn plot-inhabited-subset-summary []
   (let [inhabited-grouped (group-by :num-states (slurp-inhabited-data))

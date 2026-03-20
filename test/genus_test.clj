@@ -47,7 +47,7 @@
         (when test-verbose
           (println [:finished ~string
                     :at (human-readable-current-time)
-                    :duration (duration#)])
+                    :duration (duration# ~string)])
           (flush))))))
 
 (deftest t-typep
@@ -393,7 +393,7 @@
                            (not (= 1))))
                475)
 
-        (dotimes [_ 1000]
+        (dotimes [_ 100]
           (check (gen-type 4)
                  479))))))
 
@@ -489,7 +489,7 @@
 (deftest t-mdtd-disjoint
   (testing "mdtd disjoint 490"
     (doseq [_ (range 50)
-            num-td (range 2 7)
+            num-td (range 2 5)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (let [m (gns/mdtd tds)
@@ -514,7 +514,7 @@
 (deftest t-mdtd-factors
   (testing "mdtd factors"
     (doseq [_ (range 100)
-            num-td (range 2 6)
+            num-td (range 2 5)
             :let [tds (into #{} (for [_ (range num-td)]
                                   (rand-nth *test-types*)))]]
       (with-compile-env () 

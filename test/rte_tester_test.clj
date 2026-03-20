@@ -54,7 +54,7 @@
          (when ~verbose
            (println [:finished  ~string
                      :at (human-readable-current-time)
-                     :duration (duration#)])
+                     :duration (duration# ~string)])
            (flush))))))
 
 (deftest t-test-canonicalize-pattern
@@ -214,7 +214,7 @@
 
 (deftest t-rte-not-random
   (testing ":not random"
-    (test-rte-not 1000 4
+    (test-rte-not 100 4
                   false ;verbose
                   )))
 

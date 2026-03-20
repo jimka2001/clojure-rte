@@ -732,15 +732,26 @@
       (> seconds 0) (conj (str seconds "s"))
       true          (#(clojure.string/join " " %)))))
 
+(def durations (atom {}))
+
+(defn report-top [n]
+  (doseq [[test-name duration] (take n (sort-by second (map identity @durations)))]
+    (printf "%10s %-20s\n" (human-duration-detailed duration) test-name)))
+
 (defmacro human-readable-duration
   "Macro to wrap around a body.  The body of the macro has access to a
   function, named as first argument, which when called will return a string
   containing a human readable duration."
   [f & body]
   `(let [start# (java.time.LocalDateTime/now)]
-     (letfn [(~f [] (human-duration-detailed
-                     (java.time.Duration/between (java.time.LocalDateTime/now)
-                                                 start#)))]
+     (letfn [(~f [key#]
+              (let [elapsed# 
+                    (java.time.Duration/between (java.time.LocalDateTime/now)
+                                                start#)]
+                ;; remember all the tests so we can find the slowest ones later.
+                (swap! durations assoc key# elapsed#)
+                (report-top 10)
+                (human-duration-detailed elapsed#)))]
      ~@body)))
 
 (defn human-readable-current-time

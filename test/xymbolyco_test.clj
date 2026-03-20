@@ -44,7 +44,7 @@
 (defn -main []
   (clojure.test/run-tests 'xymbolyco-test))
 
-(def test-verbose false)
+(def test-verbose true)
 
 (def test-timeout-ms
   "This variable indicates the number of miliseconds `with-timeout` allows for
@@ -75,7 +75,9 @@
          (flush))
        (clojure.test/testing ~string ~@body)
        (when test-verbose
-         (println [:finished  (human-readable-current-time) :duration (duration#)])
+         (println [:finished ~string
+                   :at (human-readable-current-time)
+                   :duration (duration# ~string)])
          (flush)))))
 
 (deftest t-split-eqv-class
@@ -232,50 +234,55 @@
         (is (empty? incomplete-states))))))
 
 (defn t-acceptance-test-rte
-  [rte]
-  (doseq [seq-root test-seqs
-          exit-value [42 true -1]
-          :let [dfa (rte-to-dfa rte exit-value)
-                dfa-trim (xym/extend-with-sink-state (xym/trim dfa))
-                dfa-min (xym/extend-with-sink-state (xym/minimize dfa))
-                dfa-min-trim (xym/extend-with-sink-state (xym/trim dfa-min))
-                dfa-trim-min (xym/extend-with-sink-state (xym/minimize dfa-trim))]
-          reps (range 5)
-          :let [seq-long (reduce concat (repeat reps seq-root))
-                match? (rte/match dfa seq-long)]
-          ]
-    
-    (is (= match?
-           (rte/match dfa-trim seq-long))
-        (format "case 1: rte=%s seq=%s got %s from dfa, got %s from dfa-trim"
-                rte (pr-str seq-long) match? (rte/match dfa-trim seq-long)))
-    (is (= match?
-           (rte/match dfa-min seq-long))
-        (format "case 2: rte=%s seq=%s got %s from dfa, got %s from dfa-min"
-                rte (pr-str seq-long) match? (rte/match dfa-min seq-long)))
-    (is (= match?
-           (rte/match dfa-min-trim seq-long))
-        (format "case 3: rte=%s seq=%s got %s from dfa, got %s from dfa-min-trim"
-                rte (pr-str seq-long) match? (rte/match dfa-min-trim seq-long)))
-    (is (= match?
-           (rte/match dfa-trim-min seq-long))
-        (format "case 4: rte=%s seq=%s got %s from dfa, got %s from dfa-trim-min"
-                rte (pr-str seq-long) match? (rte/match dfa-trim-min seq-long)))))
-  
+  ([rte]
+   (t-acceptance-test-rte rte 5))
+  ([rte max-range]
+   (doseq [seq-root test-seqs
+           exit-value [42 true -1]
+           :let [dfa (rte-to-dfa rte exit-value)
+                 dfa-trim (xym/extend-with-sink-state (xym/trim dfa))
+                 dfa-min (xym/extend-with-sink-state (xym/minimize dfa))
+                 dfa-min-trim (xym/extend-with-sink-state (xym/trim dfa-min))
+                 dfa-trim-min (xym/extend-with-sink-state (xym/minimize dfa-trim))]
+           reps (range max-range)
+           :let [seq-long (reduce concat (repeat reps seq-root))
+                 match? (rte/match dfa seq-long)]
+           ]
+     
+     (is (= match?
+            (rte/match dfa-trim seq-long))
+         (format "case 1: rte=%s seq=%s got %s from dfa, got %s from dfa-trim"
+                 rte (pr-str seq-long) match? (rte/match dfa-trim seq-long)))
+     (is (= match?
+            (rte/match dfa-min seq-long))
+         (format "case 2: rte=%s seq=%s got %s from dfa, got %s from dfa-min"
+                 rte (pr-str seq-long) match? (rte/match dfa-min seq-long)))
+     (is (= match?
+            (rte/match dfa-min-trim seq-long))
+         (format "case 3: rte=%s seq=%s got %s from dfa, got %s from dfa-min-trim"
+                 rte (pr-str seq-long) match? (rte/match dfa-min-trim seq-long)))
+     (is (= match?
+            (rte/match dfa-trim-min seq-long))
+         (format "case 4: rte=%s seq=%s got %s from dfa, got %s from dfa-trim-min"
+                 rte (pr-str seq-long) match? (rte/match dfa-trim-min seq-long))))))
+
+(deftest t-acceptance-1
+  (testing "acceptance 1"
+    (t-acceptance-test-rte  '(:and (:* Long) (:not (:* Short)))) ;; this was an explicit failing test
+    ))
+
 (deftest t-acceptance
   (testing "acceptance:  testing whether rte/match works same on dfa when trimmed and minimized."
-
-    (t-acceptance-test-rte  '(:and (:* Long) (:not (:* Short)))) ;; this was an explicit failing test
     (let [[left-rtes right-rtes] (split-at (unchecked-divide-int (count test-rtes) 2)
                                            test-rtes)]
       (doseq [[_inx rte] (reverse (map-indexed (fn [inx item] [inx item])
-                                              (distinct (for [rte-1 right-rtes
-                                                              rte-2 left-rtes
-                                                              rte [`(:and ~rte-1 (:not ~rte-2))
-                                                                   `(:or  ~rte-1 (:not ~rte-2))]]
-                                                          rte))))]
+                                               (distinct (for [rte-1 right-rtes
+                                                               rte-2 left-rtes
+                                                               rte [`(:and ~rte-1 (:not ~rte-2))
+                                                                    `(:or  ~rte-1 (:not ~rte-2))]]
+                                                           rte))))]
         ;; (println [:inx inx :rte rte])
-        (t-acceptance-test-rte rte)))))
+        (t-acceptance-test-rte rte 4)))))
 
 (defn abbrev-to-readable [abbrevs]
   (sort-by first (map reverse (seq abbrevs))))
@@ -480,9 +487,11 @@
 (deftest t-transition-functions
   (testing "transition functions"
     (letfn [(tf1 [transitions]
-              (xym/optimized-transition-function transitions true 99))
+              (xym/optimized-transition-function-raw transitions true 99))
             (tf2 [transitions]
               (rte/slow-transition-function transitions 99))]
+
+      
       (doseq [transitions '[;; [[td state-id] [td state-id] ...]
                             [[:sigma 0]]
                             [[(= 0) 1]
@@ -615,10 +624,10 @@
             num-transitions (range num-states (+ 2 num-states))
             :let [exit-value 42 
                   type-size 2
-                  dfa (gen-dfa :num-states 10
-                               :num-transitions 25
+                  dfa (gen-dfa :num-states num-states
+                               :num-transitions num-transitions
                                :exit-value 42
-                               :type-size 2)
+                               :type-size type-size)
                   min-dfa (xym/minimize dfa)
                   rte (get (dfa-to-rte min-dfa) exit-value :empty-set)]]
       (is rte)

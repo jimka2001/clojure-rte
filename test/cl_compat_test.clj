@@ -40,7 +40,7 @@
      (when test-verbose
        (println [:finished  ~string
                  :at (human-readable-current-time)
-                 :duration (duration#)])
+                 :duration (duration# ~string)])
        (flush))))
 
 
