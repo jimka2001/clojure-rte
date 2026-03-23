@@ -760,10 +760,12 @@
     perform an (and a1 a2).
   f-arbitrate-exit-value - binary function called with [q1,q2].  q1 is an accepting state
     of dfa-1.  q2 is an accepting state in dfa-2.
-    f-arbitrate-exit-value is called when q1 and q2 are both accepting states or
-      when neither is an accepting state.   In the case that only q1 or only q2
-      is an accepting state, this accepting state's exit value is used in the SXP.
-      f-arbitrate-exit-value should return the exit value for the state in the SXP."
+    f-arbitrate-exit-value is called to compute the exit value of
+    each accepting state in the SXP.
+    We assume that the caller has passed f-arbitrate-accepting and
+    f-arbitrate-exit-value which corporate.  E.g., if (f-arbitrate-accepting a b)
+    returns the acceptance status of b, then f-arbitrate-exit-value should
+    return the exit status of b."
   [dfa-1 dfa-2 f-arbitrate-accepting f-arbitrate-exit-value]
   (letfn [(compute-state-transitions [state-1 state-2 state-ident-map]
             (for [[label-1 dst-1] (:transitions state-1)
@@ -784,7 +786,7 @@
             ;; to a final state.  In particular, it will create at least one sink-state
             ;; if dfa-1 and dfa-2 have sink-states.
             ;; Caveat some states may appear accessible but really aren't because
-            ;; they might have null-transitions leading to them.   E.g.,
+            ;; they might have unsatisfiable transitions leading to them.   E.g.,
             ;; There might be a type-designator which is the intersection of two
             ;; type-designators which gns/disjoint? is not able to determine
             ;; are really disjoint.   We error on the side of redundancy, leaving
@@ -841,23 +843,21 @@
                             [id-1 id-2]))
           state-ident-map  (zipmap sxp-pairs (range)) ;; [id id] -> id
           ident-state-map  (zipmap (range) sxp-pairs) ;; id -> [id id]
+          ;; compute new-id-date-pairs which is a sequence of [integer State] pairs.
+          ;;  each State has been created by a call to map->State and has
+          ;;  :description = [id-1 id-2] which are the ids of the two states
+          ;;  each from one of the dfas being combined.
           new-id-state-pairs (accumulate-states [0 0] state-ident-map
                                                 ident-state-map)
+          ;; compute new-exit-map which is a sequence of paris, but later in the
+          ;;   call to make-dfa will be converted to a map via (into {} ...).
+          ;; 
           new-exit-map (for [[sxp-id new-state] new-id-state-pairs
                              :when (:accepting new-state)
                              :let [[id-1 id-2] (ident-state-map sxp-id)
                                    state-1 (state-by-index dfa-1 id-1)
                                    state-2 (state-by-index dfa-2 id-2)]]
-                         [sxp-id (cond
-                                   (= (boolean (:accepting state-1))
-                                      (boolean (:accepting state-2)))
-                                   (f-arbitrate-exit-value state-1 state-2)
-                                   
-                                   (:accepting state-1)
-                                   (exit-value dfa-1 id-1)
-
-                                   (:accepting state-2)
-                                   (exit-value dfa-2 id-2))])
+                         [sxp-id (f-arbitrate-exit-value state-1 state-2)])
           ]
       (assert (member 0 (ids-as-seq dfa-1)))
       (assert (member 0 (ids-as-seq dfa-2)))
@@ -880,13 +880,21 @@
   will recognize sequences which either dfa-1 or dfa-2 recognizes.
   If some sequence is recognized both by dfa-1 and dfa-2, then
   the exit value is determined by dfa-1, and the exit-value of
-  dfa-2 is silently ignored."
+  dfa-2 is silently ignored.  Otherwise each accepting state
+  corresponds to exactly one accepting state, either in dfa-1 or dfa-2,
+  in which the corresponding exit-value is used."
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (or a b))
-                        (fn [q1 _q2]
-                          (exit-value dfa-1 q1))))
+                        (fn [qa qb]
+                          (assert (or (:accepting qa)
+                                      (:accepting qb)))
+                          (cond (:accepting qa)
+                                (exit-value dfa-1 qa)
+
+                                (:accepting qb)
+                                (exit-value dfa-2 qb)))))
 
 (defn synchronized-intersection
   "Compute the intersection of two Dfas. I.e., compute the Dfa which
@@ -896,16 +904,47 @@
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (and a b))
-                        (fn [q1 _q2]
-                          (exit-value dfa-1 q1))))
+                        (fn [qa qb]
+                          (assert (and (:accepting qa) (:accepting qb))
+                          (exit-value dfa-1 qa)))))
 
 (defn synchronized-and-not
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (and a (not b)))
-                        (fn [q1 _q2]
-                          (exit-value dfa-1 q1))))
+                        (fn [qa qb]
+                          (assert (and (:accepting qa)
+                                       (not (:accepting qb))))
+                          (exit-value dfa-1 qa))))
+
+(defn synchronized-nand
+  [dfa-1 dfa-2]
+  (synchronized-product dfa-1 dfa-2
+                        (fn [a b]
+                          (not (and a b)))
+                        (fn [qa qb]
+                          (assert (not (and (:accepting qa)
+                                            (:accepting qb))))
+                          (cond (:accepting qa)
+                                (exit-value dfa-1 qa)
+
+                                (:accepting qb)
+                                (exit-value dfa-2 qb)
+
+                                :else
+                                (exit-value dfa-1 :default)))))
+
+(defn synchronized-nor
+  [dfa-1 dfa-2]
+  (synchronized-product dfa-1 dfa-2
+                        (fn [a b]
+                          (not (or a b)))
+                        (fn [qa qb]
+                          (assert (not (or (:accepting qa)
+                                           (:accepting qb))))
+                          (exit-value dfa-1 :default))))
+                                
 
 (defn synchronized-xor
   "Compute the xor of two Dfas. I.e., compute the Dfa which
@@ -916,8 +955,15 @@
                         (fn [a b]
                           (or (and a (not b))
                               (and b (not a))))
-                        (fn [q1 _q2]
-                          (exit-value dfa-1 q1))))
+                        (fn [qa qb]
+                          (assert (or (and (:accepting qa) (not (:accepting qb)))
+                                      (and (not (:accepting qa)) (:accepting qb))))
+                          (cond (and (:accepting qa) (not (:accepting qb)))
+                                (exit-value dfa-1 qa)
+
+                                (and (not (:accepting qa)) (:accepting qb))
+                                (exit-value dfa-2 qb)))))
+                                
 
 (defn gen-dijkstra-edges [dfa]
   (let [states (states-as-map dfa)

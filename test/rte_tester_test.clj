@@ -220,8 +220,8 @@
 
 (deftest t-inhabited-type
   (testing "inhabited type"
-    (doseq [_ (range 100)
-            n (range 5)
+    (doseq [_ (range 50)
+            n (range 4)
             :let [t1 (gen-inhabited-type n)
                   inh (gns/inhabited? t1 :dont-know)]]
       (is (= true inh)

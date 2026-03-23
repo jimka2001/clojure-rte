@@ -429,6 +429,31 @@
             (format "dfa-1 => %s and dfa-2 => %s but dfa-sxp => %s, on sequence %s"
                     m-1 m-2 m-dfa-sxp s))))))
 
+(deftest exit-values
+  (testing "exit values"
+    (let [dfa-1 (rte-to-dfa '(member 1 2 3) 1)
+          dfa-2 (rte-to-dfa '(member 1 3 5) 2)
+          dfa-3 (rte-to-dfa '(member 2 4 6) 3)]
+      (doseq [f [xym/synchronized-xor
+                 xym/synchronized-and-not
+                 xym/synchronized-nand
+                 xym/synchronized-nor
+                 xym/synchronized-intersection
+                 xym/synchronized-union]
+              :let [dfa-4 (f dfa-1 dfa-2)
+                    dfa-4b (f dfa-2 dfa-1)
+                    dfa-5 (f dfa-2 dfa-3)
+                    dfa-5b (f dfa-3 dfa-2)
+                    ]]
+        (is dfa-4)
+        (is dfa-4b)
+        (is dfa-5)
+        (is dfa-5b)
+        ;;(dot/dfa-view dfa-4 "dfa-4")
+        ;;(dot/dfa-view dfa-5 "dfa-5")
+))))
+      
+
 (deftest t-test-2
  (testing "particular case 2 which was failing"
    (let [dfa-1 (rte-to-dfa '(:or (:* Long) 

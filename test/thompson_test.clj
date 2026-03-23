@@ -22,7 +22,7 @@
 (ns thompson-test
   (:require [xym.thompson :as tom]
             [genus.genus :as gns]
-            [util.util :refer [human-readable-current-time]]
+            [util.util :refer [human-readable-current-time human-readable-duration]]
             [rte.core]
             [rte.construct :as rte]
             [xym.xymbolyco :as xym]
@@ -34,19 +34,22 @@
 (defn -main []
   (clojure.test/run-tests 'thompson-test))
 
-(def testing-verbose false)
+(def testing-verbose true)
 
 (defmacro testing
   [string & body]
   `(gns/call-with-genus-env
+    (human-readable-duration duration#
     (fn []
       (when testing-verbose
         (println [:testing ~string :starting (human-readable-current-time)])
         (flush))
       (clojure.test/testing ~string ~@body)
       (when testing-verbose
-        (println [:finished  (human-readable-current-time)])
-        (flush)))))
+        (println [:finished ~string
+                  :at (human-readable-current-time)
+                  :duration (duration# ~string)])
+        (flush))))))
 
 ;; default value of num_random_tests is 1000, but you can temporarily edit this file
 ;;   and set it to a smaller number for a quicker run of the tests.
