@@ -25,16 +25,6 @@
   )
 
 
-(defn simplify [unary error-case gen-components]
-  (try (unary error-case)
-       error-case
-       
-       (catch Exception e
-         (cl-format true "e=~A~%" e)
-         (or (some (fn [component]
-                     (simplify unary component gen-components)) (gen-components error-case))
-             error-case))))
-
 (defn de-lazify [obj]
   (cond (not (sequential? obj))
         obj
@@ -60,7 +50,7 @@
   (doseq [n (doall (range num-tries))
           :let [data (de-lazify (arg-generator))]]
     (when verbose
-      (cl-format true "~d/~d: trying ~A~%" n num-tries data))
+      (cl-format true "~d/~d: trying ~A~%" (inc n) num-tries data))
     
     (try (unary-test-fun data)
          (catch java.lang.StackOverflowError e
