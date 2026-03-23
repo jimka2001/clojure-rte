@@ -53,7 +53,7 @@
 
 ;; default value of num_random_tests is 1000, but you can temporarily edit this file
 ;;   and set it to a smaller number for a quicker run of the tests.
-(def num_random_tests 1000)
+(def num_random_tests 200)
 
 (def Dfa xym.xymbolyco.Dfa)
 

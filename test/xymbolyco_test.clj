@@ -39,7 +39,7 @@
 (def testing-view
   "This value specifies whether dfa-view is called during testing.  It defaults to false
   so that dfa-view does not get called in batch testing."
-  false)
+  true)
 
 (defn -main []
   (clojure.test/run-tests 'xymbolyco-test))
