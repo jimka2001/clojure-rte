@@ -804,3 +804,34 @@
       
       (is (not-empty (xym/find-incomplete-states dfa)))
       (xym/complete dfa))))
+
+(deftest t-merge-parallel-transitions
+  (testing "merge parallel transitions"
+    (is (= []
+           (xym/merge-parallel-transitions [] gns/create-or)))
+    (is (= '[[0 String 1]]
+           (xym/merge-parallel-transitions '[[0 String 1]] gns/create-or)))
+    (is (= '[[0 (or String (satisfies odd?)) 1]]
+           (xym/merge-parallel-transitions '[[0 String 1]
+                                             [0 (satisfies odd?) 1]] gns/create-or)))
+    (is (= '[[0 String 1]
+             [1 String 2]
+             ]
+           (xym/merge-parallel-transitions '[[0 String 1]
+                                             [1 String 2]
+                                             ] gns/create-or)))
+    (is (= '[[0 String 1]
+             [1 String 2]
+             ]
+           (xym/merge-parallel-transitions '[[1 String 2]
+                                             [0 String 1]
+                                             ] gns/create-or)))
+    (is (= '[[0 (or String (satisfies odd?)) 1]
+             [1 String 2]
+             ]
+           (xym/merge-parallel-transitions '[[1 String 2]
+                                             [0 String 1]
+                                             [0 (satisfies odd?) 1]
+                                             ] gns/create-or)))
+    ))
+                                      

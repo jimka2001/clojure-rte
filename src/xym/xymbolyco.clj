@@ -559,13 +559,20 @@
   ;; (or Long
   ;;     (and (not Long) (not String)))
   ;; which *could* be reduced to simply: Long
-  (let [grouped (group-by (fn [[_ to]]
-                            to)
+  (let [grouped (group-by (fn [[from _ to]]
+                            [from to])
                           transitions)]
-    
-    (map (fn [[to transitions]]
-           [(pretty-or (map first transitions)) to])
-         grouped)))
+
+    ;; we sort with src as priority 1, and dst as priority 2
+    ;; The reason for sorting is simply to get a deterministic return value
+    ;; to make testing easier.
+    (sort-by (fn [[src _ dst]]
+               [src dst])
+             (map (fn [[[from to] transitions]]
+                    (when (timeout-reached?)
+                      (throw (ex-info "Thread interrupted during minimize")))
+                    [from (pretty-or (map second transitions)) to])
+                  grouped))))
 
 (defn minimize
   "Accepts an object of type Dfa, and returns a new object of type Dfa
@@ -580,22 +587,9 @@
     (letfn [(merge-parallel [transitions]
               (when (timeout-reached?)
                 (throw (ex-info "Thread interrupted during minimize")))
-              ;; if there are two transitions with the same src/dest, then
-              ;;   combine the labels with (or ...)
-              ;; We do not, currently, try to reduce the union type.
-              ;; It may be something like:
-              ;; (or Long
-              ;;     (and (not Long) (not String)))
-              ;; which *could* be reduced to simply: Long
-              (let [grouped (group-by (fn [[from _ to]]
-                                        [from to])
-                                      transitions)]
-                
-                (map (fn [[[from to] transitions]]
-                       (when (timeout-reached?)
-                         (throw (ex-info "Thread interrupted during minimize")))
-                       [from (gns/canonicalize-type (gns/create-or (map second transitions)) :dnf) to])
-                     grouped)))
+              (merge-parallel-transitions transitions
+                                          (fn [tds]
+                                            (gns/canonicalize-type (gns/create-or tds) :dnf))))
             (new-id [state]
               (assert (instance? State state))
               (ids-map (find-eqv-class pi-minimized state)))]
