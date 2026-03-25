@@ -452,7 +452,17 @@
         ;;(dot/dfa-view dfa-4 "dfa-4")
         ;;(dot/dfa-view dfa-5 "dfa-5")
 ))))
-      
+
+
+(deftest test-sxp-xor
+  (testing "sxp xor"
+    ;; TODO
+    ;; make sure if a sequence matches a XOR b
+    ;; then it matches exactly one of a and b.
+
+    ;; TODO similar for sxp-nor, sxp-nand, etc.
+    nil
+    ))
 
 (deftest t-test-2
  (testing "particular case 2 which was failing"
