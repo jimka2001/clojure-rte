@@ -585,8 +585,6 @@
         ids-map (zipmap pi-minimized ids)]
     (assert (sequential? pi-minimized))
     (letfn [(merge-parallel [transitions]
-              (when (timeout-reached?)
-                (throw (ex-info "Thread interrupted during minimize")))
               (merge-parallel-transitions transitions
                                           (fn [tds]
                                             (gns/canonicalize-type (gns/create-or tds) :dnf))))
