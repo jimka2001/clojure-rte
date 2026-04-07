@@ -890,7 +890,7 @@
 
 (defn synchronized-intersection
   "Compute the intersection of two Dfas. I.e., compute the Dfa which
-  will recognized any sequence which is recognized by dfa-1 and also
+  will recognize any sequence which is recognized by dfa-1 and also
   by dfa-2."
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
@@ -940,7 +940,7 @@
 
 (defn synchronized-xor
   "Compute the xor of two Dfas. I.e., compute the Dfa which
-  will recognized any sequence which is recognized by dfa-1 or
+  will recognize any sequence which is recognized by dfa-1 or
   by dfa-2 but not by both."
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
