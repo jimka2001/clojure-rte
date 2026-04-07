@@ -224,6 +224,8 @@
                  (:and (:+ (:cat String (:? Long)))
                        (:cat (:* String) Long))))
 
+
+
 (deftest t-complete
   (testing "testing xymbolyco/complete"
     (bdd/with-hash []
@@ -434,12 +436,13 @@
     (let [dfa-1 (rte-to-dfa '(member 1 2 3) 1)
           dfa-2 (rte-to-dfa '(member 1 3 5) 2)
           dfa-3 (rte-to-dfa '(member 2 4 6) 3)]
-      (doseq [f [xym/synchronized-xor
+      (doseq [f [xym/synchronized-intersection
+                 xym/synchronized-union
+                 xym/synchronized-xor
                  xym/synchronized-and-not
                  xym/synchronized-nand
                  xym/synchronized-nor
-                 xym/synchronized-intersection
-                 xym/synchronized-union]
+                 ]
               :let [dfa-4 (f dfa-1 dfa-2)
                     dfa-4b (f dfa-2 dfa-1)
                     dfa-5 (f dfa-2 dfa-3)
@@ -453,16 +456,101 @@
         ;;(dot/dfa-view dfa-5 "dfa-5")
 ))))
 
+(deftest test-sxp-intersection
+  (testing "sxp intersection"
+    (doseq [rte-1 test-rtes
+            :let [dfa-1 (xym/trim (rte-to-dfa rte-1))]
+
+            rte-2 test-rtes
+            :let [dfa-2 (xym/trim (rte-to-dfa rte-2))
+                  dfa-x (xym/synchronized-intersection dfa-1 dfa-2)]
+            s test-seqs]
+
+        
+      (is (= (rte/match dfa-x s)
+             (and (rte/match dfa-1 s) (rte/match dfa-2 s)))
+          (cl-format nil
+                     "~%~
+                      s=~A~@
+                      rte-1=~A~@
+                      rte-2=~A~@
+                      exit-map-1=~A~@
+                      exit-map-2=~A~@
+                      exit-map-s=~A~@
+                      match-1=~A~@
+                      match-2=~A~@
+                      match-x=~A"
+                     s rte-1 rte-2
+                     (:exit-map dfa-1)
+                     (:exit-map dfa-2)
+                     (:exit-map dfa-x)
+                     (rte/match dfa-1 s) (rte/match dfa-2 s)
+                     (rte/match dfa-x s))))))
+                     
+(defn === [a b]
+  (= (boolean a) (boolean b)))
+
+(deftest test-sxp-union
+  (testing "sxp union"
+    (doseq [rte-1 test-rtes
+            :let [dfa-1 (xym/trim (rte-to-dfa rte-1))]
+
+            rte-2 test-rtes
+            :let [dfa-2 (xym/trim (rte-to-dfa rte-2))
+                  dfa-x (xym/synchronized-union dfa-1 dfa-2)]
+            s test-seqs]
+      (is (=== (rte/match dfa-x s)
+             (or (rte/match dfa-1 s) (rte/match dfa-2 s)))))))
 
 (deftest test-sxp-xor
   (testing "sxp xor"
-    ;; TODO
-    ;; make sure if a sequence matches a XOR b
-    ;; then it matches exactly one of a and b.
+    (doseq [rte-1 test-rtes
+            :let [dfa-1 (xym/trim (rte-to-dfa rte-1))]
 
-    ;; TODO similar for sxp-nor, sxp-nand, etc.
-    nil
-    ))
+            rte-2 test-rtes
+            :let [dfa-2 (xym/trim (rte-to-dfa rte-2))
+                  dfa-x (xym/synchronized-xor dfa-1 dfa-2)]
+            s test-seqs]
+      (is (=== (rte/match dfa-x s)
+             (or (and (rte/match dfa-1 s) (not (rte/match dfa-2 s)))
+                 (and (rte/match dfa-2 s) (not (rte/match dfa-1 s)))))
+          ))))
+
+(deftest test-sxp-and-not
+  (testing "sxp and-not"
+    (doseq [rte-1 test-rtes
+            :let [dfa-1 (xym/trim (rte-to-dfa rte-1))]
+
+            rte-2 test-rtes
+            :let [dfa-2 (xym/trim (rte-to-dfa rte-2))
+                  dfa-x (xym/synchronized-and-not dfa-1 dfa-2)]
+            s test-seqs]
+      (is (=== (rte/match dfa-x s)
+             (and (rte/match dfa-1 s) (not (rte/match dfa-2 s))))))))
+
+(deftest test-sxp-nand
+  (testing "sxp nand"
+    (doseq [rte-1 test-rtes
+            :let [dfa-1 (xym/trim (rte-to-dfa rte-1))]
+
+            rte-2 test-rtes
+            :let [dfa-2 (xym/trim (rte-to-dfa rte-2))
+                  dfa-x (xym/synchronized-nand dfa-1 dfa-2)]
+            s test-seqs]
+      (is (=== (rte/match dfa-x s)
+               (not (and (rte/match dfa-1 s) (rte/match dfa-2 s))))))))
+
+(deftest test-sxp-nor
+  (testing "sxp nor"
+    (doseq [rte-1 test-rtes
+            :let [dfa-1 (xym/trim (rte-to-dfa rte-1))]
+
+            rte-2 test-rtes
+            :let [dfa-2 (xym/trim (rte-to-dfa rte-2))
+                  dfa-x (xym/synchronized-nor dfa-1 dfa-2)]
+            s test-seqs]
+      (is (=== (rte/match dfa-x s)
+             (not (or (rte/match dfa-1 s) (rte/match dfa-2 s))))))))
 
 (deftest t-test-2
  (testing "particular case 2 which was failing"
