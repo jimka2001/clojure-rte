@@ -750,7 +750,7 @@
     accepting.  a2 indicates whether the state from dfa-2 is accepting.
     To effectuate the intersection of dfa-1 with dfa-2, f-arbitrate-accepting should
     perform an (and a1 a2).
-  f-arbitrate-exit-value - binary function called with [q1,q2].  q1 is an accepting state
+  f-arbitrate-exit-value - function called with [complete-dfa-1, q1, complete-dfa-2, q2].  q1 is an accepting state
     of dfa-1.  q2 is an accepting state in dfa-2.
     f-arbitrate-exit-value is called to compute the exit value of
     each accepting state in the SXP.
@@ -851,7 +851,7 @@
                                :let [[id-1 id-2] (ident-state-map sxp-id)
                                      state-1 (state-by-index dfa-1 id-1)
                                      state-2 (state-by-index dfa-2 id-2)
-                                     new-exit-value (f-arbitrate-exit-value state-1 state-2)
+                                     new-exit-value (f-arbitrate-exit-value dfa-1 state-1 dfa-2 state-2)
                                      ]
                                :when (not= default-exit-value new-exit-value)
                                ]
@@ -886,7 +886,7 @@
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (or a b))
-                        (fn [qa qb]
+                        (fn [dfa-1 qa dfa-2 qb]
                           (assert (or (:accepting qa)
                                       (:accepting qb)))
                           (cond (:accepting qa)
@@ -903,46 +903,46 @@
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (and a b))
-                        (fn [qa qb]
+                        (fn [dfa-a qa dfa-b qb]
                           (assert (and (:accepting qa) (:accepting qb)))
-                          (exit-value dfa-1 qa))))
+                          (exit-value dfa-a qa))))
 
 (defn synchronized-and-not
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (and a (not b)))
-                        (fn [qa qb]
+                        (fn [dfa-a qa dfa-b qb]
                           (assert (and (:accepting qa)
                                        (not (:accepting qb))))
-                          (exit-value dfa-1 qa))))
+                          (exit-value dfa-a qa))))
 
 (defn synchronized-nand
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (not (and a b)))
-                        (fn [qa qb]
+                        (fn [dfa-a qa dfa-b qb]
                           (assert (not (and (:accepting qa)
                                             (:accepting qb))))
                           (cond (:accepting qa)
-                                (exit-value dfa-1 qa)
+                                (exit-value dfa-a qa)
 
                                 (:accepting qb)
-                                (exit-value dfa-2 qb)
+                                (exit-value dfa-b qb)
 
                                 :else
-                                (exit-value dfa-1 :default)))))
+                                (exit-value dfa-a :default)))))
 
 (defn synchronized-nor
   [dfa-1 dfa-2]
   (synchronized-product dfa-1 dfa-2
                         (fn [a b]
                           (not (or a b)))
-                        (fn [qa qb]
+                        (fn [dfa-a qa dba-b qb]
                           (assert (not (or (:accepting qa)
                                            (:accepting qb))))
-                          (exit-value dfa-1 :default))))
+                          (exit-value dfa-a :default))))
                                 
 
 (defn synchronized-xor
@@ -954,14 +954,14 @@
                         (fn [a b]
                           (or (and a (not b))
                               (and b (not a))))
-                        (fn [qa qb]
+                        (fn [dfa-a qa dfa-b qb]
                           (assert (or (and (:accepting qa) (not (:accepting qb)))
                                       (and (not (:accepting qa)) (:accepting qb))))
                           (cond (and (:accepting qa) (not (:accepting qb)))
-                                (exit-value dfa-1 qa)
+                                (exit-value dfa-a qa)
 
                                 (and (not (:accepting qa)) (:accepting qb))
-                                (exit-value dfa-2 qb)))))
+                                (exit-value dfa-b qb)))))
                                 
 
 (defn gen-dijkstra-edges [dfa]

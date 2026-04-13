@@ -403,7 +403,7 @@
           dfa-sxp (xym/synchronized-product dfa-1 dfa-2 
                                          (fn [a b]
                                            (and a b))
-                                         (fn [q1 _q2]
+                                         (fn [dfa-1 q1 _dfa_2 _q2]
                                            (xym/exit-value dfa-1 q1)))
           dfa-sxp-trim (xym/trim dfa-sxp)
           dfa-sxp-min (xym/minimize dfa-sxp)
