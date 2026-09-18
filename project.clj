@@ -38,5 +38,12 @@
                  ]
   :main ^:skip-aot clojure-rte.rte.core
   :target-path "target/%s"
+  ;; Some deftests (tagged ^:generates-data) are really data-generation scripts
+  ;; that append to committed resources/statistics/*.csv files and regenerate
+  ;; their plots as a side effect, rather than pure regression tests. Excluded
+  ;; from the default `lein test` run; invoke them explicitly with
+  ;; `lein test :generates-data` when you actually want to grow the corpus.
+  :test-selectors {:default (complement :generates-data)
+                    :generates-data :generates-data}
   :profiles {:test {:plugins [[lein-test-report-junit-xml "0.2.0"]]}
              :uberjar {:aot :all}})

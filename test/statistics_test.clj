@@ -48,6 +48,6 @@
     (is (lock/read-resource-csv subset-csv))
     (is (lock/read-resource-csv inhabited-csv))))
 
-(deftest t-update-resource-csv
+(deftest ^:generates-data t-update-resource-csv
   (testing "update inhabited subset csv resource"
     (update-inhabited-subset-csv 1 2 3)))

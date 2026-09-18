@@ -4,7 +4,7 @@
             [demos.vmcai-2026.statistics-rte :as dr]))
 
 
-(deftest statistics-rte
+(deftest ^:generates-data statistics-rte
   (testing "statistics-rte"
     (dr/build-rtes-totally-balanced 0.5 3 2)
 
@@ -14,7 +14,7 @@
 
     (dr/plot-rte-summary)))
 
-(deftest statistics-inhabited
+(deftest ^:generates-data statistics-inhabited
   (testing "statistics-inhabited"
     (di/slurp-inhabited-data)
     (di/slurp-subset-data)
