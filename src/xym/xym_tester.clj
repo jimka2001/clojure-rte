@@ -10,7 +10,7 @@
             [util.util :refer [member time-expr find-first]]))
 
 (defn build-state-map
-  "This is a helper function for use in `gen-dfa` and is not intended
+  "This is a helper function for use in `path-seeded-dfa` and is not intended
   for general-purpose use.
   `transitions` is a list of triples of the form [origin-index type-designator target-index]
   We generate a map index->State as needed for the :states argument of map->Dfa.
@@ -25,7 +25,7 @@
   Sometimes this :and/:not intersection creates a type designator which is know
   to be vacuous, in which case the transition is omitted.
   For this reason the number of transitions might be reduced,
-  and the number of transitions requested in the call to `gen-dfa`
+  and the number of transitions requested in the call to `path-seeded-dfa`
   will fail to be satisfied.
   "
   [transitions initial accepting]
@@ -58,11 +58,11 @@
                                    :accepting (member origin-index accepting)
                                    :transitions mut-ex})])))))
 
-;;(let [dfa (gen-dfa 10 25 42 2)]
+;;(let [dfa (path-seeded-dfa 10 25 42 2)]
 ;;  (dot/dfa-view dfa "random")
 ;;  (dot/dfa-view (minimize dfa) "random-min"))
 
-(defn gen-dfa
+(defn path-seeded-dfa
   "Generate a random Dfa having a specified number of states `num-states` and approximately
   `num-transitions` number of transitions.
   `num-transitions` requested number of total transitions.  This might fail to be

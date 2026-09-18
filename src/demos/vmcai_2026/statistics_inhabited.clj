@@ -6,7 +6,7 @@
             [util.util :refer [mean std-deviation with-timeout]]
             [genus.genus :as gns]
             [xym.xymbolyco :as xym]
-            [xym.xym-tester :refer [gen-dfa]]
+            [xym.xym-tester :refer [path-seeded-dfa]]
             [rte.construct :refer [rte-to-dfa]]
             [graph.view :as view]
 ))
@@ -136,14 +136,14 @@
         ]
     (doseq [dfa-1 (with-timeout timeout-sec []
                     ;; sequence of Dfas for doseq iteration
-                    [(xym/minimize (gen-dfa :num-states num-states
+                    [(xym/minimize (path-seeded-dfa :num-states num-states
                                             :num-transitions num-transitions
                                             :exit-value exit-value
                                             :type-size type-size
                                             :probability-indeterminate probability-indeterminate))])
             dfa-2 (with-timeout timeout-sec []
                     ;; sequence of Dfas for doseq iteration
-                    [(xym/minimize (gen-dfa :num-states num-states
+                    [(xym/minimize (path-seeded-dfa :num-states num-states
                                             :num-transitions num-transitions
                                             :exit-value exit-value
                                             :type-size type-size

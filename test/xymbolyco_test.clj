@@ -26,9 +26,9 @@
             [rte.tester :refer [test-rte-not-1]]
             [rte.extract :refer [dfa-to-rte]]
             [rte.randomize-syntax :as rrte]
-            [demos.conj-2025.random :refer [tbnl-rte-by-size]]
+            [demos.conj-2025.random :refer [root-averse-rte-by-size]]
             [xym.xymbolyco :as xym]
-            [xym.xym-tester :refer [gen-dfa build-state-map]]
+            [xym.xym-tester :refer [path-seeded-dfa build-state-map]]
             [genus.bdd :as bdd]
             [clojure.pprint :refer [cl-format pprint]]
             [genus.genus :as gns]
@@ -786,13 +786,13 @@
 
 
 
-(deftest t-gen-dfa
-  (testing "testing gen-dfa"
+(deftest t-path-seeded-dfa
+  (testing "testing path-seeded-dfa"
     (doseq [num-states (range 3 5)
             num-transitions (range num-states (+ 2 num-states))
             :let [exit-value 42 
                   type-size 2
-                  dfa (gen-dfa :num-states num-states
+                  dfa (path-seeded-dfa :num-states num-states
                                :num-transitions num-transitions
                                :exit-value 42
                                :type-size type-size)
@@ -812,13 +812,13 @@
           ]
       (is (xym/dfa-equivalent? dfa-1 dfa-2 :dont-know)))))
 
-(deftest t-gen-dfa-loop
-  (testing "testing gen-dfa"
+(deftest t-path-seeded-dfa-loop
+  (testing "testing path-seeded-dfa"
     (doseq [num-states (range 2 10)
             num-transitions (range num-states (* 2 num-states))
             :let [exit-value 42 
                   type-size 2
-                  dfa-1 (gen-dfa :num-states num-states
+                  dfa-1 (path-seeded-dfa :num-states num-states
                                  :num-transitions num-transitions
                                  :exit-value exit-value
                                  :type-size type-size)
@@ -837,8 +837,8 @@
 (deftest t-synchronize-subset
   (testing "synchronized subset"
     (doseq [_ (range 4)
-            :let [rte-1 (tbnl-rte-by-size 10)
-                  rte-2 (tbnl-rte-by-size 10)
+            :let [rte-1 (root-averse-rte-by-size 10)
+                  rte-2 (root-averse-rte-by-size 10)
                   dfa-1 (rte-to-dfa rte-1)
                   dfa-2 (rte-to-dfa rte-2)
                   dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]
@@ -848,8 +848,8 @@
 (deftest t-synchronize-intersect
   (testing "synchronized product intersect"
     (doseq [_ (range 4)
-            :let [rte-1 (tbnl-rte-by-size 10)
-                  rte-2 (tbnl-rte-by-size 10)
+            :let [rte-1 (root-averse-rte-by-size 10)
+                  rte-2 (root-averse-rte-by-size 10)
                   dfa-1 (rte-to-dfa rte-1)
                   dfa-2 (rte-to-dfa rte-2)
                   dfa-intersect (xym/synchronized-intersection dfa-1 dfa-2)]]
@@ -858,8 +858,8 @@
 (deftest t-synchronize-union
   (testing "synchronized product union"
     (doseq [_ (range 4)
-            :let [rte-1 (tbnl-rte-by-size 10)
-                  rte-2 (tbnl-rte-by-size 10)
+            :let [rte-1 (root-averse-rte-by-size 10)
+                  rte-2 (root-averse-rte-by-size 10)
                   dfa-1 (rte-to-dfa rte-1)
                   dfa-2 (rte-to-dfa rte-2)
                   dfa-union (xym/synchronized-union dfa-1 dfa-2)]]
@@ -870,8 +870,8 @@
 (deftest t-synchronize-and-not
   (testing "synchronized and-not"
     (doseq [_ (range 4)
-            :let [rte-1 (tbnl-rte-by-size 10)
-                  rte-2 (tbnl-rte-by-size 10)
+            :let [rte-1 (root-averse-rte-by-size 10)
+                  rte-2 (root-averse-rte-by-size 10)
                   dfa-1 (rte-to-dfa rte-1)
                   dfa-2 (rte-to-dfa rte-2)
                   dfa-and-not (xym/synchronized-and-not dfa-1 dfa-2)]]

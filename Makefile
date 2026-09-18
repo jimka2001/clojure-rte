@@ -10,8 +10,8 @@ partially-balanced:
 totally-balanced:
 	clj -M -m statistics-rte totally-balanced 100
 
-tbnl:
-	clj -M -m statistics-rte tbnl 100
+root-averse:
+	clj -M -m statistics-rte root-averse 100
 
 deps:
 	clj -Sdeps '{:deps {io.github.borkdude/lein2deps {:mvn/version "0.1.1"}}}' \
@@ -27,12 +27,18 @@ simple: deps
 cloverage:
 	lein cloverage
 
-test-tbnl:
-	clj -M -m demos.conj-2025.cli tbnl 50
+test-root-averse:
+	clj -M -m demos.conj-2025.cli root-averse 50
 
 
 tests:
 	lein test
+
+# Data-generation tests (tagged ^:generates-data) are excluded from `lein test`
+# by default (see project.clj :test-selectors) because they append to committed
+# resources/statistics/*.csv files and regenerate their plots. Run explicitly:
+test-generates-data:
+	lein test :generates-data
 
 test-genus-spec:
 	lein test :only genus-spec-test

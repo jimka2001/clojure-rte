@@ -13,7 +13,7 @@
                                    tree-split-rte-gaussian
                                    tree-split-rte-inv-gaussian
                                    flajolet-rte-by-size
-                                   tbnl-rte-by-size
+                                   root-averse-rte-by-size
                                    comb-rte]]
 ))
 
@@ -22,7 +22,7 @@
             "tree-split-gauss"
             "tree-split-inv-gauss"
             "flajolet"
-            "tbnl" ; to be named later
+            "root-averse"
             "comb"])
 
 
@@ -31,7 +31,7 @@
               "tree-split-gauss"  tree-split-rte-gaussian
               "tree-split-inv-gauss" tree-split-rte-inv-gaussian
               "flajolet" flajolet-rte-by-size
-              "tbnl" tbnl-rte-by-size
+              "root-averse" root-averse-rte-by-size
               "comb" comb-rte})
 
 (defn gen-csv-by-size [num-repetitions

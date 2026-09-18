@@ -85,7 +85,13 @@
     (reduce (fn [acc item]
               (insert acc item)) nil (shuffle (range (dec leaves))))))
 
-(defn tbnl-rte-by-size [leaves]
+;; Same skeleton as flajolet-rte-by-size, but the probability of the
+;; annihilating And operator is graded by depth: rare near the root,
+;; common near the leaves, so an accidental disjointness collapses only
+;; a small subtree instead of the whole expression. Suggested by an
+;; audience member at clojure.conj 2025, where this was first presented.
+;; (Was named "tbnl" -- "to be named later" -- until then.)
+(defn root-averse-rte-by-size [leaves]
   {:post [(rte/valid-rte? %)]}
   (letfn [(depth [tree]
             (if (empty? tree)

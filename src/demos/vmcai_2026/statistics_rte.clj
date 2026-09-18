@@ -17,7 +17,7 @@
             [demos.vmcai-2026.rte-tree-partially-balanced :refer [gen-partially-balanced-rte]]
             [demos.vmcai-2026.rte-tree-totally-balanced :refer [gen-totally-balanced-rte]]
             [rte.randomize-syntax :refer [gen-rte]]
-            [xym.xym-tester :refer [gen-dfa]]
+            [xym.xym-tester :refer [path-seeded-dfa]]
             [xym.xymbolyco :as xym]
             [util.lock :as lock]
             [demos.vmcai-2026.statistics-inhabited]
