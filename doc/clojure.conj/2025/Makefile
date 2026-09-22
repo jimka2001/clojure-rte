@@ -24,3 +24,9 @@ $(GNU_DIR)/%.pdf: $(GNU_DIR)/%.gnu
 
 clean:
 	rm -rf newton.2025.clojureconj.slides.pdf *.sta *.log *.fls *.aux *.fdb_latexmk *.snm *.out *.nav *.toc
+
+WEBPAGE_DIR := $(HOME)/Repos/lre-webpage-jim-newton
+
+webpage: newton.2025.clojureconj.slides.pdf
+	mkdir -p ${WEBPAGE_DIR}
+	cp newton.2025.clojureconj.slides.pdf ${WEBPAGE_DIR}/

@@ -78,3 +78,9 @@ $(GNU_IMAGE_DIR)/%.pdf: $(GNUPLOT_DIR)/%.gnu
 .SUFFIXES: .ltx .tex .fig .dia .svg .jpg .eps .pdf .png
 
 ### pdf.mak ends here
+
+WEBPAGE_DIR := $(HOME)/Repos/lre-webpage-jim-newton
+
+webpage: reclojure.2025.slides.pdf reclojure.2025.demo.pdf
+	mkdir -p ${WEBPAGE_DIR}
+	cp reclojure.2025.slides.pdf reclojure.2025.demo.pdf ${WEBPAGE_DIR}/
