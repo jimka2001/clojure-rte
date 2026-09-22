@@ -79,8 +79,14 @@ $(GNU_IMAGE_DIR)/%.pdf: $(GNUPLOT_DIR)/%.gnu
 
 ### pdf.mak ends here
 
-WEBPAGE_DIR := $(HOME)/Repos/lre-webpage-jim-newton
+WEBPAGE_REPO := git@gitlab.lre.epita.fr:lre/lre-web/members/jim-newton.git
 
 webpage: reclojure.2025.slides.pdf reclojure.2025.demo.pdf
-	mkdir -p ${WEBPAGE_DIR}
-	cp reclojure.2025.slides.pdf reclojure.2025.demo.pdf ${WEBPAGE_DIR}/
+	tmp=$$(mktemp -d) && \
+	git clone --depth 1 --quiet $(WEBPAGE_REPO) $$tmp && \
+	cp reclojure.2025.slides.pdf reclojure.2025.demo.pdf $$tmp/ && \
+	cd $$tmp && \
+	git add reclojure.2025.slides.pdf reclojure.2025.demo.pdf && \
+	(git diff --cached --quiet || git commit --quiet -m "Update reclojure.2025.slides.pdf, reclojure.2025.demo.pdf") && \
+	git push --quiet ; \
+	status=$$? ; rm -rf $$tmp ; exit $$status
