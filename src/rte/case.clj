@@ -48,7 +48,10 @@
               (:line call-site-meta-data)
               (:column call-site-meta-data)
               msg
-              ))))
+              )
+      ;; printf does not flush; without this the warning is lost when a
+      ;; script exits normally before *err* is flushed.
+      (flush))))
 
 (defn warn-unreachable [dfa code-exprs call-site-meta-data]
   (let [traces (xym/find-spanning-map dfa)]
