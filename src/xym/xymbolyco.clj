@@ -432,6 +432,34 @@
                               :let [labels (map first pairs)
                                     label (reduce (:combine-labels dfa) labels)]]
                           [label k]))
+                      ;; TODO (proposed fix, see newton.27.lmcs, Perspectives):
+                      ;;   states are split by *structural* equality (=) of
+                      ;;   their Phi values, i.e. of their (combined label,
+                      ;;   destination class) pairs.  The labels are combined
+                      ;;   and canonicalized, but never compared semantically,
+                      ;;   so two states whose labels are equivalent -- even
+                      ;;   provably so -- but canonicalize to different
+                      ;;   designators are not merged.  minimize is therefore
+                      ;;   sound (it never merges inequivalent states) but not
+                      ;;   maximal.  Also, Phi returns a seq, so = is
+                      ;;   order-sensitive: the same pairs listed in a
+                      ;;   different order also prevent a merge (returning a
+                      ;;   set would fix that part).  Proposed fix: also treat
+                      ;;   s1 and s2 as equivalent when they reach the same
+                      ;;   destination classes and, for each class, the XOR of
+                      ;;   their combined labels is provably empty (vacuous?
+                      ;;   returns true); merge only on that certain answer,
+                      ;;   never on :dont-know.  Costs extra semi-Boolean
+                      ;;   calls, pairwise within a class.
+                      ;; TODO (tests, not yet written): add test cases for
+                      ;;   this situation: a DFA with two states whose labels
+                      ;;   into the same destination class are equivalent
+                      ;;   (e.g. T' and T'' into one class vs. a single
+                      ;;   (or T' T'') label) but canonicalize differently,
+                      ;;   plus the same pairs in different orders.  Today they
+                      ;;   must stay separate; with the fix they must merge,
+                      ;;   and they must never merge when the XOR's emptiness
+                      ;;   is only :dont-know.
                       (repartition [eqv-class]
                         (split-eqv-class eqv-class Phi))]
                 (mapcat repartition partition)))]
