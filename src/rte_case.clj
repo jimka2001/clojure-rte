@@ -88,7 +88,10 @@
     (doseq [ev expected-exits
             :when (not (traces ev))]
       (binding [*out* *err*]
-        (printf "Unreachable code: %s\n" (nth code-exprs ev))))
+        (printf "Unreachable code: %s\n" (nth code-exprs ev))
+        ;; printf does not flush; without this the warning is lost when a
+        ;; script exits normally before *err* is flushed.
+        (flush)))
     ;; (dot/dfa-to-dot dfa :title (gensym "rte-case") :view true :draw-sink false)
     (fn [s]
       (rte/match dfa s))))
