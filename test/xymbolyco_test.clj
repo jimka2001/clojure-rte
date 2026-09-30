@@ -786,6 +786,59 @@
 
 
 
+(deftest t-build-state-map
+  (testing "build-state-map makes each state's outgoing labels pairwise disjoint"
+    (let [;; state 0 has overlapping labels: Long is a subtype of Number.
+          ;; State 3 has no outgoing transition and appears only as a target.
+          state-map (build-state-map [[0 'Long 1]
+                                      [0 'Number 2]
+                                      [0 'String 3]
+                                      [1 'Boolean 2]]
+                                     0
+                                     [3])]
+
+      (testing "every referenced state gets a State, with initial and accepting flags"
+        (is (= #{0 1 2 3} (set (keys state-map))))
+        (is (:initial (get state-map 0)))
+        (is (not (:initial (get state-map 1))))
+        (is (:accepting (get state-map 3)))
+        (is (not (:accepting (get state-map 0)))))
+
+      (testing "a state with no outgoing transition gets an empty transition list"
+        (is (empty? (:transitions (get state-map 2))))
+        (is (empty? (:transitions (get state-map 3)))))
+
+      (testing "labels leaving state 0 are pairwise disjoint"
+        (let [transitions (:transitions (get state-map 0))]
+          (doseq [[[td-1 _] i] (map vector transitions (range))
+                  [[td-2 _] j] (map vector transitions (range))
+                  :when (< i j)]
+            (is (= true (gns/disjoint? td-1 td-2 :dont-know))
+                (format "labels %s and %s are not disjoint" td-1 td-2)))))
+
+      (testing "the union of the labels is preserved, and every label is inhabited"
+        (let [transitions (:transitions (get state-map 0))
+              union-after (apply gns/Or (map first transitions))]
+          (is (= true (gns/type-equivalent? union-after
+                                            (gns/Or 'Number 'String)
+                                            :dont-know)))
+          (doseq [[td _] transitions]
+            (is (not= false (gns/inhabited? td :dont-know))))))
+
+      (testing "a label entirely covered by later labels is dropped"
+        ;; Long is a subtype of Number, so nothing is left of Long once
+        ;; Number is subtracted; its target, 1, is no longer reachable from 0.
+        (is (= #{2 3} (set (map second (:transitions (get state-map 0)))))))
+
+      (testing "a state with a single transition keeps its label unchanged"
+        (let [[[td target] & more] (:transitions (get state-map 1))]
+          (is (nil? more))
+          (is (= target 2))
+          (is (= true (gns/type-equivalent? td 'Boolean :dont-know)))))))
+
+  (testing "build-state-map with no transitions at all"
+    (is (= {} (build-state-map [] 0 [])))))
+
 (deftest t-path-seeded-dfa
   (testing "testing path-seeded-dfa"
     (doseq [num-states (range 3 5)

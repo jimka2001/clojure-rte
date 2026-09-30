@@ -35,19 +35,18 @@
     (letfn [(mutually-exclusive [pairs] ;; pairs of the form [td target-id]
               (loop [pairs pairs
                      acc []]
-                (let [td (delay (apply gns/And-not (cons (first (first pairs))
-                                                        (map first (rest pairs)))))]
-                  (cond (empty? pairs)
-                        acc
-
-                        (gns/inhabited? @td :dont-know)
-                        (recur (rest pairs)
-                               (conj acc
-                                     [@td (second (first pairs))]))
-
-                        :else
-                        (recur (rest pairs) acc)))))]
-
+                (if (empty? pairs)
+                  acc
+                  (let [td (apply gns/And-not (cons (first (first pairs))
+                                                    (map first (rest pairs))))]
+                    (cond (gns/inhabited? td :dont-know)
+                          (recur (rest pairs)
+                                 (conj acc
+                                       [td (second (first pairs))]))
+                          
+                          :else
+                          (recur (rest pairs) acc))))))]
+      
       (into {} (for [origin-index state-ids
                      :let [triples (get grouped origin-index [])
                            mut-ex (mutually-exclusive (map rest triples))
