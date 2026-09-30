@@ -1,6 +1,10 @@
 # requested-depth, actual-depth, actual-leaf-count, max-balance, mean-balance, sigma-balance, minimized-depth, minimized-leaf-count, actual-state-count, minimized-state-count, minimized-rte
+3, 0, 1, 0, 0.0, 0, 0, 1, 2, 2, :empty-set
 3, 0, 1, 0, 0.0, 0, 0, 1, 2, 2, :epsilon
+3, 3, 2, 1, 0.33333334, 0.4714045207910317, 1, 1, 2, 2, (:* :sigma)
+3, 4, 0, 0, 0.0, 0.0, 0, 1, 2, 2, :empty-set
 3, 5, 3, 2, 0.42857143, 0.7284313590846836, 0, 1, 2, 2, :empty-set
+3, 5, 4, 4, 0.6666667, 1.2472191289246473, 4, 4, 4, 3, :other
 4, 0, 1, 0, 0.0, 0, 0, 1, 1, 2, :empty-set
 4, 0, 1, 0, 0.0, 0, 0, 1, 1, 2, :empty-set
 4, 0, 1, 0, 0.0, 0, 0, 1, 1, 2, :empty-set
