@@ -839,6 +839,162 @@
   (testing "build-state-map with no transitions at all"
     (is (= {} (build-state-map [] 0 [])))))
 
+(defn hand-built-dfa
+  "Build a Dfa with states 0 .. `num-states`-1, initial state 0, from a list of
+  triples [origin type-designator target] and a list of accepting state ids.
+  No determinization or completion is done, so the labels leaving a state
+  need not be disjoint."
+  [num-states transitions accepting]
+  (xym/map->Dfa
+   {:exit-map {:default true}
+    :combine-labels gns/combine-labels
+    :states (into {}
+                  (for [id (range num-states)]
+                    [id (xym/map->State
+                         {:index id
+                          :initial (= id 0)
+                          :accepting (boolean (some #{id} accepting))
+                          :transitions (vec (for [[origin td target] transitions
+                                                  :when (= origin id)]
+                                              [td target]))})]))}))
+
+;; Oracle A (the round-trip test) uses dfa-inhabited? and dfa-vacuous? to decide
+;;   pass or fail, but only ever on automata whose answer is "vacuous", so neither
+;;   function is otherwise tested by it.  These are direct tests on hand-built
+;;   automata with known answers.
+;; TODO (cross-implementation test audit): verify whether equivalent tests exist
+;;   in the Scala (scala-rte) and Python (python-rte) implementations.  Python has
+;;   test_vacuous_hand_built_dfa, which covers only some of these cases.  Not yet
+;;   checked for Scala, and not implemented there.
+(deftest t-dfa-inhabited-hand-built
+  (testing "dfa-inhabited? and dfa-vacuous? on hand-built Dfas with known answers"
+    ;; :inhabited is the expected answer of dfa-inhabited?, one of true, false, :dont-know
+    ;; :path is the expected first element of dfa-find-accepting-path
+    (doseq [{:keys [name num-states transitions accepting inhabited path]}
+            [{:name "no accepting state"
+              :num-states 2
+              :transitions '[[0 Long 1]]
+              :accepting []
+              :inhabited false :path :unsatisfiable}
+
+             {:name "accepting state unreachable from the initial state"
+              :num-states 3
+              :transitions '[[0 Long 0] [2 Long 2]]
+              :accepting [2]
+              :inhabited false :path :unsatisfiable}
+
+             {:name "accepting initial state, no transitions"
+              :num-states 1
+              :transitions '[]
+              :accepting [0]
+              :inhabited true :path :satisfiable}
+
+             {:name "accepting state reachable through a satisfiable label"
+              :num-states 2
+              :transitions '[[0 Long 1]]
+              :accepting [1]
+              :inhabited true :path :satisfiable}
+
+             {:name "the only path goes through a label which is provably empty"
+              :num-states 2
+              :transitions '[[0 (and Long String) 1]]
+              :accepting [1]
+              :inhabited false :path :unsatisfiable}
+
+             {:name "the only path goes through an indeterminate label"
+              :num-states 2
+              :transitions '[[0 (satisfies odd?) 1]]
+              :accepting [1]
+              :inhabited :dont-know :path :indeterminate}
+
+             {:name "a longer satisfiable path and a shorter indeterminate one: satisfiable wins"
+              :num-states 3
+              :transitions '[[0 (satisfies odd?) 1] [0 Long 2] [2 String 1]]
+              :accepting [1]
+              :inhabited true :path :satisfiable}
+
+             {:name "longest possible satisfiable path (n-1 transitions) against one indeterminate transition"
+              :num-states 5
+              :transitions '[[0 Long 1] [1 Long 2] [2 Long 3] [3 Long 4] [0 (satisfies odd?) 4]]
+              :accepting [4]
+              :inhabited true :path :satisfiable}
+
+             {:name "a cycle before the accepting state"
+              :num-states 3
+              :transitions '[[0 Long 1] [1 Long 0] [1 String 2]]
+              :accepting [2]
+              :inhabited true :path :satisfiable}
+
+             {:name "a cycle, accepting state unreachable"
+              :num-states 3
+              :transitions '[[0 Long 1] [1 Long 0]]
+              :accepting [2]
+              :inhabited false :path :unsatisfiable}
+
+             {:name "two accepting states, one reachable only through an indeterminate label"
+              :num-states 3
+              :transitions '[[0 Long 1] [0 (satisfies odd?) 2]]
+              :accepting [1 2]
+              :inhabited true :path :satisfiable}
+
+             {:name "two accepting states, both reachable only through indeterminate labels"
+              :num-states 3
+              :transitions '[[0 (satisfies odd?) 1] [0 (satisfies even?) 2]]
+              :accepting [1 2]
+              :inhabited :dont-know :path :indeterminate}
+
+             {:name "a satisfiable path followed by an empty label, accepting state after it"
+              :num-states 3
+              :transitions '[[0 Long 1] [1 (and Long String) 2]]
+              :accepting [2]
+              :inhabited false :path :unsatisfiable}]]
+      (let [dfa (hand-built-dfa num-states transitions accepting)
+            [satisfiability _path] (xym/dfa-find-accepting-path dfa)]
+        (is (= inhabited (xym/dfa-inhabited? dfa))
+            (format "dfa-inhabited? for: %s" name))
+        (is (= path satisfiability)
+            (format "dfa-find-accepting-path for: %s" name))
+        ;; vacuous is the opposite of inhabited, and dont-know stays dont-know
+        (is (= (case inhabited
+                 (true) false
+                 (false) true
+                 (:dont-know) :dont-know)
+               (xym/dfa-vacuous? dfa))
+            (format "dfa-vacuous? for: %s" name))))))
+
+;; Regression test: dfa-vacuous? returned false, rather than the given default,
+;;   for an indeterminate Dfa whenever the default was not :dont-know,
+;;   because it tested (= inh default :dont-know).
+(deftest t-dfa-vacuous-default
+  (testing "dfa-vacuous? returns the given default if the answer is indeterminate"
+    (let [indeterminate (hand-built-dfa 2 '[[0 (satisfies odd?) 1]] [1])]
+      (doseq [default [:dont-know true false :x]]
+        (is (= default (xym/dfa-vacuous? indeterminate default))
+            (format "dfa-vacuous? with default %s" default))
+        (is (= default (xym/dfa-inhabited? indeterminate default))
+            (format "dfa-inhabited? with default %s" default)))
+      (is (= :dont-know (xym/dfa-vacuous? indeterminate))
+          "dfa-vacuous? without a default")))
+
+  (testing "dfa-vacuous? ignores the default if the answer is determined"
+    (let [inhabited (hand-built-dfa 2 '[[0 Long 1]] [1])
+          vacuous (hand-built-dfa 2 '[[0 Long 1]] [])]
+      (doseq [default [:dont-know true false :x]]
+        (is (= false (xym/dfa-vacuous? inhabited default))
+            (format "inhabited Dfa, default %s" default))
+        (is (= true (xym/dfa-vacuous? vacuous default))
+            (format "vacuous Dfa, default %s" default)))))
+
+  (testing "dfa-equivalent? returns the given default if the answer is indeterminate"
+    ;; dfa-1 accepts every sequence of length one starting with an odd number,
+    ;; dfa-2 accepts nothing; whether they are equivalent depends on whether
+    ;; some integer is odd, which is not decidable here.
+    (let [dfa-1 (hand-built-dfa 2 '[[0 (satisfies odd?) 1]] [1])
+          dfa-2 (hand-built-dfa 1 '[] [])]
+      (doseq [default [:dont-know true false :x]]
+        (is (= default (xym/dfa-equivalent? dfa-1 dfa-2 default))
+            (format "dfa-equivalent? with default %s" default))))))
+
 (deftest t-path-seeded-dfa
   (testing "testing path-seeded-dfa"
     (doseq [num-states (range 3 5)

@@ -1111,7 +1111,7 @@
    (dfa-vacuous? dfa :dont-know))
   ([dfa default]
    (let [inh (dfa-inhabited? dfa)]
-     (if (= inh default :dont-know)
+     (if (= inh :dont-know)
        default
        (not inh)))))
 
