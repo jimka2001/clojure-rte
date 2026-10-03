@@ -1,5 +1,6 @@
 (ns demos.vmcai-2026.statistics-inhabited
   (:require [clojure.pprint :refer [pprint cl-format]]
+            [clojure.string :as str]
             [clojure.java.shell :refer [sh]]
             [util.lock :as lock]
             [graph.vega-plot :as vega]
@@ -19,6 +20,9 @@
 (def inhabited-csv (str lock/statistics-resource "dfa-inhabited.csv"))
 (def plot-path (str lock/statistics-resource "statistics-plot.svg"))
 (def statistics-tex-path (str lock/statistics-resource "statistics-constants.tex"))
+;; The same constants under the old \vmcai... macro names, for the frozen VMCAI paper
+;;   (newton.26.vmcai), which uses those names; see `summarize-inhabited-subset-data`.
+(def statistics-tex-vmcai-path (str lock/statistics-resource "statistics-constants-vmcai.tex"))
 
 
 (defn slurp-inhabited-data []
@@ -416,5 +420,8 @@
                  ['lmcspercentnotdisjoint (round-2 (* 100 (get-in ssd [:overlap :count true] 0)))]
                  ['lmcspercentdontknowdisjoint (round-2 (* 100 (get-in ssd [:overlap :count :dont-know] 0)))]
                  ]]
-          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value))))))
+          (cl-format out-file "\\newcommand\\~a{~a}~%" sym value)))
+      ;; also write the constants with the old \vmcai... names (\lmcs... -> \vmcai...)
+      (spit statistics-tex-vmcai-path
+            (str/replace (slurp statistics-tex-path) "\\lmcs" "\\vmcai")))))
 
